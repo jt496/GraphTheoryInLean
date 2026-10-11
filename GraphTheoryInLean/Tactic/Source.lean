@@ -72,14 +72,17 @@ private def elabSource (tk : Syntax) (id : Ident)
   let excerpt ← extractSource name
   withRef tk <| logInfo (String.intercalate "\n" (clean excerpt))
 
-/-- Print the source of a declaration, without its doc-string. -/
+-- The commands below have plain comments, not doc-strings: the HTML would show a
+-- doc-string in the hover of every `#source`, next to the printed source.
+
+-- Print the source of a declaration, without its doc-string.
 elab tk:"#source " id:ident : command =>
   elabSource tk id dropLeadingDocComment
 
-/-- Print the source of a declaration, without its doc-string and attributes. -/
+-- Print the source of a declaration, without its doc-string and attributes.
 elab tk:"#source' " id:ident : command =>
   elabSource tk id (dropLeadingAttributes ∘ dropLeadingDocComment)
 
-/-- Print the source of a declaration, with its doc-string but without attributes. -/
+-- Print the source of a declaration, with its doc-string but without attributes.
 elab tk:"#source_doc " id:ident : command =>
   elabSource tk id dropLeadingAttributes

@@ -634,7 +634,8 @@ no `(r + 1)`-clique, and record the parts as the colour classes of a function
 ([Neighbours in a Set](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-neighbours-in-a-set)).
 Then the key inequality is:
 
-   `∑ v ∈ S, (G.degIn S v + #{w ∈ S | c w = c v}) ≤ ∑ v ∈ S, #{w ∈ S | c w ≠ c v}`
+`∑ v ∈ S, (G.degIn S v + #{w ∈ S | G.Adj v w ∧ c w = c v})` is at most
+`∑ v ∈ S, #{w ∈ S | c w ≠ c v}`.
 
 The left-hand side is twice the number of edges in `S` plus twice the number of edges
 whose endpoints have the same colour. The right-hand side is twice the number of
@@ -642,11 +643,74 @@ edges of the complete multipartite graph whose parts are the colour classes.
 
 In the induction step we split `S` into `N = S ∩ N(x)`, the neighbours of `x` in `S`,
 and the set `Vᵣ` of non-neighbours of `x`. We colour `Vᵣ` with the new colour `r`.
+Each of the three sums over `S` then splits into four blocks, according to whether
+`v` and `w` lie in `N` or in `Vᵣ`.
+-/
+lemma sum_card_filter_union [DecidableEq V] {s t : Finset V} (h : Disjoint s t)
+    (p : V → V → Prop) [DecidableRel p] :
+    ∑ v ∈ s ∪ t, #{w ∈ s ∪ t | p v w} =
+      ∑ v ∈ s, #{w ∈ s | p v w} + ∑ v ∈ s, #{w ∈ t | p v w} +
+        ∑ v ∈ t, #{w ∈ s | p v w} + ∑ v ∈ t, #{w ∈ t | p v w} := by
+  simp [sum_union h, filter_union, card_union_of_disjoint (disjoint_filter_filter h),
+        sum_add_distrib, add_assoc]
+
+/-!
 The edges between `N` and `Vᵣ` are counted once from each side, and the double
 counting lemma `sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow` says that the two
 counts agree.
 -/
-#check sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow
+lemma sum_degIn_comm [DecidableRel G.Adj] (s t : Finset V) :
+    ∑ v ∈ s, G.degIn t v = ∑ v ∈ t, G.degIn s v := by
+  simpa [degIn, bipartiteAbove, bipartiteBelow, adj_comm] using
+    sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow (s := s) (t := t) G.Adj
+
+/-!
+The induction step only uses that `Vᵣ` is a new colour class whose vertices have at
+most `#N` neighbours in `S`, which holds because `x` has maximum degree. We state it
+for any disjoint `N` and `A` and a colouring `c` that is less than `r` on `N` and
+equal to `r` on `A`.
+-/
+lemma furedi_step [DecidableRel G.Adj] [DecidableEq V] {N A : Finset V} {c : V → ℕ}
+    {r : ℕ} (hNA : Disjoint N A) (hN : ∀ v ∈ N, c v < r) (hA : ∀ v ∈ A, c v = r)
+    (hdeg : ∀ v ∈ A, G.degIn (N ∪ A) v ≤ #N)
+    (hc : ∑ v ∈ N, (G.degIn N v + #{w ∈ N | G.Adj v w ∧ c w = c v}) ≤
+      ∑ v ∈ N, #{w ∈ N | c w ≠ c v}) :
+    ∑ v ∈ N ∪ A, (G.degIn (N ∪ A) v + #{w ∈ N ∪ A | G.Adj v w ∧ c w = c v}) ≤
+      ∑ v ∈ N ∪ A, #{w ∈ N ∪ A | c w ≠ c v} := by
+  -- colours on `N` differ from those on `A`, which all equal `r`
+  have hne : ∀ v ∈ N, ∀ w ∈ A, c v ≠ c w := fun v hv w hw => by
+    rw [hA w hw]; exact (hN v hv).ne
+  -- the blocks other than `N × N`
+  have m1 : ∑ v ∈ N, #{w ∈ A | G.Adj v w ∧ c w = c v} = 0 :=
+    sum_eq_zero fun v hv => card_eq_zero.2 <| filter_false_of_mem fun w hw h =>
+      hne v hv w hw h.2.symm
+  have m2 : ∑ v ∈ A, #{w ∈ N | G.Adj v w ∧ c w = c v} = 0 :=
+    sum_eq_zero fun v hv => card_eq_zero.2 <| filter_false_of_mem fun w hw h =>
+      hne w hw v hv h.2
+  have m3 : ∑ v ∈ A, #{w ∈ A | G.Adj v w ∧ c w = c v} = ∑ v ∈ A, G.degIn A v :=
+    sum_congr rfl fun v hv => congrArg card <| filter_congr fun w hw => by
+      simp [hA v hv, hA w hw]
+  have d1 : ∑ v ∈ N, #{w ∈ A | c w ≠ c v} = #N * #A := by
+    rw [sum_const_nat fun v hv => congrArg card <| filter_true_of_mem fun w hw =>
+      (hne v hv w hw).symm]
+  have d2 : ∑ v ∈ A, #{w ∈ N | c w ≠ c v} = #A * #N := by
+    rw [sum_const_nat fun v hv => congrArg card <| filter_true_of_mem fun w hw =>
+      hne w hw v hv]
+  have d3 : ∑ v ∈ A, #{w ∈ A | c w ≠ c v} = 0 :=
+    sum_eq_zero fun v hv => card_eq_zero.2 <| filter_false_of_mem fun w hw h =>
+      h (by rw [hA v hv, hA w hw])
+  -- the vertices of `A` have at most `#N` neighbours in `N ∪ A`
+  have hD : ∑ v ∈ A, G.degIn N v + ∑ v ∈ A, G.degIn A v ≤ #A * #N := by
+    rw [← sum_add_distrib, ← smul_eq_mul, ← sum_const]
+    exact sum_le_sum fun v hv => (degIn_union _ _ _ hNA).symm.le.trans (hdeg v hv)
+  have e1 := sum_card_filter_union hNA G.Adj
+  have e2 := sum_card_filter_union hNA (fun v w => G.Adj v w ∧ c w = c v)
+  have e3 := sum_card_filter_union hNA (fun v w => c w ≠ c v)
+  have hdc := sum_degIn_comm (G := G) N A
+  simp only [degIn] at hc hD hdc m3 ⊢
+  rw [sum_add_distrib] at hc ⊢
+  grind
+
 /-!
 The local form of Füredi's inequality, proved by induction on `r`: a set `S` with
 no `(r + 1)`-clique has a colouring `c` with less than `r` colours on `S` such that
@@ -678,100 +742,33 @@ lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
     set N := {w ∈ S | G.Adj x w}
     set Vᵣ := {w ∈ S | ¬ G.Adj x w}
     have hdisj : Disjoint N Vᵣ := disjoint_filter_filter_not _ _ _
-    have hunion : N ∪ Vᵣ = S := filter_union_filter_not_eq _ _
+    have huni : N ∪ Vᵣ = S := filter_union_filter_not_eq _ _
     -- `N` has no `(r + 1)`-clique, since `x` would extend it to an `(r + 2)`-clique
     have hN : ∀ t ⊆ N, ¬ G.IsNClique (r + 1) t := fun t ht hc =>
       hS (insert x t) (insert_subset hxS (ht.trans (filter_subset _ _)))
         (hc.insert fun w hw => (mem_filter.1 (ht hw)).2)
     obtain ⟨c', hc'r, hc'⟩ := ih N hN
     -- colour `N` by `c'` and `Vᵣ` by the new colour `r`
-    let c : V → ℕ := fun v => if v ∈ N then c' v else r
-    have hcN : ∀ v ∈ N, c v = c' v := fun v hv => by simp [c, hv]
-    have hcVᵣ : ∀ v ∈ Vᵣ, c v = r := fun v hv => by
-      simp [c, disjoint_right.1 hdisj hv]
-    -- we now use `c`
+    let c : V → ℕ := N.piecewise c' fun _ => r
+    have hcN : ∀ v ∈ N, c v = c' v := fun v hv => piecewise_eq_of_mem _ _ _ hv
+    have hcr : ∀ v ∈ N, c v < r := fun v hv => hcN v hv ▸ hc'r v hv
+    have hcV : ∀ v ∈ Vᵣ, c v = r := fun v hv =>
+      piecewise_eq_of_notMem _ _ _ (disjoint_right.1 hdisj hv)
     refine ⟨c, fun v hv => ?_, ?_⟩
-    · by_cases h : v ∈ N
-      · rw [hcN v h]
-        exact (hc'r v h).trans (Nat.lt_succ_self r)
-      · simp [c, h]
-    -- every sum and count over `S` splits into one over `N` and one over `Vᵣ`
-    have split (f : V → ℕ) : ∑ v ∈ S, f v = ∑ v ∈ N, f v + ∑ v ∈ Vᵣ, f v := by
-      rw [← hunion, sum_union hdisj]
-    have splitc (p : V → Prop) [DecidablePred p] :
-        #{w ∈ S | p w} = #{w ∈ N | p w} + #{w ∈ Vᵣ | p w} := by
-      rw [← hunion, filter_union,
-        card_union_of_disjoint (disjoint_filter_filter hdisj)]
-    -- the counts at a vertex `v ∈ N`
-    have hmono' : ∀ v ∈ N, #{w ∈ S | G.Adj v w ∧ c w = c v} =
-        #{w ∈ N | G.Adj v w ∧ c' w = c' v} := by
-      intro v hv
-      have : #{w ∈ Vᵣ | G.Adj v w ∧ c w = c v} = 0 := by
-        rw [card_eq_zero, filter_eq_empty_iff]
-        intro w hw ⟨_, h⟩
-        rw [hcVᵣ w hw, hcN v hv] at h
-        exact (hc'r v hv).ne' h
-      rw [splitc, this, add_zero]
-      exact congrArg card (filter_congr fun w hw => by rw [hcN w hw, hcN v hv])
-    have hrhs' : ∀ v ∈ N, #{w ∈ S | c w ≠ c v} = #{w ∈ N | c' w ≠ c' v} + #Vᵣ := by
-      intro v hv
-      rw [splitc, filter_congr (p := fun w => c w ≠ c v) (q := fun w => c' w ≠ c' v)
-          (s := N) (fun w hw => by rw [hcN w hw, hcN v hv])]
-      congr 1
-      rw [filter_true_of_mem]
-      intro w hw
-      rw [hcVᵣ w hw, hcN v hv]
-      exact (hc'r v hv).ne'
-    -- the counts at a vertex `v ∈ Vᵣ`
-    have hmono₁ : ∀ v ∈ Vᵣ, #{w ∈ S | G.Adj v w ∧ c w = c v} = G.degIn Vᵣ v := by
-      intro v hv
-      have : #{w ∈ N | G.Adj v w ∧ c w = c v} = 0 := by
-        rw [card_eq_zero, filter_eq_empty_iff]
-        intro w hw ⟨_, h⟩
-        rw [hcN w hw, hcVᵣ v hv] at h
-        exact (hc'r w hw).ne h
-      rw [splitc, this, zero_add]
-      exact congrArg card (filter_congr fun w hw => by simp [hcVᵣ w hw, hcVᵣ v hv])
-    have hrhs₁ : ∀ v ∈ Vᵣ, #{w ∈ S | c w ≠ c v} = #N := by
-      intro v hv
-      have h1 : #{w ∈ N | c w ≠ c v} = #N := by
-        rw [filter_true_of_mem]
-        intro w hw
-        rw [hcN w hw, hcVᵣ v hv]
-        exact (hc'r w hw).ne
-      have h2 : #{w ∈ Vᵣ | c w ≠ c v} = 0 := by
-        rw [card_eq_zero, filter_eq_empty_iff]
-        intro w hw h
-        exact h (by rw [hcVᵣ w hw, hcVᵣ v hv])
-      rw [splitc, h1, h2, add_zero]
-    have hdeg (v : V) : G.degIn S v = G.degIn N v + G.degIn Vᵣ v := by
-      rw [← degIn_union _ _ _ hdisj, hunion]
-    -- the edges between `N` and `Vᵣ`, counted from each side
-    have hdc : ∑ v ∈ N, G.degIn Vᵣ v = ∑ v ∈ Vᵣ, G.degIn N v := by
-      simpa [degIn, bipartiteAbove, bipartiteBelow, adj_comm] using
-        sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow (s := N) (t := Vᵣ) G.Adj
-    -- rewrite both sides in terms of these counts
-    have eL' : ∑ v ∈ N, (G.degIn S v + #{w ∈ S | G.Adj v w ∧ c w = c v}) =
-        ∑ v ∈ N, (G.degIn N v + G.degIn Vᵣ v +
-          #{w ∈ N | G.Adj v w ∧ c' w = c' v}) :=
-      sum_congr rfl fun v hv => by rw [hmono' v hv, hdeg v]
-    have eL₁ : ∑ v ∈ Vᵣ, (G.degIn S v + #{w ∈ S | G.Adj v w ∧ c w = c v}) =
-        ∑ v ∈ Vᵣ, (G.degIn S v + G.degIn Vᵣ v) :=
-      sum_congr rfl fun v hv => by rw [hmono₁ v hv]
-    have eR' : ∑ v ∈ N, #{w ∈ S | c w ≠ c v} =
-        ∑ v ∈ N, (#{w ∈ N | c' w ≠ c' v} + #Vᵣ) := sum_congr rfl hrhs'
-    have eR₁ : ∑ v ∈ Vᵣ, #{w ∈ S | c w ≠ c v} = ∑ v ∈ Vᵣ, #N := sum_congr rfl hrhs₁
-    have hD : ∑ v ∈ Vᵣ, G.degIn S v =
-        ∑ v ∈ Vᵣ, G.degIn N v + ∑ v ∈ Vᵣ, G.degIn Vᵣ v := by
-      rw [← sum_add_distrib]
-      exact sum_congr rfl fun v _ => hdeg v
-    -- vertices of `Vᵣ` have degree at most `deg x = #N`
-    have hDle : ∑ v ∈ Vᵣ, G.degIn S v ≤ #Vᵣ * #N :=
-      (sum_le_card_nsmul Vᵣ _ #N fun v hv => hx v (mem_filter.1 hv).1).trans_eq
-        (smul_eq_mul _ _)
-    rw [split, split, eL', eL₁, eR', eR₁]
-    simp only [sum_add_distrib, sum_const, smul_eq_mul] at hc' ⊢
-    grind
+    · rcases mem_union.1 (huni ▸ hv) with h | h
+      · exact (hcr v h).trans r.lt_succ_self
+      · exact (hcV v h).trans_lt r.lt_succ_self
+    rw [← huni]
+    refine furedi_step hdisj hcr hcV (fun v hv => huni ▸ hx v (mem_filter.1 hv).1) ?_
+    -- on `N` the colouring `c` agrees with `c'`
+    have h1 : ∀ v ∈ N, #{w ∈ N | G.Adj v w ∧ c w = c v} =
+        #{w ∈ N | G.Adj v w ∧ c' w = c' v} := fun v hv =>
+      congrArg card (filter_congr fun w hw => by rw [hcN v hv, hcN w hw])
+    have h2 : ∀ v ∈ N, #{w ∈ N | c w ≠ c v} = #{w ∈ N | c' w ≠ c' v} := fun v hv =>
+      congrArg card (filter_congr fun w hw => by rw [hcN v hv, hcN w hw])
+    calc _ = _ := sum_congr rfl fun v hv => by rw [h1 v hv]
+      _ ≤ _ := hc'
+      _ = _ := (sum_congr rfl h2).symm
 
 /-!
 For the whole vertex set the right-hand side counts the edges of the complete
@@ -1095,8 +1092,6 @@ We do this by forming the graph `G.cliqueUnion s` which is the union of all the
 in a common `s`-clique of `G`. -/
 def cliqueUnion (G : SimpleGraph V) (s : ℕ) : SimpleGraph V where
   Adj x y := x ≠ y ∧ ∃ t, G.IsNClique s t ∧ x ∈ t ∧ y ∈ t
-  symm := ⟨fun _ _ ⟨hxy, t, ht, hx, hy⟩ => ⟨hxy.symm, t, ht, hy, hx⟩⟩
-  loopless := ⟨fun _ h => h.1 rfl⟩
 
 @[simp]
 lemma cliqueUnion_adj {s : ℕ} {x y : V} :
@@ -1215,7 +1210,6 @@ lemma IsCompleteMultipartite.exists_isNClique_of_le (hc : G.IsCompleteMultiparti
   exact ⟨_, hxu, mem_insert_self _ _, mem_insert_of_mem (mem_insert_self _ _)⟩
 
 namespace IsNCliqueMaximal
-
 variable [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {s r : ℕ}
 
 /-!

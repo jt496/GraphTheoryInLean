@@ -91,8 +91,8 @@ worth knowing how to search.
 
 * The tactic `exact?` searches Mathlib for a lemma that closes the current goal, and
   `apply?` and `rw?` do the same for `apply` and `rw`.
-* [Loogle](https://loogle.lean-lang.org/) searches by the constants and expressions,
-  for example `SimpleGraph.degree` and `SimpleGraph.completeGraph`.
+* [Loogle](https://loogle.lean-lang.org/) searches by constants and expressions, for
+  example `SimpleGraph.degree` and `SimpleGraph.completeGraph`.
 * [LeanSearch](https://leansearch.net/) searches using natural language, for example
   "degree of a vertex in the complete graph".
 * Mathlib's documentation pages list the declarations of each file in order, so the
