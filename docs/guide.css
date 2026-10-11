@@ -1,0 +1,794 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* ============================================================
+   Custom Theme
+   Override Verso's CSS custom properties here.
+   ============================================================ */
+
+:root {
+    /* Typography — body text in Lato, matching the Mathematics in Lean
+       (Read the Docs theme) reading font. */
+    --verso-text-font-family: "Lato", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    --verso-structure-font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    --verso-code-font-family: "JetBrains Mono", "Fira Code", "Menlo", monospace;
+
+    /* Slightly wider content area for math-heavy pages */
+    --verso-content-max-width: 62rem;
+
+    /* Softer text color */
+    --verso-text-color: #1a1a2e;
+    --verso-structure-color: #16213e;
+
+    /* Link color */
+    --verso-toc-background-color: #f8f6f0;
+    --verso-toc-text-color: #16213e;
+
+    /* Code highlighting — a light warm background */
+    --verso-code-keyword-color: #7b2d8b;
+    --verso-code-const-color: #1a5276;
+    --verso-code-var-color: #1e6823;
+    --stil-sorry-color: #b91c1c;
+}
+
+/* Paragraph spacing — important for readability in a guide */
+.verso-content p {
+    line-height: 1.75;
+    margin-bottom: 0.85rem;
+}
+
+/* Render `sorry` in red (as in VSCode). Verso tags each keyword occurrence
+   with the syntax kind in `data-binding`, which lets us single out the term
+   and tactic forms of `sorry` among ordinary keyword tokens. */
+.hl.lean .keyword.token[data-binding^="kw-occ-Lean.Parser.Term.sorry-"],
+.hl.lean .keyword.token[data-binding^="kw-occ-Lean.Parser.Tactic.tacticSorry-"] {
+    color: var(--stil-sorry-color);
+}
+
+/* Make display math have comfortable vertical spacing */
+.math-display {
+    margin: 1.25rem 0;
+    overflow-x: auto;
+}
+
+/* Center standalone figures emitted as paragraph-contained images */
+main .content-wrapper p > img:only-child {
+    display: block;
+    margin: 1.5rem auto;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Larger figure captions — override Verso's default 0.9em */
+figure.stil-figure figcaption {
+    font-size: 1.1em;
+    margin-top: 1.3em;
+    color: #333;
+}
+
+/* Prevent wide SVG figures from causing a horizontal scrollbar.
+   SVG files have hardcoded pt widths in their <svg> element that override
+   max-width on <img>, so we use object-fit scaling instead. */
+figure.stil-figure {
+    max-width: 100%;
+    overflow: visible;
+}
+
+figure.stil-figure img {
+    display: block;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto;
+}
+
+/* Subtle tint for inline code spans in prose (p, li, td, headings).
+   .content-wrapper is the actual Verso wrapper class in the emitted HTML.
+   :not(pre code) excludes block code fences, which have their own background. */
+.content-wrapper :is(p, li, td, h1, h2, h3, h4) code:not(pre code) {
+    /* Blend inline code/Lean into the prose background.
+       Prose (<p>/main/body) has a transparent background, so `transparent`
+       here makes inline code show the same page background as the prose.
+       With no visible pill, the horizontal padding is dropped to 0 so a span
+       sits flush against following punctuation (no spurious gap before `.`/`,`);
+       natural prose word-spacing still separates it from adjacent words.
+       To restore the tinted pill, set background-color #f0ecf7, border
+       `1px solid #ddd6ea`, and padding `0.1em 0.35em`. 
+       Changed padding to 0.15em on left and 0.15em on right of inline code.
+       */
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0.15em 0.1em;
+    color: #4a2472;
+}
+
+/* Prose/inline-code size matching.
+   Prose is set in Lato, whose x-height is smaller than the JetBrains Mono used
+   for inline Lean ({smart}/{lean}/{name}) and code spans, so at an equal pixel
+   size (both are 16px) the code visually looks larger than the prose. Enlarge
+   the prose body text so the two match, and pin inline code/Lean to the 1rem
+   base (16px) so it does NOT scale up along with the prose. Tune the single
+   1.1rem value below to taste. */
+.content-wrapper :is(p, li, dd) {
+    font-size: 1.1rem;
+}
+.content-wrapper :is(p, li, dd) code:not(.block) {
+    font-size: 1rem;
+}
+
+/* Block code (Verso emits highlighted Lean as `code.hl.lean.block`, plus generic
+   `<pre>` blocks for non-highlighted fences). Give them a subtle warm background
+   so they stand out from prose. */
+.content-wrapper code.hl.block,
+.content-wrapper pre {
+    display: block;
+    background-color: #faf7f0;
+    border: 1px solid #e6dfcf;
+    border-left: 3px solid #c9b87a;
+    border-radius: 4px;
+    padding: 0.7em 0.9em;
+    margin: 1rem 0;
+    overflow-x: auto;
+    line-height: 1.5;
+}
+
+/* When `<pre>` wraps a block `<code>`, avoid double-shading. */
+.content-wrapper pre > code.hl.block,
+.content-wrapper pre > code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+}
+
+/* ============================================================
+   Sidebar TOC: emphasise the current chapter's sub-section list
+   so the section structure of the chapter you're reading is
+   easier to scan. Verso only emits sub-sections for the current
+   chapter; this just makes them more visible.
+   ============================================================ */
+
+/* The book-level split-toc lists chapters; the next split-toc(s) are
+   the current chapter and its ancestors. Style any non-book split-toc
+   (i.e. the current chapter's sub-section list) with a soft tint. */
+#toc .split-toc:not(.book) {
+    background: #f1ede2;
+    border-left: 3px solid #c9b87a;
+    border-radius: 0 4px 4px 0;
+    padding: 0.35rem 0.5rem 0.45rem 0.7rem;
+    margin: 0.3rem 0;
+}
+
+#toc .split-toc:not(.book) > .title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+#toc .split-toc:not(.book) table tr {
+    line-height: 1.4;
+}
+
+#toc .split-toc:not(.book) tr.current a,
+#toc .split-toc:not(.book) .current > a {
+    font-weight: 600;
+    color: #7b2d8b;
+}
+
+/* Subsections of the current chapter, injected by postprocess_chapter_toc.py
+   as a nested table under each section row (html-chapter build). Hidden by
+   default; guide.js reveals only the section currently in view
+   (`tr.current-section`), mirroring html-multi where you see just the open
+   section's subsections. */
+#toc .split-toc:not(.book) table.sidebar-subsections {
+    display: none;
+    margin: 0.2rem 0 0.3rem 0;
+    padding-left: 0.4rem;
+    border-left: 2px solid #c9b87a;
+    font-size: 0.92em;
+}
+#toc .split-toc:not(.book) tr.current-section table.sidebar-subsections {
+    display: table;
+}
+#toc .split-toc:not(.book) tr.current-section > td:last-child > a {
+    font-weight: 600;
+    color: #7b2d8b;
+}
+#toc .split-toc:not(.book) table.sidebar-subsections td.num {
+    width: 0.5rem;
+    font-size: 0.9em;
+}
+#toc .split-toc:not(.book) table.sidebar-subsections a {
+    color: var(--verso-toc-text-color);
+}
+#toc .split-toc:not(.book) table.sidebar-subsections a:hover {
+    color: #7b2d8b;
+}
+
+/* ============================================================
+   html-single sidebar: subsections injected by guide.js under
+   each chapter row. Hidden by default; shown only under the
+   chapter currently in view (`tr.current-chapter`).
+   ============================================================ */
+
+#toc .split-toc.book table.sidebar-subsections {
+    display: none;
+    margin: 0.3rem 0 0.4rem 0;
+    padding-left: 0.4rem;
+    border-left: 2px solid #c9b87a;
+    font-size: 0.9em;
+}
+
+#toc .split-toc.book tr.current-chapter > td:last-child > a {
+    font-weight: 600;
+    color: #7b2d8b;
+}
+
+#toc .split-toc.book tr.current-chapter table.sidebar-subsections {
+    display: table;
+}
+
+#toc .split-toc.book table.sidebar-subsections td.num {
+    width: 0.5rem;
+}
+
+#toc .split-toc.book table.sidebar-subsections a {
+    color: var(--verso-toc-text-color);
+}
+
+#toc .split-toc.book table.sidebar-subsections a:hover {
+    color: #7b2d8b;
+}
+
+/* ============================================================
+   Part dividers (injected by guide.js): label rows in the
+   sidebar book ToC and heading items in the landing-page ToC.
+   .part-sep is a spacing-only separator (before the appendix).
+   ============================================================ */
+
+#toc .split-toc.book tr.part-label > td {
+    padding-top: 0.9em;
+    font-family: var(--verso-structure-font-family);
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--verso-toc-text-color);
+    opacity: 0.65;
+}
+
+#toc .split-toc.book tr.part-sep > td {
+    padding-top: 0.9em;
+}
+
+ol.section-toc > li.part-label {
+    list-style: none;
+    margin: 1.1em 0 0.35em;
+    font-family: var(--verso-structure-font-family);
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--verso-structure-color);
+    opacity: 0.75;
+}
+
+ol.section-toc > li.part-sep {
+    list-style: none;
+    margin-top: 1.1em;
+}
+
+/* Blockquotes — styled as a visually distinct quoted passage */
+.content-wrapper blockquote {
+    border-left: 4px solid #7b2d8b;
+    margin: 1.5rem 0 1.5rem 0;
+    padding: 0.6rem 1.2rem;
+    background: #f8f4fc;
+    color: #3a2050;
+    font-style: italic;
+}
+
+.content-wrapper blockquote p {
+    margin: 0;
+}
+
+/* ============================================================
+   Desktop collapsible navigation panel
+   The toggle mechanism (checkbox #toggle-toc, label #toggle-toc-click)
+   already exists in Verso's HTML but is hidden on desktop.
+   Here we activate it: the button floats just to the right of the TOC
+   and moves to the left edge when the panel is collapsed.
+   ============================================================ */
+
+@media screen and (min-width: 701px) {
+    /* Show the toggle button on desktop, anchored to the top-right of the TOC panel.
+       Override the burger size variables locally so the icon is small enough to sit
+       in the TOC header without obscuring navigation links. */
+    #toggle-toc-click {
+        --verso-burger-height: 0.7rem;
+        --verso-burger-width: 0.9rem;
+        --verso-burger-line-width: 0.11rem;
+        display: inline-flex;
+        cursor: pointer;
+        box-sizing: content-box;
+        width: var(--verso-burger-width);
+        height: var(--verso-burger-height);
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 0.4rem;
+        position: fixed;
+        z-index: 100;
+        /* Right edge of the TOC panel; slides to left edge when TOC collapses.
+           Track the effective (resizable) width so the X stays inside the panel
+           after the user drags the resize handle. */
+        left: calc(var(--verso-toc-effective-width) - var(--verso-burger-width) - 1.3rem);
+        top: calc(var(--verso-header-height) + 0.45rem);
+        transition: left var(--verso-toc-transition-time) ease;
+    }
+
+    /* On desktop the semantics are inverted vs mobile:
+       default (unchecked) = TOC open → show × to indicate "click to close" */
+    #toggle-toc-click .line {
+        background-color: var(--verso-burger-toc-visible-color);
+    }
+    #toggle-toc-click .line1 {
+        transform: translateY(calc((var(--verso-burger-height) - var(--verso-burger-line-width)) / 2))
+                   rotate(45deg);
+    }
+    #toggle-toc-click .line2 {
+        transform: scaleX(0);
+    }
+    #toggle-toc-click .line3 {
+        transform: translateY(calc(-1 * (var(--verso-burger-height) - var(--verso-burger-line-width)) / 2))
+                   rotate(-45deg);
+    }
+
+    /* When checked (TOC collapsed) → show hamburger ≡ and move to left edge */
+    body:has(#toggle-toc:checked) #toggle-toc-click {
+        left: 0.25rem;
+    }
+    body:has(#toggle-toc:checked) #toggle-toc-click .line {
+        background-color: var(--verso-burger-toc-hidden-color);
+    }
+    body:has(#toggle-toc:checked) #toggle-toc-click .line1,
+    body:has(#toggle-toc:checked) #toggle-toc-click .line2,
+    body:has(#toggle-toc:checked) #toggle-toc-click .line3 {
+        transform: none;
+    }
+
+    /* Add slide transition to the TOC panel */
+    #toc {
+        transition: transform var(--verso-toc-transition-time) ease;
+    }
+
+    /* Slide TOC off the left edge when collapsed */
+    body:has(#toggle-toc:checked) #toc {
+        transform: translateX(-100%);
+    }
+
+    /* The drag handle is position:fixed and so doesn't move with the TOC;
+       hide it while collapsed so its divider doesn't linger at the old edge.
+       Resizing stays enabled whenever the TOC is open. */
+    body:has(#toggle-toc:checked) .toc-resize-handle {
+        display: none;
+    }
+
+    /* Smooth main content reflow when TOC collapses/expands. Verso reserves
+       space for the sidebar with margin-left on <main> (not padding), so the
+       collapse must zero the margin and the transition must animate it. */
+    .with-toc > main {
+        transition: margin-left var(--verso-toc-transition-time) ease;
+    }
+
+    body:has(#toggle-toc:checked) .with-toc > main {
+        margin-left: 0;
+    }
+
+    /* Keep the body text in a centred column when the TOC is collapsed.
+       Below 1500px Verso left-aligns the content (margin: 0; max-width: unset)
+       to leave room for margin footnotes; once the 18rem TOC is gone there's
+       ample room, so re-centre instead of letting prose hug the left edge and
+       stretch full width. The higher-specificity selector overrides that rule
+       at every width (it is a no-op >=1500px, where content is centred anyway). */
+    body:has(#toggle-toc:checked) .with-toc .content-wrapper,
+    html[data-toc="collapsed"] .with-toc .content-wrapper {
+        margin: 0 auto;
+        max-width: var(--verso-content-max-width);
+    }
+
+    /* Mirror rules using a data attribute set by guide.js before first paint,
+       so the collapsed state is applied immediately on load with no flash. */
+    html[data-toc="collapsed"] #toc {
+        transform: translateX(-100%);
+    }
+    html[data-toc="collapsed"] .toc-resize-handle {
+        display: none;
+    }
+    html[data-toc="collapsed"] .with-toc > main {
+        margin-left: 0;
+    }
+    html[data-toc="collapsed"] #toggle-toc-click {
+        left: 0.25rem;
+    }
+    html[data-toc="collapsed"] #toggle-toc-click .line {
+        background-color: var(--verso-burger-toc-hidden-color);
+    }
+    html[data-toc="collapsed"] #toggle-toc-click .line1,
+    html[data-toc="collapsed"] #toggle-toc-click .line2,
+    html[data-toc="collapsed"] #toggle-toc-click .line3 {
+        transform: none;
+    }
+}
+
+/* ============================================================
+   Print styles
+   Hide the TOC sidebar and navigation chrome so body text
+   fills the page. Footnotes are rendered as numbered endnotes
+   at the bottom rather than hidden hover popups.
+   ============================================================ */
+
+@media print {
+    /* Hide navigation sidebar, toggle button, header chrome, and search.
+       Also hide floating/fixed chrome that otherwise paints on every page:
+       the TOC resize handle (a position:fixed element that draws a 1px divider
+       ~3cm from the left edge — appears as a vertical line on every page), the
+       floating theme-toggle button, and any open tippy popups. */
+    #toc,
+    #toggle-toc,
+    #toggle-toc-click,
+    header,
+    nav,
+    .search-box,
+    .verso-search,
+    .toc-resize-handle,
+    .theme-toggle,
+    .tippy-box,
+    [data-tippy-root] {
+        display: none !important;
+    }
+
+    /* Reset the TOC-induced left padding so content spans the full page */
+    .with-toc > main,
+    .with-toc {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* Let the content use the full width with a smaller base font */
+    body, html {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-size: 10pt;
+    }
+
+    main, .content-wrapper {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0.5cm 1cm !important;
+        box-sizing: border-box;
+        font-size: 10pt;
+        line-height: 1.5;
+    }
+
+    /* Tighten paragraph spacing to fit more on each page, and set the prose
+       text size explicitly (in pt, decoupled from the code size below). Prose
+       never overflows, so this can be larger than the code font; Lato's small
+       x-height makes it read smaller than monospace at an equal size, so 11pt
+       prose balances 8.5pt code. Tune this single value (10–12pt) to taste. */
+    .verso-content p,
+    .content-wrapper :is(p, li, dd) {
+        font-size: 12pt;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    /* Scale down code blocks only (scoped to block code so inline code in prose
+       is NOT shrunk here — it follows the prose-relative rule instead). 90-char
+       Lean lines fit A4 portrait at 9pt; lower this if longer lines overflow. */
+    .content-wrapper pre,
+    .content-wrapper code.hl.block,
+    .content-wrapper pre > code {
+        font-size: 10pt;
+    }
+
+    /* Keep code lines single-line (no wrap) and stop the screen's
+       `overflow-x: auto` from carrying into print, where it bakes a dead
+       horizontal scrollbar into the PDF and clips the overflowed code.
+       `overflow: visible` removes the scrollbar/clip box; `white-space: pre`
+       keeps lines from wrapping. Long lines now rely on the smaller print
+       font to fit; if a line is still too wide for the page, lower the
+       font-size above or print in landscape / on a larger paper size. */
+    .content-wrapper pre,
+    .content-wrapper code.hl.block,
+    .content-wrapper pre > code {
+        overflow: visible !important;
+        white-space: pre !important;
+    }
+
+    /* Avoid breaking headings and code blocks across pages */
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    pre, figure, .math-display, table {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Scale figures to fit the printed page width — the SVG files have
+       hardcoded pt widths that overflow the column without these rules. */
+    figure.stil-figure {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    figure.stil-figure img {
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    /* Footnotes (stil-footnote): the hover popup is display:none, so when printing
+       reveal the note inline, right after its [N] marker, wrapped in brackets.
+       (The TeX/PDF build via `make pdf` already uses real \footnote — see
+       Tactic/Directives.lean; this is for the browser's Print / Print-to-PDF.) */
+    span.stil-footnote-content {
+        display: inline !important;
+        position: static !important;
+        z-index: auto;
+        min-width: 0;
+        max-width: none;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        font-size: 0.85em;
+        color: #555;
+        white-space: normal;
+    }
+    span.stil-footnote-content::before { content: " ["; }
+    span.stil-footnote-content::after  { content: "]"; }
+
+    /* Make links readable in print: show URL after link text.
+       Only for genuine prose links — every identifier in a Lean code block is
+       now a link to the Mathlib docs, and expanding those URLs drowns the page.
+       So: skip anything inside highlighted code / <code>, and skip the
+       Mathlib doc links wherever they occur. */
+    a[href^="http"]:not(.hl.lean a):not(code a):not(pre a)::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #555;
+        word-break: break-all;
+    }
+    a[href*="mathlib4_docs"]::after { content: none; }
+}
+
+/* ============================================================
+   Reader theme toggle + DARK THEME
+   guide.js picks the theme (saved choice → system preference → default dark)
+   and sets data-theme="dark|light" on <html> before first paint, and adds the
+   floating .theme-toggle button. The LIGHT theme is the default styling above;
+   the rules below apply only when data-theme="dark".
+   Palette is Tokyo-Night-ish, pairing with the existing purple accent.
+   ============================================================ */
+
+/* Floating toggle button (present in both themes) */
+.theme-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 200;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid #cdc9c0;
+    background: #ffffff;
+    color: #16213e;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-toggle:hover { box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4); }
+
+html[data-theme="dark"] {
+    /* Core palette */
+    --verso-text-color: #c0caf5;
+    --verso-code-color: #c0caf5;
+    --verso-structure-color: #d5d9f0;
+    --verso-toc-background-color: #16161e;
+    --verso-toc-text-color: #c0caf5;
+
+    /* Lean syntax tokens, brightened for a dark background */
+    --verso-code-const-color: #7dcfff;
+    --verso-code-keyword-color: #bb9af7;
+    --verso-code-var-color: #9ece6a;
+    --stil-sorry-color: #f7768e;
+
+    /* #guard_msgs info/warning/error message text */
+    --verso-info-color: #c0caf5;
+    --verso-warning-color: #e0af68;
+    --verso-error-color: #f7768e;
+
+    /* Search box (input + results dropdown) */
+    --verso-background-color: #24283b;
+    --verso-selected-color: #2f3347;
+    --verso-muted-color: #8a90a6;
+
+    /* TOC toggle burger: the collapsed (≡) colour defaults to a dark navy,
+       which is invisible on the dark page. Lighten it (the open × already uses
+       --verso-toc-text-color) and drop the white shadow halos. */
+    --verso-burger-toc-hidden-color: #c0caf5;
+    --verso-burger-toc-hidden-shadow-color: transparent;
+    --verso-burger-toc-visible-shadow-color: transparent;
+}
+
+/* Page + header surfaces. (Verso doesn't apply --verso-text-color to body
+   text/headings, so we set color explicitly.) */
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+    background-color: #1a1b26;
+    color: #c0caf5;
+}
+html[data-theme="dark"] :is(main, .content-wrapper) { color: #c0caf5; }
+html[data-theme="dark"] .content-wrapper :is(h1, h2, h3, h4, h5, h6) { color: #d5d9f0; }
+html[data-theme="dark"] main .section-toc,
+html[data-theme="dark"] main .section-toc * { color: #c0caf5; }
+html[data-theme="dark"] header {
+    background: #16161e;
+    color: #c0caf5;
+    box-shadow: 0 0 6px #00000080;
+}
+html[data-theme="dark"] header a { color: #c0caf5; }
+html[data-theme="dark"] .header-title,
+html[data-theme="dark"] .header-title h1 { color: #d5d9f0; }   /* Verso hardcodes black */
+html[data-theme="dark"] #toc a { color: #c0caf5; }             /* Verso hardcodes #333 */
+html[data-theme="dark"] #toc a:hover { color: #bb9af7; }
+
+/* Links */
+html[data-theme="dark"] .content-wrapper a { color: #7aa2f7; }
+html[data-theme="dark"] main .section-toc a,
+html[data-theme="dark"] main .section-toc a:visited { color: #c0caf5; }
+html[data-theme="dark"] main .section-toc a:hover { color: #bb9af7; }
+
+/* Part divider labels (light rules use --verso colors, which stay dark-on-light) */
+html[data-theme="dark"] #toc .split-toc.book tr.part-label > td { color: #c0caf5; }
+html[data-theme="dark"] ol.section-toc > li.part-label { color: #c0caf5; }
+
+/* Inline code text (transparent bg shows page) */
+html[data-theme="dark"] .content-wrapper :is(p, li, td, h1, h2, h3, h4) code:not(pre code) {
+    color: #bb9af7;
+}
+
+/* Block code */
+html[data-theme="dark"] .content-wrapper code.hl.block,
+html[data-theme="dark"] .content-wrapper pre {
+    background-color: #1f2233;
+    border: 1px solid #2f3347;
+    border-left: 3px solid #e0af68;
+}
+
+/* Blockquotes */
+html[data-theme="dark"] .content-wrapper blockquote {
+    background: #24283b;
+    border-left: 4px solid #bb9af7;
+    color: #c0caf5;
+}
+
+/* Figure captions */
+html[data-theme="dark"] figure.stil-figure figcaption { color: #a9b1d6; }
+
+/* Solutions spoiler (styled in Tactic/Spoiler.lean — light theme uses a blue
+   #4777ff accent on a pale #f4f7ff fill, which is too bright on the dark page).
+   Re-tint with the dark palette: the link blue #7aa2f7 for the summary/border
+   and a subtle blue-grey fill that sits just above the page background. */
+html[data-theme="dark"] details.solutions-spoiler {
+    border-color: #3b4261;
+    background-color: #1f2233;
+}
+html[data-theme="dark"] details.solutions-spoiler > summary { color: #7aa2f7; }
+
+/* Footnotes (from <NOTE>) use the .stil-footnote-* classes styled in
+   Tactic/Directives.lean — a cream popup (#fffbe6) with NO text colour, so the
+   text inherits --verso-text-color. In dark mode that's light and washes out on
+   the cream note, so pin the ink (and inline-code ink) to the light-theme dark
+   values; the note then looks identical to the light theme. The background is
+   already the cream Directives sets, and the [N] reference marker stays light
+   (inherited) so it shows on the dark page. */
+html[data-theme="dark"] .stil-footnote-content {
+    color: #1a1a2e;
+    /* Reset the Lean code-token colours to the light-theme values inside the
+       note, so {smart}/{lean} spans read on the cream background. */
+    --verso-code-color: #1a1a2e;
+    --verso-code-const-color: #1a5276;
+    --verso-code-keyword-color: #7b2d8b;
+    --verso-code-var-color: #1e6823;
+    --stil-sorry-color: #b91c1c;
+}
+/* Plain inline code in the note: dark ink (needs > specificity than the general
+   dark inline-code rule). */
+html[data-theme="dark"] .content-wrapper .stil-footnote-content code { color: #4a2472; }
+
+/* Sidebar TOC tints */
+html[data-theme="dark"] #toc .split-toc:not(.book) {
+    background: #24283b;
+    border-left: 3px solid #e0af68;
+}
+html[data-theme="dark"] #toc .split-toc:not(.book) tr.current a,
+html[data-theme="dark"] #toc .split-toc:not(.book) .current > a { color: #bb9af7; }
+html[data-theme="dark"] #toc .split-toc:not(.book) table.sidebar-subsections { border-left: 2px solid #e0af68; }
+html[data-theme="dark"] #toc .split-toc:not(.book) tr.current-section > td:last-child > a { color: #bb9af7; }
+html[data-theme="dark"] #toc .split-toc.book table.sidebar-subsections { border-left: 2px solid #e0af68; }
+html[data-theme="dark"] #toc .split-toc.book tr.current-chapter > td:last-child > a { color: #bb9af7; }
+/* Disclosure triangle for collapsing/expanding the ToC: Verso hardcodes
+   background-color: black, which is invisible on the dark sidebar. */
+html[data-theme="dark"] #toc .split-toc label.toggle-split-toc::before { background-color: #c0caf5; }
+
+/* Lean InfoView: clicking a tactic "lozenge" reveals the proof state, which
+   Verso renders as `.tactic-state` (inline) or a tippy popup with
+   data-theme "tactic". All three surfaces read Verso's --verso-tactic-state-*
+   variables, defaulting to white background + BLACK text. Syntax tokens carry
+   their own colours, but the un-tokenised text — the "case …" label, "⊢", ":"
+   and the case-collapse triangle (currentcolor) — inherits that text colour, so
+   set all three variables to the dark palette. (Tippy popups live under <body>,
+   so they still inherit these from <html>.) */
+html[data-theme="dark"] {
+    --verso-tactic-state-color: #c0caf5;
+    --verso-tactic-state-bg-color: #24283b;
+    --verso-tactic-state-border-color: #5b6180;
+}
+html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="top"] > .tippy-arrow::before { border-top-color: #24283b; }
+html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="bottom"] > .tippy-arrow::before { border-bottom-color: #24283b; }
+html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="left"] > .tippy-arrow::before { border-left-color: #24283b; }
+html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="right"] > .tippy-arrow::before { border-right-color: #24283b; }
+html[data-theme="dark"] .hl.lean .tactic:has(.tactic-toggle:not(:checked)) > label:hover {
+    background-color: #2f3347;
+}
+
+/* #command output hovers (#check / #eval / #synth / #print, and message/error/
+   warning/info outputs) are shown by tippy in a popup with a LIGHT (#e5e5e5)
+   background that is theme-independent (Verso's lean/message/info/warning/error
+   themes). In dark mode our light syntax-token colours wash out on that light
+   popup. These popups are moved to <body>, so the in-document selectors don't
+   reach them — instead reset the code/message colour variables to the light-theme
+   values *on the tippy box itself*, making the popup read exactly like the light
+   theme. (The tactic-state popup is dark and styled separately above.) */
+html[data-theme="dark"] .tippy-box[data-theme~="lean"],
+html[data-theme="dark"] .tippy-box[data-theme~="message"],
+html[data-theme="dark"] .tippy-box[data-theme~="info"],
+html[data-theme="dark"] .tippy-box[data-theme~="warning"],
+html[data-theme="dark"] .tippy-box[data-theme~="error"] {
+    --verso-text-color: #1a1a2e;
+    --verso-code-color: black;
+    --verso-code-const-color: #1a5276;
+    --verso-code-keyword-color: #7b2d8b;
+    --verso-code-var-color: #1e6823;
+    --stil-sorry-color: #b91c1c;
+    --verso-info-color: black;
+    --verso-warning-color: black;
+    --verso-error-color: #cc0000;
+}
+
+/* Toggle button in dark mode */
+html[data-theme="dark"] .theme-toggle {
+    background: #24283b;
+    color: #e0af68;
+    border-color: #2f3347;
+}
+
+/* Identifiers in highlighted code are hyperlinked to mathlib4_docs (see
+   mathlibDocLinks in GuideMain.lean). Verso's default gives these a dotted
+   underline; render them exactly like unlinked code instead — the pointer
+   cursor is the only affordance. */
+.hl.lean a,
+.hl.lean a:hover {
+    text-decoration: none;
+}

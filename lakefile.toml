@@ -1,0 +1,23 @@
+name = "GraphTheoryInLean"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["GraphTheoryInLean"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+weak.linter.style.longLine.maxLineLength = 85
+weak.linter.style.missingEnd = false
+weak.linter.style.header = false
+maxSynthPendingDepth = 3
+
+# Pinned to the Mathlib commit the guide was built against.
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "96f4f6ca6e9dcdb26fec36ec10fa90c7f424e94d"
+
+[[lean_lib]]
+name = "GraphTheoryInLean"

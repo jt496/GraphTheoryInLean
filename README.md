@@ -1,0 +1,47 @@
+# Graph Theory in Lean
+
+The Lean sources of *Graph Theory in Lean*: one directory per chapter under
+`GraphTheoryInLean/`, each holding the chapter (`CNN_Name.lean`) and, for most chapters, its
+exercises with solutions (`Exercises.lean`).
+
+Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>.
+The HTML is in `docs/`, served by GitHub Pages.
+
+## Viewing the guide locally
+
+To read the guide without GitHub Pages (for instance while this repository is
+private), serve `docs/` over HTTP from the repository root:
+
+    python3 -m http.server -d docs 8000
+
+and open <http://localhost:8000/>. Opening `docs/index.html` directly via
+`file://` does not work: the pages use directory-style links that only resolve
+when something is serving them. Formula rendering loads a script from a CDN, so
+keep a network connection.
+
+## Building
+
+    lake exe cache get   # download prebuilt Mathlib (do this first)
+    lake build
+
+`lakefile.toml` pins the Mathlib commit the guide was written against.
+
+## Chapters
+
+1. [Introduction](https://jt496.github.io/GraphTheoryInLean/Introduction/)
+2. [SimpleGraph](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/)
+3. [Constructions](https://jt496.github.io/GraphTheoryInLean/Constructions/)
+4. [Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/)
+5. [Maps](https://jt496.github.io/GraphTheoryInLean/Maps/)
+6. [Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/)
+7. [Colorings](https://jt496.github.io/GraphTheoryInLean/Colorings/)
+8. [Walks](https://jt496.github.io/GraphTheoryInLean/Walks/)
+9. [Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/)
+10. [Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/)
+11. [Distance](https://jt496.github.io/GraphTheoryInLean/Distance/)
+12. [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/)
+13. [Theorems](https://jt496.github.io/GraphTheoryInLean/Theorems/)
+14. [Appendix](https://jt496.github.io/GraphTheoryInLean/Appendix/)
+
+This repository is generated from the guide's sources; edit those rather than
+these files.
