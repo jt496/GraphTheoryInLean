@@ -617,8 +617,9 @@ blocks are. Each block of `H` maps into a block of `G` via `blockOfHom` applied 
 A colouring of `G` restricts to each block, since blocks are subgraphs of `G`. For
 the converse, by De Bruijn–Erdős it suffices to colour every finite subgraph `H` of
 `G`. Each block of `H` maps, via the injective homomorphism `H.hom`, into a block of
-`G` (`blockOfHom`), so a colouring of the blocks of `G` restricts to a colouring of
-the blocks of `H`, and `colorable_of_forall_block` colours `H`.
+`G` (`Block.mapHom`, which is `blockOfHom` at the level of blocks), so a colouring of
+the blocks of `G` restricts to a colouring of the blocks of `H`, and
+`colorable_of_forall_block` colours `H`.
 -/
 theorem colorable_iff_forall_block {n : ℕ} (hn : 1 ≤ n) :
     G.Colorable n ↔ ∀ B : G.Block, B.toGraph.Colorable n := by
@@ -628,17 +629,12 @@ theorem colorable_iff_forall_block {n : ℕ} (hn : 1 ≤ n) :
     induction B using Quotient.inductionOn' with
     | h e => exact hG.mono_left (G.blockOf_le e.2)
   · intro hcol
-    classical
     -- by De Bruijn–Erdős it suffices to colour every finite subgraph `H` of `G`
     refine colorable_of_forall_finite_subgraph_colorable fun H hf => ?_
     have := hf.to_subtype
-    refine colorable_of_forall_block hn H.coe fun B => ?_
-    induction B using Quotient.inductionOn' with
-    | h e =>
-      -- the block of `e` in `H` maps into the block of `e.map H.hom` in `G`
-      obtain ⟨C⟩ := hcol
-        (G.blockMk ⟨(e : Sym2 H.verts).map H.hom, H.hom.map_mem_edgeSet e.2⟩)
-      exact ⟨C.comp (blockOfHom H.hom Subgraph.hom_injective e)⟩
+    -- each block `B` of `H` maps into the block `B.map H.hom _` of `G`
+    exact colorable_of_forall_block hn H.coe fun B =>
+      (hcol _).of_hom (B.mapHom H.hom Subgraph.hom_injective)
 
 /-! END SOLUTIONS -/
 

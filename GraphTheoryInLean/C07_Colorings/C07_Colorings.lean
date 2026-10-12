@@ -264,10 +264,9 @@ Recall that the `support` of a graph is the set of vertices that are not isolate
 Suppose `G₁` and `G₂` share a vertex type and their supports meet in a set that is a
 clique in both graphs. Then any colourings of `G₁` and `G₂` drawn from a common
 palette can be amalgamated into a colouring of the union `G₁ ⊔ G₂` — a *clique-sum*.
-On a clique both colourings are injective, so the partial recolouring `c₂ x ↦ c₁ x`
-over the shared colours is a bijection between two equal-sized colour sets;
-`Equiv.extendSubtype` extends it to a permutation `σ` of the palette, after which
-`c₁` on `G₁` and the recoloured `c₂` elsewhere agree on the overlap.
+On a clique both colourings are injective, so `Equiv.Perm.exists_extending_pair`
+gives a permutation `σ` of the palette with `σ (c₂ x) = c₁ x` for every `x` in the
+overlap. Then `c₁` on `G₁` and the recoloured `c₂` elsewhere agree on the overlap.
 -/
 theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
     (hs₁ : G₁.IsClique (G₁.support ∩ G₂.support))
@@ -278,17 +277,16 @@ theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
   obtain ⟨c₁⟩ := h₁
   obtain ⟨c₂⟩ := h₂
   let S := G₁.support ∩ G₂.support
-  -- The colour-bijection `c₂ '' S ≃ c₁ '' S`, extended to a permutation `σ` of
-  -- the palette.
-  let e₂ := Equiv.Set.imageOfInjOn c₂ S (c₂.injOn_of_isClique hs₂)
-  let e := e₂.symm.trans (Equiv.Set.imageOfInjOn c₁ S (c₁.injOn_of_isClique hs₁))
-  let σ := e.extendSubtype
-  have hσkey : ∀ x ∈ S, σ (c₂ x) = c₁ x := by
-    intro x hx
-    have hmem : c₂ x ∈ c₂ '' S := ⟨x, hx, rfl⟩
-    have h2 : e₂.symm ⟨c₂ x, hmem⟩ = ⟨x, hx⟩ := by rw [Equiv.symm_apply_eq]; rfl
-    rw [Equiv.extendSubtype_apply_of_mem e _ hmem, Equiv.trans_apply, h2]
-    rfl
+  -- Both colourings are injective on the shared clique `S` (which is therefore
+  -- finite), so a permutation `σ` of the palette carries `c₂` to `c₁` on `S`.
+  have hinj₁ : Function.Injective (fun x : S => c₁ x) :=
+    Set.injOn_iff_injective.1 (c₁.injOn_of_isClique hs₁)
+  have hinj₂ : Function.Injective (fun x : S => c₂ x) :=
+    Set.injOn_iff_injective.1 (c₂.injOn_of_isClique hs₂)
+  have : Finite S := Finite.of_injective _ hinj₁
+  obtain ⟨σ, hσ⟩ := Equiv.Perm.exists_extending_pair
+    (fun x : S => c₂ x) (fun x : S => c₁ x) hinj₂ hinj₁
+  have hσkey : ∀ x ∈ S, σ (c₂ x) = c₁ x := fun x hx => hσ ⟨x, hx⟩
   -- The glued colouring: `c₁` on `G₁`'s support, the recoloured `c₂` elsewhere.
   let f : V → Fin n := fun x => if x ∈ G₁.support then c₁ x else σ (c₂ x)
   -- On `G₂`'s support, `f` coincides with the recoloured `c₂` (they agree on the

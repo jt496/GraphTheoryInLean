@@ -882,15 +882,42 @@ lemma IsTrail.exists_support_pos_deleted {u v} (hG : G.EdgesInOneComponent)
     have hcdGp : Gp.Adj c d := by rw [deleteEdges_adj]; exact ⟨hcd, hcd_notin⟩
     exact ⟨c, hc, hpos hcdGp⟩
 
+/-!
+To *splice* a closed walk `c` at `w` into a walk `p` through `w`, we split `p` as
+`(p.takeUntil w) ++ (p.dropUntil w)` and insert `c` to get
+`(p.takeUntil w) ++ c ++ (p.dropUntil w)`. The result has length
+`p.length + c.length`, and if `p` and `c` are trails with no common edges then it is
+again a trail.
+-/
+omit [G.LocallyFinite] in
+lemma IsTrail.takeUntil_append_append_dropUntil {a b w : V} {p : G.Walk a b}
+    (hp : p.IsTrail) (hw : w ∈ p.support) {c : G.Walk w w} (hc : c.IsTrail)
+    (hdisj : List.Disjoint c.edges p.edges) :
+    ((p.takeUntil w hw).append (c.append (p.dropUntil w hw))).IsTrail := by
+  simp only [isTrail_append, edges_append]
+  refine ⟨hp.takeUntil hw, ⟨hc, hp.dropUntil hw, ?_⟩, ?_⟩
+  · -- the edges of `c` are disjoint from the `w → b` part of `p`
+    exact fun e he hf => hdisj he (edges_dropUntil_subset_edges p hw hf)
+  · -- the `a → w` part of `p` is disjoint from both `c` and the `w → b` part
+    intro e het he'
+    rcases List.mem_append.mp he' with hec | hed
+    · exact hdisj hec (edges_takeUntil_subset_edges p hw het)
+    · exact hp.disjoint_edges_takeUntil_dropUntil hw het hed
+
+omit [G.LocallyFinite] in
+lemma length_takeUntil_append_append_dropUntil {a b w : V} (p : G.Walk a b)
+    (hw : w ∈ p.support) (c : G.Walk w w) :
+    ((p.takeUntil w hw).append (c.append (p.dropUntil w hw))).length =
+      p.length + c.length := by
+  have hsp := congrArg Walk.length (p.take_spec hw)
+  grind [length_append]
+
 variable [Finite G.edgeSet]
 /-!
 A non-Eulerian trail `p` from `a` to `b` can be extended, provided every vertex has
 even degree in the graph obtained by deleting the edges of `p`. Find a vertex `w` on
 `p` incident to an unused edge, build a circuit `c` at `w` in the
 deleted graph, transfer it back into `G`, and splice it into `p` at `w`.
-
-We splice `c` in place by splitting `p` as `(p.takeUntil w) ++ (p.dropUntil w)`
-and inserting `c` to get `(p.takeUntil w) ++ c ++ (p.dropUntil w)`.
 
 [Figure](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
 
@@ -914,31 +941,18 @@ lemma IsTrail.exists_longer_of_not_isEulerian {a b} (hG : G.EdgesInOneComponent)
   have htr : ∀ e ∈ c.edges, e ∈ G.edgeSet := fun e he =>
     edgeSet_mono (deleteEdges_le _) (c.edges_subset_edgeSet he)
   -- the edges of the transferred `c` are unused by `p`
-  have hc_notin : ∀ e ∈ (c.transfer G htr).edges, e ∉ p.edges := by
+  have hc_notin : List.Disjoint (c.transfer G htr).edges p.edges := by
     intro e he hpe
     rw [edges_transfer] at he
     have heg := c.edges_subset_edgeSet he
     rw [edgeSet_deleteEdges] at heg
     exact heg.2 hpe
-  -- splice `c` into `p` at `w`: walk `a → w`, then around `c`, then `w → b`
-  let spl := (p.takeUntil w hw_supp).append
-                ((c.transfer G htr).append (p.dropUntil w hw_supp))
-  have hspl_trail : spl.IsTrail := by
-    simp only [spl, isTrail_append, edges_append]
-    refine ⟨hp.takeUntil hw_supp,
-              ⟨hc.isTrail.transfer htr, hp.dropUntil hw_supp, ?_⟩, ?_⟩
-    · -- the edges of `c` are disjoint from the `w → b` part of `p`
-      exact fun e he hf => hc_notin e he (edges_dropUntil_subset_edges p hw_supp hf)
-    · -- the `a → w` part of `p` is disjoint from both `c` and the `w → b` part
-      intro e het he'
-      rcases List.mem_append.mp he' with hec | hed
-      · exact hc_notin e hec (edges_takeUntil_subset_edges p hw_supp het)
-      · exact hp.disjoint_edges_takeUntil_dropUntil hw_supp het hed
-  -- the spliced walk is a strictly longer trail from `a` to `b`
-  refine ⟨spl, hspl_trail, ?_⟩
-  have hsp := congrArg Walk.length (p.take_spec hw_supp)
-  rw [length_append] at hsp
-  grind [length_append, length_transfer, hc.three_le_length]
+  -- splice `c` into `p` at `w`: walk `a → w`, then around `c`, then `w → b`. This
+  -- is a strictly longer trail from `a` to `b`.
+  refine ⟨_, hp.takeUntil_append_append_dropUntil hw_supp (hc.isTrail.transfer htr)
+    hc_notin, ?_⟩
+  grind [length_takeUntil_append_append_dropUntil, length_transfer,
+    hc.three_le_length]
 
 /-!
 ## Euler's Theorem
@@ -1669,15 +1683,11 @@ So wlog every vertex of `s` has at least `Δ` neighbours in `s`. Since all degre
 at most `Δ`, every vertex of `s` must have *exactly* `Δ` neighbours, all of which lie
 in `s` (so `s` is closed under adjacency).
 
-*Regular case:* pick `v₂ ∈ s` and let `K` be the vertex set of its connected
-component `G⟦v₂⟧`, which lies inside `s` since `s` is closed under adjacency. Then
-`K` is closed under adjacency, so there are no edges between `K` and
-`s \ K`, and we may colour `s \ K` by `ih` (it does not contain `v₂`, so it is a
-proper subset) and combine this with a colouring of `K`, which we now construct. (If
-`K ⊂ s` then `ih` would colour `K` as well, so the essential case is `K = s`, i.e.
-`s` connected. We do not make this case split, however: the construction below works
+*Regular case:* write `K := s`, which is closed under adjacency and `Δ`-regular, and
+pick any `v₂ ∈ K`. We do not need `K` to be connected: the construction below works
 uniformly for any adjacency-closed `Δ`-regular `K`, using only colourings of *proper*
-subsets of `K`.)
+subsets of `K`. (If `K` were disconnected we could instead colour the component of
+`v₂` and the rest separately, but this case split is unnecessary.)
 
 Since `G` has no `Δ + 1`-clique, the neighbourhood of `v₂` is not a clique, so `v₂`
 has two neighbours `v₁` and `v₃` that are not adjacent to each other. Write
@@ -2066,6 +2076,29 @@ lemma _root_.Equiv.exists_perm_of_eq_iff_eq {α : Type*}
           by grind, by grind⟩
 
 /-!
+Combined with `ColoringOn.union`, this gives the gluing step. Suppose that `A` and
+`B` meet only in `{x, y}`, and that there are no edges between `A \ B` and `B \ A`.
+Then colourings `C` of `A` and `D` of `B` with the same pattern on `{x, y}` can be
+glued into a colouring of `A ∪ B`: permute the colours of `D` so that it agrees with
+`C` at `x` and `y`, and use `C` on `A` and the permuted `D` on `B \ A`.
+-/
+lemma ColoringOn.nonempty_union_of_eq_iff_eq {α : Type*} {A B : Set V} {x y : V}
+    (C : G.ColoringOn α A) (D : G.ColoringOn α B) (hmeet : A ∩ B ⊆ {x, y})
+    (hcross : ∀ u ∈ A \ B, ∀ v ∈ B \ A, ¬G.Adj u v)
+    (hpat : C x = C y ↔ D x = D y) : Nonempty (G.ColoringOn α (A ∪ B)) := by
+  classical
+  obtain ⟨σ, hσx, hσy⟩ := Equiv.exists_perm_of_eq_iff_eq hpat
+  refine ⟨C.union (D.map σ.toEmbedding) fun u v hu hv huv => ?_⟩
+  by_cases hu' : u ∈ B
+  · -- `u` is `x` or `y`, where `C` agrees with the permuted `D`
+    have hσu : σ (D u) = C u := by
+      obtain rfl | rfl : u = x ∨ u = y := by simpa using hmeet ⟨hu, hu'⟩
+      exacts [hσx, hσy]
+    rw [ColoringOn.map_apply, ← hσu]
+    exact fun h => D.valid ⟨hu', hv.1, huv⟩ (σ.injective h)
+  · exact absurd huv (hcross u ⟨hu, hu'⟩ v hv)
+
+/-!
 Step 2 of the sketch: colourings of `D := A ∪ {v₁, v₃}` and `E := B ∪ {v₁, v₃}` with
 the same pattern (equal or distinct) on `{v₁, v₃}`. Here `A` is given abstractly,
 with the properties of the walk-component that we need as hypotheses, and
@@ -2194,21 +2227,15 @@ private lemma closed_regular_case [G.LocallyFinite] (hΔ : 3 ≤ Δ)
       hAsub hv₂A (induce_walkComponent_connected hv₂W) hAclosed
   -- `D ∪ E = K`.
   have hDEK : (A ∪ {v₁, v₃}) ∪ (B ∪ {v₁, v₃}) = K := by grind
-  -- permute the colours of `C_E₀` so that it agrees with `C_D` on `{v₁, v₃}`
-  obtain ⟨σ, hσ1, hσ3⟩ := Equiv.exists_perm_of_eq_iff_eq hpat
-  let C_E : G.ColoringOn (Fin Δ) ↑(B ∪ {v₁, v₃}) := C_E₀.map σ.toEmbedding
-  have hC_E_def : ∀ x, C_E x = σ (C_E₀ x) := fun _ => rfl
-  -- the two colourings can be glued since they agree on `{v₁, v₃}`
-  have hcompat : ∀ ⦃v w⦄, v ∈ (↑(A ∪ {v₁, v₃}) : Set V) →
-      w ∈ (↑(B ∪ {v₁, v₃}) : Set V) \ ↑(A ∪ {v₁, v₃}) →
-      G.Adj v w → C_D v ≠ C_E w := by
-    grind [C_E₀.valid, Subgraph.induce_adj, Subgraph.top_adj]
-  exact ⟨(C_D.union C_E hcompat).copy (by rw [← coe_union, hDEK])⟩
+  -- `D` and `E` meet in `{v₁, v₃}`, and there are no edges between `A` and `B`, so
+  -- the two colourings can be glued
+  obtain ⟨C⟩ := C_D.nonempty_union_of_eq_iff_eq C_E₀ (by grind)
+    (fun u hu w hw huw => by grind) hpat
+  exact ⟨C.copy (by rw [← coe_union, hDEK])⟩
 
 /-!
-The regular case of the sketch: `K` is the set of vertices of `s` in the component
-`G⟦v₂⟧`, coloured by `closed_regular_case`, and the rest `s \ K` is coloured by the
-induction hypothesis.
+The regular case of the sketch: every vertex of `s` has degree `Δ` and all its
+neighbours in `s`, so `closed_regular_case` colours `s` (taking `K = s`).
 -/
 private lemma regular_case [G.LocallyFinite] [DecidableRel G.Adj] (hΔ : 3 ≤ Δ)
     (hcf : G.CliqueFree (Δ + 1))
@@ -2221,27 +2248,7 @@ private lemma regular_case [G.LocallyFinite] [DecidableRel G.Adj] (hΔ : 3 ≤ �
     (hdeg a).antisymm ((hreg a ha).trans (degIn_le_degree s a))
   have hsubs : ∀ a ∈ s, G.neighborFinset a ⊆ s := fun a ha =>
     neighborFinset_subset_of_degree_le_degIn s a ((hdeg a).trans (hreg a ha))
-  -- the vertices of `s` in the connected component of `v₂`
-  let K := {u ∈ s | u ∈ G⟦v₂⟧.supp}
-  have hKs : K ⊆ s := filter_subset _ _
-  have hmemK : ∀ {u}, u ∈ K ↔ u ∈ s ∧ u ∈ G⟦v₂⟧.supp := fun {u} => mem_filter
-  have hv₂K : v₂ ∈ K := hmemK.mpr ⟨hv₂, rfl⟩
-  have hclosed : ∀ u ∈ K, G.neighborFinset u ⊆ K := by
-    intro u hu w hw
-    have hus := hmemK.mp hu
-    have hadj : G.Adj u w := (mem_neighborFinset _ _ _).mp hw
-    exact hmemK.mpr ⟨hsubs u hus.1 hw,
-      (ConnectedComponent.connectedComponentMk_eq_of_adj hadj).symm.trans hus.2⟩
-  obtain ⟨CK⟩ := closed_regular_case hΔ hcf K v₂ hv₂K hclosed
-    (fun u hu => hdegs u (hKs hu))
-    (fun t ht => ih t (Finset.ssubset_of_ssubset_of_subset ht hKs))
-  obtain ⟨Crest⟩ := ih (s \ K) (sdiff_ssubset hKs ⟨v₂, hv₂K⟩)
-  have hcompat : ∀ ⦃v w⦄, v ∈ (↑K : Set V) →
-     w ∈ (↑(s \ K) : Set V) \ ↑K → G.Adj v w → CK v ≠ Crest w := by
-    intro v w hv hw hadj
-    have hwK : w ∈ K := hclosed v (mem_coe.mp hv) ((mem_neighborFinset ..).mpr hadj)
-    exact absurd hwK (by simpa using hw.2)
-  exact ⟨(CK.union Crest hcompat).copy (by simpa using hKs)⟩
+  exact closed_regular_case hΔ hcf s v₂ hv₂ hsubs hdegs ih
 
 /-!
 Any locally finite graph that is `(Δ + 1)`-clique-free with maximum degree at most
@@ -2595,6 +2602,35 @@ theorem blockOf_mono {G' : SimpleGraph V} (hsub : G' ≤ G) (e : Sym2 V) :
   exact ⟨by simpa using h.1.map (Hom.ofLE hsub) Function.injective_id, h.2⟩
 
 /-!
+`blockOfHom` and `blockOf_mono` work with representative edges, but we can also map
+blocks themselves. An injective homomorphism `f : G →g G'` sends the block of an edge
+`e` to the block of `e.map f`, and by `BlockEquivalent.map` this does not depend on
+the choice of `e`. So `f` induces a map `Block.map f hf : G.Block → G'.Block`, just
+as a homomorphism induces a map of connected components (`ConnectedComponent.map`).
+-/
+/-- The image of a block under an injective homomorphism `f`: the block containing
+the images of its edges. -/
+def Block.map {W : Type*} {G' : SimpleGraph W} (f : G →g G')
+    (hf : Function.Injective f) (B : G.Block) : G'.Block :=
+  Quotient.map' (fun e => ⟨e.1.map f, f.map_mem_edgeSet e.2⟩)
+    (fun _ _ => BlockEquivalent.map f hf) B
+
+/-!
+Moreover, `f` itself is a homomorphism from each block `B` (as a `SimpleGraph V`) to
+the block `B.map f hf`. To prove this we may assume that `B` is the block of an edge
+`e` (`Quotient.inductionOn'`), and then it is exactly what `blockOfHom` says. With
+`Colorable.of_hom` this lets us pull back colourings of blocks of `G'` to blocks of
+`G` without choosing representatives.
+-/
+/-- An injective homomorphism `f` maps each block `B` into the block `B.map f hf`. -/
+@[simps]
+def Block.mapHom {W : Type*} {G' : SimpleGraph W} (f : G →g G')
+    (hf : Function.Injective f) (B : G.Block) :
+    B.toGraph →g (B.map f hf).toGraph where
+  toFun := f
+  map_rel' := Quotient.inductionOn' B fun e => (blockOfHom f hf e).map_rel'
+
+/-!
 ## Colouring a Graph from its Blocks
 
 The idea is to cut `G` into two pieces that share at most one vertex, colour each
@@ -2753,9 +2789,10 @@ For finite graphs we can now argue by well-founded induction on `G`, with respec
 `<`. This is allowed because a finite type carries only finitely many graphs (a graph
 is determined by its adjacency relation, `SimpleGraph.adj_injective`), and a strict
 order on a finite type is well-founded. If `G` splits at some vertex, then both
-pieces are proper subgraphs, whose blocks lie in blocks of `G` (`blockOf_mono`), so
-we can colour them by induction and glue the colourings. Otherwise `G` is either
-edgeless or equal to the block of any of its edges.
+pieces are proper subgraphs, whose blocks map into blocks of `G` along the inclusion
+`Hom.ofLE` (`Block.mapHom`), so we can colour them by induction and glue the
+colourings. Otherwise `G` is either edgeless or equal to the block of any of its
+edges.
 -/
 theorem colorable_of_forall_block [Finite V] {n : ℕ} (hn : 1 ≤ n)
     (G : SimpleGraph V) (hcol : ∀ B : G.Block, B.toGraph.Colorable n) :
@@ -2763,11 +2800,8 @@ theorem colorable_of_forall_block [Finite V] {n : ℕ} (hn : 1 ≤ n)
   have : Finite (SimpleGraph V) := .of_injective _ SimpleGraph.adj_injective
   induction G using WellFoundedLT.induction with
   | _ G ih =>
-    have hlt : ∀ H < G, H.Colorable n := fun H hH => ih H hH fun B => by
-      induction B using Quotient.inductionOn' with
-      | h e =>
-        exact (hcol (G.blockMk ⟨e, edgeSet_mono hH.le e.2⟩)).mono_left
-          (blockOf_mono hH.le e)
+    have hlt : ∀ H < G, H.Colorable n := fun H hH => ih H hH fun B =>
+      (hcol _).of_hom (B.mapHom (.ofLE hH.le) Function.injective_id)
     by_cases hs : ∃ x, G.SplitsAt x
     · obtain ⟨x, G₁, G₂, h₁, h₂, hG, hmeet⟩ := hs
       rw [← hG]

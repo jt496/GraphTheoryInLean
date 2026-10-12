@@ -337,6 +337,10 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `Block.toGraph`: the subgraph underlying a block.
 * `blockOfHom`: an injective homomorphism maps the block of `e` into the block of
   `e.map f`.
+* `Block.map`: the image of a block under an injective homomorphism `f`, the block
+  containing the images of its edges.
+* `Block.mapHom`: an injective homomorphism `f` maps each block `B` into the block
+  `B.map f hf`.
 * `SplitsAt`: `G` is the union of two proper subgraphs whose supports meet in at most
   a given vertex.
 
@@ -620,6 +624,8 @@ its exercises:
 * `Walk.IsMaximalPath.exists_cycle_spanning`: a maximal path of length at least two
   whose endpoints form an `IsOrePair` can be closed (by `concat` or `posaClosed`)
   into a cycle through exactly its vertices.
+* `Walk.IsCycle.exists_isPath_of_mem_edges`: a cycle through an edge `u — v` can be
+  cut open into a path from `u` to `v` through the same vertices, avoiding `u — v`.
 * `Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges`: a Hamiltonian
   cycle through an edge `u — v` can be cut open into a Hamiltonian walk from `u` to
   `v` avoiding `u — v`.

@@ -2248,8 +2248,7 @@ with `deg u + deg v ≥ |V|`, then `G` is Hamiltonian iff `G` with the edge `u �
 added is Hamiltonian. Repeatedly adding such edges yields the *closure* of `G`.
 
 We start with an easy lemma: reversal preserves being a Hamiltonian walk.
-(Reversal also preserves being a Hamiltonian *cycle*, though we will not need
-this here: see the exercises.)
+(Reversal also preserves being a Hamiltonian *cycle*: see the exercises.)
 -/
 @[simp]
 lemma Walk.isHamiltonian_reverse [DecidableEq V] {u v : V} {p : G.Walk u v} :
@@ -2259,7 +2258,9 @@ lemma Walk.isHamiltonian_reverse [DecidableEq V] {u v : V} {p : G.Walk u v} :
 /-!
 The first step towards the Bondy–Chvátal theorem is a piece of cycle surgery: given a
 Hamiltonian cycle `c` through an edge `u — v`, deleting that edge from `c` should
-leave a Hamiltonian path from `u` to `v`.
+leave a Hamiltonian path from `u` to `v`. Hamiltonicity plays no part in the surgery
+itself, so we cut open an arbitrary cycle and record what the resulting path
+inherits from it.
 
 We first need to prove a simple lemma about darts of a cycle.
 -/
@@ -2281,51 +2282,62 @@ lemma Walk.IsCycle.snd_eq_of_mem_darts {u : V} {c : G.Walk u u}
   rfl
 
 /-!
-Cutting a Hamiltonian cycle at its first edge yields a Hamiltonian path: the reversed
-tail runs from the endpoint `u` to the second vertex, visits every vertex, and avoids
-the deleted first edge (a cycle is a trail, so no edge is repeated).
--/
-lemma Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_snd [DecidableEq V] {u : V}
-    {c : G.Walk u u} (hc : c.IsHamiltonianCycle) :
-    ∃ p : G.Walk u c.snd, p.IsHamiltonian ∧ s(u, c.snd) ∉ p.edges := by
-  refine ⟨c.tail.reverse, isHamiltonian_reverse.2 hc.isHamiltonian_tail, ?_⟩
-  rw [edges_reverse, List.mem_reverse]
-  have hnd : c.edges.Nodup := hc.isCycle.edges_nodup
-  rw [← c.cons_tail_eq hc.isCycle.not_nil, edges_cons] at hnd
-  exact (List.nodup_cons.1 hnd).1
+Deleting an edge `u — v` from a cycle `c` leaves a path from `u` to `v` that is one
+edge shorter than `c`, visits exactly the vertices of `c`, and avoids `u — v`.
 
-/-!
-Now the general surgery lemma: a Hamiltonian cycle through an edge `u — v` (based
-anywhere) can be cut open into a Hamiltonian path from `u` to `v` avoiding `u — v`.
 The edge `u — v` of the cycle is the image of a dart, which either points from `u`
-to `v` or from `v` to `u` (`dart_edge_eq_mk'_iff'`). Rotating the cycle to be
-based at the dart's *first* vertex makes the dart the first dart of the cycle,
-so cutting at the first edge yields a Hamiltonian path from the dart's first vertex
-to its second. This is the required path in the first case, and its reverse is the
-required path in the second.
+to `v` or from `v` to `u` (`dart_edge_eq_mk'_iff'`). Rotating the cycle to be based
+at the dart's *first* vertex makes the dart the first dart of the cycle, and the
+reversed tail of the rotated cycle then runs from the dart's first vertex to its
+second. It is a path, since the tail of a cycle is a path; it visits every vertex of
+the cycle, since the base vertex reappears at the end of the tail; and it avoids the
+deleted first edge, since a cycle is a trail, so no edge is repeated. This is the
+required path in the first case, and its reverse is the required path in the second.
 -/
-lemma Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges [DecidableEq V]
-    {x u v : V} {c : G.Walk x x} (hc : c.IsHamiltonianCycle)
-    (he : s(u, v) ∈ c.edges) :
-    ∃ p : G.Walk u v, p.IsHamiltonian ∧ s(u, v) ∉ p.edges := by
-  -- cutting `c` open at a dart from `a` to `b` gives a Hamiltonian `a`-`b` path
+lemma Walk.IsCycle.exists_isPath_of_mem_edges {x u v : V} {c : G.Walk x x}
+    (hc : c.IsCycle) (he : s(u, v) ∈ c.edges) :
+    ∃ p : G.Walk u v, p.IsPath ∧ p.length + 1 = c.length ∧
+      (∀ w, w ∈ p.support ↔ w ∈ c.support) ∧ s(u, v) ∉ p.edges := by
+  classical
+  -- cutting `c` open at a dart from `a` to `b` gives an `a`-`b` path
   have key : ∀ {a b : V}, ∀ d ∈ c.darts, d.fst = a → d.snd = b →
-      ∃ p : G.Walk a b, p.IsHamiltonian ∧ s(a, b) ∉ p.edges := by
-    intro a b d hd hfst hsnd
-    have ha := hc.mem_support a
-    have hb : (c.rotate a ha).snd = b :=
-      hsnd ▸ ((hc.rotate ha).isCycle.snd_eq_of_mem_darts
-        ((c.rotate_darts a ha).perm.mem_iff.2 hd) hfst).symm
-    obtain ⟨p, h1, h2⟩ := (hc.rotate ha).exists_isHamiltonian_walk_snd
-    exact ⟨p.copy rfl hb, (isHamiltonian_copy ..).2 h1, by simpa [← hb] using h2⟩
+      ∃ p : G.Walk a b, p.IsPath ∧ p.length + 1 = c.length ∧
+        (∀ w, w ∈ p.support ↔ w ∈ c.support) ∧ s(a, b) ∉ p.edges := by
+    rintro a b d hd rfl rfl
+    -- rotate `c` to be based at `d.fst`, so that `d` becomes its first dart
+    have ha := c.dart_fst_mem_support_of_mem_darts hd
+    have hr := hc.rotate ha
+    rw [hr.snd_eq_of_mem_darts ((c.rotate_darts _ ha).perm.mem_iff.2 hd) rfl]
+    -- the reversed tail of the rotated cycle is the required path
+    refine ⟨_, hr.isPath_tail.reverse, ?_, fun w => ?_, ?_⟩
+    · simpa using length_tail_add_one hr.not_nil
+    · -- `d.fst` is dropped from the start of the support but is still the end
+      have := cons_support_tail hr.not_nil
+      grind [support_reverse, end_mem_support, mem_support_rotate_iff]
+    · -- no edge is repeated, so the first edge does not occur in the tail
+      have hnd := hr.edges_nodup
+      rw [← (c.rotate _ ha).cons_tail_eq hr.not_nil, edges_cons] at hnd
+      simpa using (List.nodup_cons.1 hnd).1
   -- the edge `u — v` is the image of a dart of `c`
   obtain ⟨d, hd, hde⟩ := List.mem_map.1 he
   rcases dart_edge_eq_mk'_iff'.1 hde with ⟨hfst, hsnd⟩ | ⟨hfst, hsnd⟩
   · -- the dart points from `u` to `v`: cut there
     exact key d hd hfst hsnd
   · -- the dart points from `v` to `u`: cut there and reverse the resulting path
-    obtain ⟨p, h1, h2⟩ := key d hd hfst hsnd
-    exact ⟨p.reverse, isHamiltonian_reverse.2 h1, by simpa [Sym2.eq_swap] using h2⟩
+    obtain ⟨p, h1, h2, h3, h4⟩ := key d hd hfst hsnd
+    exact ⟨p.reverse, h1.reverse, by simpa using h2, by simpa using h3,
+      by simpa [Sym2.eq_swap] using h4⟩
+
+/-!
+If the cycle is Hamiltonian then the path visits every vertex, so it is a
+Hamiltonian path (`IsPath.isHamiltonian_iff`).
+-/
+lemma Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges [DecidableEq V]
+    {x u v : V} {c : G.Walk x x} (hc : c.IsHamiltonianCycle)
+    (he : s(u, v) ∈ c.edges) :
+    ∃ p : G.Walk u v, p.IsHamiltonian ∧ s(u, v) ∉ p.edges := by
+  obtain ⟨p, hp, -, hsupp, hpe⟩ := hc.isCycle.exists_isPath_of_mem_edges he
+  exact ⟨p, hp.isHamiltonian_iff.2 fun w => (hsupp w).2 (hc.mem_support w), hpe⟩
 
 /-!
 ### Adding a Single Edge
@@ -2609,9 +2621,28 @@ complete even when Ore's condition fails (see
 #eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closure.edgeFinset.card     -- 10
 
 /-!
-We can now prove the third lemma: each round that changes the graph adds at least
-one missing edge, so the number of missing edges strictly decreases, and it can never
-go below zero.
+Conversely, a round leaves `G` unchanged only if `G` is closed, since it joins every
+eligible pair. So if `G` is not closed then a round adds at least one missing edge,
+and the number of missing edges strictly decreases.
+-/
+lemma isClosed_iff_closureStep_eq [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
+    G.IsClosed ↔ G.closureStep = G := by
+  refine ⟨IsClosed.closureStep_eq, fun h x y hne hd => ?_⟩
+  have : G.closureStep.Adj x y := closureStep_adj.2 (Or.inr ⟨hne, hd⟩)
+  rwa [h] at this
+
+lemma card_compl_edgeFinset_closureStep_lt [Fintype V] [DecidableEq V]
+    [DecidableRel G.Adj] (hG : ¬G.IsClosed) :
+    #(G.closureStep)ᶜ.edgeFinset < #Gᶜ.edgeFinset := by
+  have hlt : G < G.closureStep :=
+    lt_of_le_of_ne le_closureStep fun h => hG (isClosed_iff_closureStep_eq.2 h.symm)
+  exact Finset.card_lt_card
+    (edgeFinset_ssubset_edgeFinset.2 (compl_lt_compl_iff_lt.2 hlt))
+
+/-!
+We can now prove the third lemma, by induction on the fuel: each round that changes
+the graph decreases the number of missing edges, which can never go below zero, so if
+we start with enough fuel then the process must terminate with a closed graph.
 -/
 lemma isClosed_closureAux [Fintype V] [DecidableEq V] :
     ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj], #Gᶜ.edgeFinset ≤ fuel →
@@ -2627,12 +2658,7 @@ lemma isClosed_closureAux [Fintype V] [DecidableEq V] :
     · -- `G` is already closed, and the closure does not change it
       exact hG.of_eq (closureAux_eq_self (fuel + 1) G hG).symm
     · -- some eligible pair is not yet adjacent, so a missing edge is added
-      have hlt : G < closureStep G := by
-        refine lt_of_le_of_ne le_closureStep fun h => hG fun x y hne hd => ?_
-        have : G.closureStep.Adj x y := closureStep_adj.2 (Or.inr ⟨hne, hd⟩)
-        rwa [← h] at this
-      have := Finset.card_lt_card
-        (edgeFinset_ssubset_edgeFinset.2 (compl_lt_compl_iff_lt.2 hlt))
+      have := card_compl_edgeFinset_closureStep_lt hG
       exact isClosed_closureAux fuel G.closureStep (by grind)
 
 theorem isClosed_closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :

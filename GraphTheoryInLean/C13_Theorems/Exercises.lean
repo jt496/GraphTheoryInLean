@@ -159,7 +159,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3)
 `K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
 square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
 `boxProdRight` to show that every infinite component of `G - K` contains
-`(N + 1, N + 1)`.
+`(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
 -/
 example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
   sorry
@@ -404,38 +404,34 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3)
 `K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
 square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
 `boxProdRight` to show that every infinite component of `G - K` contains
-`(N + 1, N + 1)`.
+`(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
 -/
 example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
   have hadj (n : ℤ) : (hasse ℤ).Adj n (n + 1) :=
     hasse_adj.2 (.inl (Order.covBy_add_one n))
   have hP : (hasse ℤ).Preconnected := hasse_preconnected_of_succ ℤ
   rw [Nat.card_eq_one_iff_unique]
-  refine ⟨⟨fun ⟨e, he⟩ ⟨f, hf⟩ => Subtype.ext (funext fun K => ?_)⟩, ?_⟩
+  refine ⟨subsingleton_end_of_common_vertex fun K => ?_, ?_⟩
   · obtain ⟨N, hN⟩ :=
-      (K.unop.finite_toSet.image fun v : ℤ × ℤ => max |v.1| |v.2|).bddAbove
+      (K.finite_toSet.image fun v : ℤ × ℤ => max |v.1| |v.2|).bddAbove
     -- the column `{a} × ℤ` and the row `ℤ × {b}` avoid `K` when `N < |a|`, `N < |b|`
     let col (a : ℤ) := (boxProdRight (hasse ℤ) (hasse ℤ) a).toHom
     let row (b : ℤ) := (boxProdLeft (hasse ℤ) (hasse ℤ) b).toHom
-    have hcol (a : ℤ) (ha : N < |a|) (n : ℤ) : col a n ∉ K.unop := fun hK =>
+    have hcol (a : ℤ) (ha : N < |a|) (n : ℤ) : col a n ∉ K := fun hK =>
       ha.not_ge ((le_max_left _ _).trans (hN ⟨_, hK, rfl⟩))
-    have hrow (b : ℤ) (hb : N < |b|) (n : ℤ) : row b n ∉ K.unop := fun hK =>
+    have hrow (b : ℤ) (hb : N < |b|) (n : ℤ) : row b n ∉ K := fun hK =>
       hb.not_ge ((le_max_right _ _).trans (hN ⟨_, hK, rfl⟩))
     have hN1 : N < |N + 1| := (lt_add_one N).trans_le (le_abs_self _)
     -- every infinite component of `G - K` contains `(N + 1, N + 1)`
-    have key (C : (hasse ℤ □ hasse ℤ).ComponentCompl K.unop) (hC : C.supp.Infinite) :
-        (N + 1, N + 1) ∈ C := by
-      obtain ⟨⟨a, b⟩, habC, hbox⟩ :=
-        (hC.sdiff ((Set.finite_Icc (-N) N).prod (Set.finite_Icc (-N) N))).nonempty
-      simp only [Set.mem_prod, Set.mem_Icc, ← abs_le, not_and_or, not_le] at hbox
-      rcases hbox with ha | hb
-      · have := ComponentCompl.mem_of_hom hP (col a) (hcol a ha) (u := b) habC
-        exact ComponentCompl.mem_of_hom hP (row _) (hrow _ hN1) (u := a) (this _) _
-      · have := ComponentCompl.mem_of_hom hP (row b) (hrow b hb) (u := a) habC
-        exact ComponentCompl.mem_of_hom hP (col _) (hcol _ hN1) (u := b) (this _) _
-    exact ComponentCompl.pairwise_disjoint.eq (Set.not_disjoint_iff.2 ⟨_,
-      key _ (end_componentCompl_infinite _ ⟨e, he⟩ K),
-      key _ (end_componentCompl_infinite _ ⟨f, hf⟩ K)⟩)
+    refine ⟨(N + 1, N + 1), fun C hC => ?_⟩
+    obtain ⟨⟨a, b⟩, habC, hbox⟩ :=
+      (hC.sdiff ((Set.finite_Icc (-N) N).prod (Set.finite_Icc (-N) N))).nonempty
+    simp only [Set.mem_prod, Set.mem_Icc, ← abs_le, not_and_or, not_le] at hbox
+    rcases hbox with ha | hb
+    · have := ComponentCompl.mem_of_hom hP (col a) (hcol a ha) (u := b) habC
+      exact ComponentCompl.mem_of_hom hP (row _) (hrow _ hN1) (u := a) (this _) _
+    · have := ComponentCompl.mem_of_hom hP (row b) (hrow b hb) (u := a) habC
+      exact ComponentCompl.mem_of_hom hP (col _) (hcol _ hN1) (u := b) (this _) _
   · have (n : ℤ) : Fintype ((hasse ℤ).neighborSet n) :=
       Fintype.ofFinset {n - 1, n + 1} fun m => by
         simp [hasse_adj, Order.covBy_iff_add_one_eq]; grind

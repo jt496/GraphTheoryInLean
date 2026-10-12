@@ -827,6 +827,20 @@ lemma piTensorProd_adj {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleG
   iInf_adj
 
 /-!
+So when `ι` is nonempty, adjacency in the indexed tensor product is just adjacency in
+every component. (We give this higher simp priority than `piTensorProd_adj`, so that
+it fires first when `ι` is nonempty.)
+-/
+@[simp high]
+lemma piTensorProd_adj_of_nonempty {ι : Type*} [Nonempty ι] {V : ι → Type*}
+    {G : (i : ι) → SimpleGraph (V i)} {f g : (i : ι) → V i} :
+    (⨂g i, G i).Adj f g ↔ ∀ i, (G i).Adj (f i) (g i) := by
+  rw [piTensorProd_adj]
+  refine ⟨And.left, fun h => ⟨h, ?_⟩⟩
+  obtain ⟨i⟩ := ‹Nonempty ι›
+  exact fun e => (h i).ne (congrFun e i)
+
+/-!
 We can only expect to decide adjacency in the indexed tensor product by checking
 every factor when the index type is finite: you can't check infinitely many
 conditions! So the tensor product of a finite family of graphs has decidable
@@ -849,8 +863,7 @@ instance {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
     [∀ i, Fintype ((G i).neighborSet (f i))] :
     Fintype ((⨂g i, G i).neighborSet f) :=
   Fintype.ofFinset (Fintype.piFinset fun i ↦ (G i).neighborFinset (f i)) fun y ↦ by
-    obtain ⟨i⟩ := ‹Nonempty ι›
-    simpa using fun h e ↦ (h i).ne (congrFun e i)
+    simp
 
 /-!
 The analogues for the indexed tensor product of the maps in
@@ -1074,29 +1087,41 @@ def isoMycielskianCompleteTwoCycleGraphFive : mμ[K[2]] ≃g C[5] where
   right_inv := by decide +revert
   map_rel_iff' := by decide +revert
 
+/-!
+The forward direction only needs `mμ[G]` to be regular, so we isolate it as a lemma:
+comparing the degrees of `u ₗ`, `u ᵣ` and `none` shows that if `V` is finite and
+nonempty and `mμ[G]` is regular then `G` is a single edge.
+-/
+lemma nonempty_iso_completeGraph_two_of_regular_mycielskian {V : Type*}
+    {G : SimpleGraph V} [Finite V] [Nonempty V] [mμ[G].LocallyFinite] {d : ℕ}
+    (hd : mμ[G].IsRegularOfDegree d) : Nonempty (G ≃g K[2]) := by
+  classical
+  obtain ⟨v : V⟩ := ‹Nonempty V›
+  cases nonempty_fintype V
+  -- From `d = 2 * G.degree u` and `d = G.degree u + 1` we get `G.degree u = 1`.
+  have h1 : G.IsRegularOfDegree 1 := fun u => by
+    have hₗ : mμ[G].degree (u ₗ) = 2 * G.degree u := by simp
+    have hᵣ : mμ[G].degree (u ᵣ) = G.degree u + 1 := by simp
+    grind [hd (u ₗ), hd (u ᵣ)]
+  -- Then `d = Fintype.card V` forces `Fintype.card V = 2`, as required.
+  have hcard : Fintype.card V = 2 := by
+    have h₀ : mμ[G].degree none = Fintype.card V := by simp
+    have hᵣ : mμ[G].degree (v ᵣ) = G.degree v + 1 := by simp
+    grind [hd none, hd (v ᵣ), h1 v]
+  -- we now use the fact that if `G` is regular of degree `Fintype.card V - 1`
+  -- then `G` is complete.
+  obtain rfl : G = ⊤ :=
+    G.isRegularOfDegree_card_sub_one_iff_eq_top.1 (by simpa [hcard] using h1)
+  exact ⟨Iso.completeGraph (Fintype.equivFinOfCardEq hcard)⟩
+
 theorem isVertexTransitive_mycielskian_iff {V : Type*} (G : SimpleGraph V) [Finite V]
     [Nonempty V] : mμ[G].IsVertexTransitive ↔ Nonempty (G ≃g K[2]) := by
   classical
   constructor
   · intro h
-    obtain ⟨v : V⟩ := ‹Nonempty V›
     cases nonempty_fintype V
     obtain ⟨d, hd⟩ := isRegular_of_isVertexTransitive h
-    -- From `d = 2 * G.degree u` and `d = G.degree u + 1` we get `G.degree u = 1`.
-    have h1 : G.IsRegularOfDegree 1 := fun u => by
-      have hₗ : mμ[G].degree (u ₗ) = 2 * G.degree u := by simp
-      have hᵣ : mμ[G].degree (u ᵣ) = G.degree u + 1 := by simp
-      grind [hd (u ₗ), hd (u ᵣ)]
-    -- Then `d = Fintype.card V` forces `Fintype.card V = 2`, as required.
-    have hcard : Fintype.card V = 2 := by
-      have h₀ : mμ[G].degree none = Fintype.card V := by simp
-      have hᵣ : mμ[G].degree (v ᵣ) = G.degree v + 1 := by simp
-      grind [hd none, hd (v ᵣ), h1 v]
-    -- we now use the fact that if `G` is regular of degree `Fintype.card V - 1`
-    -- then `G` is complete.
-    obtain rfl : G = ⊤ :=
-      G.isRegularOfDegree_card_sub_one_iff_eq_top.1 (by simpa [hcard] using h1)
-    exact ⟨Iso.completeGraph (Fintype.equivFinOfCardEq hcard)⟩
+    exact nonempty_iso_completeGraph_two_of_regular_mycielskian hd
   · intro ⟨e⟩
     exact (e.mapMycielskian.symm.comp isoMycielskianCompleteTwoCycleGraphFive.symm)
       |>.isVertexTransitive (isVertexTransitive_cycleGraph _)

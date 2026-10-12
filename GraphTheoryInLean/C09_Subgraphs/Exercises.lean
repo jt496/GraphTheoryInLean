@@ -105,9 +105,9 @@ independent set (`exists_isNIndepSet_indepNum`) and `M` a maximum matching
 (`exists_isMatching_matchingNum`), so `#I = ⍺ G` and `M` has `ν G` edges. Count the
 vertices of `I` inside and outside `M.verts` separately:
 * *Inside:* no edge of `M` has both ends in `I`, since `I` is independent. So
-  sending each `v ∈ I ∩ M.verts` to the edge of `M` containing it
-  (`Subgraph.IsMatching.toEdge`) is injective, and at most `|E(M)|` vertices of `I`
-  lie in `M.verts`.
+  sending each `v ∈ I ∩ M.verts` to the edge of `M` containing it is injective, and
+  at most `|E(M)|` vertices of `I` lie in `M.verts`
+  (`Subgraph.IsMatching.ncard_inter_le_of_isIndepSet`).
 * *Outside:* `M.verts` has `2 * |E(M)|` vertices (`Subgraph.IsMatching.ncard_verts`),
   so at most `|V| - 2 * |E(M)|` vertices lie outside it.
 
@@ -160,15 +160,30 @@ lemma Subgraph.IsMatching.exists_le_encard_eq_add_one' (h : ν G = ⊤)
 
 /-!
 17. If `ν G = ⊤` then `G` has an infinite matching. Hint: restate the previous
-exercise as `∀ M, ∃ N, M.IsMatching → M.verts.Finite → ...`, so that `choose`
-produces a total step function `ext`, and iterate it from `⊥`: `M n := ext^[n] ⊥`,
-with `Function.iterate_succ_apply'` unfolding one step. Show by induction that each
-`M n` is a finite matching with exactly `n` edges, so `M` is monotone
-(`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by Exercise 14 with at
-least `n` edges for every `n`.
+exercise on the subtype `FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}`
+of finite matchings, so that `choose` produces a step function `next : FM → FM`,
+and iterate it from `⊥`: `M n := next^[n] ⊥`, with `Function.iterate_succ_apply'`
+unfolding one step. Each `M n` is then a finite matching by construction; show by
+induction that it has exactly `n` edges. Each step extends the previous matching, so
+`M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by
+Exercise 14 with at least `n` edges for every `n`.
 -/
 lemma exists_isMatching_encard_eq_top' (h : ν G = ⊤) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ⊤ := by
+  -- Choose, for every finite matching, an extension by one edge. Packaging the
+  -- finite matchings as a subtype `FM` makes this a total function `next`.
+  let FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}
+  have : ∀ M : FM, ∃ N : FM,
+      M.1 ≤ N.1 ∧ N.1.edgeSet.encard = M.1.edgeSet.encard + 1 := by
+    rintro ⟨M, hM, hfin⟩
+    obtain ⟨N, hle, hN, hNfin, hcard⟩ := hM.exists_le_encard_eq_add_one' h hfin
+    exact ⟨⟨N, hN, hNfin⟩, hle, hcard⟩
+  choose next hnext hcard using this
+  -- Iterate from the empty matching.
+  let M : ℕ → FM := fun n => next^[n] ⟨⊥, Subgraph.isMatching_bot, by simp⟩
+  have hstep : ∀ n, M (n + 1) = next (M n) := fun n =>
+    Function.iterate_succ_apply' _ _ _
+  -- Each `M n` is a finite matching by construction; it has exactly `n` edges.
   sorry
 
 /-!
@@ -362,9 +377,9 @@ independent set (`exists_isNIndepSet_indepNum`) and `M` a maximum matching
 (`exists_isMatching_matchingNum`), so `#I = ⍺ G` and `M` has `ν G` edges. Count the
 vertices of `I` inside and outside `M.verts` separately:
 * *Inside:* no edge of `M` has both ends in `I`, since `I` is independent. So
-  sending each `v ∈ I ∩ M.verts` to the edge of `M` containing it
-  (`Subgraph.IsMatching.toEdge`) is injective, and at most `|E(M)|` vertices of `I`
-  lie in `M.verts`.
+  sending each `v ∈ I ∩ M.verts` to the edge of `M` containing it is injective, and
+  at most `|E(M)|` vertices of `I` lie in `M.verts`
+  (`Subgraph.IsMatching.ncard_inter_le_of_isIndepSet`).
 * *Outside:* `M.verts` has `2 * |E(M)|` vertices (`Subgraph.IsMatching.ncard_verts`),
   so at most `|V| - 2 * |E(M)|` vertices lie outside it.
 
@@ -377,27 +392,10 @@ lemma indepNum_add_matchingNum_le [Finite V] :
   have := Fintype.ofFinite V
   obtain ⟨I, hI⟩ := G.exists_isNIndepSet_indepNum
   obtain ⟨M, hM, hcard⟩ := exists_isMatching_matchingNum (G := G)
-  -- Send each vertex of `I` covered by `M` to its edge of `M`.
-  let f : V → Sym2 V := fun v =>
-    if hv : v ∈ M.verts then (hM.toEdge ⟨v, hv⟩ : Sym2 V) else s(v, v)
-  have hf : Set.InjOn f (↑I ∩ M.verts) := by
-    rintro v ⟨hvI, hv⟩ w ⟨hwI, hw⟩ hfvw
-    simp only [f, hv, hw, ↓reduceDIte] at hfvw
-    -- Both `v` and `w` lie on the matching edge of `v`.
-    have hve : v ∈ (hM.toEdge ⟨v, hv⟩ : Sym2 V) := hM.mem_coe_toEdge hv
-    have hwe : w ∈ (hM.toEdge ⟨v, hv⟩ : Sym2 V) := hfvw ▸ hM.mem_coe_toEdge hw
-    by_contra hne
-    -- So that edge is `s(v, w)`, an edge of `G` between two vertices of `I`.
-    have hadj : M.Adj v w := by
-      rw [← Subgraph.mem_edgeSet, ← Sym2.mem_and_mem_iff hne |>.mp ⟨hve, hwe⟩]
-      exact (hM.toEdge ⟨v, hv⟩).2
-    exact hI.isIndepSet (Finset.mem_coe.mpr hvI) (Finset.mem_coe.mpr hwI) hne
-      hadj.adj_sub
-  have hmaps : Set.MapsTo f (↑I ∩ M.verts) M.edgeSet := fun v ⟨_, hv⟩ => by
-    simp only [f, hv, ↓reduceDIte]
-    exact (hM.toEdge ⟨v, hv⟩).2
+  -- Sending each vertex of `I` covered by `M` to its edge of `M` is injective
+  -- (`IsMatching.ncard_inter_le_of_isIndepSet`).
   have h1 : (↑I ∩ M.verts).ncard ≤ M.edgeSet.ncard :=
-    Set.ncard_le_ncard_of_injOn f hmaps hf
+    hM.ncard_inter_le_of_isIndepSet hI.isIndepSet
   -- The other vertices of `I` lie outside `M.verts`.
   have h2 : (↑I \ M.verts).ncard ≤ Nat.card V - 2 * M.edgeSet.ncard := by
     rw [← hM.ncard_verts, ← Set.ncard_univ, ← Set.ncard_sdiff (Set.subset_univ _)]
@@ -490,48 +488,44 @@ lemma Subgraph.IsMatching.exists_le_encard_eq_add_one (h : ν G = ⊤)
 
 /-!
 17. If `ν G = ⊤` then `G` has an infinite matching. Hint: restate the previous
-exercise as `∀ M, ∃ N, M.IsMatching → M.verts.Finite → ...`, so that `choose`
-produces a total step function `ext`, and iterate it from `⊥`: `M n := ext^[n] ⊥`,
-with `Function.iterate_succ_apply'` unfolding one step. Show by induction that each
-`M n` is a finite matching with exactly `n` edges, so `M` is monotone
-(`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by Exercise 14 with at
-least `n` edges for every `n`.
+exercise on the subtype `FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}`
+of finite matchings, so that `choose` produces a step function `next : FM → FM`,
+and iterate it from `⊥`: `M n := next^[n] ⊥`, with `Function.iterate_succ_apply'`
+unfolding one step. Each `M n` is then a finite matching by construction; show by
+induction that it has exactly `n` edges. Each step extends the previous matching, so
+`M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by
+Exercise 14 with at least `n` edges for every `n`.
 -/
 lemma exists_isMatching_encard_eq_top (h : ν G = ⊤) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ⊤ := by
-  -- Choose, for every finite matching, an extension by one edge.
-  have : ∀ M : G.Subgraph, ∃ N : G.Subgraph, M.IsMatching → M.verts.Finite →
-      M ≤ N ∧ N.IsMatching ∧ N.verts.Finite ∧
-        N.edgeSet.encard = M.edgeSet.encard + 1 := by
-    intro M
-    by_cases hM : M.IsMatching ∧ M.verts.Finite
-    · obtain ⟨N, hN⟩ := hM.1.exists_le_encard_eq_add_one h hM.2
-      exact ⟨N, fun _ _ => hN⟩
-    · exact ⟨M, fun h1 h2 => absurd ⟨h1, h2⟩ hM⟩
-  choose ext hext using this
+  -- Choose, for every finite matching, an extension by one edge. Packaging the
+  -- finite matchings as a subtype `FM` makes this a total function `next`.
+  let FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}
+  have : ∀ M : FM, ∃ N : FM,
+      M.1 ≤ N.1 ∧ N.1.edgeSet.encard = M.1.edgeSet.encard + 1 := by
+    rintro ⟨M, hM, hfin⟩
+    obtain ⟨N, hle, hN, hNfin, hcard⟩ := hM.exists_le_encard_eq_add_one h hfin
+    exact ⟨⟨N, hN, hNfin⟩, hle, hcard⟩
+  choose next hnext hcard using this
   -- Iterate from the empty matching.
-  let M : ℕ → G.Subgraph := fun n => ext^[n] ⊥
-  have hstep : ∀ n, M (n + 1) = ext (M n) := fun n =>
+  let M : ℕ → FM := fun n => next^[n] ⟨⊥, Subgraph.isMatching_bot, by simp⟩
+  have hstep : ∀ n, M (n + 1) = next (M n) := fun n =>
     Function.iterate_succ_apply' _ _ _
-  -- The invariant: each stage is a finite matching with exactly `n` edges.
-  have hinv : ∀ n,
-      (M n).IsMatching ∧ (M n).verts.Finite ∧ (M n).edgeSet.encard = n := by
+  -- Each `M n` is a finite matching by construction; it has exactly `n` edges.
+  have hcount : ∀ n : ℕ, (M n).1.edgeSet.encard = n := by
     intro n
     induction n with
-    | zero => exact ⟨Subgraph.isMatching_bot, by simp [M], by simp [M]⟩
-    | succ n ih =>
-      obtain ⟨-, hmat, hfin, hcard⟩ := hext (M n) ih.1 ih.2.1
-      rw [hstep]
-      exact ⟨hmat, hfin, by rw [hcard, ih.2.2, Nat.cast_succ]⟩
-  have hmono : Monotone M := monotone_nat_of_le_succ fun n => by
+    | zero => simp [M]
+    | succ n ih => rw [hstep, hcard, ih, Nat.cast_succ]
+  have hmono : Monotone fun n => (M n).1 := monotone_nat_of_le_succ fun n => by
     rw [hstep]
-    exact (hext (M n) (hinv n).1 (hinv n).2.1).1
-  refine ⟨⨆ n, M n,
-    Subgraph.IsMatching.iSup_of_monotone hmono fun n => (hinv n).1, ?_⟩
+    exact hnext (M n)
+  refine ⟨⨆ n, (M n).1,
+    Subgraph.IsMatching.iSup_of_monotone hmono fun n => (M n).2.1, ?_⟩
   -- The union contains a matching with `n` edges for every `n`, so it is infinite.
-  have hle : ∀ n : ℕ, (n : ℕ∞) ≤ (⨆ n, M n).edgeSet.encard := fun n => by
-    rw [← (hinv n).2.2]
-    exact Set.encard_le_encard (Subgraph.edgeSet_mono (le_iSup M n))
+  have hle : ∀ n : ℕ, (n : ℕ∞) ≤ (⨆ n, (M n).1).edgeSet.encard := fun n => by
+    rw [← hcount n]
+    exact Set.encard_le_encard <| Subgraph.edgeSet_mono <| le_iSup_of_le n le_rfl
   exact ENat.eq_top_iff_forall_ge.2 hle
 
 /-!

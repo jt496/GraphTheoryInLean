@@ -231,15 +231,71 @@ we proved weak duality `ν G ≤ τ G`: a vertex cover needs a vertex from each 
 matching. *Kőnig's theorem* says that for bipartite graphs this is an equality. It is
 not in Mathlib, and we deduce it from a *deficiency version* of Hall's theorem.
 
-Suppose that every finite `s ⊆ p₁` has at least `|s| - d` neighbours. Then we can
-match all but at most `d` vertices of `p₁`. If `p₁` has at most `d` vertices the
-empty matching will do. Otherwise each `x ∈ p₁` has a finite neighbourhood: if not,
-then `x` and `d` other vertices of `p₁` would violate the condition, since an
-infinite neighbourhood has `ncard` equal to `0`. Next, add `d` new vertices adjacent
-to every vertex of `p₁`. Hall's condition now holds, so the systems of distinct
-representatives theorem gives an injective choice of neighbours `g`, with values in
-`V ⊕ Fin d`. At most `d` vertices of `p₁` are sent to new vertices, and the others
-are sent injectively to neighbours in `G`, which gives a matching.
+Suppose that every finite `s ⊆ p₁` has at least `|s| - d` neighbours. We show that
+we can then match all but at most `d` vertices of `p₁`. If `p₁` has at most `d`
+vertices the empty matching will do. Otherwise each `x ∈ p₁` has a finite
+neighbourhood: if not, then `x` and `d` other vertices of `p₁` would violate the
+condition, since an infinite neighbourhood has `ncard` equal to `0`. This step does
+not use the bipartition, so we state it for any set `p` of vertices.
+-/
+/-- If every `s ⊆ p` has at least `|s| - d` neighbours and `p` has more than `d`
+vertices, then every vertex of `p` has a finite neighbourhood. -/
+lemma finite_neighborSet_of_forall_ncard_le_add {p : Set V} {d : ℕ}
+    (h : ∀ s ⊆ p, s.ncard ≤ (⋃ x ∈ s, G.neighborSet x).ncard + d)
+    (hp : d < p.encard) {x : V} (hx : x ∈ p) : (G.neighborSet x).Finite := by
+  by_contra hinf
+  -- apply the condition to `x` and `d` more vertices of `p`
+  rw [← Set.encard_sdiff_singleton_add_one hx] at hp
+  obtain ⟨t, ht, htd⟩ := Set.exists_subset_encard_eq (Order.le_of_lt_add_one hp)
+  have htfin : t.Finite := Set.finite_of_encard_eq_coe htd
+  have hxt : x ∉ t := fun h => (ht h).2 rfl
+  have hs := h (insert x t) (Set.insert_subset hx (ht.trans Set.sdiff_subset))
+  have hN : (⋃ y ∈ insert x t, G.neighborSet y).Infinite :=
+    Set.Infinite.mono (Set.subset_biUnion_of_mem (Set.mem_insert _ _)) hinf
+  rw [hN.ncard, Set.ncard_insert_of_notMem hxt htfin] at hs
+  have : t.ncard = d := by exact_mod_cast htfin.cast_ncard_eq.trans htd
+  grind
+
+/-!
+Next, add `d` new vertices adjacent to every vertex of `p₁`. Hall's condition now
+holds, so the systems of distinct representatives theorem gives an injective choice
+of neighbours `g`, with values in `V ⊕ Fin d`. At most `d` vertices of `p₁` are sent
+to new vertices, and the others are sent injectively to neighbours in `G`, which
+gives a matching by `exists_isMatching_of_injective`. We state this last step
+separately: it is the only one that uses the bipartition.
+-/
+/-- An injective choice, for each vertex of `p₁`, of either a neighbour or one of `d`
+new vertices gives a matching that covers all but at most `d` vertices of `p₁`. -/
+lemma exists_isMatching_of_injective_sum {p₁ p₂ : Set V} {d : ℕ}
+    (h₁ : G.IsBipartiteWith p₁ p₂) (g : p₁ → V ⊕ Fin d) (hg : Function.Injective g)
+    (hadj : ∀ x y, g x = .inl y → G.Adj x y) :
+    ∃ M : Subgraph G, M.IsMatching ∧ (p₁ \ M.verts).encard ≤ d := by
+  -- the vertices `X` of `p₁` that chose an old vertex are matched in `G`
+  let X : Set V := {x | ∃ hx : x ∈ p₁, (g ⟨x, hx⟩).isLeft}
+  have hX : X ⊆ p₁ := fun x hx => hx.1
+  let f : X → V := fun x => (g ⟨x, x.2.1⟩).getLeft x.2.2
+  have hgf (x : X) : g ⟨x, x.2.1⟩ = .inl (f x) := (Sum.inl_getLeft _ _).symm
+  have hf : Function.Injective f := fun x y hxy => by
+    have := hg ((hgf x).trans (hxy ▸ (hgf y).symm))
+    exact Subtype.ext (congrArg (fun z : p₁ => (z : V)) this)
+  obtain ⟨M, hXM, hM⟩ :=
+    exists_isMatching_of_injective h₁ hX f hf fun x => hadj _ _ (hgf x)
+  refine ⟨M, hM,
+    le_trans (Set.encard_le_encard (Set.sdiff_subset_sdiff_right hXM)) ?_⟩
+  -- the other vertices of `p₁` chose distinct new vertices
+  have hp (x : ↥(p₁ \ X)) : (x : V) ∈ p₁ := x.2.1
+  have hr (x : ↥(p₁ \ X)) : (g ⟨x, hp x⟩).isRight := by
+    simpa [X, hp x] using x.2.2
+  let φ : ↥(p₁ \ X) → Fin d := fun x => (g ⟨x, hp x⟩).getRight (hr x)
+  have hgφ (x : ↥(p₁ \ X)) : g ⟨x, hp x⟩ = .inr (φ x) := (Sum.inr_getRight _ _).symm
+  have hφ : Function.Injective φ := fun x y hxy => by
+    have := hg ((hgφ x).trans (hxy ▸ (hgφ y).symm))
+    exact Subtype.ext (congrArg (fun z : p₁ => (z : V)) this)
+  simpa using ENat.card_le_card_of_injective hφ
+
+/-!
+The proof of the theorem combines these two lemmas. What remains is to check Hall's
+condition after adding the new vertices.
 -/
 /-- **Hall's theorem with deficiency `d`**: if every `s ⊆ p₁` has at least
 `|s| - d` neighbours, then a matching covers all but at most `d` vertices of `p₁`. -/
@@ -251,22 +307,9 @@ theorem exists_isMatching_of_forall_ncard_le_add {p₁ p₂ : Set V} {d : ℕ}
   -- if `p₁` has at most `d` vertices, the empty matching will do
   rcases le_or_gt p₁.encard d with hp | hp
   · exact ⟨⊥, Subgraph.isMatching_bot, by simpa using hp⟩
-  -- otherwise each `x ∈ p₁` has a finite neighbourhood: apply the condition to `x`
-  -- and `d` more vertices of `p₁`
-  have hfin (x : p₁) : (G.neighborSet x).Finite := by
-    by_contra hinf
-    rw [← Set.encard_sdiff_singleton_add_one x.2] at hp
-    obtain ⟨t, ht, htd⟩ := Set.exists_subset_encard_eq (Order.le_of_lt_add_one hp)
-    have htfin : t.Finite := Set.finite_of_encard_eq_coe htd
-    have hxt : (x : V) ∉ t := fun h => (ht h).2 rfl
-    have hs := h₂ (insert (x : V) t)
-      (Set.insert_subset x.2 (ht.trans Set.sdiff_subset))
-    have hN : (⋃ y ∈ insert (x : V) t, G.neighborSet y).Infinite :=
-      Set.Infinite.mono (Set.subset_biUnion_of_mem (Set.mem_insert _ _)) hinf
-    rw [hN.ncard, Set.ncard_insert_of_notMem hxt htfin] at hs
-    have : t.ncard = d := by exact_mod_cast htfin.cast_ncard_eq.trans htd
-    grind
-  let : ∀ x : p₁, Fintype (G.neighborSet x) := fun x => (hfin x).fintype
+  -- otherwise each vertex of `p₁` has a finite neighbourhood
+  let : ∀ x : p₁, Fintype (G.neighborSet x) := fun x =>
+    (finite_neighborSet_of_forall_ncard_le_add h₂ hp x.2).fintype
   -- each vertex of `p₁` may choose a neighbour, or one of `d` new vertices
   let t : p₁ → Finset (V ⊕ Fin d) := fun x =>
     (G.neighborFinset x).map .inl ∪ univ.map .inr
@@ -290,29 +333,8 @@ theorem exists_isMatching_of_forall_ncard_le_add {p₁ p₂ : Set V} {d : ℕ}
       rw [this, card_union_of_disjoint (disjoint_map_inl_map_inr _ _), card_map,
         card_map, card_univ, Fintype.card_fin]
       exact hs
-  -- the vertices `X` of `p₁` that chose an old vertex are matched in `G`
-  let X : Set V := {x | ∃ hx : x ∈ p₁, (g ⟨x, hx⟩).isLeft}
-  have hX : X ⊆ p₁ := fun x hx => hx.1
-  let f : X → V := fun x => (g ⟨x, x.2.1⟩).getLeft x.2.2
-  have hgf (x : X) : g ⟨x, x.2.1⟩ = .inl (f x) := (Sum.inl_getLeft _ _).symm
-  have hf : Function.Injective f := fun x y hxy => by
-    have := hg₁ ((hgf x).trans (hxy ▸ (hgf y).symm))
-    exact Subtype.ext (congrArg (fun z : p₁ => (z : V)) this)
-  have hadj (x : X) : G.Adj x (f x) := by
-    simpa [t, hgf x] using hg₂ ⟨x, x.2.1⟩
-  obtain ⟨M, hXM, hM⟩ := exists_isMatching_of_injective h₁ hX f hf hadj
-  refine ⟨M, hM,
-    le_trans (Set.encard_le_encard (Set.sdiff_subset_sdiff_right hXM)) ?_⟩
-  -- the other vertices of `p₁` chose distinct new vertices
-  have hp (x : ↥(p₁ \ X)) : (x : V) ∈ p₁ := x.2.1
-  have hr (x : ↥(p₁ \ X)) : (g ⟨x, hp x⟩).isRight := by
-    simpa [X, hp x] using x.2.2
-  let φ : ↥(p₁ \ X) → Fin d := fun x => (g ⟨x, hp x⟩).getRight (hr x)
-  have hgφ (x : ↥(p₁ \ X)) : g ⟨x, hp x⟩ = .inr (φ x) := (Sum.inr_getRight _ _).symm
-  have hφ : Function.Injective φ := fun x y hxy => by
-    have := hg₁ ((hgφ x).trans (hxy ▸ (hgφ y).symm))
-    exact Subtype.ext (congrArg (fun z : p₁ => (z : V)) this)
-  simpa using ENat.card_le_card_of_injective hφ
+  exact exists_isMatching_of_injective_sum h₁ g hg₁ fun x y hxy => by
+    simpa [t, hxy] using hg₂ x
 
 /-!
 The case `d = 0` is `exists_isMatching_of_forall_ncard_le'`, Hall's theorem without
@@ -1251,28 +1273,31 @@ the remaining parts. Since `G` is only maximal for the number of `s`-cliques, a
 change of `0` gives no contradiction, so we need this change to be strictly positive.
 
 Since the parts are unbalanced, `A` has at least `#B + 2` vertices, so we can fix a
-vertex `a ∈ A` other than `w`. We now map `B` injectively into `A \ {w, a}` using
-some `φ`. We then extend `φ` to a map `σ : V → V` that sends `w` to `v`, and fixes
-every other vertex.
+vertex `a ∈ A` other than `w`. We first build the map that will transfer the
+cliques. Map `B` injectively into `A \ {w, a}` using some `φ`, and extend `φ` to a
+map `σ : V → V` that sends `w` to `v`, and fixes every other vertex.
 
-Let `t` be an `s`-clique containing `w`. It has no other vertex in `A`, and at most
-one vertex in `B`, so `σ` moves `w` into `B` and the vertex of `t` in `B` (if any)
-into `A`, and fixes the rest. Hence `t.image σ` is again an `s`-clique, by
-`IsNClique.image_of_adj` from
-[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques). It
-contains `v` but neither `w` nor `a`, and `σ` is injective on the vertices that can
-lie in such a clique (`w` and the vertices outside `A`). So `t ↦ t.image σ` is an
-injection from the `s`-cliques containing `w` to those containing `v` that avoid `w`
-and `a`: this is the inequality below. Avoiding `a` is exactly what we need in
-`card_le_card_add_one`, where we find an `s`-clique containing `v` and `a`. It avoids
-`w`, so it is missed by the injection, and so the change is strictly positive.
+The vertices that can lie in an `s`-clique with `w` form its closed neighbourhood
+`insert w (G.neighborSet w)`: `w` and the vertices outside `A`. On these vertices
+`σ` moves `w` into `B` and the vertices of `B` into `A`, and fixes the rest. Since
+no two vertices of `B` are adjacent, `σ` preserves adjacency there. It is also
+injective there, and never takes the value `w` or `a`.
 -/
-lemma IsCompleteMultipartite.card_filter_mem_cliqueFinset_le [Fintype V]
-    [DecidableEq V] [DecidableRel G.Adj] (hc : G.IsCompleteMultipartite) {v w a : V}
-    (hvw : G.Adj v w) (hwa : ¬G.Adj w a) (haw : a ≠ w)
-    (hlt : #{x | ¬G.Adj v x} + 1 < #{x | ¬G.Adj w x}) (s : ℕ) :
-    #{t ∈ G.cliqueFinset s | w ∈ t} ≤
-      #{t ∈ G.cliqueFinset s | v ∈ t ∧ w ∉ t ∧ a ∉ t} := by
+/--
+Let `G` be complete multipartite, let the part of `w` have at least two more
+vertices than the part of `v`, and let `a ≠ w` lie in the part of `w`. Then some map
+sends `w` to `v`, and is injective and preserves adjacency on the closed
+neighbourhood of `w`, where it avoids `w` and `a`.
+-/
+lemma IsCompleteMultipartite.exists_transfer [Fintype V] [DecidableRel G.Adj]
+    (hc : G.IsCompleteMultipartite) {v w a : V} (hvw : G.Adj v w)
+    (hwa : ¬G.Adj w a) (haw : a ≠ w)
+    (hlt : #{x | ¬G.Adj v x} + 1 < #{x | ¬G.Adj w x}) :
+    ∃ σ : V → V, Set.InjOn σ (insert w (G.neighborSet w)) ∧
+      (∀ ⦃x⦄, x ∈ insert w (G.neighborSet w) → ∀ ⦃y⦄,
+        y ∈ insert w (G.neighborSet w) → G.Adj x y → G.Adj (σ x) (σ y)) ∧
+      σ w = v ∧ ∀ x ∈ insert w (G.neighborSet w), σ x ≠ w ∧ σ x ≠ a := by
+  classical
   set A : Finset V := {x | ¬G.Adj w x}
   set B : Finset V := {x | ¬G.Adj v x}
   have nt {x y z : V} (h₁ : ¬G.Adj x y) (h₂ : ¬G.Adj y z) : ¬G.Adj x z :=
@@ -1297,46 +1322,64 @@ lemma IsCompleteMultipartite.card_filter_mem_cliqueFinset_le [Fintype V]
   have hφw (x : B) : (φ x : V) ∈ A.erase w := mem_of_mem_erase (φ x).2
   have hφA (x : B) : (φ x : V) ∈ A := mem_of_mem_erase (hφw x)
   let σ : V → V := fun x => if x = w then v else if hx : x ∈ B then φ ⟨x, hx⟩ else x
-  -- the cliques containing `w` lie in `{w} ∪ Aᶜ`
-  have hsub {t : Finset V} (ht : G.IsNClique s t) (hwt : w ∈ t) :
-      (t : Set V) ⊆ {x | x = w ∨ x ∉ A} := fun x hx => by
-    by_cases hxw : x = w
-    · exact .inl hxw
-    · exact .inr fun hxA => hA.1 hxA (ht.1 hwt hx (Ne.symm hxw))
-  -- `σ` on the vertices that can lie in a clique containing `w`
-  have hσ {x : V} (hx : x = w ∨ x ∉ A) :
+  -- `σ` on the closed neighbourhood of `w`
+  have hσ {x : V} (hx : x ∈ insert w (G.neighborSet w)) :
       (x = w ∧ σ x = v) ∨ (∃ hxB : x ∈ B, σ x = φ ⟨x, hxB⟩) ∨
         (x ∉ A ∧ x ∉ B ∧ σ x = x) := by
     by_cases hxw : x = w
     · exact .inl ⟨hxw, by simp [σ, hxw]⟩
-    · grind
-  have hinj : Set.InjOn σ {x | x = w ∨ x ∉ A} := by
-    intro x hx y hy hxy
-    rcases hσ hx with ⟨hxw, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, hxB, hx'⟩ <;>
+    · have hxA : x ∉ A := fun hxA =>
+        hA.1 hxA ((Set.mem_insert_iff.1 hx).resolve_left hxw)
+      grind
+  refine ⟨σ, fun x hx y hy hxy => ?_, fun x hx y hy hxy => ?_, by simp [σ],
+    fun x hx => ?_⟩
+  · rcases hσ hx with ⟨hxw, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, hxB, hx'⟩ <;>
       rcases hσ hy with ⟨hyw, hy'⟩ | ⟨hyB, hy'⟩ | ⟨hyA, hyB, hy'⟩ <;>
       rw [hx', hy'] at hxy <;> try grind
     · exact congrArg Subtype.val (φ.injective (Subtype.ext hxy))
-  have hadj {x y : V} (hx : x = w ∨ x ∉ A) (hy : y = w ∨ y ∉ A) (hxy : G.Adj x y) :
-      G.Adj (σ x) (σ y) := by
-    rcases hσ hx with ⟨hxw, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, hxB, hx'⟩ <;>
+  · rcases hσ hx with ⟨hxw, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, hxB, hx'⟩ <;>
       rcases hσ hy with ⟨hyw, hy'⟩ | ⟨hyB, hy'⟩ | ⟨hyA, hyB, hy'⟩ <;>
       rw [hx', hy'] <;> try grind
     · exact absurd hxy (nt (fun h => hB.1 hxB h.symm) (hB.1 hyB))
     · exact not_not.1 fun h => hxB (hB.2 fun h' => h h'.symm)
     · exact not_not.1 fun h => hxA (hA.2 (nt (hA.1 (hφA _)) fun h' => h h'.symm))
+  · rcases hσ hx with ⟨-, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, -, hx'⟩ <;> grind
+
+/-!
+Now let `t` be an `s`-clique containing `w`. It lies in the closed neighbourhood of
+`w`, so `t.image σ` is again an `s`-clique, by `IsNClique.image_of_adj` from
+[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques). It
+contains `v` but neither `w` nor `a`. Different cliques have different images, since
+`σ` is injective on the whole closed neighbourhood and not just on each clique. So
+`t ↦ t.image σ` is an injection from the `s`-cliques containing `w` to those
+containing `v` that avoid `w` and `a`: this is the inequality below. Avoiding `a` is
+exactly what we need in `card_le_card_add_one`, where we find an `s`-clique
+containing `v` and `a`. It avoids `w`, so it is missed by the injection, and so the
+change is strictly positive.
+-/
+lemma IsCompleteMultipartite.card_filter_mem_cliqueFinset_le [Fintype V]
+    [DecidableEq V] [DecidableRel G.Adj] (hc : G.IsCompleteMultipartite) {v w a : V}
+    (hvw : G.Adj v w) (hwa : ¬G.Adj w a) (haw : a ≠ w)
+    (hlt : #{x | ¬G.Adj v x} + 1 < #{x | ¬G.Adj w x}) (s : ℕ) :
+    #{t ∈ G.cliqueFinset s | w ∈ t} ≤
+      #{t ∈ G.cliqueFinset s | v ∈ t ∧ w ∉ t ∧ a ∉ t} := by
+  obtain ⟨σ, hinj, hadj, hσw, hσ⟩ := hc.exists_transfer hvw hwa haw hlt
+  -- the cliques containing `w` lie in its closed neighbourhood
+  have hsub {t : Finset V} (ht : G.IsNClique s t) (hwt : w ∈ t) :
+      (t : Set V) ⊆ insert w (G.neighborSet w) := fun x hx => by
+    by_cases hxw : x = w
+    · exact .inl hxw
+    · exact .inr (ht.1 hwt hx (Ne.symm hxw))
   refine card_le_card_of_injOn (fun t => t.image σ) (fun t ht => ?_)
     (fun t ht t' ht' htt' => ?_)
   · simp only [coe_filter, Set.mem_ofPred_eq, mem_cliqueFinset_iff] at ht ⊢
     obtain ⟨ht, hwt⟩ := ht
-    refine ⟨ht.image_of_adj (hinj.mono (hsub ht hwt)) fun x hx y hy =>
-        hadj (hsub ht hwt hx) (hsub ht hwt hy), mem_image.2 ⟨w, hwt, by simp [σ]⟩,
-      fun hw => ?_, fun ha => ?_⟩
+    refine ⟨ht.image_of_adj fun x hx y hy => hadj (hsub ht hwt hx) (hsub ht hwt hy),
+      mem_image.2 ⟨w, hwt, hσw⟩, fun hw => ?_, fun ha => ?_⟩
     · obtain ⟨x, hx, hxw⟩ := mem_image.1 hw
-      rcases hσ (hsub ht hwt hx) with ⟨-, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, -, hx'⟩
-        <;> grind
+      exact (hσ x (hsub ht hwt hx)).1 hxw
     · obtain ⟨x, hx, hxa⟩ := mem_image.1 ha
-      rcases hσ (hsub ht hwt hx) with ⟨-, hx'⟩ | ⟨hxB, hx'⟩ | ⟨hxA, -, hx'⟩
-        <;> grind
+      exact (hσ x (hsub ht hwt hx)).2 hxa
   · simp only [coe_filter, Set.mem_ofPred_eq, mem_cliqueFinset_iff] at ht ht' htt'
     apply Finset.coe_injective
     exact (hinj.image_eq_image_iff
@@ -1921,31 +1964,46 @@ theorem ComponentCompl.mem_of_hom {W : Type*} {H : SimpleGraph W}
   | cons h _ ih => exact ih (mem_of_adj _ _ hu (hK _) (φ.map_adj h))
 
 /-!
+Each end chooses infinite components of `G - K` (`end_componentCompl_infinite`), so
+to show that a graph has at most one end it is enough to find, for each finite set
+`K`, a vertex lying in every infinite component of `G - K`: any two ends then choose
+components sharing this vertex, which must be equal. (Mathlib only defines
+`end_componentCompl_infinite` for vertex types in `Type`, so we do the same.)
+-/
+lemma subsingleton_end_of_common_vertex {V : Type} {G : SimpleGraph V}
+    (h : ∀ K : Finset V, ∃ v : V,
+      ∀ C : G.ComponentCompl (K : Set V), C.supp.Infinite → v ∈ C) :
+    Subsingleton G.end := by
+  constructor
+  rintro ⟨e, he⟩ ⟨f, hf⟩
+  apply Subtype.ext
+  funext K
+  obtain ⟨v, hv⟩ := h K.unop
+  exact ComponentCompl.pairwise_disjoint.eq (Set.not_disjoint_iff.2 ⟨v,
+    hv _ (end_componentCompl_infinite _ ⟨e, he⟩ K),
+    hv _ (end_componentCompl_infinite _ ⟨f, hf⟩ K)⟩)
+
+/-!
 For example, `pathNat₁` has exactly one end. Given a finite set `K`, choose `N` with
 `K ⊆ [0, N]`. The translate `N + 1, N + 2, …` of `pathNat₁` avoids `K`, so it lies in
-a single component of `G - K`. Each end chooses infinite components, and an infinite
-component contains some `m > N`, and hence contains `N + 1`. So every end chooses the
-component containing `N + 1`.
+a single component of `G - K`. An infinite component contains some `m > N`, and
+hence contains `N + 1`. So `N + 1` lies in every infinite component of `G - K`.
 -/
 example : Nat.card pathNat₁.end = 1 := by
   rw [Nat.card_eq_one_iff_unique]
-  refine ⟨⟨fun ⟨e, he⟩ ⟨f, hf⟩ => Subtype.ext (funext fun K => ?_)⟩, ?_⟩
-  · obtain ⟨N, hN⟩ := K.unop.finite_toSet.bddAbove
+  refine ⟨subsingleton_end_of_common_vertex fun K => ?_, ?_⟩
+  · obtain ⟨N, hN⟩ := K.finite_toSet.bddAbove
     let φ := (pathNat₁Translate (N + 1)).toHom
     have hφ (n : ℕ) : φ n = n + (N + 1) := rfl
-    have hK (n : ℕ) : φ n ∉ K.unop := fun h => by
+    have hK (n : ℕ) : φ n ∉ K := fun h => by
       have := hN h; rw [hφ] at this; grind
     -- every infinite component of `G - K` contains `N + 1`
-    have key (C : pathNat₁.ComponentCompl K.unop) (hC : C.supp.Infinite) :
-        N + 1 ∈ C := by
-      obtain ⟨m, hmC, hm⟩ := hC.exists_gt N
-      have h₁ : φ (m - (N + 1)) = m := by rw [hφ]; grind
-      have h₂ : φ 0 = N + 1 := by rw [hφ]; grind
-      exact h₂ ▸ ComponentCompl.mem_of_hom pathNat₁_connected.preconnected φ hK
-        (h₁ ▸ hmC) 0
-    exact ComponentCompl.pairwise_disjoint.eq (Set.not_disjoint_iff.2 ⟨_,
-      key _ (end_componentCompl_infinite _ ⟨e, he⟩ K),
-      key _ (end_componentCompl_infinite _ ⟨f, hf⟩ K)⟩)
+    refine ⟨N + 1, fun C hC => ?_⟩
+    obtain ⟨m, hmC, hm⟩ := hC.exists_gt N
+    have h₁ : φ (m - (N + 1)) = m := by rw [hφ]; grind
+    have h₂ : φ 0 = N + 1 := by rw [hφ]; grind
+    exact h₂ ▸ ComponentCompl.mem_of_hom pathNat₁_connected.preconnected φ hK
+      (h₁ ▸ hmC) 0
   · have : Fact pathNat₁.Preconnected := ⟨pathNat₁_connected.preconnected⟩
     exact (nonempty_ends_of_infinite _).to_subtype
 

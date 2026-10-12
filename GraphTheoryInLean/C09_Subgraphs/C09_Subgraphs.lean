@@ -794,15 +794,12 @@ lemma Subgraph.IsMatching.ncard_verts [Finite V] {M : G.Subgraph}
   rfl
 
 /-!
-If `G` is bipartite with parts `p₁` and `p₂`
-([Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-bipartite-graphs)),
-every edge of a matching has exactly one endpoint in `p₁`. So a matching with
-finitely many edges has at least as many edges as it has vertices in `p₁`. We use
-this in the proof of
-[Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem).
+If `p₁` is an independent set then every edge of a matching has at most one endpoint
+in `p₁`. So a matching with finitely many edges has at least as many edges as it has
+vertices in `p₁`: sending each such vertex to its edge in the matching is injective.
 -/
-lemma Subgraph.IsMatching.ncard_inter_le {p₁ p₂ : Set V}
-    (h₁ : G.IsBipartiteWith p₁ p₂) {M : G.Subgraph} [Finite M.edgeSet]
+lemma Subgraph.IsMatching.ncard_inter_le_of_isIndepSet {p₁ : Set V}
+    (h₁ : G.IsIndepSet p₁) {M : G.Subgraph} [Finite M.edgeSet]
     (hM : M.IsMatching) :
     (p₁ ∩ M.verts).ncard ≤ M.edgeSet.ncard := by
   classical
@@ -817,7 +814,21 @@ lemma Subgraph.IsMatching.ncard_inter_le {p₁ p₂ : Set V}
   rw [hxy] at hxe
   have he := M.edgeSet_subset (hM.toEdge ⟨y, hy.2⟩).2
   rw [(Sym2.mem_and_mem_iff hne).1 ⟨hxe, hye⟩, mem_edgeSet] at he
-  exact Set.disjoint_left.1 h₁.disjoint hy.1 (h₁.mem_of_mem_adj hx.1 he)
+  exact h₁ hx.1 hy.1 hne he
+
+/-!
+In particular, if `G` is bipartite with parts `p₁` and `p₂`
+([Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-bipartite-graphs))
+then `p₁` is independent, so a matching with finitely many edges has at least as many
+edges as it has vertices in `p₁`. We use this in the proof of
+[Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem).
+-/
+lemma Subgraph.IsMatching.ncard_inter_le {p₁ p₂ : Set V}
+    (h₁ : G.IsBipartiteWith p₁ p₂) {M : G.Subgraph} [Finite M.edgeSet]
+    (hM : M.IsMatching) :
+    (p₁ ∩ M.verts).ncard ≤ M.edgeSet.ncard :=
+  hM.ncard_inter_le_of_isIndepSet fun _ hx _ hy _ h =>
+    Set.disjoint_left.1 h₁.disjoint hy (h₁.mem_of_mem_adj hx h)
 
 /-!
 A matching covers two vertices per edge, so the matching number of any finite graph

@@ -1807,14 +1807,20 @@ example : Q[2].Adj (((), false), false) (((), false), true) := by decide
 /-!
 The vertex type `HypercubeVert n` is finite.
 -/
-instance (n : ℕ) : Fintype (HypercubeVert n) := by
+instance hypercubeFintype (n : ℕ) : Fintype (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
 
 /-!
-The `n`-dimensional hypercube has `2 ^ n` vertices.
+The `n`-dimensional hypercube has `2 ^ n` vertices. We state this for an arbitrary
+`Fintype` instance on `HypercubeVert n`, so that it applies whichever enumeration a
+caller has: `convert` reduces it to the instance `hypercubeFintype`, since any two
+`Fintype` instances on a type are equal.
 -/
 @[simp]
-lemma card_hypercubeVert (n : ℕ) : Fintype.card (HypercubeVert n) = 2 ^ n := by
+lemma card_hypercubeVert (n : ℕ) [Fintype (HypercubeVert n)] :
+    Fintype.card (HypercubeVert n) = 2 ^ n := by
+  suffices h : @Fintype.card (HypercubeVert n) (hypercubeFintype n) = 2 ^ n by
+    convert h
   induction n with
   | zero => simp
   | succ n ih => rw [pow_succ, ← ih]; exact Fintype.card_prod _ _

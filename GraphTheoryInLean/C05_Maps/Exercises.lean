@@ -344,9 +344,9 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i where
   toFun x i := f i x
   map_rel' h := by
-    rw [piTensorProd_adj]
-    refine ⟨fun i => (f i).map_adj h, ?_⟩
-    exact fun hfg => ((f i₀).map_adj h).ne (congrFun hfg i₀)
+    have : Nonempty ι := ⟨i₀⟩
+    rw [piTensorProd_adj_of_nonempty]
+    exact fun i => (f i).map_adj h
 
 /-!
 14. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
@@ -395,9 +395,7 @@ example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
   simp_rw [← card_neighborFinset_eq_degree, ← Fintype.card_piFinset]
   congr 1
   ext g
-  obtain ⟨i⟩ := ‹Nonempty ι›
-  simpa using fun h e => (h i).ne (congrFun e i)
-
+  simp
 /-!
 16. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
 graph embedding, we have a graph embedding of `K` into the indexed tensor product.
@@ -413,10 +411,10 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
   toFun x i := f i x
   inj' _ _ h := inj (congrFun h i₀)
   map_rel_iff' := by
-    simp only [piTensorProd_adj]
-    exact ⟨fun h => reflect (h.1 i₀),
-      fun hk => ⟨fun i => (f i).map_adj hk,
-        fun hne => hk.ne (inj (congrFun hne i₀))⟩⟩
+    have : Nonempty ι := ⟨i₀⟩
+    intro x y
+    rw [piTensorProd_adj_of_nonempty]
+    exact ⟨fun h => reflect (h i₀), fun hk i => (f i).map_adj hk⟩
 
 /-!
 The next two exercises are about the starred section

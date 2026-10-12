@@ -5370,6 +5370,14 @@
         "Extremal Graph Theory",
         "Füredi's Stability Theorem"]}},
      "address": "/Theorems/"}],
+   "SimpleGraph.subsingleton_end_of_common_vertex":
+   [{"id": "SimpleGraph___subsingleton_end_of_common_vertex",
+     "data":
+     {"/Theorems/#SimpleGraph___subsingleton_end_of_common_vertex":
+      {"display": "subsingleton_end_of_common_vertex",
+       "context":
+       ["Graph Theory in Lean", "Theorems", "Infinite Graphs*", "Ends"]}},
+     "address": "/Theorems/"}],
    "SimpleGraph.subset_image_preimage_left_union_right":
    [{"id": "SimpleGraph___subset_image_preimage_left_union_right",
      "data":
@@ -5574,6 +5582,17 @@
      {"/Maps/#SimpleGraph___piTensorProd_hom_iff_of_isEmpty":
       {"display": "piTensorProd_hom_iff_of_isEmpty",
        "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
+     "address": "/Maps/"}],
+   "SimpleGraph.piTensorProd_adj_of_nonempty":
+   [{"id": "SimpleGraph___piTensorProd_adj_of_nonempty",
+     "data":
+     {"/Maps/#SimpleGraph___piTensorProd_adj_of_nonempty":
+      {"display": "piTensorProd_adj_of_nonempty",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Tensor Products*",
+        "Indexed Tensor Products"]}},
      "address": "/Maps/"}],
    "SimpleGraph.piTensorProd_adj":
    [{"id": "SimpleGraph___piTensorProd_adj",
@@ -5888,6 +5907,18 @@
         "Moore and Cage Bounds",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.nonempty_iso_completeGraph_two_of_regular_mycielskian":
+   [{"id":
+     "SimpleGraph___nonempty_iso_completeGraph_two_of_regular_mycielskian",
+     "data":
+     {"/Maps/#SimpleGraph___nonempty_iso_completeGraph_two_of_regular_mycielskian":
+      {"display": "nonempty_iso_completeGraph_two_of_regular_mycielskian",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Automorphisms*",
+        "Vertex-Transitivity of Mycielskians"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.neighborLTSet":
    [{"id": "SimpleGraph___neighborLTSet",
      "data":
@@ -6214,17 +6245,6 @@
      "data":
      {"/Cliques/#SimpleGraph___mycielskianProj_left":
       {"display": "mycielskianProj_left",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.mycielskianProj_injOn_clique":
-   [{"id": "SimpleGraph___mycielskianProj_injOn_clique",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_injOn_clique":
-      {"display": "mycielskianProj_injOn_clique",
        "context":
        ["Graph Theory in Lean",
         "Cliques",
@@ -7421,6 +7441,18 @@
         "Claw-Free Graphs*",
         "Triangles in Line Graphs"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.isClosed_iff_closureStep_eq":
+   [{"id": "SimpleGraph___isClosed_iff_closureStep_eq",
+     "data":
+     {"/Walks/#SimpleGraph___isClosed_iff_closureStep_eq":
+      {"display": "isClosed_iff_closureStep_eq",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.isClosed_closureAux":
    [{"id": "SimpleGraph___isClosed_closureAux",
      "data":
@@ -7944,6 +7976,16 @@
      "data":
      {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeFintypeNeighborSet":
       {"display": "hypercubeFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.hypercubeFintype":
+   [{"id": "SimpleGraph___hypercubeFintype",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeFintype":
+      {"display": "hypercubeFintype",
        "context":
        ["Graph Theory in Lean",
         "Decidability, Finiteness and Degrees",
@@ -8731,6 +8773,14 @@
         "Moore and Cage Bounds",
         "Finite Eccentricity"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.finite_neighborSet_of_forall_ncard_le_add":
+   [{"id": "SimpleGraph___finite_neighborSet_of_forall_ncard_le_add",
+     "data":
+     {"/Theorems/#SimpleGraph___finite_neighborSet_of_forall_ncard_le_add":
+      {"display": "finite_neighborSet_of_forall_ncard_le_add",
+       "context":
+       ["Graph Theory in Lean", "Theorems", "Matchings", "Kőnig's Theorem"]}},
+     "address": "/Theorems/"}],
    "SimpleGraph.filter_adj_eq_inter":
    [{"id": "SimpleGraph___filter_adj_eq_inter",
      "data":
@@ -8885,6 +8935,14 @@
         "Counting Copies of Subcubes*",
         "Rigidity: Every Copy is a Canonical Subcube Copy"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.exists_isMatching_of_injective_sum":
+   [{"id": "SimpleGraph___exists_isMatching_of_injective_sum",
+     "data":
+     {"/Theorems/#SimpleGraph___exists_isMatching_of_injective_sum":
+      {"display": "exists_isMatching_of_injective_sum",
+       "context":
+       ["Graph Theory in Lean", "Theorems", "Matchings", "Kőnig's Theorem"]}},
+     "address": "/Theorems/"}],
    "SimpleGraph.exists_isMatching_of_injective":
    [{"id": "SimpleGraph___exists_isMatching_of_injective",
      "data":
@@ -9677,6 +9735,13 @@
         "Mapping Walks",
         "Cycle Graphs and Complete Graphs Are Hamiltonian"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.cycleGraph_four_free_of_common_neighbor_unique":
+   [{"id": "SimpleGraph___cycleGraph_four_free_of_common_neighbor_unique",
+     "data":
+     {"/Distance/#SimpleGraph___cycleGraph_four_free_of_common_neighbor_unique":
+      {"display": "cycleGraph_four_free_of_common_neighbor_unique",
+       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
+     "address": "/Distance/"}],
    "SimpleGraph.cycleGraph_four_free_mycielskian":
    [{"id": "SimpleGraph___cycleGraph_four_free_mycielskian",
      "data":
@@ -9765,6 +9830,17 @@
         "Counting Copies of Subcubes*",
         "Rigidity: Every Copy is a Canonical Subcube Copy"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.copy_exists_direction_embedding":
+   [{"id": "SimpleGraph___copy_exists_direction_embedding",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_exists_direction_embedding":
+      {"display": "copy_exists_direction_embedding",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Counting Copies of Subcubes*",
+        "Rigidity: Every Copy is a Canonical Subcube Copy"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.copy_eq_subCubeCopy":
    [{"id": "SimpleGraph___copy_eq_subCubeCopy",
      "data":
@@ -9786,6 +9862,17 @@
         "Algebraic Graph Theory",
         "Counting Copies*",
         "Induced 5-Cycles"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.copy_apply_eq_add_extendEmb_of_single":
+   [{"id": "SimpleGraph___copy_apply_eq_add_extendEmb_of_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_apply_eq_add_extendEmb_of_single":
+      {"display": "copy_apply_eq_add_extendEmb_of_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Counting Copies of Subcubes*",
+        "Rigidity: Every Copy is a Canonical Subcube Copy"]}},
      "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.copy_apply_eq_add_add":
    [{"id": "SimpleGraph___copy_apply_eq_add_add",
@@ -11251,6 +11338,18 @@
         "Counting Copies*",
         "Counting 5-Cycles in Mycielskians"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.card_compl_edgeFinset_closureStep_lt":
+   [{"id": "SimpleGraph___card_compl_edgeFinset_closureStep_lt",
+     "data":
+     {"/Walks/#SimpleGraph___card_compl_edgeFinset_closureStep_lt":
+      {"display": "card_compl_edgeFinset_closureStep_lt",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.card_cliqueFinset_two'":
    [{"id": "SimpleGraph___card_cliqueFinset_two___",
      "data":
@@ -12192,6 +12291,17 @@
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Pósa Rotations"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.Walk.length_takeUntil_append_append_dropUntil":
+   [{"id": "SimpleGraph___Walk___length_takeUntil_append_append_dropUntil",
+     "data":
+     {"/Connectivity/#SimpleGraph___Walk___length_takeUntil_append_append_dropUntil":
+      {"display": "length_takeUntil_append_append_dropUntil",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Extending Trails"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.Walk.length_posaRotate":
    [{"id": "SimpleGraph___Walk___length_posaRotate",
      "data":
@@ -12657,6 +12767,17 @@
         "Plumbing: Fixing Type Mismatches",
         "Copy"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsTrail.takeUntil_append_append_dropUntil":
+   [{"id": "SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil",
+     "data":
+     {"/Connectivity/#SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil":
+      {"display": "IsTrail.takeUntil_append_append_dropUntil",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Extending Trails"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.Walk.IsTrail.exists_unused_edge_of_even":
    [{"id": "SimpleGraph___Walk___IsTrail___exists_unused_edge_of_even",
      "data":
@@ -12875,6 +12996,13 @@
       {"display": "Walk.IsMaximumPath.isMaximalPath",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsMaximumPath.isHamiltonian_of_isCycle":
+   [{"id": "SimpleGraph___Walk___IsMaximumPath___isHamiltonian_of_isCycle",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___IsMaximumPath___isHamiltonian_of_isCycle":
+      {"display": "Walk.IsMaximumPath.isHamiltonian_of_isCycle",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsMaximumPath":
    [{"id": "SimpleGraph___Walk___IsMaximumPath",
      "data":
@@ -12961,18 +13089,6 @@
         "Walks",
         "Walks in Hypercube and Mycielskian Graphs",
         "Walks in the Mycielskian"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_snd":
-   [{"id":
-     "SimpleGraph___Walk___IsHamiltonianCycle___exists_isHamiltonian_walk_snd",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___exists_isHamiltonian_walk_snd":
-      {"display": "Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_snd",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges":
    [{"id":
@@ -13106,6 +13222,17 @@
      {"/Walks/#SimpleGraph___Walk___IsCycle___exists_isPath_spanning":
       {"display": "Walk.IsCycle.exists_isPath_spanning",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsCycle.exists_isPath_of_mem_edges":
+   [{"id": "SimpleGraph___Walk___IsCycle___exists_isPath_of_mem_edges",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___IsCycle___exists_isPath_of_mem_edges":
+      {"display": "Walk.IsCycle.exists_isPath_of_mem_edges",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Subgraph.two_mul_edgeSet_encard_le_mycielskianDouble":
    [{"id":
@@ -13259,6 +13386,13 @@
      "data":
      {"/Subgraphs/#SimpleGraph___Subgraph___IsMatching___ncard_verts":
       {"display": "Subgraph.IsMatching.ncard_verts",
+       "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
+     "address": "/Subgraphs/"}],
+   "SimpleGraph.Subgraph.IsMatching.ncard_inter_le_of_isIndepSet":
+   [{"id": "SimpleGraph___Subgraph___IsMatching___ncard_inter_le_of_isIndepSet",
+     "data":
+     {"/Subgraphs/#SimpleGraph___Subgraph___IsMatching___ncard_inter_le_of_isIndepSet":
+      {"display": "Subgraph.IsMatching.ncard_inter_le_of_isIndepSet",
        "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
      "address": "/Subgraphs/"}],
    "SimpleGraph.Subgraph.IsMatching.ncard_inter_le":
@@ -13430,6 +13564,14 @@
      "data":
      {"/Algebraic-Graph-Theory/#SimpleGraph___Iso___copyEquivIso":
       {"display": "Iso.copyEquivIso",
+       "context":
+       ["Graph Theory in Lean", "Algebraic Graph Theory", "Counting Copies*"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.Iso.copyCount_eq_left":
+   [{"id": "SimpleGraph___Iso___copyCount_eq_left",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___Iso___copyCount_eq_left":
+      {"display": "Iso.copyCount_eq_left",
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Counting Copies*"]}},
      "address": "/Algebraic-Graph-Theory/"}],
@@ -14150,6 +14292,17 @@
         "Extremal Graph Theory",
         "Zykov's Theorem*"]}},
      "address": "/Theorems/"}],
+   "SimpleGraph.IsCompleteMultipartite.exists_transfer":
+   [{"id": "SimpleGraph___IsCompleteMultipartite___exists_transfer",
+     "data":
+     {"/Theorems/#SimpleGraph___IsCompleteMultipartite___exists_transfer":
+      {"display": "IsCompleteMultipartite.exists_transfer",
+       "context":
+       ["Graph Theory in Lean",
+        "Theorems",
+        "Extremal Graph Theory",
+        "Zykov's Theorem*"]}},
+     "address": "/Theorems/"}],
    "SimpleGraph.IsCompleteMultipartite.exists_isNClique_of_le":
    [{"id": "SimpleGraph___IsCompleteMultipartite___exists_isNClique_of_le",
      "data":
@@ -14857,6 +15010,18 @@
         "Partial Colourings*",
         "Restricting and Copying Partial Colourings"]}},
      "address": "/Subgraphs/"}],
+   "SimpleGraph.ColoringOn.nonempty_union_of_eq_iff_eq":
+   [{"id": "SimpleGraph___ColoringOn___nonempty_union_of_eq_iff_eq",
+     "data":
+     {"/Connectivity/#SimpleGraph___ColoringOn___nonempty_union_of_eq_iff_eq":
+      {"display": "ColoringOn.nonempty_union_of_eq_iff_eq",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Brooks' Theorem*",
+        "Maximum Degree at Least Three",
+        "Step 2: Gluing Along the Pair"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.ColoringOn.map_apply":
    [{"id": "SimpleGraph___ColoringOn___map_apply",
      "data":
@@ -15255,6 +15420,28 @@
      "data":
      {"/Connectivity/#SimpleGraph___Block___toGraph":
       {"display": "Block.toGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Cut Vertices and Blocks*",
+        "Blocks as a Quotient of Edges"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.Block.mapHom":
+   [{"id": "SimpleGraph___Block___mapHom",
+     "data":
+     {"/Connectivity/#SimpleGraph___Block___mapHom":
+      {"display": "Block.mapHom",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Cut Vertices and Blocks*",
+        "Blocks as a Quotient of Edges"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.Block.map":
+   [{"id": "SimpleGraph___Block___map",
+     "data":
+     {"/Connectivity/#SimpleGraph___Block___map":
+      {"display": "Block.map",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",

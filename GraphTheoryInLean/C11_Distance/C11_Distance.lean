@@ -495,6 +495,23 @@ lemma five_le_egirth (h3 : G.CliqueFree 3) (h4 : C[4].Free G) : 5 ≤ G.egirth :
     exacts [cliqueFree_three_iff_free_cycleGraph.mp h3, h4]
 
 /-!
+To show that `G` contains no copy of `C[4]` it is enough to check that any two
+distinct vertices have at most one common neighbour: a copy `f` of `C[4]` would give
+distinct vertices `f 0` and `f 2` with two distinct common neighbours `f 1` and
+`f 3`.
+-/
+lemma cycleGraph_four_free_of_common_neighbor_unique
+    (h : ∀ x y u v, G.Adj x u → G.Adj u y → G.Adj x v → G.Adj v y → x ≠ y → u = v) :
+    C[4].Free G := by
+  rintro ⟨f⟩
+  have hadj {i j : Fin 4} (ha : C[4].Adj i j) : G.Adj (f i) (f j) :=
+    f.toHom.map_adj ha
+  have heq := h (f 0) (f 2) (f 1) (f 3) (hadj (by decide))
+    (hadj (by decide)) (hadj (by decide)) (hadj (by decide))
+    (fun h => absurd (f.injective h) (by decide))
+  exact absurd (f.injective heq) (by decide)
+
+/-!
 ## Girth and Diameter of Cycle Graphs
 
 The cycle graph `C[n + 3]` contains the cycle `cycleGraph.cycle n` of length `n + 3`,
@@ -643,33 +660,17 @@ two neighbours on the cycle of any vertex `y ₗ` or `y ᵣ` are copies of neigh
 `y`, so (as `G` is a matching) they are the two copies of a single vertex. This
 forces two right copies to be adjacent, which is impossible.
 
-In Lean, given a copy `f`, we split into cases according to whether each of
-`f 0, …, f 3` is the apex, a left copy or a right copy. The adjacency rules of the
-Mycielskian dispose of most of the `81` cases, and the rest contradict `hmatch`.
+We use `cycleGraph_four_free_of_common_neighbor_unique`: given distinct vertices `x`
+and `y` with common neighbours `u` and `v`, we split into cases according to whether
+each of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy. The adjacency
+rules of the Mycielskian dispose of most of the `81` cases, and `grind` finishes the
+rest using `hmatch`.
 -/
 lemma cycleGraph_four_free_mycielskian (hmatch : G.IsMatchingAndIsolated) :
-    C[4].Free mμ[G] := fun ⟨f⟩ => by
-  have hadj {i j : Fin 4} (h : C[4].Adj i j) : mμ[G].Adj (f i) (f j) :=
-    f.toHom.map_adj h
-  have h01 := hadj (i := 0) (j := 1) (by decide)
-  have h12 := hadj (i := 1) (j := 2) (by decide)
-  have h23 := hadj (i := 2) (j := 3) (by decide)
-  have h30 := hadj (i := 3) (j := 0) (by decide)
-  have hne02 : f 0 ≠ f 2 := fun h => absurd (f.injective h) (by decide)
-  have hne13 : f 1 ≠ f 3 := fun h => absurd (f.injective h) (by decide)
-  clear hadj
-  generalize f 0 = p0, f 1 = p1, f 2 = p2, f 3 = p3 at *
-  rcases p0 with _ | (u | u) <;> rcases p1 with _ | (v1 | v1) <;>
-  rcases p2 with _ | (v2 | v2) <;> rcases p3 with _ | (v3 | v3) <;>
-  -- 81 goals..
-  simp_all only [mycielskian_adj] <;>
-  -- 13 goals remain
-  first
-    | grind
-    | have heq := hmatch _ _ _ h12.symm h23 ; grind
-    | have heq := hmatch _ _ _ h01 h30.symm ; grind
-    | have heq := hmatch _ _ _ h01.symm h12 ; grind
-    | have heq := hmatch _ _ _ h23.symm h30 ; grind
+    C[4].Free mμ[G] := by
+  apply cycleGraph_four_free_of_common_neighbor_unique
+  rintro (_ | (a | a)) (_ | (b | b)) (_ | (u | u)) (_ | (v | v)) h1 h2 h3 h4 hne
+    <;> simp_all only [mycielskian_adj] <;> grind [Adj.symm]
 
 /-!
 A graph in which no two edges share a common endpoint is triangle-free.
@@ -1199,17 +1200,11 @@ lemma petersenGraph_eq_of_adj_of_adj : ∀ x y u v, petersenGraph.Adj x u →
   decide
 
 /-!
-The last fact rules out a copy `f` of `C[4]`: its vertices `f 0` and `f 2` would be
-distinct with the two distinct common neighbours `f 1` and `f 3`.
+By `cycleGraph_four_free_of_common_neighbor_unique`, the last fact rules out a copy
+of `C[4]`.
 -/
-lemma petersenGraph_cycleGraph_four_free : C[4].Free petersenGraph := by
-  rintro ⟨f⟩
-  have hadj {i j : Fin 4} (h : C[4].Adj i j) : petersenGraph.Adj (f i) (f j) :=
-    f.toHom.map_adj h
-  have := petersenGraph_eq_of_adj_of_adj (f 0) (f 2) (f 1) (f 3) (hadj (by decide))
-    (hadj (by decide)) (hadj (by decide)) (hadj (by decide))
-    (fun h => absurd (f.injective h) (by decide))
-  exact absurd (f.injective this) (by decide)
+lemma petersenGraph_cycleGraph_four_free : C[4].Free petersenGraph :=
+  cycleGraph_four_free_of_common_neighbor_unique petersenGraph_eq_of_adj_of_adj
 
 /-!
 The diameter is at most `2` by the first fact. It is not `1`, since by the Moore
@@ -1279,13 +1274,11 @@ lemma mul_card_inter_layer_le [Finite V] [G.LocallyFinite] [DecidableEq V]
       have h2 : G.edist s x = i + 2 := edist_eq_add_two_of_adj hu.2 hw hwu hx hxw hg
       have h1 : G.edist r x = i + 1 := by
         refine le_antisymm (by simpa [hu.1] using hx.edist_le_add_one r) ?_
-        have := G.edist_triangle (u := s) (v := r) (w := x)
-        rw [h2, edist_eq_one_iff_adj.mpr hrs.symm] at this
-        rcases eq_or_ne (G.edist r x) ⊤ with h | h
-        · simp [h]
-        lift G.edist r x to ℕ using h with m
-        norm_cast at this ⊢
-        grind
+        -- cancel the `1` (which is finite) from `i + 2 ≤ G.edist r x + 1`
+        have := hrs.edist_le_add_one x
+        rw [edist_comm (u := x) (v := s), edist_comm (u := x) (v := r), h2] at this
+        exact (ENat.add_le_add_iff_right ENat.one_ne_top).mp
+          (by simpa [add_assoc, one_add_one_eq_two] using this)
       simp only [mem_inter, mem_layer]
       exact ⟨by exact_mod_cast h1, by exact_mod_cast h2⟩
     grind

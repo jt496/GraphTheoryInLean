@@ -648,18 +648,8 @@ lemma degreeMultiset_mycielskian [Fintype V] [DecidableRel G.Adj] :
 lemma exists_three_le_degree_iff {V : Type*} (G : SimpleGraph V)
     [G.LocallyFinite] : (∃ v, 3 ≤ G.degree v) ↔
       ∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d := by
-  constructor
-  · rintro ⟨a, ha⟩
-    rw [← card_neighborFinset_eq_degree] at ha
-    obtain ⟨b, c, d, hb, hc, hd, hbc, hbd, hcd⟩ := Finset.two_lt_card_iff.1 ha
-    exact ⟨a, b, c, d, by simpa using hb, by simpa using hc,
-        by simpa using hd, hbc, hbd, hcd⟩
-  · rintro ⟨a, b, c, d, hab, hac, had, hbc, hbd, hcd⟩
-    use a
-    change 2 < _ -- `rw` can't see that `2 < #s` is the same as `3 ≤ #s`
-    rw [← card_neighborFinset_eq_degree, Finset.two_lt_card_iff]
-    use b, c, d
-    simp_all
+  simp only [Nat.succ_le_iff, ← card_neighborFinset_eq_degree,
+            Finset.two_lt_card_iff, mem_neighborFinset]
 
 /-!
 The final exercises return to decidability, and give decidable adjacency instances

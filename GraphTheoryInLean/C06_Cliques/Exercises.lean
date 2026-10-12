@@ -409,17 +409,10 @@ example : ω pathNat₁ = 2 := by
     have h2 : pathNat₁.Adj a c := ht.isClique (by grind) (by grind) hac
     have h3 : pathNat₁.Adj b c := ht.isClique (by grind) (by grind) hbc
     grind
-  -- the clique `{0, 1}` gives the lower bound, and `h3` bounds the supremum
-  refine le_antisymm h3.cliqueNum_le (le_csSup ⟨2, ?_⟩ ⟨{0, 1}, ?_⟩)
-  · rintro n ⟨s, hs⟩
-    by_contra hn
-    exact h3.mono (by grind) s hs
-  · constructor
-    · intro x hx y hy hxy
-      simp only [coe_insert, coe_singleton, Set.mem_insert_iff,
-        Set.mem_singleton_iff] at hx hy
-      grind
-    · rfl
+  -- the edge `{0, 1}` is a `2`-clique, and `IsNClique.cliqueNum_eq_of_cliqueFree`
+  -- needs no finiteness: `h3` bounds the size of every clique
+  have h2 : pathNat₁.IsNClique 2 {0, 1} := is2Clique_pair_iff.mpr (by decide)
+  exact h2.cliqueNum_eq_of_cliqueFree h3
 
 /-!
 9. The first projection of a clique in the tensor product `G ⊗g H` is a clique in
@@ -531,11 +524,10 @@ second coordinate, so such a clique projects to a clique of `G` of the same size
 lemma IsNClique.boxProd_image_fst {W : Type*} [DecidableEq V] {H : SimpleGraph W}
     {m : ℕ} {t : Finset (V × W)} {w : W} (ht : (G □ H).IsNClique m t)
     (hconst : ∀ z ∈ t, z.2 = w) : G.IsNClique m (t.image Prod.fst) := by
-  -- the vertices of `t` agree in the second coordinate, so equal first coordinates
-  -- force equality
-  refine ht.image_of_adj (fun p hp q hq hfeq =>
-    Prod.ext hfeq ((hconst p hp).trans (hconst q hq).symm)) fun p hp q hq h => ?_
-  -- an edge of `t` cannot be vertical, since then its endpoints would be equal
+  -- it suffices to show that `Prod.fst` preserves adjacency on `t` (injectivity on
+  -- the clique `t` is then automatic); an edge of `t` cannot be vertical, since the
+  -- vertices of `t` agree in the second coordinate
+  refine ht.image_of_adj fun p hp q hq h => ?_
   grind [boxProd_adj]
 
 /-!

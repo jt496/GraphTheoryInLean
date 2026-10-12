@@ -1418,6 +1418,21 @@ lemma Iso.labelledCopyCount_eq {V' W W' : Type*} [Fintype V] [Fintype V'] [Finty
   exact Nat.card_congr (eA.copyCongr eB)
 
 /-!
+Counting copies of `A` in `B` makes sense as long as `B` is finite. Indeed for
+unlabelled copies we can drop the finiteness of `A` and `A'`. But Mathlib's current
+definition of `labelledCopyCount` requires both graphs to be finite.
+-/
+lemma Iso.copyCount_eq_left {V' W : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
+    [Fintype W] (e : A ≃g A') (B : SimpleGraph W) :
+    B.copyCount A = B.copyCount A' := by
+  classical
+  unfold copyCount
+  congr 1
+  ext C
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  exact ⟨fun ⟨f⟩ => ⟨e.symm.trans f⟩, fun ⟨f⟩ => ⟨e.trans f⟩⟩
+
+/-!
 ## Counting Copies of Cycles
 
 By `labelledCopyCount_eq_copyCount_mul_labelledCopyCount`, the number of labelled
@@ -1868,10 +1883,11 @@ lemma subCubeCopy_injective {n k : ℕ} :
 Every copy of `Q[k]` in `Q[n]` is of the form `subCubeCopy b d`. Note that a copy is
 only an *injective homomorphism*: it preserves adjacency in the forward direction
 only, so, unlike for automorphisms, no distance or weight preservation is available.
-The parallelogram lemma substitutes for it: the proof is by strong induction on the
-Hamming weight, computing `f y` for `y` of weight `m + 2` from the images of the
-three vertices `y + eᵢ`, `y + eⱼ`, `y + eᵢ + eⱼ` below it in the four-cycle through
-`y`.
+The parallelogram lemma substitutes for it. The proof has two steps: we first read
+off the direction embedding `d` from the images of the basis vectors, and then show
+that `f x = f 0 + extendEmb d x` by strong induction on the Hamming weight of `x`,
+computing `f y` for `y` of weight `m + 2` from the images of the three vertices
+`y + eᵢ`, `y + eⱼ`, `y + eᵢ + eⱼ` below it in the four-cycle through `y`.
 
 First we prove a small helper lemma: a vector of Hamming weight at least two has two
 distinct `true` coordinates.
@@ -1901,9 +1917,16 @@ lemma copy_apply_eq_add_add {n k : ℕ}
     (fun h => hij (single_true_left_inj (add_left_cancel (f.injective h))))
   rw [add_assoc, hpar, add_comm (f y), boolVec_add_add_cancel]
 
-lemma copy_exists_extendEmb {n k : ℕ}
+/-!
+For the first step, each basis vector `eᵢ` is a neighbour of `0`, so its image is a
+neighbour of `f 0` and differs from it in a single coordinate, which we call `d i`.
+Two basis vectors with the same direction would have the same image, so `d` is
+injective because `f` is.
+-/
+lemma copy_exists_direction_embedding {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
-    ∃ d : Fin k ↪ Fin n, ∀ x, f x = f 0 + extendEmb d x := by
+    ∃ d : Fin k ↪ Fin n,
+      ∀ i, f (Pi.single i true) = f 0 + Pi.single (d i) true := by
   -- each basis vector is mapped to a neighbour of `f 0`, defining the
   -- direction map `δ`
   have hD : ∀ i : Fin k, ∃ p : Fin n,
@@ -1918,9 +1941,19 @@ lemma copy_exists_extendEmb {n k : ℕ}
     have h : f (Pi.single i true) = f (Pi.single j true) := by
       rw [hδ i, hδ j, hδij]
     exact single_true_left_inj (f.injective h)
-  refine ⟨⟨δ, hδinj⟩, ?_⟩
+  exact ⟨⟨δ, hδinj⟩, hδ⟩
+
+/-!
+For the second step we show that the images of `0` and of the basis vectors
+determine the whole copy. Here the direction embedding `d` is an input rather than
+an output, so the statement applies to any `d` satisfying `hd`.
+-/
+lemma copy_apply_eq_add_extendEmb_of_single {n k : ℕ}
+    {f : Copy (hypercubeHamming k) (hypercubeHamming n)} {d : Fin k ↪ Fin n}
+    (hd : ∀ i, f (Pi.single i true) = f 0 + Pi.single (d i) true)
+    (x : Fin k → Bool) : f x = f 0 + extendEmb d x := by
   suffices H : ∀ (m : ℕ) (y : Fin k → Bool), hammingNorm y = m →
-      f y = f 0 + extendEmb ⟨δ, hδinj⟩ y from fun x => H _ x rfl
+      f y = f 0 + extendEmb d y from H _ x rfl
   intro m
   induction m using Nat.strong_induction_on with
   | _ m ih =>
@@ -1930,11 +1963,10 @@ lemma copy_exists_extendEmb {n k : ℕ}
       rw [hammingNorm_eq_zero] at hy
       simp [hy]
     rcases m with _ | m
-    · -- weight one: `y` is a basis vector, handled by the direction map
+    · -- weight one: `y` is a basis vector, handled by `hd`
       intro y hy
       obtain ⟨i, rfl⟩ := hammingNorm_eq_one_iff.mp hy
-      rw [hδ i, extendEmb_single]
-      rfl
+      rw [hd i, extendEmb_single]
     -- weight `m + 2`: `y` has two distinct `true` coordinates `i ≠ j`
     intro y hy
     obtain ⟨i, j, hij, hyi, hyj⟩ :=
@@ -1955,6 +1987,15 @@ lemma copy_exists_extendEmb {n k : ℕ}
     rw [copy_apply_eq_add_add f y hij, hf₁, hf₂, hf₃]
     simp only [extendEmb_add]
     simp [add_assoc, add_comm, add_left_comm]
+
+/-!
+Combining the two steps:
+-/
+lemma copy_exists_extendEmb {n k : ℕ}
+    (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
+    ∃ d : Fin k ↪ Fin n, ∀ x, f x = f 0 + extendEmb d x := by
+  obtain ⟨d, hd⟩ := copy_exists_direction_embedding f
+  exact ⟨d, copy_apply_eq_add_extendEmb_of_single hd⟩
 
 /-!
 Every copy of `Q[k]` in `Q[n]` *is* a canonical subcube copy.

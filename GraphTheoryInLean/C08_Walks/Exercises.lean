@@ -348,8 +348,8 @@ lemma Walk.mem_support_tail_iff' {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V}
 /-!
 36. A cycle can be cut at any of its vertices to give a path from that vertex
 through exactly the cycle's vertices, of length one less than the cycle. Hint:
-rotate the cycle to start at `y` and take the reversed tail, as in the chapter's
-`IsHamiltonianCycle.exists_isHamiltonian_walk_snd`.
+rotate the cycle to start at `y` and take the reversed tail, as in the proof of the
+chapter's `IsCycle.exists_isPath_of_mem_edges`.
 -/
 lemma Walk.IsCycle.exists_isPath_spanning' {a : V} {c : G.Walk a a}
     (hc : c.IsCycle) {y : V} (hy : y ∈ c.support) :
@@ -792,29 +792,46 @@ lemma Walk.IsCycle.exists_isPath_spanning {a : V} {c : G.Walk a a}
 
 /-!
 37. A maximum-length path in an Ore graph is Hamiltonian.
+
+We first separate out the part of the argument that doesn't use Ore's condition: if
+`p` is a maximum-length path from `u`, every vertex is reachable from `u`, and some
+cycle through `u` of length one more than `p` visits exactly the vertices of `p`,
+then `p` is Hamiltonian. (Finiteness isn't needed either.)
+-/
+lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle [DecidableEq V] {u v : V}
+    {p : G.Walk u v} (hmax : p.IsMaximumPath) (hreach : ∀ w, G.Reachable u w)
+    {c : G.Walk u u} (hc : c.IsCycle) (hlen : c.length = p.length + 1)
+    (hsupp : ∀ x, x ∈ c.support ↔ x ∈ p.support) : p.IsHamiltonian := by
+  rw [hmax.isPath.isHamiltonian_iff]
+  by_contra! hcon
+  -- Some vertex `w` is missing from the path.
+  obtain ⟨w, hw⟩ := hcon
+  -- The support of `c` (as a `Set V`) does not contain `w`
+  have hw' : w ∉ {x | x ∈ c.support} := fun hwc => hw ((hsupp w).mp hwc)
+  -- A boundary edge leaves `c`; break the cycle there and prepend it.
+  obtain ⟨q⟩ := hreach w
+  obtain ⟨x, hxc, z, hzc, hxz⟩ := q.exists_cross_adj c.start_mem_support hw'
+  obtain ⟨z', q, hqpath, hqlen, hqsupp⟩ := hc.exists_isPath_spanning hxc
+  have hznotin : z ∉ q.support := fun hzq => hzc ((hqsupp z).mp hzq)
+  have hlong : (q.cons hxz.symm).IsPath :=
+    (cons_isPath_iff hxz.symm q).mpr ⟨hqpath, hznotin⟩
+  grind [length_cons, hmax.length_le hlong]
+
+/-!
+Ore's condition now supplies the cycle (`exists_cycle_spanning`) and reachability
+(by walks of length at most two).
 -/
 lemma Walk.isHamiltonian_of_isMaximumPath [Fintype V] [DecidableEq V]
     [G.LocallyFinite] (h : G.IsOreGraph)
     (hn : 3 ≤ Fintype.card V) {u v : V} {p : G.Walk u v}
     (hmax : p.IsMaximumPath) : p.IsHamiltonian := by
-  rw [hmax.isPath.isHamiltonian_iff]
-  by_contra! hcon
-  -- Some vertex `w` is missing from the path.
-  obtain ⟨w, hw⟩ := hcon
   have h2 : 2 ≤ p.length := h.two_le_length_of_isMaximumPath hn hmax
   -- Build a cycle through exactly the vertices of `p`.
   obtain ⟨c, hcyc, hclen, hcsupp⟩ :=
     hmax.isMaximalPath.exists_cycle_spanning h2 (h u v)
-  -- The support of `c` (as a `Set V`) does not contain `w`
-  have hw' : w ∉ {x | x ∈ c.support} := fun hwc => hw ((hcsupp w).mp hwc)
-  -- A boundary edge leaves `c`; break the cycle there and prepend it.
+  refine hmax.isHamiltonian_of_isCycle (fun w => ?_) hcyc hclen hcsupp
   obtain ⟨q, -⟩ := h.exists_walk_length_le_two u w
-  obtain ⟨x, hxc, z, hzc, hxz⟩ := q.exists_cross_adj c.start_mem_support hw'
-  obtain ⟨z', q, hqpath, hqlen, hqsupp⟩ := hcyc.exists_isPath_spanning hxc
-  have hznotin : z ∉ q.support := fun hzq => hzc ((hqsupp z).mp hzq)
-  have hlong : (q.cons hxz.symm).IsPath :=
-    (cons_isPath_iff hxz.symm q).mpr ⟨hqpath, hznotin⟩
-  grind [length_cons, hmax.length_le hlong]
+  exact q.reachable
 
 /-!
 38. Give a direct proof of Ore's theorem, not using the closure.

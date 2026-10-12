@@ -191,14 +191,15 @@ def kneserColoring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     · grind -- impossible since the equal colours are not equal
     · push Not at h1 h3
       -- both `u` and `v` lie in `{n - 2 * k + 1, ..., n - 1}`, which has only
-      -- `2 * k - 1` elements, so by the pigeonhole principle they meet
+      -- `2 * k - 1` elements, so they lie in an independent set of `Kn[n, k]`
+      -- (`kneserGraph_isIndepSet_of_card_lt` from the previous chapter)
       let a : Fin n := ⟨n - 2 * k, by grind⟩
       have hsub (s : Finset (Fin n)) (hne : s.Nonempty)
           (hs : n - 2 * k < ↑(s.min' hne)) : s ⊆ Ioi a :=
         fun x hx => mem_Ioi.2 (hs.trans_le (min'_le _ x hx))
-      refine not_disjoint_iff_nonempty_inter.2 ?_ hadj.1
-      exact inter_nonempty_of_card_lt_card_add_card (hsub _ _ h1) (hsub _ _ h3)
-        (by grind [Fin.card_Ioi, u.2, v.2])
+      have hind := kneserGraph_isIndepSet_of_card_lt (k := k) (s := Ioi a)
+        (by grind [Fin.card_Ioi])
+      exact hind (hsub _ _ h1) (hsub _ _ h3) hadj.2 hadj
 
 
 /-!

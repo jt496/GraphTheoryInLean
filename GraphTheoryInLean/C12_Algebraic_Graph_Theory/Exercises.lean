@@ -157,10 +157,10 @@ lemma copyCount_completeGraph_cycleGraph' (n : ℕ) :
 16. Count the 4-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
 `n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
-`labelledCopyCount_hypercube` along the isomorphism
+`labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
 `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]` of
 [Exercises](https://jt496.github.io/GraphTheoryInLean/Maps/#section-exercises-maps),
-using `Iso.labelledCopyCount_eq`.)
+using `Iso.labelledCopyCount_eq` and `Iso.copyCount_eq_left`.)
 -/
 lemma labelledCopyCount_hypercube_cycleGraph_four' (n : ℕ) :
     Q[n].labelledCopyCount C[4] = 2 ^ n * (n * (n - 1)) := by
@@ -645,12 +645,7 @@ lemma exists_aut_hypercubeHamming_of_adj {n : ℕ} {x y x' y' : Fin n → Bool}
   · simp
   · have : (Pi.single i true : Fin n → Bool) ∘ Equiv.swap i j =
         Pi.single j true := by
-      funext k
-      by_cases hkj : k = j
-      · simp [hkj]
-      · by_cases hki : k = i
-        · subst hki; simp [hkj, Ne.symm hkj]
-        · simp [Equiv.swap_apply_of_ne_of_ne hki hkj, hki, hkj]
+      simpa using Pi.single_comp_equiv (Equiv.swap i j) i true
     simp [this]
 
 /-!
@@ -691,16 +686,15 @@ lemma copyCount_completeGraph_cycleGraph (n : ℕ) :
 16. Count the 4-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
 `n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
-`labelledCopyCount_hypercube` along the isomorphism
+`labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
 `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]` of
 [Exercises](https://jt496.github.io/GraphTheoryInLean/Maps/#section-exercises-maps),
-using `Iso.labelledCopyCount_eq`.)
+using `Iso.labelledCopyCount_eq` and `Iso.copyCount_eq_left`.)
 -/
 /-!
 The labelled count is `labelledCopyCount_hypercube n 2`, since
-`n.descFactorial 2 = n * (n - 1)`. For the unlabelled count we divide by the `8`
-automorphisms of `C[4]`, using `n * (n - 1) = 2 * n.choose 2` and
-`2 ^ n = 2 ^ (n - 2) * 4`.
+`n.descFactorial 2 = n * (n - 1)`, and the unlabelled count is
+`copyCount_hypercube n 2`.
 -/
 lemma labelledCopyCount_hypercube_cycleGraph_four (n : ℕ) :
     Q[n].labelledCopyCount C[4] = 2 ^ n * (n * (n - 1)) := by
@@ -710,15 +704,7 @@ lemma labelledCopyCount_hypercube_cycleGraph_four (n : ℕ) :
 
 lemma copyCount_hypercube_cycleGraph_four (n : ℕ) (hn : 2 ≤ n) :
     Q[n].copyCount C[4] = n.choose 2 * 2 ^ (n - 2) := by
-  have h := labelledCopyCount_cycleGraph Q[n] 1
-  have hc : n * (n - 1) = 2 * n.choose 2 := by
-    have := Nat.descFactorial_eq_factorial_mul_choose n 2
-    simp [Nat.descFactorial] at this
-    grind
-  have h2 : 2 ^ n = 2 ^ (n - 2) * 4 := by
-    rw [show (4 : ℕ) = 2 ^ 2 by norm_num, ← pow_add, Nat.sub_add_cancel hn]
-  rw [labelledCopyCount_hypercube_cycleGraph_four, hc, h2] at h
-  grind
+  rw [← hypercubeTwoIsoCycleFour.copyCount_eq_left Q[n], copyCount_hypercube n 2 hn]
 
 /-!
 17. Since `mμ[K[2]]` is a 5-cycle, it contains as many labelled copies of `C[5]` as

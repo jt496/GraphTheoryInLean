@@ -155,15 +155,20 @@ lemma Hom.injOn_of_isClique {W : Type*} {H : SimpleGraph W} (f : G →g H)
   exact H.irrefl (hxy ▸ f.map_adj (hs hx hy hne))
 
 /-!
-Next, if a map `f : V → W` is injective on an `n`-clique `s` of `G` and
-sends adjacent vertices of `s` to adjacent vertices of `H` then the image of `s` is
-an `n`-clique of `H`. (We will use this several times, with `f` a graph homomorphism
-or a projection.)
+Next, if a map `f : V → W` sends adjacent vertices of an `n`-clique `s` of `G` to
+adjacent vertices of `H` then the image of `s` is an `n`-clique of `H`. As in
+`Hom.injOn_of_isClique`, `f` is automatically injective on `s`, since distinct
+vertices of `s` are adjacent. (We will use this several times, with `f` a graph
+homomorphism or a projection.)
 -/
 lemma IsNClique.image_of_adj {W : Type*} {H : SimpleGraph W} [DecidableEq W]
-    {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) {f : V → W} (hinj : Set.InjOn f s)
+    {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) {f : V → W}
     (hadj : ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → G.Adj x y → H.Adj (f x) (f y)) :
     H.IsNClique n (s.image f) := by
+  have hinj : Set.InjOn f s := by
+    intro x hx y hy hxy
+    by_contra hne
+    exact (hadj hx hy (hs.isClique hx hy hne)).ne hxy
   refine ⟨?_, by rw [Finset.card_image_of_injOn hinj, hs.card_eq]⟩
   rintro _ ha _ hb hne
   obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp ha
@@ -171,13 +176,12 @@ lemma IsNClique.image_of_adj {W : Type*} {H : SimpleGraph W} [DecidableEq W]
   exact hadj hx hy (hs.isClique hx hy fun h => hne (by rw [h]))
 
 /-!
-Using `Hom.injOn_of_isClique` we can show that the image of an `n`-clique under a
-graph homomorphism is an `n`-clique.
+In particular the image of an `n`-clique under a graph homomorphism is an `n`-clique.
 -/
 protected lemma IsNClique.mapHom {W : Type*} {H : SimpleGraph W} [DecidableEq W]
     {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) (f : G →g H) :
     H.IsNClique n (s.image f) :=
-  hs.image_of_adj (f.injOn_of_isClique hs.isClique) fun _ _ _ _ h => f.map_adj h
+  hs.image_of_adj fun _ _ _ _ h => f.map_adj h
 
 /-!
 # Clique-Free
@@ -431,12 +435,19 @@ lemma CliqueFree.cliqueNum_le {n : ℕ} (h : G.CliqueFree (n + 1)) : ω G ≤ n 
 
 /-!
 So to compute a clique number it is enough to find an `n`-clique and show that the
-graph is `(n + 1)`-clique-free.
+graph is `(n + 1)`-clique-free. This needs no finiteness either: the clique-free
+hypothesis bounds the size of every clique, so `n` is a genuine largest element of
+the set of clique sizes, and `le_csSup` applies.
 -/
-theorem IsNClique.cliqueNum_eq_of_cliqueFree [Finite V] {s : Finset V}
+theorem IsNClique.cliqueNum_eq_of_cliqueFree {s : Finset V}
     {n : ℕ} (hs : G.IsNClique n s) (h : G.CliqueFree (n + 1)) :
-    ω G = n :=
-  h.cliqueNum_le.antisymm hs.le_cliqueNum
+    ω G = n := by
+  refine h.cliqueNum_le.antisymm ?_
+  apply le_csSup (s := {k | ∃ t, G.IsNClique k t}) ?_ ⟨s, hs⟩
+  refine ⟨n, ?_⟩
+  rintro k ⟨t, ht⟩
+  by_contra! hk
+  exact h.mono hk _ ht
 
 /-!
 For example, the `5`-cycle has clique number `2`: `{0, 1}` is an edge and the cycle
@@ -525,7 +536,7 @@ The analogue of `IsNClique.cliqueNum_eq_of_cliqueFree` for independent sets: if 
 is an `n`-independent set in `G` and `G` has no `(n + 1)`-independent set then
 `⍺ G = n`. Rather than repeating the argument we pass to the complement.
 -/
-theorem IsNIndepSet.indepNum_eq_of_indepSetFree [Finite V] {s : Finset V}
+theorem IsNIndepSet.indepNum_eq_of_indepSetFree {s : Finset V}
     {n : ℕ} (hs : G.IsNIndepSet n s) (h : G.IndepSetFree (n + 1)) :
     ⍺ G = n := by
   rw [← cliqueNum_compl]
@@ -939,32 +950,19 @@ lemma mycielskianProj_right (v₀ v : V) :
 lemma mycielskianProj_none (v₀ : V) : mycielskianProj v₀ none = v₀ := rfl
 
 /-!
-The projection map is injective on any clique `t` in `mμ[G]` that doesn't contain
-`none`, since if two vertices in `t` had the same projection then they would be the
-images of some `v ₗ` and `v ᵣ` and in particular `v ₗ` would be adjacent to `v ᵣ` in
-`mμ[G]` which implies `G.Adj v v`, a contradiction.
--/
-lemma mycielskianProj_injOn_clique (v₀ : V) {k : ℕ}
-    {t : Finset (Option (V ⊕ V))} (hn : none ∉ t) (ht : mμ[G].IsNClique k t) :
-    Set.InjOn (mycielskianProj v₀) (t : Set (Option (V ⊕ V))) := by
-  intro a ha b hb hxy
-  by_contra hne
-  have := ht.isClique ha hb hne
-  rcases a with _ | ⟨v | v⟩ <;> rcases b with _ | ⟨w | w⟩ <;> simp_all
-
-/-!
 Any `k`-clique in `mμ[G]` (with `3 ≤ k`) maps to a `k`-clique in `G` under
-`mycielskianProj`.
+`mycielskianProj`. Such a clique doesn't contain `none`, and every edge of `mμ[G]`
+not involving `none` projects to an edge of `G`. (In particular two vertices of the
+clique can't have the same projection `v`, since they would be `v ₗ` and `v ᵣ`,
+whose adjacency in `mμ[G]` would give `G.Adj v v`.)
 -/
 lemma IsNClique.of_mycielskian [DecidableEq V] (v₀ : V) {k : ℕ} (h3 : 3 ≤ k)
     {t : Finset (Option (V ⊕ V))} (ht : mμ[G].IsNClique k t) :
     G.IsNClique k (t.image (mycielskianProj v₀)) := by
   -- any clique of size at least `3` in `mμ[G]` cannot contain `none`
   have hnone := mycielskian_none_notMem_clique h3 ht
-  -- hence the projection is injective on `t`
-  have hinj := mycielskianProj_injOn_clique v₀ hnone ht
-  -- so it remains to show that the projection preserves adjacency on `t`
-  refine ht.image_of_adj hinj fun x hx y hy hadj => ?_
+  -- so it suffices to show that the projection preserves adjacency on `t`
+  refine ht.image_of_adj fun x hx y hy hadj => ?_
   -- `first | t₁ | t₂ | …` tries the tactics in turn, until one succeeds
   rcases x with _ | ⟨_ | _⟩ <;> rcases y with _ | ⟨_ | _⟩ <;> -- 9 goals
     first | exact absurd hx hnone | exact absurd hy hnone | exact hadj | simp at hadj
