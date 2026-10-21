@@ -1,5 +1,6 @@
 import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.DegreeSum
+import Mathlib.Combinatorics.Digraph.Basic
 namespace SimpleGraph
 /-!
 Our goal in writing this guide is to introduce graph theorists to the interactive
@@ -16,7 +17,7 @@ are many excellent tutorials and texts for this, including:
 - [A Glimpse of Lean](https://github.com/PatrickMassot/GlimpseOfLean/) ("an
 introduction to theorem proving in Lean for the impatient")
 - [The Hitchhiker’s Guide to Logical Verification](https://github.com/lean-forward/logical_verification_2025)
-(companion text to a graduate level course on interactive theorem proving)
+(companion text to a graduate-level course on interactive theorem proving)
 - [How To Prove It With Lean](https://djvelleman.github.io/HTPIwL/) (an introduction
 to proofs in Lean based on the classic textbook)
 - [Logic and Proof](https://leanprover-community.github.io/logic_and_proof/) (a
@@ -24,8 +25,9 @@ course in logic and proof using Lean)
 - [Lean Game Portal](https://adam.math.hhu.de/)
 (interactive games such as the Natural Number Game)
 
-A first course in Graph Theory is assumed as is a basic level of Lean proficiency
-(for example the first few chapters of `Mathematics in Lean`).
+A first course in graph theory is assumed, as is a basic level of Lean proficiency
+(for example the first few chapters of
+[Mathematics in Lean](https://leanprover-community.github.io/mathematics_in_lean/)).
 
 Our aim is to give graph theorists an idea of how formalizing their work might look
 in Lean, making use of Mathlib. In particular we will try to point out the
@@ -35,18 +37,17 @@ differences that we encounter in Lean, compared to informal definitions and proo
 
 If you haven't done so already please [install Lean](https://lean-lang.org/install/)
 and clone a copy of the repository <https://github.com/jt496/GraphTheoryInLean>.
-Reading through this guide within `VSCode` will allow you to understand more easily
-how the example code works, via the `InfoView` messages.
 
-# How to read this guide
+# How to Read This Guide
 
-If you are reading the `.lean` files directly then see the `README.md` file for build
-instructions (`lake exe cache get` followed by `lake build`). Each chapter is in a
-separate folder that also contains any associated exercises.
+If you are reading the `.lean` files directly in VS Code or similar then see the
+`README.md` file for build instructions (`lake exe cache get` followed by
+`lake build`). Each chapter is in a separate folder that also contains any associated
+exercises.
 
 If you are reading the web version then please note that this is published using
 [Verso](https://verso.lean-lang.org/). You should be able to see most of the
-interactive features of Lean such as `InfoView` messages and `#command` outputs.
+interactive features of Lean such as InfoView messages and `#command` outputs.
 
 To see the actual output of a `#command` you need to hover over the `#command` itself
 with your cursor (the `#command` will have wavy underlining). Many terms also have
@@ -54,11 +55,11 @@ associated doc-strings which you can see by hovering over them; click on them to
 the full documentation. Types of terms are also shown.
 
 For example, below you should be able to hover over the `#source` command to see the
-verbatim source-code of the definition of `SimpleGraph` in Mathlib. While if you
+verbatim source code of the definition of `SimpleGraph` in Mathlib. While if you
 hover over `SimpleGraph` itself you will see its doc-string; clicking on it will take
 you to its documentation page. Hovering over the `#check` will tell you the type of
-`G.Adj u v` (it is a `Prop`); while hovering over `u` will confirm that it has type
-`V`; which in turn you can hover over to see its type `Type u_1`.
+`G.Adj u v` (it is a `Prop`), while hovering over `u` will confirm that it has type
+`V`, which in turn you can hover over to see its type `Type u_1`.
 -/
 variable {V : Type*} {G : SimpleGraph V} (u v : V)
 #source SimpleGraph
@@ -72,8 +73,8 @@ When we want to put results or definitions in other namespaces we will do this
 explicitly.
 
 In the interest of making this guide as readable as possible by graph theorists we
-introduce quite a lot of "standard" graph theory notation that is not in Mathlib,
-(for example `K[n]`, `C[n]`, `K[s, t]`, `Q[n]`, `ω G`, `χ G`, etc.) For reference see
+introduce quite a lot of "standard" graph theory notation that is not in Mathlib (for
+example `K[n]`, `C[n]`, `K[s, t]`, `Q[n]`, `ω G`, `χ G`, etc.). For reference, see
 [Notation](https://jt496.github.io/GraphTheoryInLean/Appendix/#section-notation). We
 also provide lists of the
 [Definitions](https://jt496.github.io/GraphTheoryInLean/Appendix/#section-definitions)
@@ -98,7 +99,7 @@ worth knowing how to search.
 * Mathlib's documentation pages list the declarations of each file in order, so the
   lemmas about a definition can usually be found near it.
 
-# How this guide is structured
+# How This Guide is Structured
 
 This guide is focused entirely on `SimpleGraph`. We start with the basic definitions
 in the next chapter before moving on to give many different concrete examples in
@@ -158,10 +159,10 @@ Examples of more advanced topics that we cover in the guide include:
 * [Albertson's Precolouring Extension Theorem](https://jt496.github.io/GraphTheoryInLean/Distance/#section-albertson-s-precolouring-extension-theorem)
 * [Counting Copies](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-counting-copies)
 * [The Automorphism Group of the Hypercube](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-automorphism-group-of-the-hypercube)
-* [Counting Copies of Subcubes](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-counting-copies-of-subcubes)
 * [Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)
 * [Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem)
 * [Zykov's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-zykov-s-theorem)
+* [Ruzsa–Szemerédi Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-the-ruzsa-szemer-di-theorem)
 
 Theorems from Mathlib that we survey, mostly in the final chapter
 [Theorems](https://jt496.github.io/GraphTheoryInLean/Theorems/#chapter-theorems),
@@ -174,7 +175,7 @@ include:
   [Mantel's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-mantel-s-theorem)
 * [Andrásfai–Erdős–Sós Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-andr-sfai-erd-s-s-s-theorem)
 * [Erdős–Stone Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-tur-n-density-and-the-erd-s-stone-theorem)
-* [The Laplacian and Connected Components](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-laplacian)
+* [The Laplacian](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-laplacian)
 * [Strongly Regular Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-strongly-regular-graphs)
 * [Szemerédi Regularity Lemma](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-the-szemer-di-regularity-lemma)
 * [Triangle Removal Lemma](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-the-triangle-removal-lemma)
@@ -184,7 +185,7 @@ include:
   and [Ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-ends)
 
 Each chapter (except this one) has some exercises with worked solutions. Each set of
-exercises comes with `sorry` first, solutions are then given below.
+exercises is given first with `sorry`, and the solutions follow.
 
 Since we want to develop results for our running examples some of these exercises are
 named lemmas or theorems rather than anonymous examples. To avoid naming clashes we

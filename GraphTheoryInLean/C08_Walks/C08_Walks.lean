@@ -2,6 +2,7 @@ import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidabilit
 import GraphTheoryInLean.C05_Maps.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Trails
 import Mathlib.Combinatorics.SimpleGraph.Hamiltonian
+import Mathlib.Combinatorics.SimpleGraph.Coloring.Constructions
 import Mathlib.Order.Closure
 namespace SimpleGraph
 open Walk
@@ -11,9 +12,10 @@ variable {V : Type*} {G : SimpleGraph V} {u v w : V}
 Walks are a fundamental concept in graph theory. In this chapter we look at how they
 are defined in Mathlib. We will consider operations on walks such as concatenation
 (`append`) and reversal (`reverse`), as well as the `length` (number of edges) and
-`support` (list of vertices visited) of walks. We then meet the types of walks that
+`support` (list of vertices visited) of walks. We then meet the kinds of walks that
 arise most frequently in graph theory: trails, paths, circuits and cycles, together
-with Eulerian trails and Hamiltonian paths and cycles.
+with Eulerian trails and Hamiltonian paths and cycles. Along the way we show that a
+graph is bipartite iff it has no odd cycle.
 
 The type of a walk records its endpoints, and this makes some plumbing necessary that
 has no counterpart in informal graph theory: `Walk.Nil`, `Walk.copy` and
@@ -40,7 +42,7 @@ but it does mean that we sometimes need to deal with type mismatches that have n
 counterpart in informal graph theory. We look at this in detail in
 [Plumbing: Fixing Type Mismatches](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-fixing-type-mismatches).
 
-Notice finally that `G.Walk u v` is a `Type`, not a `Prop`: two walks with the same
+Notice also that `G.Walk u v` is a `Type`, not a `Prop`: two walks with the same
 endpoints can be different, and we can compute with them. The proposition that there
 is *some* walk from `u` to `v` is `G.Reachable u v`, which we meet in
 [Reachability](https://jt496.github.io/GraphTheoryInLean/Walks/#section-reachability).
@@ -82,7 +84,7 @@ very little: Lean can infer many of the details from the type of walk we are bui
 in each case.
 
 First we have the `nil` walk from `7` to `7`. (We have opened the namespace `Walk` in
-this chapter so we can use `nil` rather than `Walk.nil`)
+this chapter so we can use `nil` rather than `Walk.nil`.)
 -/
 example : pathNat₁.Walk 7 7 := nil
 /-!
@@ -101,7 +103,7 @@ so the first edge must be `h₁ : G.Adj 3 v` and the second edge must be
 `h₂ : G.Adj v 5`, for some vertex `v`. We need to tell Lean what `v` is in at least
 one case, but once we do this for the first edge the second edge is determined (again
 the actual existence of both edges is easily proved by simp). There are a few ways to
-do this, we show two below.
+do this; we show two below.
 
 First we use type ascription notation `(by simp : ...)` which tells Lean what we want
 to prove and then gets `simp` to prove it.
@@ -124,7 +126,7 @@ one of them explicitly, since the other two can be inferred from the type of wal
 are building and the edge we are using.
 
 Of course a walk may have repeated edges or vertices. So we can build the following
-walk from `3` to `5` using the edges `3 — 2 — 3 — 4 — 5 — 6 — 5`.
+walk from `3` to `5`, which we write informally as `3 — 2 — 3 — 4 — 5 — 6 — 5`.
 -/
 private def pathNat₁35 : pathNat₁.Walk 3 5 :=
   cons' _ 2 _ (by simp) <| cons' _ 3 _  (by simp) <| cons' _ 4 _ (by simp)
@@ -133,9 +135,8 @@ private def pathNat₁35 : pathNat₁.Walk 3 5 :=
 /-!
 The key advantage of defining walks as an inductive type (as opposed to as a `List V`
 with proofs of adjacency of consecutive vertices) is that many things are simply
-*correct by construction*.
-
-The inductive nature of the type allows for simple inductive definitions and proofs.
+*correct by construction*. The inductive nature of the type allows for simple
+inductive definitions and proofs.
 
 For example, the concatenation of two walks `p₁` and `p₂` is only defined when the
 walks are compatible: i.e. if `p₁` is a walk from `u` to `v` then `p₂` must be a walk
@@ -218,14 +219,14 @@ The *support* of a walk is the sequence of vertices it visits in order, as a
 #source Walk.support
 /-!
 A `nil` walk has length `0` and support `[u]`. So in particular every walk has at
-least one vertex in its support. (Note that if we had defined walks in terms of lists
-of vertices then we would have needed to decide what to do with the empty list.)
+least one vertex in its support. (Note that if walks were defined in terms of lists
+of vertices then we would have to decide what to do with the empty list.)
 -/
 example : (Walk.nil : G.Walk u u).support = [u] := rfl
 
 /-!
 The support of a `cons` walk consists of the first vertex of the new edge followed by
-the support of the rest of the walk. (Note the use of `List` notation here `a :: l`
+the support of the rest of the walk. (Note the use of `List` notation here: `a :: l`
 is the list with head `a` and tail `l`).
 -/
 example (h : G.Adj u v) (p : G.Walk v w) :
@@ -239,7 +240,7 @@ model we considered at the start of the chapter.
 
 /-!
 The start and end vertices of a walk belong to its support. Results involving the
-start and end of a walk use `start` and `end` in their names, but `Walk.start` and
+start and end of a walk use "start" and "end" in their names, but `Walk.start` and
 `Walk.end` are not defined. (By design, if we have a walk `p : G.Walk u v` then `u`
 and `v` are already available as part of the type of `p` so we don't need special
 names for them.)
@@ -248,8 +249,8 @@ names for them.)
 #check Walk.end_mem_support    -- (p : G.Walk u v) : v ∈ p.support
 
 /-!
-The support of the walk from `i` to `i + j` in `pathNat₁` is `[i, i + 1, ..., i + j]`
-which can be expressed as `List.range' i (j + 1)`
+The support of the walk `pathNat₁Walk i j` from `i` to `i + j` in `pathNat₁` is
+`[i, i + 1, ..., i + j]`, which can be expressed as `List.range' i (j + 1)`.
 -/
 #check List.range'
 
@@ -278,7 +279,7 @@ example (h : G.Adj u v) (p : G.Walk v w) : (Walk.cons h p).getVert 1 = v := by
 
 /-!
 Notice that `getVert i` is well-defined for any `i : ℕ`, rather than requiring us to
-check that `i ≤ p.length` it simply returns the end vertex if `p.length ≤ i`.
+check that `i ≤ p.length`, it simply returns the end vertex if `p.length ≤ i`.
 -/
 example (p : G.Walk v w) : p.getVert (p.length + 100) = w :=
   p.getVert_of_length_le (by simp)
@@ -330,7 +331,7 @@ example (p₁ : G.Walk u v) (p₂ : G.Walk v w) :
     (p₁.append p₂).edges = p₁.edges ++ p₂.edges := Walk.edges_append p₁ p₂
 
 /-!
-We can also view the edges of a walk as a set of edges via `Walk.edgeSet`
+We can also view the edges of a walk as a set of edges via `Walk.edgeSet`.
 -/
 #source Walk.edgeSet -- {e | e ∈ p.edges}
 
@@ -400,7 +401,7 @@ type mismatches are the subject of
 /-!
 # Trails, Paths, Circuits and Cycles
 
-There are a number of important special types of walks, such as paths, cycles, trails
+There are a number of important special kinds of walks, such as paths, cycles, trails
 and circuits, that crop up frequently in graph theory. Most of the common ones are
 defined in Mathlib. We gather a summary of these below.
 
@@ -473,7 +474,7 @@ second vertex of `p`.
 #check IsPath.eq_snd_of_mem_edges
 
 /-!
-If we join two vertex disjoint paths using an edge then we get a path. (We will need
+If we join two vertex-disjoint paths using an edge then we get a path. (We will need
 this result a couple of times later in this chapter.)
 -/
 theorem Walk.IsPath.append_cons {u v w z} {h : G.Adj v w} {p : G.Walk u v}
@@ -499,11 +500,9 @@ A walk is a path iff `getVert` is injective on the set `{i | i ≤ p.length}`.
 /-!
 If there is a walk from `u` to `v` in a graph `G`, then there is a path from `u` to
 `v`. Informally we might prove this by taking a shortest walk and proving that it is
-a path.
-
-In Mathlib given any walk `p : G.Walk u v` we can get a path from `u` to `v` using
-`Walk.bypass`. Note that this need not be a shortest path, it is simply the walk
-constructed from `p` by removing closed subwalks between repeated vertices.
+a path. In Mathlib given any walk `p : G.Walk u v` we can get a path from `u` to `v`
+using `Walk.bypass`. Note that this need not be a shortest path; it is simply the
+walk constructed from `p` by removing closed subwalks between repeated vertices.
 
 [Figure: `Walk.bypass` removes closed subwalks to produce a path](https://jt496.github.io/GraphTheoryInLean/figures/walk_bypass.svg)
 -/
@@ -571,15 +570,15 @@ no repeated vertices.
 /-!
 Any cycle is a circuit.
 -/
-example {u} (c : G.Walk u u) (hc : c.IsCycle) : c.IsCircuit := hc.isCircuit
+example (c : G.Walk u u) (hc : c.IsCycle) : c.IsCircuit := hc.isCircuit
 
 /-!
 Since a cycle is a circuit, it is not equal to `nil`.
 -/
-example {u} (c : G.Walk u u) (hc : c.IsCycle) : c ≠ nil := hc.isCircuit.ne_nil
+example (c : G.Walk u u) (hc : c.IsCycle) : c ≠ nil := hc.isCircuit.ne_nil
 
 /-!
-There is a 3-cycle in the complete graph `K[4]`.
+There is a `3`-cycle in the complete graph `K[4]`.
 -/
 example : ∃ (c₃ : K[4].Walk 0 0), c₃.IsCycle ∧ c₃.length = 3 := by
   let c₃: K[4].Walk 0 0 := cons' 0 1 _ (by decide) <|
@@ -600,7 +599,7 @@ path.
 -/
 #check isCycle_iff_isPath_tail_and_le_length
 /-!
-If `c` is a cycle then `getVert` is injective on `{i | 1 ≤ i ≤ c.length}`.
+If `c` is a cycle then `getVert` is injective on `{i | 1 ≤ i ∧ i ≤ c.length}`.
 -/
 #check IsCycle.getVert_injOn
 
@@ -629,6 +628,82 @@ theorem Walk.cons_isCycle_iff_length_ne_one {u v : V} (p : G.Walk v u)
   simp only [isCycle_iff_isPath_tail_and_le_length, getVert_cons_succ, tail_cons,
     isPath_copy, length_cons, Nat.reduceLeDiff, ne_eq, and_congr_right_iff]
   grind
+
+/-!
+## Odd Cycles and Bipartite Graphs
+
+Mathlib contains the following result saying that a graph is bipartite iff every
+closed walk has even length.
+-/
+#check two_colorable_iff_forall_loop_even
+  -- G.Colorable 2 ↔ ∀ u (w : G.Walk u u), Even w.length
+/-!
+However we would really like the stronger result about cycles rather than closed
+walks: a graph is bipartite iff it contains no odd cycle. One direction is immediate,
+since a cycle is a closed walk. For the other we need to show that a closed walk of
+odd length contains a cycle of odd length. This is not currently in Mathlib.
+
+A key step is `Walk.cons_isCycle_iff_length_ne_one`, which we have just proved: a
+path closed up by an edge is a cycle, unless the path is just that edge.
+
+We show first that any walk can be replaced by a path between the same endpoints
+whose length has the same parity, unless the graph has an odd cycle. The proof is by
+induction on the walk, mimicking `Walk.bypass`
+([Trails and Paths](https://jt496.github.io/GraphTheoryInLean/Walks/#section-trails-and-paths))
+while keeping track of parity. Given an edge `h : G.Adj a d` and a path `q` from `d`
+to `b` with the same parity as the rest of the walk, either `a` is not on `q` and
+`cons h q` is a path of the correct parity, or we split `q` at `a`. In this second
+case `Walk.bypass` would discard the closed walk `cons h (q.takeUntil a)` and keep
+`q.dropUntil a`. This preserves parity only if the closed walk has even length; if it
+has odd length then it is an odd cycle.
+
+[Figure: Splitting `q` at `a`; dashed parts are discarded. Left: the closed walk `cons h (q.takeUntil a)` has even length, so `q.dropUntil a` (orange) is a path from `a` to `b` with the same parity as `cons h q`. Right: the closed walk has odd length, so it is an odd cycle (red)](https://jt496.github.io/GraphTheoryInLean/figures/odd_cycle_bypass.svg)
+-/
+#source Walk.bypass
+
+lemma Walk.exists_isPath_or_odd_isCycle {a b : V} (p : G.Walk a b) :
+    (∃ q : G.Walk a b, q.IsPath ∧ (Even q.length ↔ Even p.length)) ∨
+      ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length := by
+  classical
+  induction p with
+  | nil => exact .inl ⟨nil, .nil, Iff.rfl⟩
+  | @cons a d b h p ih =>
+    rcases ih with ⟨q, hq, hpar⟩ | hodd
+    · by_cases ha : a ∈ q.support
+      · have hlen := length_append _ _  ▸ congrArg length (q.take_spec ha)
+        rcases Nat.even_or_odd (q.takeUntil a ha).length with he | ho
+        · exact .inr ⟨a, cons h (q.takeUntil a ha),
+            (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq.takeUntil ha, by grind⟩,
+            by simp_all⟩
+        · exact .inl ⟨q.dropUntil a ha, hq.dropUntil ha, by grind [length_cons]⟩
+      · exact .inl ⟨cons h q, hq.cons ha, by grind [length_cons]⟩
+    · exact .inr hodd
+
+/-!
+Now an odd closed walk `cons h p` contains an odd cycle: either the previous lemma
+finds one directly, or it replaces `p` by a path `q` of even length, and then
+`cons h q` is an odd cycle.
+-/
+theorem Walk.exists_odd_isCycle {u : V} (w : G.Walk u u) (hw : Odd w.length) :
+    ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length := by
+  cases w with
+  | nil => simp at hw
+  | cons h p =>
+    refine p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
+    have hqe : Even q.length := by grind [length_cons]
+    exact ⟨_, cons h q, (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq, by grind⟩,
+      by grind [length_cons]⟩
+
+/-!
+Hence a graph is bipartite iff it has no odd cycle.
+-/
+theorem isBipartite_iff_forall_isCycle_even :
+    G.IsBipartite ↔ ∀ u (c : G.Walk u u), c.IsCycle → Even c.length := by
+  refine ⟨fun h u c _ => two_colorable_iff_forall_loop_even.mp h u c, fun h => ?_⟩
+  refine two_colorable_iff_forall_loop_even.mpr fun u w => ?_
+  by_contra hw
+  obtain ⟨v, c, hc, hodd⟩ := w.exists_odd_isCycle (Nat.not_even_iff_odd.mp hw)
+  exact Nat.not_even_iff_odd.mpr hodd (h v c hc)
 
 /-!
 ## Eulerian Trails
@@ -795,9 +870,7 @@ A rotation of a walk is a Hamiltonian cycle iff the walk is a Hamiltonian cycle.
 /-!
 Mathlib also has the `SimpleGraph.IsHamiltonian` predicate, which is a property of
 finite graphs rather than walks. A graph on a finite vertex set is *Hamiltonian* if
-it contains a Hamiltonian cycle or is a single vertex. (Which complete graphs are
-Hamiltonian? See
-[Exercises](https://jt496.github.io/GraphTheoryInLean/Walks/#section-exercises-walks).)
+it contains a Hamiltonian cycle or is a single vertex.
 -/
 #source SimpleGraph.IsHamiltonian -- def IsHamiltonian (G : SimpleGraph α) : Prop :=
                                   --   Fintype.card α ≠ 1 →
@@ -837,8 +910,8 @@ We have already seen examples of how this allows for "correct by construction"
 definitions (such as `Walk.append`), but it also has a cost. Simply stating the
 proposition that two walks `p : G.Walk u v` and `q : G.Walk x y` are equal is only
 possible if they have precisely the same endpoints. This kind of problem arises
-frequently when working with *dependent types* such as `G.Walk u v`, whose type
-depends on values (here the endpoints).
+frequently when working with *dependent types* such as `G.Walk u v`, which depend on
+values (here the endpoints).
 
 We first deal with the special case when one of the walks is `nil`, before turning to
 the more general problem of endpoint mismatches with `Walk.copy`.
@@ -857,7 +930,7 @@ not `nil`, but whose first edge we don't know.
 
 The second is to hypothesize that the walk is not `nil`. This is potentially
 problematic: if the result is about a walk `p : G.Walk v w` then `p ≠ nil` does not
-type check since `nil` has type `G.Walk u u` for some `u`.
+type-check since `nil` has type `G.Walk u u` for some `u`.
 -/
 /-- error: Type mismatch
   nil
@@ -879,7 +952,7 @@ subsection [Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy)
 Recall that `Walk` is an inductive type with two constructors: `nil` (whose type
 forces its two endpoints to coincide) and `cons` (which does not). Now suppose we
 have a walk `p : G.Walk v w` and we try the naive test `p = nil`. For this equation
-to type check, Lean must unify the type of `nil`, namely `G.Walk u u`, with the type
+to type-check, Lean must unify the type of `nil`, namely `G.Walk u u`, with the type
 of `p`, namely `G.Walk v w`, which forces `v` and `w` to be *defeq*. So `p = nil`
 cannot even be *stated* unless `v` and `w` are already defeq.
 
@@ -891,7 +964,7 @@ constructor to the next, and its single constructor
 
 Two things follow immediately from this. Firstly, `Nil p` is a well-typed proposition
 for *every* `p : G.Walk v w`, whatever its endpoints: so we have replaced an equation
-that may not type check with a predicate that always does. Secondly, the only way to
+that may not type-check with a predicate that always does. Secondly, the only way to
 build a proof of `Nil p` is via this constructor, which applies precisely when `p` is
 `nil`. There is no constructor mentioning `cons`, so `Nil (cons h q)` is simply
 uninhabited.
@@ -940,9 +1013,7 @@ The Mathlib API also relates `Nil` to `length` directly.
 
 /-!
 ## Copy
--/
-section copy
-/-!
+
 Having solved the problem of type mismatches involving `nil`, we now turn to the more
 general problem of type mismatches between arbitrary walks. For example if
 `p : G.Walk u v₁` and `q : G.Walk v₂ w` where `v₁` and `v₂` are provably, but not
@@ -950,29 +1021,32 @@ definitionally, equal then we can't directly form `Walk.append p q` since `appen
 has a signature that expects compatible walks. If we try to write `p.append q` we get
 a type error.
 -/
-variable {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁)
 /-- Application type mismatch: The argument
   q
 has type
   G.Walk v₂ w
 but is expected to have type
-  G.Walk v₁ ?m.8 -/
-#guard_msgs (substring := true) in
-#check p.append q
-/-!
-A quick fix for this is to change the type of `q` using `h : v₂ = v₁` and `▸`
+  G.Walk v₁ w
 -/
-#check h ▸ q -- G.Walk v₁ w
+#guard_msgs (substring := true) in
+example {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁) :
+  G.Walk u w :=  p.append q
+
+/-!
+A quick fix for this is to change the type of `q` using `h : v₂ = v₁` and `▸`:
+-/
+example {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁) :
+  G.Walk u w :=  p.append (h ▸ q)
+
 /-!
 This changes the type of `q` without changing the walk itself.
 
-A more systematic way to do this is provided by `Walk.copy` which allows both start
-and end points of a walk to be changed simultaneously using proofs of equality.
+Mathlib's `Walk.copy` packages this cast with a name, so we can state lemmas about
+it, and it lets both endpoints be changed at once.
 -/
 #source Walk.copy
-
-#check (q.copy h rfl)           -- G.Walk v₁ w
-#check p.append (q.copy h rfl)  -- G.Walk u w
+example {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁) :
+  G.Walk u w :=  p.append (q.copy h rfl)
 
 /-!
 A simple example of where we need to introduce a `Walk.copy` is in the proof that
@@ -981,10 +1055,11 @@ A simple example of where we need to introduce a `Walk.copy` is in the proof tha
 On paper this is completely obvious: `Walk.tail` is the walk obtained by dropping its
 first edge, so `(p.cons h).tail` first adds and then drops the edge `h` to the start
 of `p`. However the type of `(p.cons h).tail` is `G.Walk (p.cons h).snd w` while `p`
-has type `G.Walk v w`. The vertex `(p.cons h).snd` unfolds to `p.getVert 0`, which
-is provably but not definitionally equal to `v` (`getVert` cannot compute without
-knowing whether `p` is `nil` or a `cons`), so the obvious equality does not type
-check. Instead we have to state this using `Walk.copy`.
+has type `G.Walk v w`. The vertex `(p.cons h).snd` unfolds to `p.getVert 0`, which is
+provably but not definitionally equal to `v`. So the obvious equality does not type
+check. Instead we have to state this using `Walk.copy`. (The definition of
+`getVert` matches on the walk before the index, so even `p.getVert 0` is stuck until
+Lean knows whether `p` is `nil` or a `cons`, although both cases give `v`.)
 -/
 #check tail_cons -- (cons h p).tail = p.copy ⋯ ⋯
 /-!
@@ -1003,10 +1078,9 @@ For example `length_copy`, `support_copy`, `edges_copy` and `isPath_copy`.
 
 /-!
 The `subst_vars` is essential. As its source shows, `copy` is just the cast
-`hu ▸ hv ▸ p`, and like the cast `h ▸ v` in the disjoint union `Σg` of
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs),
-it is stuck while the endpoints are distinct variables. So not even the length of a
-copied walk can be computed, and `rfl` fails.
+`hu ▸ hv ▸ p`, and like the cast `h ▸ v` in the disjoint union `Σg`
+(`SimpleGraph.sigma`), it is stuck while the endpoints are distinct variables. So not
+even the length of a copied walk can be computed, and `rfl` fails.
 -/
 /-- error: Tactic `rfl` failed: The left-hand side
   (p.copy hu hv).length
@@ -1014,8 +1088,7 @@ is not definitionally equal to the right-hand side
   p.length -/
 #guard_msgs (substring := true) in
 example {u u' v v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
-    (p.copy hu hv).length = p.length := by
-  rfl
+    (p.copy hu hv).length = p.length := by rfl
 
 /-!
 Substituting identifies `u'` with `u` and `v'` with `v`, so both casts are now along
@@ -1028,12 +1101,12 @@ example {u u' v v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
   rfl
 
 /-!
-Notice that the four `copy` lemmas above are all simp lemmas with `p.copy` on the
-LHS so that simp will systematically remove `.copy` when possible by rewriting to
+Notice that the four `copy` lemmas listed above are all simp lemmas with `p.copy` on
+the LHS so that simp will systematically remove `.copy` when possible by rewriting to
 the original walk.
 
 One such lemma that is currently missing is that `p.copy` is a Hamiltonian path iff
-`p` is. We give it here.
+`p` is. We give it here; the proof is the obvious one.
 -/
 @[simp]
 lemma Walk.isHamiltonian_copy {u u' v v'} {p : G.Walk u v} [DecidableEq V]
@@ -1051,9 +1124,9 @@ the same as taking a copy of the equivalent `cons` walk.
 
 /-!
 Some, but certainly not all, such results are simp lemmas. To understand why, we need
-to read the docstring for `Walk.copy`, in particular the following comment:
+to read the doc-string for `Walk.copy`, in particular the following comment:
 
-> The simp-normal form is for the copy to be pushed outward. That way calculations
+> The simp-normal form is for the `copy` to be pushed outward. That way calculations
 can occur within the "copy context".
 
 What this means is that lemmas involving `Walk.copy` are only marked as `@[simp]` if
@@ -1111,7 +1184,6 @@ example {a b c d u v x y} (hub : u = b) (hvx : v = x) (hyc : y = c)
   rw [append_copy_copy, cons_copy, concat_copy, length_copy, length_concat,
     length_cons, length_append]
 
-end copy
 /-!
 ## Transfer
 
@@ -1161,8 +1233,8 @@ Two nested transfers fuse into a single one via `transfer_transfer`.
 -/
 #check transfer_transfer -- (p.transfer H hp).transfer K hp' = p.transfer K ⋯
 /-!
-Finally, simp lemmas such as `length_transfer`, `support_transfer`, `edges_transfer`
-allow us to transfer properties of the walk across the transfer.
+Finally, simp lemmas such as `length_transfer`, `support_transfer` and
+`edges_transfer` allow us to transfer properties of the walk across the transfer.
 -/
 #check length_transfer  -- (p.transfer H hp).length = p.length
 #check support_transfer -- (p.transfer H hp).support = p.support
@@ -1205,9 +1277,8 @@ When `G ≤ H` (and so trivially the edges of any walk in `G` lie in `H`)
 
 /-!
 Recall `P[n]`, the `pathGraph` with `n` vertices on `Fin n`, and the embedding
-`pathGraphEmbedding n k : P[n] ↪g P[n + k]` from
-[Exercises](https://jt496.github.io/GraphTheoryInLean/Maps/#section-exercises-maps),
-which sends `i ↦ i + k`, so its image is the last `n` vertices of `P[n + k]`.
+`pathGraphEmbedding n k : P[n] ↪g P[n + k]`, which sends `i ↦ i + k`, so its image is
+the last `n` vertices of `P[n + k]`.
 -/
 #check pathGraph
 #check pathGraphEmbedding
@@ -1231,10 +1302,10 @@ def Walk.pathGraphWalk (n : ℕ) : (P[n + 1]).Walk 0 (Fin.last n) :=
           (by simp [pathGraph_adj] : P[n + 2].Adj 0 1)
 
 /-!
-We could have defined this walk directly, indeed we previously defined walks directly
+We could have defined this walk directly; indeed we previously defined walks directly
 in `pathNat₁` so why not give a direct definition here? The key difference here is
 that the vertex type of each `P[n]` is different so the induction would be more
-painful, also we would have fewer results to rely on in subsequent proofs. From the
+painful, and we would have fewer results to rely on in subsequent proofs. From the
 `Walk.map` definition the proof that this is a Hamiltonian path will drop out very
 easily below.
 -/
@@ -1271,11 +1342,11 @@ lemma Walk.pathGraphWalk_isPath {n} : (pathGraphWalk n).IsPath := by
 /-!
 Hence this walk is a Hamiltonian path.
 -/
-lemma Walk.pathGraphWalk_isHamiltonian {n} : Walk.IsHamiltonian (pathGraphWalk n) :=
+lemma Walk.pathGraphWalk_isHamiltonian {n} : (pathGraphWalk n).IsHamiltonian  :=
   isHamiltonian_iff_isPath_and_length_eq.mpr ⟨pathGraphWalk_isPath, by simp⟩
 
 /-!
-## Cycle Graphs and Complete Graphs Are Hamiltonian
+## Cycle Graphs and Complete Graphs are Hamiltonian
 
 Having walked along the path graph from end to end we can wrap this Hamiltonian path
 around in the cycle graph to give a Hamiltonian cycle. The path graph `P[n + 3]` is
@@ -1303,7 +1374,7 @@ lemma Walk.cycleGraphCycle_isCycle (n : ℕ) : (cycleGraphCycle n).IsCycle := by
   simp
 
 /-!
-Since it is a cycle of length `n + 3` through the `n + 3` vertices of `C[n + 3]`,
+Since it is a cycle of length `n + 3` containing the `n + 3` vertices of `C[n + 3]`,
 it is a Hamiltonian cycle, and so cycle graphs (on at least three vertices) are
 Hamiltonian.
 -/
@@ -1357,7 +1428,6 @@ lemma top_isHamiltonian [Fintype V] [DecidableEq V] (hn : 3 ≤ Fintype.card V) 
   exact ⟨e a, c.map (Iso.completeGraph e).toHom, hc.map e.bijective⟩
 
 end basics
-section hypercube
 /-!
 # Walks in Hypercube and Mycielskian Graphs
 
@@ -1390,6 +1460,7 @@ via the `embedBool` embedding we defined earlier. (Recall that `embedBool n b` s
 -/
 #check hypercube.embedBool
 
+section hypercube
 open hypercube HypercubeVert
 /-!
 We can define Hamming paths using `if-then-else` syntax to split on the value of the
@@ -1400,8 +1471,7 @@ which is `(u, b)` by definition but not syntactically, so in both cases we use
 
 Since a Hamming path is a path between two `HypercubeVert n` vertices, we choose to
 put it, and related definitions and results, in the `HypercubeVert` namespace.
-
- (Although `(embedBool n b) u` and `(u, b)` are defeq, we discharge the first side
+(Although `(embedBool n b) u` and `(u, b)` are defeq, we discharge the first side
 condition of each `Walk.copy` with `by simp` rather than `rfl`. Lean stores each such
 proof as an auxiliary lemma, and with `rfl` its statement would be
 `(embedBool n b).toHom u = (embedBool n b).toHom u`. The definition would still be
@@ -1433,7 +1503,7 @@ directly below.
                    --         (x y : (i : ι) → β i) : ℕ
 
 /-- Hamming distance in `Q[n]` defined for `HypercubeVert n` directly. -/
-def HypercubeVert.hammingDist : {n : ℕ} → (u v : HypercubeVert n) → ℕ
+protected def HypercubeVert.hammingDist : {n : ℕ} → (u v : HypercubeVert n) → ℕ
 | 0, _, _ => 0
 | _ + 1, (u, b), (v, c) => u.hammingDist v + if b = c then 0 else 1
 
@@ -1451,16 +1521,15 @@ between the first `n` coordinates, plus `1` iff the last coordinates differ.
 -/
 @[simp]
 lemma HypercubeVert.hammingDist_succ {n : ℕ} {u v : HypercubeVert (n + 1)} :
-  hammingDist u v =
-    hammingDist u.1 v.1 + if u.2 = v.2 then 0 else 1 := rfl
+  u.hammingDist v =
+    u.1.hammingDist v.1 + if u.2 = v.2 then 0 else 1 := rfl
 
 /-!
 The proofs of basic facts about `hammingPath` are by standard induction, using the
 `split_ifs` tactic to deal with the `if-then-else` when needed.
-
-The length of the Hamming path is equal to the Hamming distance between the two
-vertices.
 -/
+/-- The length of the Hamming path is equal to the Hamming distance between the two
+vertices. -/
 @[simp]
 lemma HypercubeVert.length_hammingPath {n} (u v : HypercubeVert n) :
     (u.hammingPath v).length = u.hammingDist v := by
@@ -1481,15 +1550,18 @@ lemma HypercubeVert.hammingPath_isPath {n} (u v : HypercubeVert n) :
   induction n with
   | zero => exact Walk.IsPath.nil
   | succ n ih =>
-    rcases u
-    rcases v
+    rcases u with ⟨u, b⟩
+    rcases v with ⟨v, c⟩
     rw [hammingPath]
     split_ifs with h <;> apply Walk.IsPath.copy
     · apply IsPath.map (embedBool ..).injective (ih _ _)
     · apply IsPath.map (embedBool ..).injective (ih _ _)|>.concat
+      -- the mapped path lies in the slice with last coordinate `b`, so it cannot
+      -- visit the new end vertex `(v, c)`, as `b ≠ c`
       simp_rw [Walk.support_map, List.mem_map]
-      rintro ⟨_, _, _, _⟩
-      contradiction
+      rintro ⟨w, -, hw⟩
+      -- `hw : (w, b) = (v, c)`, so comparing last coordinates gives `b = c`
+      exact h (congrArg Prod.snd hw)
 
 /-!
 We will use Hamming paths to show that the hypercube is connected in
@@ -1519,7 +1591,7 @@ def HypercubeVert.grayEnd : (n : ℕ) → HypercubeVert n
   | 0 => ()
   | n + 1 => (grayStart n, true)
 
-/-- The Gray Code walk in `Q[n]`. -/
+/-- The Gray code walk in `Q[n]`. -/
 def Walk.grayWalk : (n : ℕ) → Q[n].Walk (grayStart n) (grayEnd n)
   | 0 => nil  -- The nil walk from `()` to `()`
   | n + 1 =>
@@ -1540,7 +1612,7 @@ def Walk.grayWalk : (n : ℕ) → Q[n].Walk (grayStart n) (grayEnd n)
     firstHalf.append <| cons crossAdj secondHalf
 
 /-!
-[Figure: The Gray code walk in $Q_n$](https://jt496.github.io/GraphTheoryInLean/figures/grayWalk.svg)
+[Figure: The Gray code walk in $Q_n$ for $n = 1, 2, 3, 4$, from `grayStart n` (green) to `grayEnd n` (red)](https://jt496.github.io/GraphTheoryInLean/figures/grayWalk.svg)
 
 We can now easily prove that this walk has length `2 ^ n - 1` and that it is a path.
 -/
@@ -1567,10 +1639,15 @@ lemma Walk.grayWalk_isPath (n) : (grayWalk n).IsPath := by
     -- two parts of the walk have disjoint support
     intro y hy hz
     rw [Walk.support_copy, Walk.support_map, List.mem_map] at hy hz
-    rcases hy with ⟨_,_,_,_⟩; rcases hz with ⟨_,_,_,_⟩
+    -- the first half lies in the `false` slice and the second in the `true` slice,
+    -- so `y = (a, false) = (b, true)`, and the last coordinates clash
+    obtain ⟨a, -, rfl⟩ := hy
+    obtain ⟨b, -, hb⟩ := hz
+    have hlast : true = false := congrArg Prod.snd hb
+    contradiction
 
 /-!
-Moreover it is clearly a Hamiltonian path. (Since `Q[n]` has `2 ^ n` vertices.)
+Moreover it is clearly a Hamiltonian path, since `Q[n]` has `2 ^ n` vertices.
 -/
 @[simp]
 lemma Walk.grayWalk_isHamiltonian (n : ℕ) : (grayWalk n).IsHamiltonian :=
@@ -1591,7 +1668,7 @@ variable {V : Type*} {G : SimpleGraph V}
 
 Recall `mμ[G]`, the `mycielskian` of a graph `G`. Given any non-nil walk in `G`,
 there is a natural way to define a walk in `mμ[G]`. We explore this construction in
-detail below, using it to prove that every edge of `G` gives a 5-cycle in `mμ[G]`,
+detail below, using it to prove that every edge of `G` gives a `5`-cycle in `mμ[G]`,
 and that `mμ[G]` contains a Hamiltonian path or cycle whenever `G` does (provided
 `G` has at least two vertices).
 
@@ -1601,8 +1678,8 @@ definition and from which it is easy to build paths and cycles in `mμ[G]` from 
 and cycles in `G`.
 
 First, note that if `u — w` is a walk of length 1 in `G` (i.e. a single edge) then
-there is a corresponding walk of length 2 in `mμ[G]`: given by `u ₗ — w ₗ — u ᵣ`.
-Further, if `u — v — w`, is a walk of length 2 in `G`, then there is a corresponding
+there is a corresponding walk of length 2 in `mμ[G]`, given by `u ₗ — w ₗ — u ᵣ`.
+Further, if `u — v — w` is a walk of length 2 in `G`, then there is a corresponding
 walk of length 4 in `mμ[G]`: `u ₗ — v ᵣ — w ₗ — v ₗ — u ᵣ`. Notice that this second
 example can be obtained from the first by taking the walk corresponding to the single
 edge `v — w`, reversing it and adding the edges `u ₗ — v ᵣ` and `v ₗ — u ᵣ` to the
@@ -1613,7 +1690,9 @@ Having built the walk in `mμ[G]` from `v ₗ` to `v ᵣ` corresponding to a non
 `p : G.Walk v w`, the walk for `cons h p`, where `h : G.Adj u v`, is formed by
 prepending the edge `u ₗ — v ᵣ` to the reverse of the walk corresponding to `p` and
 then concatenating the edge `v ₗ — u ᵣ` to give
-`mycielskianAux(cons h p) = u ₗ — [mycielskianAux(p).reverse] — u ᵣ`
+`mycielskianAux(cons h p) = u ₗ — [mycielskianAux(p).reverse] — u ᵣ`.
+
+[Figure: The two cases of the auxiliary zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianAux.svg)
 -/
 /-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `u ₗ`
 to `u ᵣ` in `mμ[G]`. -/
@@ -1651,15 +1730,11 @@ lemma Walk.mycielskianAux_cons_cons {u v x w} (h : G.Adj u v) (h' : G.Adj v x)
         ((mycielskianAux hn').reverse.concat (by simpa using h.symm)) := rfl
 
 /-!
-[Figure: Three cases of the auxiliary zig-zag walk in mμ(G)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianAux.svg)
--/
-
-/-!
-From the definition of `mycielskianAux`, Lean automatically generates a *functional
-induction* principle `mycielskianAux.induct`. It has one case for each `match` case
-of the definition, named `case1` and `case2`, whose variables are the pattern
-variables of that case, together with an induction hypothesis wherever the
-definition calls itself. We use it as `induction hn using mycielskianAux.induct`:
+From the definition of `mycielskianAux`, Lean automatically generates a
+*functional induction* principle `mycielskianAux.induct`. It has one case for each
+`match` case of the definition, named `case1` and `case2`, whose variables are the
+pattern variables of that case, together with an induction hypothesis wherever the
+definition calls itself. We use it with `induction hn using mycielskianAux.induct`:
 its cases follow the definition exactly, which plain induction on the walk does not.
 -/
 #check mycielskianAux.induct -- slightly scary looking! (but useful)
@@ -1675,12 +1750,12 @@ lemma Walk.length_mycielskianAux {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
     grind [length_cons, mycielskianAux_cons_cons, length_concat, length_reverse]
 
 /-!
-We can use the auxiliary walk to map any non-trivial walk of length `k` in `G` to a
+We can use the auxiliary walk to map any non-nil walk of length `k` in `G` to a
 walk of length `2k + 2` in the Mycielskian. This preserves the property of being a
 path and in particular maps Hamiltonian paths to Hamiltonian paths. We simply add the
 two edges `u ᵣ — none — w ᵣ` at the end of the auxiliary walk.
 -/
-/-- Given a non-trivial walk from `u` to `w` in `G`, this is a walk from `u ₗ` to
+/-- Given a non-nil walk from `u` to `w` in `G`, this is a walk from `u ₗ` to
 `w ᵣ` in `mμ[G]`. If the original walk was a (Hamiltonian) path then so is the new
 walk. -/
 protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
@@ -1688,10 +1763,10 @@ protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
   mycielskianAux hn|>.concat (by simp) |>.concat (by simp : mμ[G].Adj none _ )
 
 /-!
-[Figure: Converting a path in $G$ to a path in mμ(G)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
+[Figure: Converting a path in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
 
 Using this walk we can also map closed walks in `G` to closed walks in the
-Mycielskian. This will preserve the property of being a cycle and in particular maps
+Mycielskian. This preserves the property of being a cycle and in particular maps
 Hamiltonian cycles to Hamiltonian cycles in the Mycielskian.
 -/
 
@@ -1719,7 +1794,7 @@ lemma Walk.mycielskianClosed_cons_cons {u v w} (h : G.Adj u v) (h' : G.Adj v w)
         (by simpa using h) := rfl
 
 /-!
-[Figure: Converting a cycle in $G$ to a cycle in mμ(G)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_cycle.svg)
+[Figure: Converting a cycle in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_cycle.svg)
 -/
 /-!
 The `Walk.mycielskian` of a non-nil walk `p` has length `2 * p.length + 2`.
@@ -1757,7 +1832,7 @@ lemma Walk.exists_of_mem_support_mycielskianAux {u w z} {p : G.Walk u w}
   induction hn using mycielskianAux.induct <;> aesop
 
 /-!
-In particular, the auxiliary walk does not visit `none`
+In particular, the auxiliary walk does not visit `none`.
 -/
 @[simp]
 lemma Walk.none_notMem_support_mycielskianAux {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
@@ -1827,20 +1902,19 @@ lemma Walk.mycielskianClosed_isCycle {u} {p : Walk G u u} (hn : ¬ p.Nil)
   -- we use the `cons'` pattern here to make the InfoView more readable.
   | cons' _ v _ h (cons' _ w _ h' p) => by
     -- we now use `cons_isCycle_iff_length_ne_one` that we proved earlier to reduce
-    -- this to showing that the `Walk.mycielskian` is a path of length at least 2.
+    -- this to showing that the `Walk.mycielskian` is a path of length not equal to 1
     rw [mycielskianClosed, cons_isCycle_iff_length_ne_one]
     -- We know that the `Walk.mycielskian` of a path is a path and `simp`
     -- can take care of the length.
-    have hp : (cons h' p).IsPath := IsPath.mk' hc
-    exact ⟨hp.mycielskian (by simp), by simp⟩
+    exact ⟨(IsPath.mk' hc).mycielskian (by simp), by simp⟩
 
 /-!
 The weaker assumption is exactly what we need for one application of the result. If
 `h : G.Adj u v` then the closed walk `u — v — u` goes along an edge and straight
 back, so it is not a cycle. But it is not nil, and the tail `[v, u]` of its support
 has no repeated vertices, so its image `u ᵣ — v ₗ — u ₗ — v ᵣ — none — u ᵣ` is a
-cycle. So every edge of `G` gives a 5-cycle in `mμ[G]`. We will use this to find the
-bridges of `mμ[G]` in
+`5`-cycle. Hence every edge of `G` gives a `5`-cycle in `mμ[G]`. We will use this to
+find the bridges of `mμ[G]` in
 [Bridges](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-bridges)
 and to compute its girth in
 [The Girth of the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Distance/#section-the-girth-of-the-mycielskian).
@@ -1870,7 +1944,7 @@ lemma Walk.IsHamiltonianCycle.mycielskianClosed [DecidableEq V] {u} {p : G.Walk 
   refine isHamiltonianCycle_iff_isCycle_and_length_eq.2
     ⟨mycielskianClosed_isCycle hp.isCycle.not_nil hp.isCycle.support_nodup, ?_⟩
   grind [length_mycielskianClosed hp.isCycle.not_nil, hp.length_eq,
-    Fintype.card_option, Fintype.card_sum]
+        Fintype.card_option, Fintype.card_sum]
 
 /-!
 Finally we can show that if `G` is Hamiltonian then `mμ[G]` is also Hamiltonian
@@ -1878,8 +1952,10 @@ Finally we can show that if `G` is Hamiltonian then `mμ[G]` is also Hamiltonian
 vertex and so is clearly not Hamiltonian).
 -/
 theorem IsHamiltonian.mycielskian [DecidableEq V] [Fintype V]
-    (hH : G.IsHamiltonian) (hf : Fintype.card V ≠ 1) : mμ[G].IsHamiltonian :=
-  fun _ => have ⟨_, _, hc⟩ := hH hf; ⟨_, _, hc.mycielskianClosed⟩
+    (hH : G.IsHamiltonian) (hf : Fintype.card V ≠ 1) : mμ[G].IsHamiltonian := by
+  intro
+  have ⟨_, _, hc⟩ := hH hf
+  exact ⟨_, _, hc.mycielskianClosed⟩
 
 end mycielskian
 section ore
@@ -1900,15 +1976,22 @@ repeatedly joining non-adjacent vertices whose degree sum is at least the number
 vertices. Ore's theorem falls out immediately, since the closure of an Ore graph is
 complete and complete graphs are Hamiltonian (`top_isHamiltonian`).
 
+Recall that if `u ≠ v` then `G ⊔ edge u v` is the graph obtained from `G` by adding
+the edge `u — v`.
+
 The proof has four steps.
 
 1. A *maximal* path (one that cannot be extended at either end) whose endpoints
-   satisfy Ore's degree condition can be closed up into a cycle through exactly the
+   satisfy Ore's degree condition can be closed up into a cycle visiting exactly the
    same vertices. The tools are Pósa rotations and a counting argument.
-2. Cutting a Hamiltonian cycle open at an edge and closing it up again by step 1
-   gives the *one-step lemma*: joining two non-adjacent vertices whose degree sum is
-   at least `|V|` does not change whether the graph is Hamiltonian.
-3. Repeating the one-step lemma, in rounds, shows that a graph is Hamiltonian iff
+2. If `u` and `v` are distinct non-adjacent vertices whose degree sum is at least
+   `|V|`, then `G ⊔ edge u v` is Hamiltonian iff `G` is. Adding an edge can only
+   help, so the hard part is the converse: a Hamiltonian cycle of `G ⊔ edge u v`
+   gives one of `G`. If the cycle avoids the new edge `u — v`, it already lies in
+   `G`. Otherwise, deleting `u — v` leaves a Hamiltonian path from `u` to `v` in `G`.
+   A Hamiltonian path is certainly maximal, so step 1 closes it up into a Hamiltonian
+   cycle of `G`.
+3. Adding such edges repeatedly, in rounds, shows that a graph is Hamiltonian iff
    its closure is.
 4. Ore's and Dirac's theorems follow, since the closure of an Ore graph is complete.
 
@@ -1925,14 +2008,14 @@ length as `P`, and still starts at `v₀`, but now ends at `vᵢ₊₁`.
 
 Currently this isn't in Mathlib but we can easily define it for ourselves.
 
-Given a walk `p : G.Walk u v` and an edge from the `i`th vertex of `p` to its end
+Given a walk `p : G.Walk u v` and an edge from the `i`-th vertex of `p` to its end
 vertex `v`, i.e. `h : G.Adj (p.getVert i) v`, we split `p` at index `i` using
 `Walk.take i` and `Walk.drop i`, which have types `G.Walk u (p.getVert i)` and
 `G.Walk (p.getVert i) v` respectively. The rotated walk is then the concatenation of
 `p.take i` with the edge from `p.getVert i` to `v` (i.e. `h`) followed by the reverse
 of the tail of `p.drop i`, which goes from `v` to `p.getVert (i + 1)`.
 
-[Figure: A Pósa rotation of a path](https://jt496.github.io/GraphTheoryInLean/figures/posa.svg)
+[Figure: A Pósa rotation. Top: a path with a chord from $v_i$ to its endpoint $v_k$. Bottom: the rotated path, which ends at $v_{i+1}$](https://jt496.github.io/GraphTheoryInLean/figures/posa.svg)
 -/
 section posa
 variable {u v : V} {p : G.Walk u v} {i : ℕ}
@@ -1949,13 +2032,13 @@ lemma Walk.lt_length_of_adj_getVert_end (h : G.Adj (p.getVert i) v) :
 /-!
 One issue with giving the definition of the Pósa rotation is that although the
 reverse of the tail of `p.drop i` goes from `v` to `p.getVert (i + 1)`, this is not
-clear from the type of this walk.
+obvious from the type of this walk.
 -/
 #check (p.drop i).tail.reverse -- G.Walk v (p.drop i).snd
 
 /-!
-In order to give the definition of Pósa rotation we need to use `Walk.copy` and give
-a proof that `(p.drop i).snd = p.getVert (i + 1)` (which simp can provide).
+So to give the definition of Pósa rotation we need to use `Walk.copy` and give a
+proof that `(p.drop i).snd = p.getVert (i + 1)` (which simp can provide).
 -/
 /-- The `i`-th Pósa rotation of a walk `p`. -/
 def Walk.posaRotate (p : G.Walk u v) (h : G.Adj (p.getVert i) v) :
@@ -2010,7 +2093,7 @@ lemma Walk.mem_support_posaRotate_iff {u v : V} {i : ℕ} (p : G.Walk u v)
       ← cons_tail_support (p.drop i), List.mem_cons]
 
 /-!
-[Figure: Closing a Pósa rotation to get a cycle](https://jt496.github.io/GraphTheoryInLean/figures/posa_cycle.svg)
+[Figure: Closing a Pósa rotation to get a cycle. Top: the rotated path with an edge from its endpoint $v_{i+1}$ back to $v_0$. Bottom: the resulting cycle](https://jt496.github.io/GraphTheoryInLean/figures/posa_cycle.svg)
 
 If `p` is a walk from `u` to `v` and `h₁ : G.Adj (p.getVert i) v` then we can form
 the Pósa rotation ending at `p.getVert (i + 1)`. If there is also an edge
@@ -2059,16 +2142,16 @@ lemma Walk.IsPath.posaClosed_isCycle (hp : p.IsPath) (h2 : 2 ≤ p.length)
 /-!
 The key idea in all of the Hamiltonicity theorems we prove below goes back to Dirac.
 We state it here with Ore's degree condition. Suppose `p = v₀, v₁, ..., vₖ` (with
-`k ≥ 2`) is a *maximal* path whose endpoints, if non-adjacent, satisfy the degree
-condition `deg v₀ + deg vₖ ≥ |V|`. Then `p` can be closed into a cycle through
+`k ≥ 2`) is a *maximal* path whose endpoints, if non-adjacent, satisfy the Ore degree
+condition: `deg v₀ + deg vₖ ≥ |V|`. Then `p` can be closed into a cycle containing
 exactly the vertices of `p`.
 
-If `v₀ — vₖ` is an edge this is immediate. Otherwise `v₀` and `vₖ` are non-adjacent,
-so `deg v₀ + deg vₖ ≥ |V|`. Every neighbour of `v₀` is `vᵢ₊₁` for some `i < k`, and
+If `v₀` and `vₖ` are adjacent this is immediate. Otherwise the Ore condition gives
+`deg v₀ + deg vₖ ≥ |V|`. Every neighbour of `v₀` is `vᵢ₊₁` for some `i < k`, and
 every neighbour of `vₖ` is `vⱼ` for some `j < k`. Since a path has distinct vertices,
 these indices `i` and `j` form two subsets of `{0, ..., k - 1}` of sizes `deg v₀` and
 `deg vₖ`, and `k < |V| ≤ deg v₀ + deg vₖ`. So by pigeonhole the two subsets share an
-index `i`, and both edges `vᵢ — vₖ` and `vᵢ₊₁ — v₀` are present: a *crossing pair*.
+index `i`, and both edges `vᵢ₊₁ — v₀` and `vᵢ — vₖ` are present: a *crossing pair*.
 The Pósa rotation `v₀, ..., vᵢ, vₖ, vₖ₋₁, ..., vᵢ₊₁` followed by the edge `vᵢ₊₁ — v₀`
 is then the required cycle (this is the `Walk.posaClosed` we just defined).
 -/
@@ -2076,14 +2159,16 @@ end posa
 /-!
 ## Counting Bijections and a Crossing Pair
 -/
+section finset
 open Finset
 /-!
-We prove a general counting lemma. If `p` is a path containing every neighbour of a
-vertex `x`, and `f : ℕ → ℕ` maps `{i | i < p.length}` into `{i | i ≤ p.length}`, is
-injective on `{n | n < p.length}` and is surjective on
-`{j | j ≤ p.length ∧ p.getVert j ≠ x}`, then the indices `i < p.length` with
-`G.Adj (p.getVert (f i)) x` number exactly `G.degree x`: the bijection being
-`i ↦ p.getVert (f i)` onto the neighbours of `x`.
+We now prove a general counting lemma to help with the informal argument we gave
+above. If `p` is a path containing every neighbour of a vertex `x`, and `f : ℕ → ℕ`
+maps `{i | i < p.length}` into `{i | i ≤ p.length}`, is injective on
+`{n | n < p.length}` and is surjective on `{j | j ≤ p.length ∧ p.getVert j ≠ x}`,
+then the indices `i < p.length` with `G.Adj (p.getVert (f i)) x` number exactly
+`G.degree x`. As we can see in its proof, the bijection is `i ↦ p.getVert (f i)` onto
+the neighbours of `x`.
 -/
 lemma Walk.IsPath.card_filter_adj_getVert_eq_degree [DecidableRel G.Adj] {u v x : V}
     [Fintype (G.neighborSet x)]
@@ -2127,8 +2212,8 @@ lemma Walk.IsPath.card_succ_adj_start [DecidableRel G.Adj] {u v : V}
 
 /-!
 The indices `i < p.length` with `G.Adj (p.getVert i) v` biject with the neighbours
-of `v`, hence number exactly `G.degree v`. (This is the lemma with `x = v` and
-`f i = i`.)
+of `v`, hence number exactly `G.degree v`. (This is
+`IsPath.card_filter_adj_getVert_eq_degree` with `x = v` and `f i = i`.)
 -/
 lemma Walk.IsPath.card_adj_end [DecidableRel G.Adj] {u v : V}
     [Fintype (G.neighborSet v)]
@@ -2142,7 +2227,9 @@ lemma Walk.IsPath.card_adj_end [DecidableRel G.Adj] {u v : V}
 
 /-!
 The next two results are about a *maximal path*. We define this as
-`Walk.IsMaximalPath`, a structure extending `Walk.IsPath`.
+`Walk.IsMaximalPath`, a structure extending `Walk.IsPath`. (The `end` field is
+written `«end»` because `end` is a Lean keyword; French quotes turn it into an
+ordinary name.)
 
 (Compare `Walk.IsMaximumPath` in the exercises: that is the stronger condition
 that no path anywhere in `G` is longer.)
@@ -2150,7 +2237,7 @@ that no path anywhere in `G` is longer.)
 /-- A *maximal path*: a path that cannot be extended at either end, or equivalently
 one for which every neighbour of either endpoint already lies on it. -/
 structure Walk.IsMaximalPath {u v : V} (p : G.Walk u v) : Prop extends
-    isPath : p.IsPath where
+  isPath : p.IsPath where
   /-- Every neighbour of the start vertex lies on the path. -/
   start : ∀ w, G.Adj u w → w ∈ p.support
   /-- Every neighbour of the end vertex lies on the path. -/
@@ -2184,10 +2271,10 @@ lemma Walk.IsMaximalPath.exists_crossing_index [Fintype V] {u v : V}
 /-!
 ## Ore's Condition and Closing the Path
 
-We can now assemble the construction. Given a maximal path of length ≥ 2, either the
+We can now put things together. Given a maximal path of length ≥ 2, either the
 endpoints are adjacent (so it can be closed with `concat`) or the crossing pair gives
-a `Walk.posaClosed`. In both cases we obtain a cycle based at `u` through exactly the
-vertices of `p`, of length `p.length + 1`.
+a `Walk.posaClosed`. In both cases we obtain a cycle based at `u` containing exactly
+the vertices of `p`, of length `p.length + 1`.
 
 Note that all we need for this is the degree-sum bound for the single pair of
 endpoints, and only when they are non-adjacent. This is *Ore's condition* at a
@@ -2226,7 +2313,7 @@ lemma Walk.IsMaximalPath.exists_cycle_spanning [Fintype V] {u v : V}
 /-!
 A Hamiltonian path is trivially maximal, since every vertex lies on it. So a
 Hamiltonian path of length at least 2 whose endpoints form an Ore pair closes up into
-a cycle through every vertex: a Hamiltonian cycle.
+a cycle visiting every vertex: a Hamiltonian cycle.
 -/
 lemma Walk.IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair [Fintype V]
     [DecidableEq V] {u v : V} [Fintype (G.neighborSet u)] [Fintype (G.neighborSet v)]
@@ -2244,8 +2331,8 @@ lemma Walk.IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair [Fintype V]
 
 The key observation of Bondy and Chvátal is that the degree condition above is only
 ever needed one pair at a time: if `u` and `v` are distinct non-adjacent vertices
-with `deg u + deg v ≥ |V|`, then `G` is Hamiltonian iff `G` with the edge `u — v`
-added is Hamiltonian. Repeatedly adding such edges yields the *closure* of `G`.
+with `deg u + deg v ≥ |V|`, then `G` is Hamiltonian iff `G ⊔ edge u v` is
+Hamiltonian. Repeatedly adding such edges yields the *closure* of `G`.
 
 We start with an easy lemma: reversal preserves being a Hamiltonian walk.
 (Reversal also preserves being a Hamiltonian *cycle*: see the exercises.)
@@ -2256,11 +2343,13 @@ lemma Walk.isHamiltonian_reverse [DecidableEq V] {u v : V} {p : G.Walk u v} :
   simp only [Walk.IsHamiltonian, support_reverse, List.count_reverse]
 
 /-!
-The first step towards the Bondy–Chvátal theorem is a piece of cycle surgery: given a
-Hamiltonian cycle `c` through an edge `u — v`, deleting that edge from `c` should
-leave a Hamiltonian path from `u` to `v`. Hamiltonicity plays no part in the surgery
-itself, so we cut open an arbitrary cycle and record what the resulting path
-inherits from it.
+The first step towards the Bondy–Chvátal theorem is a piece of cycle surgery. A
+Hamiltonian cycle of `G ⊔ edge u v` may use the new edge `u — v`, which is not
+available in `G`. Deleting `u — v` from such a cycle `c` should leave a
+Hamiltonian path from `u` to `v` that does lie in `G`, and the previous section
+then closes this path up into a Hamiltonian cycle of `G`. Hamiltonicity plays no
+part in the surgery itself, so we cut open an arbitrary cycle and record what the
+resulting path inherits from it.
 
 We first need to prove a simple lemma about darts of a cycle.
 -/
@@ -2342,21 +2431,17 @@ lemma Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges [DecidableE
 /-!
 ### Adding a Single Edge
 
-We can now prove the heart of the Bondy–Chvátal theorem: if the pair `u`, `v`
-satisfies Ore's condition `IsOrePair`, then adding the edge `u — v` to `G` does not
-change whether `G` is Hamiltonian.
-
-Mathlib provides `SimpleGraph.edge u v`, the graph whose only edge is `u — v`, so
-that `G ⊔ edge u v` is `G` with the edge `u — v` added.
+We can now prove the heart of the Bondy–Chvátal theorem: if `u` and `v` satisfy
+Ore's condition `IsOrePair`, then `G ⊔ edge u v` is Hamiltonian iff `G` is.
 
 The interesting direction takes a Hamiltonian cycle `c` of `G ⊔ edge u v`. If `c`
 avoids the edge `u — v` then it transfers directly to `G`. Otherwise our previous
 lemma cuts `c` open into a Hamiltonian path from `u` to `v` avoiding `u — v`, which
 transfers to `G`; since the path is Hamiltonian, every neighbour of `u` and of `v`
 trivially lies on it, so `IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair` (via
-`IsMaximalPath.exists_cycle_spanning`) closes it back up into a cycle through all of
-`V`, using a crossing pair if `u` and `v` are non-adjacent in `G`. This is where the
-degree condition enters. The reverse direction is simply monotonicity of
+`IsMaximalPath.exists_cycle_spanning`) closes it back up into a cycle containing all
+of `V`, using a crossing pair if `u` and `v` are non-adjacent in `G`. This is where
+the degree condition enters. The reverse direction is simply monotonicity of
 Hamiltonicity (`IsHamiltonian.mono` in Mathlib).
 
 In both cases we transfer a walk in `G ⊔ edge u v` that avoids the new edge `u — v`
@@ -2398,9 +2483,9 @@ Call a pair of vertices *eligible* if they are distinct, non-adjacent, and have
 degree sum at least `|V|`. Any eligible pair is an `IsOrePair`, but not conversely:
 an adjacent pair satisfies `IsOrePair` vacuously but is not eligible.
 
-The one-step lemma `sup_edge_isHamiltonian_iff` says that adding an edge between an
-eligible pair does not change whether the graph is Hamiltonian, so we now simply keep
-adding such edges until no eligible pair remains. The resulting graph is the
+By `sup_edge_isHamiltonian_iff`, adding an edge between an eligible pair does not
+change whether the graph is Hamiltonian, so we now simply keep adding such edges
+until no eligible pair remains. The resulting graph is the
 *Bondy–Chvátal closure* of `G`. A graph with no eligible pair, i.e. one in which any
 two distinct vertices with degree sum at least `|V|` are already adjacent, is called
 *closed*. (As we will see below, Mathlib's theory of closure operators
@@ -2427,7 +2512,7 @@ one unit of fuel per subtraction. (The test `0 < b` ensures we never waste time
 subtracting zero, and matches Lean's convention that `a % 0 = a`.)
 -/
 /-- Subtract `b` from `a` while `0 < b ≤ a`, at most `fuel` times. -/
-def modAux : ℕ → ℕ → ℕ → ℕ
+private def modAux : ℕ → ℕ → ℕ → ℕ
   | 0, a, _ => a
   | fuel + 1, a, b => if 0 < b ∧ b ≤ a then modAux fuel (a - b) b else a
 
@@ -2444,28 +2529,23 @@ giving the wrong answer.
 /-!
 How much fuel do we need? Since each subtraction reduces `a` by at least one,
 starting with `fuel` equal to `a` is always enough to reach the remainder. (This can
-be proved by induction on the fuel, the same pattern we use for the closure below.)
+easily be proved by induction on the fuel, the same pattern we use for the closure
+below.)
 
 Returning to the Bondy–Chvátal closure, the textbook definition adds eligible edges
 one at a time, in any order. In Lean it is more convenient to proceed in rounds: in
 each round we join all pairs that are currently eligible. A round adds at least one
 edge unless the graph is already closed, so starting with `fuel` equal to the number
-of missing edges of `G` (the number of edges of its complement `Gᶜ`) is enough to
+of missing edges of `G` (the number of edges in its complement `Gᶜ`) is enough to
 reach a closed graph. Adding all eligible pairs at once also means that we never have
 to choose an order in which to add them, so the closure is computable (at least in
 principle; see below).
 
-We do this using the `SimpleGraph.fromRel` constructor, which builds a graph from a
-decidable relation. A single round gives the graph `G.closureStep` below: `G`
-together with the edges of `fromRel r`, the graph in which distinct vertices `u` and
-`v` are adjacent if `r u v` or `r v u`. Here `r u v` says that `u` and `v` have
-degree sum at least `|V|`, so the new edges join exactly the eligible pairs. Its
-adjacency relation is decidable whenever that of `G` is. Since we define
-`closureStep` using `abbrev` rather than `def`, Lean can see through the name, so it
-finds this `DecidableRel` instance automatically, from those for `⊔` and `fromRel`.
- (This is why the closure takes `[DecidableRel G.Adj]` rather than
-`[G.LocallyFinite]`: Mathlib has no `LocallyFinite` instances for `⊔` or `fromRel`,
-so with the latter Lean could not find the instance for each round automatically.)
+A single round, `closureStep` below, is `G ⊔ fromRel r`, where `r u v` says that `u`
+and `v` have degree sum at least `|V|`. The graph `SimpleGraph.fromRel r` joins
+distinct `u` and `v` whenever `r u v` or `r v u`, so the new edges join exactly the
+eligible pairs. Since `closureStep` is an `abbrev`, Lean can see through it and find
+its `DecidableRel` instance automatically, from those for `⊔` and `fromRel`.
 -/
 /-- One round of the closure process: join all eligible pairs of `G`. -/
 abbrev closureStep [Fintype V] [DecidableEq V] (G : SimpleGraph V)
@@ -2475,7 +2555,7 @@ abbrev closureStep [Fintype V] [DecidableEq V] (G : SimpleGraph V)
 lemma closureStep_adj [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {x y : V} :
     G.closureStep.Adj x y ↔
       G.Adj x y ∨ x ≠ y ∧ Fintype.card V ≤ G.degree x + G.degree y := by
-  simp [closureStep, add_comm]
+  simp [add_comm]
 
 /-!
 Iterating `closureStep` needs a `DecidableRel` instance for each intermediate graph,
@@ -2495,9 +2575,10 @@ def closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] : SimpleGraph V :=
   closureAux #Gᶜ.edgeFinset G
 
 /-!
-We need three key facts. Firstly, the closure contains the original graph. Secondly,
-taking the closure does not change whether the graph is Hamiltonian. Thirdly, with
-enough fuel the closure really is closed.
+The main result about the closure is the Bondy–Chvátal theorem: taking the closure
+does not change whether the graph is Hamiltonian. Before proving it we record two
+basic facts: the closure contains the original graph, and with enough fuel it really
+is closed. We start with the first of these.
 -/
 lemma le_closureStep [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     G ≤ closureStep G := le_sup_left
@@ -2511,59 +2592,7 @@ theorem le_closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     G ≤ G.closure := le_closureAux ..
 
 /-!
-Secondly, the key property: taking the closure does not change whether the graph is
-Hamiltonian. The one-step lemma `sup_edge_isHamiltonian_iff` adds a single edge,
-whereas a round may add many, so we first add the edges of a round one at a time, by
-induction on a finset of pairs. Each pair was eligible in `G`, and adding edges only
-increases degrees, so it is still an `IsOrePair` in each of the intermediate graphs.
-(These intermediate graphs carry no `LocallyFinite` instances of their own, so the
-proof starts with `classical` to supply them.)
--/
-/-- Adding any finite set of pairs that are eligible in `G` preserves
-Hamiltonicity. -/
-lemma sup_sup_edge_isHamiltonian_iff [Fintype V] [DecidableEq V] [G.LocallyFinite]
-    (s : Finset (V × V))
-    (hs : ∀ p ∈ s, Fintype.card V ≤ G.degree p.1 + G.degree p.2) :
-    (G ⊔ s.sup fun p => edge p.1 p.2).IsHamiltonian ↔ G.IsHamiltonian := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp
-  | insert p s hp ih =>
-    rw [Finset.sup_insert, sup_comm (edge p.1 p.2), ← sup_assoc,
-      sup_edge_isHamiltonian_iff, ih fun q hq => hs q (Finset.mem_insert_of_mem hq)]
-    have hp' := hs p (Finset.mem_insert_self p s)
-    exact fun _ _ => hp'.trans (Nat.add_le_add (degree_le_of_le le_sup_left)
-      (degree_le_of_le le_sup_left))
-
-/-!
-A round adds exactly the edges `edge x y` for the pairs `(x, y)` with degree sum at
-least `|V|` (for `x = y` the graph `edge x x` has no edges, so we don't need to
-exclude them), so a round does not change whether the graph is Hamiltonian, and nor
-does taking the closure.
--/
-lemma closureStep_isHamiltonian_iff [Fintype V] [DecidableEq V]
-    [DecidableRel G.Adj] : G.closureStep.IsHamiltonian ↔ G.IsHamiltonian := by
-  let s : Finset (V × V) := {p | Fintype.card V ≤ G.degree p.1 + G.degree p.2}
-  have hs : closureStep G = G ⊔ s.sup fun p => edge p.1 p.2 := by
-    ext x y
-    simp only [s, Finset.sup_eq_iSup, sup_adj, iSup_adj, edge_adj, mem_filter,
-      mem_univ, true_and]
-    aesop
-  rw [hs, sup_sup_edge_isHamiltonian_iff _ fun p hp => by simpa [s] using hp]
-
-lemma closureAux_isHamiltonian_iff [Fintype V] [DecidableEq V] :
-    ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj],
-      (closureAux fuel G).IsHamiltonian ↔ G.IsHamiltonian
-  | 0, _, _ => Iff.rfl
-  | fuel + 1, G, _ =>
-    (closureAux_isHamiltonian_iff fuel G.closureStep).trans
-      closureStep_isHamiltonian_iff
-
-theorem closure_isHamiltonian_iff [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
-    G.closure.IsHamiltonian ↔ G.IsHamiltonian := closureAux_isHamiltonian_iff ..
-
-/-!
-Thirdly, with enough fuel the closure really is closed. We first record that a round
+Next, with enough fuel the closure really is closed. We first record that a round
 leaves a graph unchanged if the graph is closed, so that once the process reaches a
 closed graph it stays there. Since `IsClosed` takes a `LocallyFinite` argument, we
 also need to transport closedness along an equality of graphs whose instances are
@@ -2594,7 +2623,7 @@ adjacency relation. We define one by recursion on the fuel, from the instances f
 principle: deciding adjacency after `k` rounds needs the degrees after `k - 1`
 rounds, each of which needs `|V|` adjacency queries after `k - 1` rounds, and so on,
 so the cost grows exponentially with the number of rounds. (This could be made much
-more efficient but we do not need to do so here: just don't try to evaluate on
+more efficient but we do not need to do so here: just don't try to evaluate it on
 anything with more than a few vertices!)
 -/
 instance decidableRelClosureAux [Fintype V] [DecidableEq V] :
@@ -2613,12 +2642,13 @@ not an Ore graph: the non-adjacent vertices `1` and `4` both have degree `2`, so
 their degree sum is `4 < 5`. But the first round joins the eligible pairs `1, 3` and
 `2, 4`, after which `1` and `4` both have degree `3`, so the second round joins them
 too, and the closure is the complete graph with `10` edges. So the closure can be
-complete even when Ore's condition fails (see
-[Exercises](https://jt496.github.io/GraphTheoryInLean/Walks/#section-exercises-walks)).
+complete even when Ore's condition fails.
+
+[Figure: The closure of $C_5$ with the chords `0 — 2` and `0 — 3`, with the degree of each vertex written next to it. Left: the starting graph. Centre: the first round adds `1 — 3` and `2 — 4`. Right: the second round adds `1 — 4`, giving the complete graph $K_5$](https://jt496.github.io/GraphTheoryInLean/figures/closure_rounds.svg)
 -/
-#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).edgeFinset.card             -- 7
-#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closureStep.edgeFinset.card -- 9
-#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closure.edgeFinset.card     -- 10
+#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).edgeFinset             -- 7 edges
+#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closureStep.edgeFinset -- 9 edges
+#eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closure.edgeFinset    -- 10 edges (complete)
 
 /-!
 Conversely, a round leaves `G` unchanged only if `G` is closed, since it joins every
@@ -2640,9 +2670,10 @@ lemma card_compl_edgeFinset_closureStep_lt [Fintype V] [DecidableEq V]
     (edgeFinset_ssubset_edgeFinset.2 (compl_lt_compl_iff_lt.2 hlt))
 
 /-!
-We can now prove the third lemma, by induction on the fuel: each round that changes
-the graph decreases the number of missing edges, which can never go below zero, so if
-we start with enough fuel then the process must terminate with a closed graph.
+We can now prove that the closure is closed, by induction on the fuel: each round
+that changes the graph decreases the number of missing edges, which can never go
+below zero, so if we start with enough fuel then the process must terminate with a
+closed graph.
 -/
 lemma isClosed_closureAux [Fintype V] [DecidableEq V] :
     ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj], #Gᶜ.edgeFinset ≤ fuel →
@@ -2660,13 +2691,152 @@ lemma isClosed_closureAux [Fintype V] [DecidableEq V] :
     · -- some eligible pair is not yet adjacent, so a missing edge is added
       have := card_compl_edgeFinset_closureStep_lt hG
       exact isClosed_closureAux fuel G.closureStep (by grind)
-
+/-!
+The closure of a graph is closed.
+-/
 theorem isClosed_closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     G.closure.IsClosed :=
   isClosed_closureAux _ G le_rfl
 
 /-!
-### The Closure is the Least Closed Supergraph
+We now prove the Bondy–Chvátal theorem. The lemma `sup_edge_isHamiltonian_iff` adds
+a single edge, whereas a round may add many, so we first add the edges of a round
+one at a time, by induction on a finset of pairs. Each pair was eligible in `G`, and
+adding edges only increases degrees, so it is still an `IsOrePair` in each of the
+intermediate graphs. (These intermediate graphs carry no `LocallyFinite` instances
+of their own, so the proof starts with `classical` to supply them.)
+-/
+/-!
+Adding any finite set of pairs that are eligible in `G` preserves
+Hamiltonicity.
+-/
+lemma sup_sup_edge_isHamiltonian_iff [Fintype V] [DecidableEq V] [G.LocallyFinite]
+    (s : Finset (V × V))
+    (hs : ∀ p ∈ s, Fintype.card V ≤ G.degree p.1 + G.degree p.2) :
+    (G ⊔ s.sup fun p => edge p.1 p.2).IsHamiltonian ↔ G.IsHamiltonian := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert p s hp ih =>
+    -- `p` still satisfies the degree condition in the bigger graph: degrees only
+    -- grow when edges are added
+    have hore : (G ⊔ s.sup fun q => edge q.1 q.2).IsOrePair p.1 p.2 := by
+      intro _ _
+      have hp' := hs p (Finset.mem_insert_self p s)
+      exact hp'.trans (Nat.add_le_add (degree_le_of_le le_sup_left)
+        (degree_le_of_le le_sup_left))
+    rw [Finset.sup_insert, sup_comm (edge p.1 p.2), ← sup_assoc,
+      sup_edge_isHamiltonian_iff hore,
+      ih fun q hq => hs q (Finset.mem_insert_of_mem hq)]
+
+/-!
+A round adds exactly the edges `edge x y` for the pairs `(x, y)` with degree sum at
+least `|V|` (for `x = y` the graph `edge x x` has no edges, so we don't need to
+exclude them), so a round does not change whether the graph is Hamiltonian, and nor
+does taking the closure.
+-/
+lemma closureStep_isHamiltonian_iff [Fintype V] [DecidableEq V]
+    [DecidableRel G.Adj] : G.closureStep.IsHamiltonian ↔ G.IsHamiltonian := by
+  let s : Finset (V × V) := {p | Fintype.card V ≤ G.degree p.1 + G.degree p.2}
+  have hs : closureStep G = G ⊔ s.sup fun p => edge p.1 p.2 := by
+    ext x y
+    simp only [s, Finset.sup_eq_iSup, sup_adj, iSup_adj, edge_adj, mem_filter,
+      mem_univ, true_and]
+    aesop
+  rw [hs, sup_sup_edge_isHamiltonian_iff _ fun p hp => by simpa [s] using hp]
+
+lemma closureAux_isHamiltonian_iff [Fintype V] [DecidableEq V] :
+    ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj],
+      (closureAux fuel G).IsHamiltonian ↔ G.IsHamiltonian
+  | 0, _, _ => Iff.rfl
+  | fuel + 1, G, _ =>
+    (closureAux_isHamiltonian_iff fuel G.closureStep).trans
+      closureStep_isHamiltonian_iff
+
+/-- *Bondy–Chvátal theorem*: a graph is Hamiltonian iff its closure is. -/
+theorem closure_isHamiltonian_iff [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
+    G.closure.IsHamiltonian ↔ G.IsHamiltonian := closureAux_isHamiltonian_iff ..
+
+/-!
+## Ore's Theorem and Dirac's Theorem
+
+Combining the Bondy–Chvátal theorem `closure_isHamiltonian_iff` with
+`top_isHamiltonian`, proved back in
+[Cycle Graphs and Complete Graphs are Hamiltonian](https://jt496.github.io/GraphTheoryInLean/Walks/#section-cycle-graphs-and-complete-graphs-are-hamiltonian),
+gives the form we need: if `G` has at least 3 vertices and its closure is complete
+then `G` is Hamiltonian.
+-/
+theorem isHamiltonian_of_closure_eq_top [Fintype V] [DecidableEq V]
+    [DecidableRel G.Adj] (hn : 3 ≤ Fintype.card V) (h : G.closure = ⊤) :
+    G.IsHamiltonian := by
+  rw [← closure_isHamiltonian_iff, h]
+  exact top_isHamiltonian hn
+
+/-- An *Ore graph*: every pair of vertices satisfies Ore's condition `IsOrePair`,
+i.e. any two distinct non-adjacent vertices have degree sum at least the
+number of vertices. -/
+def IsOreGraph (G : SimpleGraph V) [Fintype V] [G.LocallyFinite] : Prop :=
+  ∀ x y, G.IsOrePair x y
+
+/-!
+Ore's theorem is now a corollary: the closure of an Ore graph is complete. Two
+observations make this trivial. Firstly, Ore's condition is inherited by any
+supergraph: if `x ≠ y` are non-adjacent in `H ≥ G` then they are non-adjacent in `G`,
+so Ore's condition gives them degree sum at least `|V|` in `G`, hence also in `H`.
+-/
+lemma IsOreGraph.mono [Fintype V] [G.LocallyFinite] {H : SimpleGraph V}
+    [H.LocallyFinite] (hG : G.IsOreGraph)
+    (hGH : G ≤ H) : H.IsOreGraph := fun x y hne hnadj =>
+  (hG x y hne (fun h => hnadj (hGH h))).trans
+    (Nat.add_le_add (degree_le_of_le hGH) (degree_le_of_le hGH))
+
+/-!
+Secondly, Ore's condition and closedness are complementary: the former says that
+non-adjacent pairs have degree sum at least `|V|`, the latter that such pairs are
+adjacent. So a closed Ore graph is complete.
+-/
+lemma IsOreGraph.eq_top_of_isClosed [Fintype V] [G.LocallyFinite]
+    (hO : G.IsOreGraph) (hC : G.IsClosed) : G = ⊤ :=
+  eq_top_iff.2 fun x y hne => by_contra fun hn => hn (hC hne (hO x y hne hn))
+
+/-!
+The closure of `G` is a closed graph above `G`, so it inherits Ore's condition and is
+therefore complete.
+-/
+theorem IsOreGraph.closure_eq_top [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
+    [G.LocallyFinite] (h : G.IsOreGraph) : G.closure = ⊤ :=
+  (h.mono le_closure).eq_top_of_isClosed isClosed_closure
+
+/-- *Ore's theorem*: a finite graph on at least three vertices in which every pair
+of non-adjacent vertices has degree sum at least `|V|` is Hamiltonian. -/
+theorem IsOreGraph.isHamiltonian [Fintype V] [DecidableEq V] [G.LocallyFinite]
+    (h : G.IsOreGraph) (hn : 3 ≤ Fintype.card V) : G.IsHamiltonian := by
+  classical
+  exact isHamiltonian_of_closure_eq_top hn h.closure_eq_top
+
+/-!
+Dirac's theorem is an immediate corollary. We state this as `|V| ≤ 2 * δ(G)` rather
+than `|V| / 2 ≤ δ(G)`, because `Nat` division rounds down: for odd `|V|` the latter
+is a strictly weaker assumption and the statement would then be false. (Two triangles
+sharing a vertex have `|V| = 5` and `δ(G) = 2 = 5 / 2`, but the shared vertex is a
+cut vertex, so the graph has no Hamiltonian cycle.)
+-/
+/-- *Dirac's theorem*: a finite graph on at least three vertices satisfying
+`|V| ≤ 2 * δ(G)` is Hamiltonian. -/
+theorem isHamiltonian_of_card_le_two_mul_minDegree [Fintype V] [DecidableEq V]
+    [DecidableRel G.Adj]
+    (hn : 3 ≤ Fintype.card V) (hdeg : Fintype.card V ≤ 2 * δ(G)) :
+    G.IsHamiltonian := by
+  apply IsOreGraph.isHamiltonian (fun x y _ _ => ?_) hn
+  grind [G.minDegree_le_degree x, G.minDegree_le_degree y]
+
+/-!
+Since our aim is to give as many examples as possible of different graph-theoretic
+proof techniques in Lean, we also give the more direct classical proof of Ore's
+theorem, via maximum-length paths. This approach is developed in the exercises to
+this chapter.
+
+## The Closure is the Least Closed Supergraph
 
 Our construction proceeds in rounds, whereas the textbook definition adds eligible
 pairs one at a time, in any order. A natural question is: could different orders
@@ -2728,86 +2898,6 @@ A monotone map on a partial order that is *inflationary* (`G ≤ G.closure`) and
 come with.)
 -/
 #check ClosureOperator
-
-/-!
-## Ore's Theorem and Dirac's Theorem
-
-Putting these all together we get the form of the Bondy–Chvátal theorem that we need:
-if the closure of `G` is complete then `G` is Hamiltonian. (This is where we use
-`top_isHamiltonian`, proved back in
-[Cycle Graphs and Complete Graphs Are Hamiltonian](https://jt496.github.io/GraphTheoryInLean/Walks/#section-cycle-graphs-and-complete-graphs-are-hamiltonian).)
--/
-theorem isHamiltonian_of_closure_eq_top [Fintype V] [DecidableEq V]
-    [DecidableRel G.Adj] (hn : 3 ≤ Fintype.card V) (h : G.closure = ⊤) :
-    G.IsHamiltonian := by
-  rw [← closure_isHamiltonian_iff, h]
-  exact top_isHamiltonian hn
-
-/-- An *Ore graph*: every pair of vertices satisfies Ore's condition `IsOrePair`,
-i.e. any two distinct non-adjacent vertices have degree sum at least the
-number of vertices. -/
-def IsOreGraph (G : SimpleGraph V) [Fintype V] [G.LocallyFinite] : Prop :=
-  ∀ x y, G.IsOrePair x y
-
-/-!
-Ore's theorem is now a corollary: the closure of an Ore graph is complete. Two
-observations make this trivial. Firstly, Ore's condition is inherited by any
-supergraph: if `x ≠ y` are non-adjacent in `H ≥ G` then they are non-adjacent in `G`,
-so Ore's condition gives them degree sum at least `|V|` in `G`, hence also in `H`.
--/
-lemma IsOreGraph.mono [Fintype V] [G.LocallyFinite] {H : SimpleGraph V}
-    [H.LocallyFinite] (hG : G.IsOreGraph)
-    (hGH : G ≤ H) : H.IsOreGraph := fun x y hne hnadj =>
-  (hG x y hne (fun h => hnadj (hGH h))).trans
-    (Nat.add_le_add (degree_le_of_le hGH) (degree_le_of_le hGH))
-
-/-!
-Secondly, Ore's condition and closedness are complementary: the former says that
-non-adjacent pairs have degree sum at least `|V|`, the latter that such pairs are
-adjacent. So a closed Ore graph is complete.
--/
-lemma IsOreGraph.eq_top_of_isClosed [Fintype V] [G.LocallyFinite]
-    (hO : G.IsOreGraph) (hC : G.IsClosed) : G = ⊤ :=
-  eq_top_iff.2 fun x y hne => by_contra fun hn => hn (hC hne (hO x y hne hn))
-
-/-!
-The closure of `G` is a closed graph above `G`, so it inherits Ore's condition and is
-therefore complete.
--/
-theorem IsOreGraph.closure_eq_top [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
-    [G.LocallyFinite] (h : G.IsOreGraph) : G.closure = ⊤ :=
-  (h.mono le_closure).eq_top_of_isClosed isClosed_closure
-
-/-!
-**Ore's theorem** is now immediate: a finite graph on at least three vertices in
-which every pair of non-adjacent vertices has degree sum at least `|V|` is
-Hamiltonian.
--/
-theorem IsOreGraph.isHamiltonian [Fintype V] [DecidableEq V] [G.LocallyFinite]
-    (h : G.IsOreGraph) (hn : 3 ≤ Fintype.card V) : G.IsHamiltonian := by
-  classical
-  exact isHamiltonian_of_closure_eq_top hn h.closure_eq_top
-
-/-!
-**Dirac's theorem** as a corollary: minimum degree at least `|V| / 2` implies `G` is
-Hamiltonian. We state this as `|V| ≤ 2 * δ(G)` rather than `|V| / 2 ≤ δ(G)`, because
-`Nat` division rounds down: for odd `|V|` the latter is a strictly weaker assumption
-and the statement would then be false. (Two triangles sharing a vertex have `|V| = 5`
-and `δ = 2 = 5 / 2`, but the shared vertex is a cut vertex, so the graph has no
-Hamiltonian cycle.)
--/
-theorem isHamiltonian_of_card_le_two_mul_minDegree [Fintype V] [DecidableEq V]
-    [DecidableRel G.Adj]
-    (hn : 3 ≤ Fintype.card V) (hdeg : Fintype.card V ≤ 2 * δ(G)) :
-    G.IsHamiltonian := by
-  apply IsOreGraph.isHamiltonian (fun x y _ _ => ?_) hn
-  grind [G.minDegree_le_degree x, G.minDegree_le_degree y]
-
-/-!
-Since our aim is to give as many examples as possible of different graph theoretic
-proof techniques in Lean, we also give the more direct classical proof of Ore's
-theorem, via maximum-length paths. This approach is developed in the exercises to
-this chapter.
--/
+end finset
 end ore
 end SimpleGraph

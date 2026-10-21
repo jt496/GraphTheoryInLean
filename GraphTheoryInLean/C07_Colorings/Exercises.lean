@@ -6,7 +6,7 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
 
-1. Show that the cycle graph `C[5]` is not 2-colourable.
+1. Show that the cycle graph `C[5]` is not `2`-colourable.
 -/
 example : ¬ C[5].Colorable 2 := by
   sorry
@@ -19,7 +19,7 @@ example {u v : V} (h : G.Adj u v) : 2 ≤ χ G := by
   sorry
 
 /-!
-3. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ` . Hint: combine
+3. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ`. Hint: combine
 `natCard_le_chromaticNumber_mul_indepNum` with `cliqueNum_compl`.
 -/
 example : Nat.card V ≤ χ G * χ Gᶜ := by
@@ -33,16 +33,17 @@ example (n : ℕ) : χ Q[n + 1] = 2 := by
   sorry
 
 /-!
-5. The Kneser graph `Kn[n, k]` is `(n - 2 * k + 2)`-colourable for `2 * k ≤ n` and
-`0 < k`. (Recall `Kn[n, k]` is the graph whose vertices are the `k`-element subsets
-of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. This is the easy
-part of the Kneser–Lovász theorem.) The colouring is given below: colour a vertex by
-its least element, merging all the large colours into one. Show that it is a proper
-colouring. This is the hardest exercise in this chapter: the case where both
-vertices receive the merged colour needs a pigeonhole argument which is in Mathlib as
+5. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
+subsets of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. Show that
+it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouring is
+given below: colour a vertex by its least element, merging all the large colours into
+one. This is the hardest exercise in this chapter: the case where both vertices
+receive the merged colour needs a pigeonhole argument which is in Mathlib as
 `Finset.inter_nonempty_of_card_lt_card_add_card`.
+
+[Figure: The colouring below for the Petersen graph $\mathrm{Kn}(5,2)$, with $5 - 2 \cdot 2 + 2 = 3$ colours: a vertex is red if its least element is $0$, blue if its least element is $1$, and green (the merged colour) otherwise](https://jt496.github.io/GraphTheoryInLean/figures/kneser_colouring.svg)
 -/
-/-- The explicit `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
+/-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
 def kneserColoring' (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     Kn[n, k].Coloring (Fin (n - 2 * k + 2)) where
   toFun s :=
@@ -85,11 +86,11 @@ lemma degreeLT_le_self' (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSe
   sorry
 
 /-!
-9. The *infinite star* `starNat` joins `0` to every other natural number. Since `0`
-has infinitely many neighbours, `starNat` is not locally finite, so the bound
-`colorable_of_degree_le_of_countable` does not apply. Show that it is nevertheless
-`2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at most one
-earlier neighbour.
+9. The *infinite star* `starNat` joins `0` to every other natural number. Show that
+`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
+bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
+nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
+most one earlier neighbour.
 -/
 /-- The infinite star on `ℕ`: the vertex `0` is adjacent to every other vertex. -/
 abbrev starNat : SimpleGraph ℕ where
@@ -108,7 +109,7 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
 
 /-!
 11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
-`[Encodable V]` as a `SimpleGraph ℕ` are the same.
+`[Encodable V]` as a `SimpleGraph ℕ` agree.
 -/
 example [Encodable V] {G : SimpleGraph V} : G.encode = G.encodeMap := by
   sorry
@@ -116,7 +117,7 @@ example [Encodable V] {G : SimpleGraph V} : G.encode = G.encodeMap := by
 /-! SOLUTIONS -/
 
 /-!
-1. Show that the cycle graph `C[5]` is not 2-colourable.
+1. Show that the cycle graph `C[5]` is not `2`-colourable.
 -/
 example : ¬ C[5].Colorable 2 := by
   rw [← chromaticNumber_le_iff_colorable,
@@ -140,6 +141,9 @@ example : Nat.card V ≤ χ G * χ Gᶜ :=
   -- an independent set of `G` is a clique of `Gᶜ`
   calc (Nat.card V : ℕ∞) ≤ χ G * ⍺ G := natCard_le_chromaticNumber_mul_indepNum
     _ = χ G * ω Gᶜ := by rw [cliqueNum_compl]
+    -- `gcongr` ("generalized congruence") proves an inequality between two terms of
+    -- the same shape by comparing the parts that differ: since multiplication by
+    -- `χ G` is monotone, it reduces the goal to `ω Gᶜ ≤ χ Gᶜ`
     _ ≤ χ G * χ Gᶜ := by gcongr; exact cliqueNum_le_chromaticNumber
 
 /-!
@@ -151,20 +155,19 @@ example (n : ℕ) : χ Q[n + 1] = 2 := by
   -- `Q[n + 1] ≠ ⊥` for which we need a vertex of `Q[n]` (each gives an edge in
   -- the next dimension)
   obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
-  refine chromaticNumber_eq_two_iff.2 ⟨hypercube_isBipartite _,?_⟩
-  exact  ne_bot_iff_exists_adj.2 ⟨(v, false), (v, true), by simp⟩
+  refine chromaticNumber_eq_two_iff.2 ⟨hypercube_isBipartite _, ?_⟩
+  exact ne_bot_iff_exists_adj.2 ⟨(v, false), (v, true), by simp⟩
 
 /-!
-5. The Kneser graph `Kn[n, k]` is `(n - 2 * k + 2)`-colourable for `2 * k ≤ n` and
-`0 < k`. (Recall `Kn[n, k]` is the graph whose vertices are the `k`-element subsets
-of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. This is the easy
-part of the Kneser–Lovász theorem.) The colouring is given below: colour a vertex by
-its least element, merging all the large colours into one. Show that it is a proper
-colouring. This is the hardest exercise in this chapter: the case where both
-vertices receive the merged colour needs a pigeonhole argument which is in Mathlib as
+5. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
+subsets of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. Show that
+it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouring is
+given below: colour a vertex by its least element, merging all the large colours into
+one. This is the hardest exercise in this chapter: the case where both vertices
+receive the merged colour needs a pigeonhole argument which is in Mathlib as
 `Finset.inter_nonempty_of_card_lt_card_add_card`.
 -/
-/-- The explicit `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
+/-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
 def kneserColoring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     Kn[n, k].Coloring (Fin (n - 2 * k + 2)) where
   toFun s :=
@@ -187,9 +190,10 @@ def kneserColoring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
       have h : u.val.min' hune = v.val.min' hvne :=
         Fin.val_injective (by simpa using congrArg Fin.val hcolor)
       exact Finset.disjoint_left.mp hadj.1 (min'_mem _ hune) (h ▸ min'_mem _ hvne)
-    · grind -- impossible since the equal colours are not equal
-    · grind -- impossible since the equal colours are not equal
-    · push Not at h1 h3
+    · grind -- impossible: one colour is ≤ `n - 2 * k`, the other is `n - 2 * k + 1`
+    · grind -- impossible: one colour is ≤ `n - 2 * k`, the other is `n - 2 * k + 1`
+    · -- `push Not` pushes the negations inwards (`¬ a ≤ b` becomes `b < a`)
+      push Not at h1 h3
       -- both `u` and `v` lie in `{n - 2 * k + 1, ..., n - 1}`, which has only
       -- `2 * k - 1` elements, so they lie in an independent set of `Kn[n, k]`
       -- (`kneserGraph_isIndepSet_of_card_lt` from the previous chapter)
@@ -245,16 +249,18 @@ most `v` earlier neighbours.
 -/
 lemma degreeLT_le_self (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSet v)] :
     G.degreeLT v ≤ v := by
-  -- the earlier neighbours of `v` lie in `{0, 1, …, v - 1}`
+  -- We want to change the 2nd occurrence of `v` to `#(range v)` in the goal,
+  -- but `rw` will change all occurrences, so we use `nth_rw 2` below
   nth_rw 2 [← Finset.card_range v]
   apply Finset.card_le_card
   intro x hx; simp_all
 
 /-!
-9. The *infinite star* `starNat` joins `0` to every other natural number. Since `0`
-has infinitely many neighbours, `starNat` is not locally finite, so the bound
-`colorable_of_degree_le_of_countable` does not apply. Show that it is nevertheless
-`2`-colourable, using `colorable_of_degreeLT_le`.
+9. The *infinite star* `starNat` joins `0` to every other natural number. Show that
+`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
+bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
+nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
+most one earlier neighbour.
 -/
 example : (starNat.neighborSet 0).Infinite ∧ starNat.Colorable 2 := by
   refine ⟨Set.infinite_of_injective_forall_mem (f := Nat.succ) Nat.succ_injective
@@ -282,7 +288,7 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
 
 /-!
 11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
-`[Encodable V]` as a `SimpleGraph ℕ` are the same.
+`[Encodable V]` as a `SimpleGraph ℕ` agree.
 -/
 example [Encodable V] {G : SimpleGraph V} : G.encode = G.encodeMap := by
   ext a b

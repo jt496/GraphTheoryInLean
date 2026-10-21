@@ -2,7 +2,7 @@ import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.DeleteEdges
 namespace SimpleGraph
 section basics
-variable {V : Type*} (G : SimpleGraph V) {u v : V}
+variable {V : Type*} (G : SimpleGraph V)
 /-!
 In this chapter we introduce the basics of `SimpleGraph`, Mathlib's definition of a
 simple, loopless, undirected graph. We will explore how adjacency, edges, darts, and
@@ -12,12 +12,12 @@ to perform basic computations on graphs.
 
 # SimpleGraph
 
-Mathlib already contains a few different definitions of graphs, (for example directed
-graphs as `Digraph` and multi-graphs as `Graph`) but we will only look at
+Mathlib already contains a few different definitions of graphs (for example directed
+graphs as `Digraph` and multigraphs as `Graph`), but we will only look at
 `SimpleGraph`. (Although `SimpleGraph` is currently the most commonly used
-graph structure in Mathlib it has some real limitations: for example any non-spanning
-subgraph of a `SimpleGraph V` is *not* a `SimpleGraph V`. However it has a well
-developed API and many results can be formalized with relative ease.)
+graph structure in Mathlib, it has some real limitations: for example any
+non-spanning subgraph of a `SimpleGraph V` is *not* a `SimpleGraph V`. However, it
+has a well-developed API and many results can be formalized with relative ease.)
 
 The definition of `SimpleGraph` in Mathlib says that, for a fixed vertex type `V`, a
 term of `SimpleGraph V` is a structure consisting of a binary relation `Adj` on `V`
@@ -39,45 +39,45 @@ Lean will try to fill them in using the automated `aesop_graph` tactic.)
 Both `Std.Symm Adj` and `Std.Irrefl Adj` are structures with a single field, namely
 `symm : ∀ a b, Adj a b → Adj b a` and `irrefl : ∀ a, ¬Adj a a`. So to give these
 proofs by hand we write `symm := ⟨fun a b h => …⟩` (or give a tactic proof with
-`symm := by constructor; …`). To use them we rarely need the fields themselves: for
-example, `G.irrefl : ¬G.Adj v v` says that `G` has no loops.
+`symm := by constructor; …`).
 
 We will meet the formal definition of a graph's edges in a moment, but usually we
-reason directly with the adjacency relation `G.Adj`. Where informally we would speak
-of "the edge `u — v`", we instead work with a proof `h` of the proposition
-`G.Adj u v : Prop`. (Strictly speaking, `h : G.Adj u v` records the *directed* edge
-`u → v`, but by symmetry it also gives `G.Adj v u`, namely `h.symm`, so we can treat
-it as the undirected edge `u — v`.)
+reason directly with the adjacency relation `G.Adj`. Informally we write `u — v` for
+an edge of `G` joining `u` and `v`; in Lean we instead work with a proof `h` of the
+proposition `G.Adj u v : Prop`. (Strictly speaking, `h : G.Adj u v` records the
+*directed* edge `u → v`, but by symmetry it also gives `G.Adj v u`, namely `h.symm`,
+so we can treat it as the undirected edge `u — v`.)
 -/
-example (h : G.Adj u v) : G.Adj v u := h.symm
+example {u v : V} (h : G.Adj u v) : G.Adj v u := h.symm
+/-!
+The fact that `G` does not have a loop at a vertex `u` is the proposition
+`¬ G.Adj u u`.
+-/
+example {u : V} : ¬ G.Adj u u := G.irrefl
 /-!
 # Edges
--/
-section edges
-/-!
+
 Since `SimpleGraph` is a loopless undirected graph, its edges are *unordered* pairs
 of distinct vertices. In Lean unordered pairs have type `Sym2 V`, the symmetric
 square of `V`. Formally this is the quotient of `V × V` modulo swaps (`Sym2.Rel`).
 Elements (or more precisely terms) of `Sym2 V` are denoted `s(u, v)`. Note that
-although `s(v, v)` cannot be an edge of a `SimpleGraph`, (which is loopless), the
+although `s(v, v)` cannot be an edge of a `SimpleGraph` (which is loopless), the
 type `Sym2 V` still contains such pairs.
 -/
-example : s(u, v) = s(v, u) := Sym2.eq_swap
+example {u v : V} : s(u, v) = s(v, u) := Sym2.eq_swap
 /-!
 The *edge set* of `G` is `G.edgeSet` and is a `Set (Sym2 V)`. Membership is
-definitionally equivalent to adjacency. (This means that the proof is `rfl`)
+definitionally equivalent to adjacency. (This means that the proof is `rfl`.)
 -/
-example : s(u, v) ∈ G.edgeSet ↔ G.Adj u v := by rfl
+example {u v : V} : s(u, v) ∈ G.edgeSet ↔ G.Adj u v := by rfl
 /-!
-However using `G.Adj u v` has a couple of advantages over `s(u,v) ∈ G.edgeSet`: it
+However using `G.Adj u v` has a couple of advantages over `s(u, v) ∈ G.edgeSet`: it
 avoids the need for `Sym2 V` and, via dot notation, we have easy access to convenient
 lemmas about adjacency.
 -/
 #check Adj.ne -- G.Adj a b → a ≠ b
-variable {h : G.Adj u v}
-#check h.ne   -- Adj.ne h : u ≠ v
-#check h.ne'  -- Adj.ne' h : v ≠ u
-#check h.symm -- Adj.symm h : G.Adj v u
+example {u v : V} (h : G.Adj u v) : u ≠ v := h.ne
+example {u v : V} (h : G.Adj u v) : v ≠ u := h.ne'
 /-!
 Generally we prefer to use `G.Adj u v` rather than `s(u, v) ∈ G.edgeSet` when talking
 about individual edges, but when we want to talk about a *set* of (possible) edges of
@@ -90,16 +90,14 @@ is a loop. Mathlib calls a pair of the form `s(v, v)` *diagonal* (`Sym2.IsDiag`)
 -/
 example (e : Sym2 V) (he : e ∈ G.edgeSet) : ¬ e.IsDiag := by
   induction e using Sym2.ind with
-  | h x y =>                 -- he : s(x, y) ∈ G.edgeSet ⊢ ¬s(x, y).IsDiag
+  | _ x y =>                 -- he : s(x, y) ∈ G.edgeSet ⊢ ¬s(x, y).IsDiag
     rw [mem_edgeSet] at he
     rw [Sym2.mk_isDiag_iff]
     exact he.ne
+
 /-!
 Notice that `induction` replaced `e` by `s(x, y)` in the hypothesis `he` as well as
 in the goal. This result is `G.not_isDiag_of_mem_edgeSet` in Mathlib.
--/
-end edges
-/-!
 
 # Vertices
 
@@ -110,10 +108,10 @@ and `[Fintype V]`. See
 [Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees)
 for more details.
 
-Mathlib defines a number of subsets of `V`, i.e. `s : Set V` that can be useful, in
-particular the `support` of the graph and the `neighborSet` of a vertex. (Note that
-if we want to refer to the entire vertex set of a `SimpleGraph V` as a *set* then it
-is `Set.univ : Set V`.)
+Mathlib defines a number of useful subsets of `V` (terms `s : Set V`), in
+particular the `support` of the graph and the `neighborSet` of a vertex. (We can
+refer to the entire vertex set of a `SimpleGraph V` as a *set* by
+`Set.univ : Set V`.)
 
 ## Support
 
@@ -124,69 +122,77 @@ The *support* of a graph is the set of vertices that belong to at least one edge
 /-!
 If `G.Adj u v` then `u` is in the support of `G`.
 -/
-example (h : G.Adj u v) : u ∈ G.support := h.left_mem_support
+example {u v : V} (h : G.Adj u v) : u ∈ G.support := h.left_mem_support
 /-!
 Notice that in the previous example we could use `h.left_mem_support` where
 `h : G.Adj u v` since the theorem we applied is in the `SimpleGraph.Adj` namespace.
+Also note the use of "left" in the name of the lemma. You should be able to guess
+how to prove `v ∈ G.support` from `h : G.Adj u v`.
 -/
 #check SimpleGraph.Adj.left_mem_support
 
 /-!
 ## Neighbours
+
 The *neighbours* of a vertex `v` in a graph `G` are the vertices adjacent to `v`.
 -/
 #source neighborSet -- def neighborSet (v : V) : Set V := {w | G.Adj v w}
 
-example : G.Adj u v ↔ v ∈ G.neighborSet u := by rfl
+example {u v : V} : G.Adj u v ↔ v ∈ G.neighborSet u := by rfl
 
-example : G.neighborSet u ⊆ G.support := by
+example {u : V} : G.neighborSet u ⊆ G.support := by
   intro v hv
   exact ⟨u, hv.symm⟩
 
 /-!
 This result is also in Mathlib.
 -/
-example : G.neighborSet u ⊆ G.support := G.neighborSet_subset_support u
+example {u : V} : G.neighborSet u ⊆ G.support := G.neighborSet_subset_support u
 
 /-!
 The *incidence set* of `v` is the set of edges that contain `v`. (For `e : Sym2 V`,
 `v ∈ e` means that `v` is one of the two endpoints of `e`.) A vertex is *isolated* if
-it has no neighbours.
+it has no neighbours; it is *universal* if it is adjacent to every other vertex.
 -/
 #source incidenceSet -- {e ∈ G.edgeSet | v ∈ e}
 #check mem_incidenceSet -- s(v, w) ∈ G.incidenceSet v ↔ G.Adj v w
 #source IsIsolated -- ∀ w, ¬G.Adj v w
+#source IsUniversal -- ∀ ⦃w⦄, v ≠ w → G.Adj v w
 
 /-!
-### Sets as types
+The braces `∀ ⦃w⦄` in the definition of `IsUniversal` mark `w` as a *strict-implicit*
+argument: Lean fills it in like `{w}`, but only once a later explicit argument (here
+the proof of `v ≠ w`) is supplied.
+
+### Sets as Types
 
 Although `G.neighborSet u` is a `Set V`, Lean also lets us use it as a *type*. A term
-`w : G.neighborSet u` is a vertex together with a proof that it is a neighbour of
-`u`. (Lean displays this type as `↥(G.neighborSet u)`: it is the *subtype*
-`{w : V // w ∈ G.neighborSet u}`.) We build such terms with the anonymous
-constructor `⟨v, h⟩` and take them apart with `.val` (the vertex) and `.property`
-(the proof). Lean inserts `.val` automatically wherever a term of `V` is expected,
-and displays it as `↑w`.
--/
-example (h : G.Adj u v) : G.neighborSet u := ⟨v, h⟩
+`w : G.neighborSet u` is a vertex together with a proof that this vertex is a
+neighbour of `u`.
 
-section sets_as_types
-variable (w : G.neighborSet u)
-#check w.val       -- ↑w : V
-#check w.property  -- w.property : ↑w ∈ G.neighborSet u
-
-example : G.Adj u w := w.property
-end sets_as_types
-/-!
-# Darts
+Lean displays this type as `↑(G.neighborSet u)`: it is the *subtype*
+`{w : V // w ∈ G.neighborSet u}`. We build such terms with the anonymous constructor
+`⟨v, h⟩` and take them apart with `.val` (the vertex) and `.property` (the proof).
+Lean inserts `.val` automatically wherever a term of `V` is expected, and displays it
+as `↑w`.
 -/
+example {u v : V} (h : G.Adj u v) : G.neighborSet u := ⟨v, h⟩
+
+example {u : V} (w : G.neighborSet u) : G.Adj u w.val := by
+  exact w.property
+
+example {u : V} (w : G.neighborSet u) : G.Adj u w := by
+  exact w.property
+
 section darts
 /-!
+# Darts
+
 Since edges in `SimpleGraph` are undirected it might seem strange to introduce the
 notion of a dart (an oriented edge). However we already noted that `h : G.Adj u v`
-has a direction to it, darts simply give us a way to talk about the ordered pairs of
+has a direction to it; darts simply give us a way to talk about the ordered pairs of
 adjacent vertices in a graph. These can be very useful, for example in double
-counting arguments such as proving the *Handshake Lemma*.
+counting arguments such as proving the *handshake lemma*.
 
 A *dart* `d : G.Dart` is an ordered pair of vertices together with a proof that they
 are adjacent in `G`. Since edges are unoriented, darts come in symmetric pairs: if
@@ -229,7 +235,11 @@ in the context of formalization. Here *complete* means that every set of graphs 
 one graph in the set) and an infimum (the graph whose edges are those present in
 every graph in the set). The *atoms* of `SimpleGraph V` are the graphs with exactly
 one edge, and *atomic* means that every graph is the supremum of the atoms below it,
-i.e. the union of its single-edge subgraphs.
+i.e. the union of its single-edge subgraphs. Mathlib registers this structure as an
+*instance*, which Lean supplies automatically wherever it is needed. The command
+`#synth` asks Lean to find (synthesize) an instance and shows it; we say more about
+instances in
+[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).
 -/
 #synth CompleteAtomicBooleanAlgebra (SimpleGraph V)
 
@@ -259,7 +269,7 @@ The *inf* of `G` and `H`, denoted `G ⊓ H`, is the `SimpleGraph V` in which any
 of vertices from `V` are adjacent iff they are adjacent in both `G` and `H` (i.e. it
 is the intersection of `G` and `H`).
 
-[Figure: The inf and sup of two graphs](https://jt496.github.io/GraphTheoryInLean/figures/inf.svg)
+[Figure: Top: graphs $G$ (blue) and $H$ (red) on the same vertices. Bottom: their inf $G \sqcap H$ (left) and sup $G \sqcup H$ (right), with the edges in both graphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf.svg)
 -/
 #check inf_adj
 
@@ -277,11 +287,11 @@ are necessarily unchanged.)
 #check sdiff_adj
 
 /-!
-[Figure: The complement and set difference](https://jt496.github.io/GraphTheoryInLean/figures/sdiff.svg)
+[Figure: Top: graphs $G$ and $H$. Bottom: the complement $G^c$ (left) and the set difference $G \setminus H$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/sdiff.svg)
 
 We can remove a set of edges `s : Set (Sym2 V)` from a graph `G` to form
-`G.deleteEdges s`. If `s = H.edgeSet` then this is the same as the set-difference
-`G \ H`. (As ever, vertices are unchanged.)
+`G.deleteEdges s`. If `s = H.edgeSet` then this is the same as the set difference
+`G \ H`.
 -/
 #source deleteEdges
 #check deleteEdges_adj      -- (G.deleteEdges s).Adj v w ↔ G.Adj v w ∧ s(v, w) ∉ s
@@ -293,20 +303,20 @@ We can remove a set of edges `s : Set (Sym2 V)` from a graph `G` to form
 The *complete graph* `⊤` has all possible edges (every pair of distinct vertices is
 adjacent), while the *empty graph* `⊥` has no edges. These are the greatest and least
 elements of the subgraph order. Although `completeGraph V` and `emptyGraph V` are
-abbreviations for `⊤` and `⊥`, we use `top` and `bot` in naming results about these
-graphs.
+abbreviations for `⊤` and `⊥`, we generally use `top` and `bot` in naming results
+about these graphs.
 -/
 
 #check top_adj  -- (⊤ : SimpleGraph V).Adj v w ↔ v ≠ w
 #check bot_adj  -- (⊥ : SimpleGraph V).Adj v w ↔ False
 
 /-!
-Every graph is a subgraph of the complete graph
+Every graph is a subgraph of the complete graph.
 -/
 example : G ≤ ⊤ := le_top
 
 /-!
-The empty graph is a subgraph of every graph
+The empty graph is a subgraph of every graph.
 -/
 example : ⊥ ≤ G := bot_le
 
@@ -317,8 +327,9 @@ graph.
 example {G H : SimpleGraph V} (h : G < H) : G < ⊤ := lt_top_of_lt h
 /-!
 Notice that the last few proofs all made use of results about orders rather than
-anything specific to graphs. They all follow easily from the instance of
-`CompleteAtomicBooleanAlgebra (SimpleGraph V)` we gave at the start of this section.
+anything specific to graphs. They all follow easily from Mathlib's instance of
+`CompleteAtomicBooleanAlgebra (SimpleGraph V)`, which we displayed with `#synth` at
+the start of this section.
 -/
 end order
 end basics
@@ -346,12 +357,13 @@ with the declaration once it is defined: `@[simp]` registers a lemma for use by
 which lemmas are generated by a `@[simps]` attribute you can change it to `@[simps?]`
 and the InfoView will tell you.)
 -/
-#check pathNat₁_adj --  pathNat₁.Adj x y = (x + 1 = y ∨ y + 1 = x)
+#check pathNat₁_adj -- pathNat₁.Adj x y = (x + 1 = y ∨ y + 1 = x)
 
 /-!
-Alternatively we can use the `SimpleGraph.fromRel` constructor which symmetrizes any
-given relation and removes loops (The expression `(· + 1 = · )` below is
-shorthand for the relation `fun x y => x + 1 = y`.).
+Another way to construct the same graph is to use the `SimpleGraph.fromRel`
+constructor which symmetrizes any given relation and removes loops (The
+expression `(· + 1 = ·)` below is shorthand for the relation
+`fun x y => x + 1 = y`.).
 -/
 #source SimpleGraph.fromRel
 
@@ -371,7 +383,8 @@ both. (If we wrote `@[simps]` here, a linter warning would suggest `@[simps!]`.)
 
 /-!
 Also notice that `pathNat₂` is a `def`, whereas `pathNat₁` (and `pathNat₃` below) are
-`abbrev`s. This is deliberate: we will see in
+`abbrev`s, definitions that Lean unfolds automatically when it needs to. This is
+deliberate: we will see in
 [Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees)
 how this choice affects Lean's ability to compute with these graphs.
 
@@ -385,12 +398,12 @@ the same adjacency relation (i.e. the same edges). We *don't* need to check that
 have the same vertex sets since this is done automatically by the type system: both
 `pathNat₁` and `pathNat₂` are `SimpleGraph ℕ`.
 
-Lean's type-checker ensures that we can't even state a theorem saying that two graphs
+Lean's type checker ensures that we can't even state a theorem saying that two graphs
 with different vertex sets are equal. For example if `G : SimpleGraph V` then the
 expression `G = pathNat₁` is not well-typed since `pathNat₁` has vertex type `ℕ` and
 `G` has vertex type `V`. (The actual error is suppressed in the Lean source file
 by the `#guard_msgs` command and only shown in the HTML version. Delete the
-`#guard_msgs` line to see the error message in VSCode.)
+`#guard_msgs` line to see the error message in VS Code.)
 -/
 /-- error: Type mismatch
   pathNat₁
@@ -440,10 +453,17 @@ abbrev pathNat₃ : SimpleGraph ℕ := SimpleGraph.fromEdgeSet {e | ∃ n, e = s
 Again we can show that `pathNat₃` is equal to `pathNat₁` using `ext` (hence all three
 definitions agree).
 -/
-lemma pathNat₃_eq_pathNat₁ : pathNat₃ = pathNat₁ := by
+lemma pathNat₁_eq_pathNat₃ : pathNat₁ = pathNat₃ := by
   ext a b
-  rw [pathNat₃_adj, pathNat₁_adj]
+  rw [pathNat₁_adj, pathNat₃_adj]
   grind
+
+/-!
+We can also state this equality in terms of adjacency, which is usually more
+convenient.
+-/
+lemma pathNat₁_adj_iff_pathNat₃ {x y : ℕ} : pathNat₁.Adj x y ↔ pathNat₃.Adj x y := by
+  rw [pathNat₁_eq_pathNat₃]
 
 /-!
 ## Definitional and Propositional Equalities
@@ -486,15 +506,8 @@ example (n : ℕ) : 0 + n = n := by rfl
 The distinction matters more in Lean than on paper. Lean's type checker, and its
 matching of terms when we apply a lemma, only see definitional equalities, so two
 things that are merely propositionally equal cannot be used interchangeably without
-an explicit step. We will see examples for cycle graphs in
-[Cycle Graphs](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-cycle-graphs),
-and the consequences for typeclass instances in
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)
-and for walks in
-[Plumbing: Fixing Type Mismatches](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-fixing-type-mismatches).
--/
+an explicit step.
 
-/-!
 # Computations
 
 As well as reasoning about graphs in Lean we can also do computations with them. For
@@ -512,7 +525,8 @@ Even when our goal is to prove theorems, computations such as these can be very
 useful. Firstly, they allow us to perform quick sanity checks of our definitions
 and secondly they can be used inside proofs with the `decide` tactic.
 -/
-example : (⊤ : SimpleGraph (Fin 6)).Adj 2 3 := by decide
+example : (⊤ : SimpleGraph (Fin 6)).Adj 2 3 := by
+  decide
 
 /-!
 Both `#eval` and `decide` rely on adjacency being *decidable*: Lean needs a concrete

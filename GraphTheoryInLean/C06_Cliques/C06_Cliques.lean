@@ -35,7 +35,8 @@ adjacent.
 -/
 #source IsClique -- abbrev IsClique (s : Set α) : Prop := s.Pairwise G.Adj
 
-#source Pairwise -- def Pairwise (r : α → α → Prop) := ∀ ⦃i j⦄, i ≠ j → r i j
+#source Set.Pairwise -- def Set.Pairwise (s : Set α) (r : α → α → Prop) :=
+                     --   ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → x ≠ y → r x y
 
 /-!
 If `G ≤ H` and `s` is a clique in `G` then `s` is also a clique in `H`.
@@ -87,17 +88,16 @@ is `IsNClique` in Lean, which is a structure that bundles a proof that `s` is a
 clique together with a proof that `s` has cardinality `n`.
 
 Notice that `IsClique` takes a `Set V` while `IsNClique` takes a `Finset V`. A clique
-may be infinite, so `IsClique` works with sets. But an `n`-clique needs a size in
-`ℕ`, and `#s` is a natural number for a finset (and computable, so `decide` and
-`#eval` can use it). The field `isClique : G.IsClique s` silently coerces the finset
-`s` to a set. This coercion is written `↑s` (or `(s : Set V)`), and we will see it
-in many statements below, such as `G.IsIndepSet ↑s`.
+may be infinite, so `IsClique` needs to work with general sets. But an `n`-clique
+needs a size in `ℕ`, and `#s` is a natural number for a finset (and computable, so
+`decide` and `#eval` can use it). The field `isClique : G.IsClique s` silently
+coerces the finset `s` to a set. This coercion is written `↑s` (or `(s : Set V)`).
 -/
 #source IsNClique -- structure IsNClique (n : ℕ) (s : Finset α) : Prop where
                   --                 isClique : G.IsClique s
                   --                 card_eq : #s = n
 /-!
-The `Finset` `{a, b}` is a 2-clique if and only if `G.Adj a b` holds.
+The `Finset` `{a, b}` is a `2`-clique if and only if `G.Adj a b` holds.
 -/
 lemma is2Clique_pair_iff {a b : V} [DecidableEq V] :
     G.IsNClique 2 {a, b} ↔ G.Adj a b := by
@@ -110,8 +110,8 @@ lemma is2Clique_pair_iff {a b : V} [DecidableEq V] :
     · grind [h.ne]
 
 /-!
-The `Finset` `{a, b, c}` is a 3-clique if and only if `a`, `b`, and `c` are pairwise
-adjacent. Notice in this and the previous lemma we need to give Lean a
+The `Finset` `{a, b, c}` is a `3`-clique if and only if `a`, `b`, and `c` are
+pairwise adjacent. Notice in this and the previous lemma we need to give Lean a
 `DecidableEq V` instance to be able to form the `Finset` `{a, b}` and `{a, b, c}`.
 Also we don't need to assume that the vertices in the cliques are distinct because
 pairwise adjacency trivially implies that they are distinct.
@@ -132,14 +132,14 @@ example : K[9].IsNClique 5 {0, 1, 3, 5, 7} := by decide
 
 /-!
 Famously the Mycielskian of any triangle-free graph is also triangle-free, so in
-particular any iterated Mycielskian of the 5-cycle is triangle-free. (We will prove
-this and a more general result later.)
+particular any iterated Mycielskian of `K[2]` is triangle-free. (We will prove this
+and a more general result later.)
 
-For now we just check that a particular set of 3 vertices in `mμ^3 C[5]` is not a
-3-clique.
+For now we just check that a particular set of 3 vertices in `mμ^3 K[2]` is not a
+`3`-clique.
 -/
 example :
-    ¬ (mμ^3 C[5]).IsNClique 3 {(0 : Fin 5)ᵣᵣᵣ, (1 : Fin 5)ₗₗₗ, (2 : Fin 5)ₗᵣₗ} := by
+    ¬ (mμ^3 K[2]).IsNClique 3 {(0 : Fin 2)ᵣᵣᵣ, (1 : Fin 2)ₗₗₗ, (1 : Fin 2)ₗᵣₗ} := by
   decide
 
 /-!
@@ -155,12 +155,13 @@ lemma Hom.injOn_of_isClique {W : Type*} {H : SimpleGraph W} (f : G →g H)
   exact H.irrefl (hxy ▸ f.map_adj (hs hx hy hne))
 
 /-!
-Next, if a map `f : V → W` sends adjacent vertices of an `n`-clique `s` of `G` to
-adjacent vertices of `H` then the image of `s` is an `n`-clique of `H`. As in
-`Hom.injOn_of_isClique`, `f` is automatically injective on `s`, since distinct
-vertices of `s` are adjacent. (We will use this several times, with `f` a graph
-homomorphism or a projection.)
+Any map that sends adjacent vertices of an `n`-clique `s` of `G` to adjacent vertices
+of a graph `H` is automatically injective on `s`, hence the image of `s` is an
+`n`-clique of `H`. We will use this several times, with `f` a graph homomorphism or a
+projection.
 -/
+/-- If a map `f : V → W` sends adjacent vertices of an `n`-clique `s` of `G` to
+adjacent vertices of `H` then the image of `s` is an `n`-clique of `H`. -/
 lemma IsNClique.image_of_adj {W : Type*} {H : SimpleGraph W} [DecidableEq W]
     {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) {f : V → W}
     (hadj : ∀ ⦃x⦄, x ∈ s → ∀ ⦃y⦄, y ∈ s → G.Adj x y → H.Adj (f x) (f y)) :
@@ -175,9 +176,7 @@ lemma IsNClique.image_of_adj {W : Type*} {H : SimpleGraph W} [DecidableEq W]
   obtain ⟨y, hy, rfl⟩ := Finset.mem_image.mp hb
   exact hadj hx hy (hs.isClique hx hy fun h => hne (by rw [h]))
 
-/-!
-In particular the image of an `n`-clique under a graph homomorphism is an `n`-clique.
--/
+/-- The image of an `n`-clique under a graph homomorphism is an `n`-clique. -/
 protected lemma IsNClique.mapHom {W : Type*} {H : SimpleGraph W} [DecidableEq W]
     {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) (f : G →g H) :
     H.IsNClique n (s.image f) :=
@@ -190,9 +189,10 @@ Much of extremal graph theory is concerned with properties of graphs that do not
 contain cliques of a certain size. For example, Mantel's theorem says that a
 triangle-free graph on `n` vertices has at most `n ^ 2 / 4` edges.
 
-We say that a graph `G` is *n-clique-free* if it contains no `n`-cliques.
+We say that a graph `G` is *`n`-clique-free* if it contains no `n`-cliques.
 -/
 #source CliqueFree -- def CliqueFree (n : ℕ) : Prop := ∀ t, ¬G.IsNClique n t
+
 /-!
 So `¬ G.CliqueFree n` holds if and only if `G` contains an `n`-clique.
 -/
@@ -204,13 +204,13 @@ If `G ≤ H` and `H` is `n`-clique-free then so is `G`, so the property of being
 `n`-clique-free is monotone downwards (in Mathlib, `Antitone`).
 -/
 #check CliqueFree.anti      -- G ≤ H → CliqueFree n H → CliqueFree n G
+
 /-!
-More generally, Mathlib's `CliqueFree.comap` says that if `H` contains a copy of `G`
-(`G ⊑ H`, see
-[Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies)) and `H` is
-`n`-clique-free then so is `G`. Since a copy is just an injective homomorphism, we
-can ask whether injectivity is needed. It is not: a homomorphism `G →g H` is enough,
-since by `IsNClique.mapHom` it maps any `n`-clique of `G` to an `n`-clique of `H`.
+More generally, Mathlib's `CliqueFree.comap` says that if `G` contains a copy of `H`
+(`H ⊑ G`, see `IsContained`) and `G` is `n`-clique-free then so is `H`.
+Since a copy is just an injective homomorphism, we can ask whether injectivity is
+needed. It is not: a homomorphism `G →g H` is enough, since by `IsNClique.mapHom` it
+maps any `n`-clique of `G` to an `n`-clique of `H`.
 -/
 #check CliqueFree.comap     -- G ⊑ H → CliqueFree n H → CliqueFree n G
 
@@ -221,15 +221,14 @@ lemma CliqueFree.of_hom {W : Type*} {H : SimpleGraph W} {n : ℕ} (f : G →g H)
 /-!
 An `n`-clique is the same thing as a copy of the complete graph `K[n]`, so `G` is
 `n`-clique-free exactly when it contains no copy of `K[n]`, i.e. when `G` is
-`K[n]`-free in the sense of
-[Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies).
+`K[n]`-free in the sense of `Free`.
 -/
 #check not_cliqueFree_iff_top_isContained -- ¬G.CliqueFree n ↔ K[n] ⊑ G
 #check cliqueFree_iff_free_top_fin        -- G.CliqueFree n ↔ K[n].Free G
 end cliques
 
 /-!
-If we take any complete-multipartite graph with nonempty parts indexed by a type `ι`
+If we take any complete multipartite graph with nonempty parts indexed by a type `ι`
 then it will contain an `n`-clique if and only if the index type has cardinality at
 least `n`. Notice that this result makes sense for `ι` an infinite type, so we need a
 way to say that `n ≤ #ι` without assuming that `ι` is finite.
@@ -243,19 +242,17 @@ for more details on the different ways to talk about cardinality.)
 /-!
 Notice how this lemma requires the parts to be nonempty. Instead of a hypothesis
 `∀ i, Nonempty (W i)` it takes a function `f : ∀ i, W i` choosing a vertex in each
-part. Having such a choice function is equivalent to all parts being nonempty, and
-it is often easier to work with. We do the same in `blowUpGraph_cliqueFree_iff`
-below.
+part. Having such a choice function is equivalent to assuming that all its parts are
+nonempty, but is often easier to work with. We do the same in
+`blowUpGraph_cliqueFree_iff` below.
 
 Conversely, if `ι` is finite with less than `n` elements then the graph is
 `n`-clique-free. (Mathlib states this direction for a `Fintype` index.)
 -/
 #check cliqueFree_completeMultipartiteGraph
 
-/-!
-The blow-up of a graph `G` with nonempty parts is `n`-clique-free if and only if `G`
-is `n`-clique-free.
--/
+/-- The blow-up of a graph `G` with nonempty parts is `n`-clique-free if and only if
+`G` is `n`-clique-free. -/
 lemma blowUpGraph_cliqueFree_iff {n : ℕ} {ι : Type*} (G : SimpleGraph ι)
     (W : ι → Type*) (f : ∀ i, W i) :
     (G.blowUpGraph W).CliqueFree n ↔ G.CliqueFree n := by
@@ -272,7 +269,8 @@ to provide such an instance.
 
 # The Finset of n-Cliques
 
-If `G` is a finite graph then we can form the `Finset` of all `n`-cliques in `G`.
+If `G` is a finite graph with a `Fintype V` instance then we can form the `Finset` of
+all `n`-cliques in `G`.
 -/
 #source cliqueFinset -- def cliqueFinset (n : ℕ) : Finset (Finset α) :=
                      --                       {s | G.IsNClique n s}
@@ -293,7 +291,7 @@ This is computable so we can use `#eval` to compute the `Finset (Finset V)` of a
 -/
 #eval C[5].cliqueFinset 2     -- {{0, 1}, {1, 2}, {2, 3}, {0, 4}, {3, 4}}
 #eval mμ[K[4]].cliqueFinset 3 -- {{0ₗ, 1ₗ, 2ₗ}, {0ₗ, 1ₗ, 3ₗ},..., {1ₗ, 2ₗ, 3ᵣ}}
-#eval mμ[K[4]].cliqueFinset 5 -- ∅
+#eval mμ[C[5]].cliqueFinset 5 -- ∅
 /-!
 The `cliqueFinset` of `n`-cliques in a finite graph is empty if and only if the graph
 is `n`-clique-free.
@@ -309,7 +307,7 @@ instance decidableCliqueFree {V : Type*} [Fintype V] (n : ℕ) {G : SimpleGraph 
 
 #eval C[5].CliqueFree 3     -- true
 #eval mμ[C[5]].CliqueFree 3 -- true
-#eval Q[4].CliqueFree 3     -- true
+#eval K[4].CliqueFree 3     -- false
 
 section indset
 variable {V : Type*} {G : SimpleGraph V}
@@ -319,19 +317,21 @@ variable {V : Type*} {G : SimpleGraph V}
 
 The *clique number* of a graph is the size of the largest clique in the graph. In
 Mathlib this is defined as the `sSup` of the set of `n` such that there exists an
-`n`-clique in the graph.
+`n`-clique in the graph. We write `ω G` for the clique number of `G`.
 -/
 #source cliqueNum -- noncomputable def cliqueNum (G : SimpleGraph α) : ℕ :=
                   --                      sSup {n | ∃ s, G.IsNClique n s}
+
 @[inherit_doc]
 scoped notation "ω" => SimpleGraph.cliqueNum
 /-!
 Since this is our first time seeing `sSup` we will take a moment to explain what it
-is. The name `sSup` stands for *set supremum*, for `ℕ` this is the largest element of
+is. The name `sSup` stands for *set supremum*; for `ℕ` this is the largest element of
 a nonempty bounded `Set ℕ`, or `0` if the set is empty or unbounded.
 -/
 #check Nat.sSup_def
 #check Nat.sSup_of_not_bddAbove
+
 /-!
 What this means for our definition of `cliqueNum` is that:
 
@@ -356,7 +356,6 @@ chromatic number, which takes values in `ℕ∞`, so that an infinite chromatic 
 is recorded as `⊤` rather than `0`.)
 -/
 example : ω (⊤ : SimpleGraph ℕ) = 0 := by simp
-
 example : ω (⊤ : SimpleGraph (Fin 3)) = 3 := by simp
 
 /-!
@@ -364,9 +363,8 @@ In a finite graph any clique has size at most the `cliqueNum`:
 -/
 #check IsClique.card_le_cliqueNum
 
-/-!
-We will often apply this to an `n`-clique, so we record that version too.
--/
+/-- An `n`-clique in a finite graph provides a lower bound on the clique number of
+the graph. -/
 lemma IsNClique.le_cliqueNum [Finite V] {n : ℕ} {s : Finset V}
     (h : G.IsNClique n s) : n ≤ ω G :=
   h.card_eq ▸ h.isClique.card_le_cliqueNum
@@ -401,8 +399,8 @@ at all: if the clique sizes are unbounded then `ω G = 0`, and `∅` is a `0`-cl
 A graph homomorphism into a finite graph cannot decrease the clique number: by
 `exists_isNClique_cliqueNum` there is a clique of size `ω G`, and it maps to a clique
 of the same size in `H`. The hypothesis `[Finite W]` cannot be dropped. For example,
-`K[3]` maps into the complete graph on `ℕ` (any injective map will do), but the
-complete graph on `ℕ` has clique number `0 < 3`.
+`K[3]` maps into the complete graph on `ℕ`, but the complete graph on `ℕ` has clique
+number `0 < 3`.
 -/
 lemma Hom.cliqueNum_le {W : Type*} [Finite W] {H : SimpleGraph W} (f : G →g H) :
     ω G ≤ ω H := by
@@ -422,7 +420,7 @@ lemma Iso.cliqueNum_eq {W : Type*} {H : SimpleGraph W} (e : G ≃g H) : ω G = �
   congr 1
   ext n
   exact ⟨fun ⟨_, hs⟩ => ⟨_, hs.mapHom e.toHom⟩,
-    fun ⟨_, hs⟩ => ⟨_, hs.mapHom e.symm.toHom⟩⟩
+         fun ⟨_, hs⟩ => ⟨_, hs.mapHom e.symm.toHom⟩⟩
 
 /-!
 If `G` is `(n + 1)`-clique-free then `ω G ≤ n`. Once again no finiteness is needed,
@@ -430,11 +428,12 @@ since the clique given by `exists_isNClique_cliqueNum` always exists.
 -/
 lemma CliqueFree.cliqueNum_le {n : ℕ} (h : G.CliqueFree (n + 1)) : ω G ≤ n := by
   obtain ⟨s, hs⟩ := G.exists_isNClique_cliqueNum
+  -- `by_contra!` is `by_contra` with the negation pushed inwards: `hlt : n < ω G`
   by_contra! hlt
   exact h.mono hlt _ hs
 
 /-!
-So to compute a clique number it is enough to find an `n`-clique and show that the
+So to compute the clique number it is enough to find an `n`-clique and show that the
 graph is `(n + 1)`-clique-free. This needs no finiteness either: the clique-free
 hypothesis bounds the size of every clique, so `n` is a genuine largest element of
 the set of clique sizes, and `le_csSup` applies.
@@ -477,8 +476,9 @@ This is defined analogously to `IsClique`.
 #source IsIndepSet -- abbrev IsIndepSet (s : Set α) : Prop :=
                    --                    s.Pairwise (fun v w ↦ ¬G.Adj v w)
 /-!
-Since a `SimpleGraph` is loopless `s : Set V` is an independent set iff every pair of
-vertices in `s` is non-adjacent (irrespective of whether or not they are distinct).
+Since a `SimpleGraph` is loopless, `s : Set V` is an independent set iff every pair
+of vertices in `s` is non-adjacent (irrespective of whether or not they are
+distinct).
 -/
 lemma isIndepSet_iff_forall_not_adj {s : Set V} :
     G.IsIndepSet s ↔ ∀ ⦃v w⦄, v ∈ s → w ∈ s → ¬G.Adj v w := by
@@ -516,11 +516,9 @@ of the largest independent set.
 #source indepNum -- noncomputable def indepNum (G : SimpleGraph α) : ℕ :=
                  --                     sSup {n | ∃ s, G.IsNIndepSet n s}
 
-/--
-The maximal number of vertices of an independent set in a graph `G`.
-Denoted `⍺ G`. The symbol is the APL alpha `⍺` (Unicode `U+237A`, typed as `\apla`)
-rather than the Greek `α` (`\a`), to avoid clashes with generic type variables.
--/
+/-- The maximum number of vertices of an independent set in a graph `G`.
+Denoted `⍺ G`. (The symbol is the APL alpha `⍺`: Unicode `U+237A`, typed as `\apla`
+rather than the Greek `α`, to avoid clashes with generic type variables.) -/
 scoped notation "⍺" => SimpleGraph.indepNum
 
 /-!
@@ -555,13 +553,12 @@ lemma indepNum_bot : ⍺ (⊥ : SimpleGraph V) = Nat.card V := by
 /-!
 ## Triangles and Independent Sets
 
-In a triangle-free graph the neighbourhood of any vertex is an independent set, since
-two adjacent neighbours of `v` would form a triangle with `v`.
+In a triangle-free graph the neighbourhood of any vertex `v` is an independent set,
+since two adjacent neighbours of `v` would form a triangle with `v`.
 -/
 #check isIndepSet_neighborSet_of_triangleFree
-/-!
-Hence in a finite triangle-free graph every vertex has degree at most `⍺ G`.
--/
+
+/-- In a finite triangle-free graph every vertex has degree at most `⍺ G`. -/
 lemma degree_le_indepNum_of_triangleFree [Finite V] [G.LocallyFinite]
     (h : G.CliqueFree 3) (v : V) : G.degree v ≤ ⍺ G := by
   rw [← card_neighborFinset_eq_degree]
@@ -597,9 +594,7 @@ Contrast this with the bound `|V| ≤ χ G * ⍺ G` that we will prove in the
 next chapter. On the other hand the sum satisfies `ω G + ⍺ G ≤ |V| + 1` for every
 finite graph, since a clique and an independent set share at most one vertex (see the
 exercises).
--/
 
-/-!
 ## Independence Number of the Infinite Path on ℕ
 
 The infinite path graph on `ℕ` (`pathNat₁`) has unbounded independent sets, so what
@@ -655,15 +650,15 @@ hypotheses:
   `2 * r ≤ n`.
 -/
 section kneser
-variable {k : ℕ} {β : Type*}
 open Finset
+variable {k : ℕ} {β : Type*}
 /-!
 The vertices of `kneserGraph β k` have type `{s : Finset β // #s = k}` which is a
 bit of a pain to write, so we introduce a local notation for it.
 -/
 
 /-- The type of `k`-element subsets of `β`: `{s : Finset β // #s = k}`, the
-vertices of `kneserGraph β k` -/
+vertices of `kneserGraph β k`. -/
 local notation "βₖ" => {s : Finset β // #s = k}
 
 /-!
@@ -672,6 +667,8 @@ independent set in `kneserGraph β k`: any two such vertices share `i`, so they 
 not disjoint. When `1 ≤ k` and `2 * k ≤ #β` this is a largest independent set: we
 will see below that the Erdős–Ko–Rado theorem gives the matching upper bound. (For
 larger `k` the graph has no edges at all.)
+
+[Figure: The star at $0$, a largest independent set in the Petersen graph $\mathrm{Kn}(5,2)$](https://jt496.github.io/GraphTheoryInLean/figures/kneser_star.svg)
 -/
 lemma kneserGraph_isIndepSet_of_mem (i : β) :
     (kneserGraph β k).IsIndepSet {b | i ∈ b.val} := by
@@ -682,7 +679,7 @@ lemma kneserGraph_isIndepSet_of_mem (i : β) :
 /-!
 We now want to start using the `Finset.powersetCard` API to compute sizes of families
 of `k`-element subsets of a fintype `β`. Due to our choice of vertex type for the
-Kneser graph we need the following book-keeping lemma which has zero mathematical
+Kneser graph we need the following bookkeeping lemma which has zero mathematical
 content.
 
 Given any predicate `p : Finset β → Prop`, the number of `k`-element subsets of `β`
@@ -700,7 +697,7 @@ lemma card_filter_val_eq_card_filter_powersetCard [Fintype β] (p : Finset β �
   exact fun t ht => ⟨⟨t, ht.1.2⟩, by simpa using ht.2, rfl⟩
 
 /-!
-To compute the independence number we need the size of the star at `i`: the number
+To compute the independence number we need the size of the *star* at `i`: the number
 of `k`-element subsets of a finite type `β` containing `i` is
 `(Fintype.card β - 1).choose (k - 1)`. We get this from Mathlib's
 `card_filter_powersetCard_subset`, which counts the `k`-element subsets containing a
@@ -756,7 +753,7 @@ this is where `[NeZero k]` is needed: the only `0`-element subset is `∅`.
 -/
 lemma kneserGraph_isIndepSet_image_intersecting [DecidableEq β] [NeZero k]
     {t : Finset βₖ} (ht : (kneserGraph β k).IsIndepSet (t : Set _)) :
-    ((t.image Subtype.val : Finset (Finset β)) : Set (Finset β)).Intersecting := by
+    (t.image Subtype.val : Set (Finset β)).Intersecting := by
   simp only [Finset.coe_image]
   rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩ hdisj
   obtain rfl | hne := eq_or_ne x y
@@ -766,11 +763,11 @@ lemma kneserGraph_isIndepSet_image_intersecting [DecidableEq β] [NeZero k]
 
 /-!
 The image under `Subtype.val` of any finset of `k`-element subsets of `β` is a
-family of `k`-element sized subsets of `β`.
+family of `k`-element subsets of `β`.
 -/
 lemma sized_image_val [DecidableEq β] (t : Finset βₖ) :
-    ((t.image Subtype.val : Finset (Finset β)) : Set (Finset β)).Sized k := by
-  simp +contextual [Set.Sized]
+    (t.image Subtype.val : Set (Finset β)).Sized k := by
+  simp_all [Set.Sized]
 
 /-!
 Since the version of the Erdős–Ko–Rado theorem in Mathlib is stated in terms of
@@ -837,7 +834,7 @@ preserves the clique number (of any finite graph with at least one edge).
 -/
 theorem CliqueFree.mycielskian (h : G.CliqueFree 3) : mμ[G].CliqueFree 3 := by
   intro t ht
-  -- we use `classical` to avoid the need for a `DecidableEq V` instance here
+  -- `classical` provides the `DecidableEq V` instance required in the proof
   classical
   rw [is3Clique_iff] at ht
   obtain ⟨a, b, c, hab, hac, hbc, _⟩ := ht
@@ -864,10 +861,13 @@ theorem CliqueFree.iterMycielskian (n : ℕ) (h : G.CliqueFree 3) :
   | succ _ ih => exact ih.mycielskian
 
 /-!
-In particular the iterated Mycielskian of the 5-cycle is triangle-free.
+In particular every iterated Mycielskian of the single edge `K[2]` is triangle-free.
+Up to isomorphism this sequence begins `K[2]`, `C[5]`, `grotzschGraph`: we have
+`mμ[K[2]] ≃g C[5]` (`isoMycielskianCompleteTwoCycleGraphFive`), and applying
+`Iso.mapMycielskian` to this gives `mμ^2 K[2] ≃g grotzschGraph`.
 -/
-theorem cliqueFree_three_iterMycielskian_cycleGraph (n : ℕ) :
-    (mμ^n C[5]).CliqueFree 3 :=
+theorem cliqueFree_three_iterMycielskian_completeGraph_two (n : ℕ) :
+    (mμ^n K[2]).CliqueFree 3 :=
   CliqueFree.iterMycielskian n (by decide)
 
 /-!
@@ -877,11 +877,11 @@ We now turn to the clique number of the Mycielskian.
 
 On paper this is easy: any clique in `G` also appears in `mμ[G]` via the obvious
 embedding. Conversely any clique of size at least `3` in `mμ[G]` cannot use the
-vertex `none` since `none` is only adjacent to the vertices in the right-copy of `V`,
-and the right-copy of `V` is an independent set. Moreover no clique in `mμ[G]` can
-contain `v ₗ` and `v ᵣ` for any `v ∈ V`. (Since this would imply that `G.Adj v v`
-which is impossible.) Hence any clique of size at least `3` in `mμ[G]` can be mapped
-to a clique of the same size in `G` using the projection we will define below.
+vertex `none` since `none` is only adjacent to the vertices in the right copy of `V`,
+and the right copy of `V` is an independent set. Moreover no clique in `mμ[G]` can
+contain `v ₗ` and `v ᵣ` for any `v ∈ V`. (This would imply `G.Adj v v`, which is
+impossible.) Hence any clique of size at least `3` in `mμ[G]` can be mapped to a
+clique of the same size in `G` using the projection we will define below.
 
 We first prove that the Mycielskian embedding mapping `G` into its Mycielskian sends
 `k`-cliques in `G` to `k`-cliques in `mμ[G]`.
@@ -893,8 +893,8 @@ lemma IsNClique.mycielskian {k : ℕ} {s : Finset V} (h : G.IsNClique k s) :
 
 /-!
 Next we want to show that the vertex `none` cannot belong to any `k`-clique in
-`mμ[G]` when `3 ≤ k`, because `none` is only adjacent to right-vertices, and no two
-right-vertices are adjacent.
+`mμ[G]` when `3 ≤ k`, because `none` is only adjacent to right vertices, and no two
+right vertices are adjacent.
 -/
 lemma mycielskian_none_notMem_clique {k : ℕ} (h3 : 3 ≤ k)
     {t : Finset (Option (V ⊕ V))} (ht : mμ[G].IsNClique k t) : none ∉ t := by
@@ -917,34 +917,32 @@ lemma mycielskian_none_notMem_clique {k : ℕ} (h3 : 3 ≤ k)
   -- but no two "right" vertices are adjacent, so we have a contradiction.
   exact ht.isClique (Finset.mem_of_mem_erase ha) (Finset.mem_of_mem_erase hb) hab
 
-
 /-!
 If `s` is a clique in the Mycielskian then `s` cannot contain both `v ₗ` and `v ᵣ`
-for any `v ∈ V` (since `mμ[G].Adj v ₗ v ᵣ` would imply `G.Adj v v` which is
+for any `v ∈ V` (since `mμ[G].Adj v ₗ v ᵣ` would imply `G.Adj v v`, which is
 impossible). Moreover we just proved that any `k`-clique with `3 ≤ k` cannot contain
 `none`. This means that if we define a projection map from the vertices of `mμ[G]` to
 the vertices of `G` by "forgetting" which side (left or right) vertices came from
 (and sending `none` to an arbitrary vertex in `V`) then it will be injective on any
 clique in `mμ[G]` of size at least `3` and also preserve adjacency.
 -/
-
-/-- Projection from the vertex set of `mμ[G]` to that of `G` (will preserve
-`k`-cliques for `k ≥ 3`) -/
+/-- Projection from the vertex set of `mμ[G]` to that of `G` (preserves `k`-cliques
+for `k ≥ 3`). -/
 def mycielskianProj (v₀ : V) : Option (V ⊕ V) → V
-  | some (Sum.inl v) => v
-  | some (Sum.inr v) => v
-  | none             => v₀
+  | none => v₀
+  | v ₗ => v
+  | v ᵣ => v
 
 /-!
 We need some simple definitional lemmas about `mycielskianProj`.
 -/
 @[simp]
 lemma mycielskianProj_left (v₀ v : V) :
-    mycielskianProj v₀ (some (Sum.inl v)) = v := rfl
+    mycielskianProj v₀ v ₗ = v := rfl
 
 @[simp]
 lemma mycielskianProj_right (v₀ v : V) :
-    mycielskianProj v₀ (some (Sum.inr v)) = v := rfl
+    mycielskianProj v₀ v ᵣ = v := rfl
 
 @[simp]
 lemma mycielskianProj_none (v₀ : V) : mycielskianProj v₀ none = v₀ := rfl
@@ -952,9 +950,7 @@ lemma mycielskianProj_none (v₀ : V) : mycielskianProj v₀ none = v₀ := rfl
 /-!
 Any `k`-clique in `mμ[G]` (with `3 ≤ k`) maps to a `k`-clique in `G` under
 `mycielskianProj`. Such a clique doesn't contain `none`, and every edge of `mμ[G]`
-not involving `none` projects to an edge of `G`. (In particular two vertices of the
-clique can't have the same projection `v`, since they would be `v ₗ` and `v ᵣ`,
-whose adjacency in `mμ[G]` would give `G.Adj v v`.)
+not involving `none` projects to an edge of `G`.
 -/
 lemma IsNClique.of_mycielskian [DecidableEq V] (v₀ : V) {k : ℕ} (h3 : 3 ≤ k)
     {t : Finset (Option (V ⊕ V))} (ht : mμ[G].IsNClique k t) :
@@ -965,7 +961,27 @@ lemma IsNClique.of_mycielskian [DecidableEq V] (v₀ : V) {k : ℕ} (h3 : 3 ≤ 
   refine ht.image_of_adj fun x hx y hy hadj => ?_
   -- `first | t₁ | t₂ | …` tries the tactics in turn, until one succeeds
   rcases x with _ | ⟨_ | _⟩ <;> rcases y with _ | ⟨_ | _⟩ <;> -- 9 goals
-    first | exact absurd hx hnone | exact absurd hy hnone | exact hadj | simp at hadj
+    first | grind | exact hadj | contradiction
+
+/-!
+This generalizes `CliqueFree.mycielskian`: for every `r ≥ 3`, the Mycielskian of an
+`r`-clique-free graph is `r`-clique-free. No finiteness is needed. To apply
+`IsNClique.of_mycielskian` we need a vertex `v₀ : V`, and the clique itself provides
+one: it has a vertex, which is not `none`, so it is `v ₗ` or `v ᵣ` for some `v ∈ V`.
+The bound `3 ≤ r` cannot be dropped. The empty graph on one vertex is
+`2`-clique-free, but its Mycielskian has an edge from `none` to the right copy of the
+vertex.
+-/
+theorem CliqueFree.mycielskian_of_three_le {r : ℕ} (hr : 3 ≤ r)
+    (h : G.CliqueFree r) : mμ[G].CliqueFree r := by
+  classical -- to infer `DecidableEq V`
+  intro t ht
+  -- an `r`-clique with `3 ≤ r` has a vertex `x`
+  obtain ⟨x, hx⟩ : t.Nonempty := by grind [Finset.card_pos, ht.card_eq]
+  rcases x with _ | ⟨v | v⟩
+  · exact mycielskian_none_notMem_clique hr ht hx
+  -- if `x` is `v ₗ` or `v ᵣ` then `t` projects to an `r`-clique in `G`
+  all_goals exact h _ (ht.of_mycielskian v hr)
 
 /-!
 Any finite graph with at least one edge has the same clique number as its
@@ -978,44 +994,39 @@ theorem cliqueNum_mycielskian_of_ne_bot [Finite V] (h : G ≠ ⊥) :
   -- `G ≠ ⊥` gives an edge, i.e. a `2`-clique, so `2 ≤ ω G`
   obtain ⟨a, b, hab⟩ := ne_bot_iff_exists_adj.mp h
   have h2 : 2 ≤ ω G := (G.is2Clique_pair_iff.mpr hab).le_cliqueNum
-  -- a maximum clique of `G` maps to an `ω G`-clique in `mμ[G]`, so it only remains
-  -- to show that `mμ[G]` is `(ω G + 1)`-clique-free
+  -- `G` is `(ω G + 1)`-clique-free, so `mμ[G]` is too since `3 ≤ ω G + 1`
+  have hfree : G.CliqueFree (ω G + 1) := fun _ hs => by grind [hs.le_cliqueNum]
+  -- and a maximum clique of `G` maps to an `ω G`-clique in `mμ[G]`
   obtain ⟨s, hs⟩ := G.exists_isNClique_cliqueNum
-  apply hs.mycielskian.cliqueNum_eq_of_cliqueFree
-  intro t ht
-  -- any `(ω G + 1)`-clique in `mμ[G]` projects to an `(ω G + 1)`-clique in `G`
-  -- (note `3 ≤ ω G + 1` since `2 ≤ ω G`), contradicting `card_le_cliqueNum`
-  exact absurd (ht.of_mycielskian a (by grind)).le_cliqueNum (by grind)
+  exact hs.mycielskian.cliqueNum_eq_of_cliqueFree
+    (hfree.mycielskian_of_three_le (by grind))
 
 /-!
-Applying this repeatedly to the `5`-cycle, we see that every iterated Mycielskian of
-`C[5]` has clique number `2`. Each `mμ^n C[5]` has an edge because its clique number
-is `2`, while the edgeless graph `⊥` is `2`-clique-free.
+Applying this repeatedly to `K[2]`, which has clique number `2` by `cliqueNum_top`,
+we see that every iterated Mycielskian of `K[2]` has clique number `2`. Each
+`mμ^n K[2]` has an edge, since `K[2]` does and the left copies of the ends of an edge
+of `G` are adjacent in `mμ[G]`.
 -/
-theorem cliqueNum_iterMycielskian_cycleGraph (n : ℕ) : ω (mμ^n C[5]) = 2 := by
+theorem cliqueNum_iterMycielskian_completeGraph_two (n : ℕ) :
+    ω (mμ^n K[2]) = 2 := by
+  have hne (n : ℕ) : mμ^n K[2] ≠ ⊥ := by
+    induction n with
+    | zero => exact (ne_bot_iff_exists_adj.mpr ⟨0, 1, by decide⟩ : K[2] ≠ ⊥)
+    | succ n ih =>
+      obtain ⟨a, b, hab⟩ := ne_bot_iff_exists_adj.mp ih
+      exact ne_bot_iff_exists_adj.mpr ⟨a ₗ, b ₗ, hab⟩
   induction n with
-  | zero =>
-    have h2 : C[5].IsNClique 2 {0, 1} := by decide
-    exact h2.cliqueNum_eq_of_cliqueFree (by decide)
-  | succ n ih =>
-    have hne : mμ^n C[5] ≠ ⊥ := by
-      intro h
-      obtain ⟨s, hs⟩ := (mμ^n C[5]).exists_isNClique_cliqueNum
-      rw [ih, h] at hs
-      exact cliqueFree_bot le_rfl s hs
-    rw [← ih]
-    exact cliqueNum_mycielskian_of_ne_bot hne
+  | zero => simp
+  | succ n ih => rwa [iterMycielskian_succ, cliqueNum_mycielskian_of_ne_bot (hne n)]
 
 /-!
 In
 [Colouring Mycielskians](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-colouring-mycielskians)
-we show that `mμ^n C[5]` has chromatic number `n + 3`. So these graphs all have
+we show that `mμ^n K[2]` has chromatic number `n + 2`. So these graphs all have
 clique number `2` but have arbitrarily large chromatic number.
 -/
 
 end mycielskian_cliquenum
-section open_neighborhoods
-variable {V : Type*}
 /-!
 ## Independence Number of the Mycielskian *
 
@@ -1027,6 +1038,8 @@ texts instead define the neighbourhood of `s` to exclude `s`. The definitions ag
 when `s` is independent, which is the only case we will use.) Mathlib has no
 definition of the neighbourhood of a set of vertices, so we make our own.
 -/
+section open_neighborhoods
+variable {V : Type*}
 
 /-- The open neighbourhood of a set of vertices in a graph `G` is the union of the
 neighbourhoods of each vertex in the set. -/
@@ -1038,7 +1051,7 @@ first by `v : V` and then by proofs of `v ∈ s`.
 -/
 #check Set.iUnion
 /-!
-Membership in the open neighbourhood and in its complement (the vertices with no
+Membership of the open neighbourhood and of its complement (the vertices with no
 neighbour in `s`) unfold as expected.
 -/
 @[simp]
@@ -1061,13 +1074,13 @@ deciding which elements are duplicates.
 #check Finset.biUnion -- [DecidableEq β] (s : Finset α) (t : α → Finset β) : Finset β
 #check Finset.coe_biUnion -- ↑(s.biUnion t) = ⋃ x ∈ s, ↑(t x)
 
-/-- The open neighbourhood of a Finset `s` in a graph `G` is the finset of vertices
+/-- The open neighbourhood of a finset `s` in a graph `G` is the finset of vertices
 that are adjacent to at least one vertex in `s`. -/
 def openNeighborhoodFinset (G : SimpleGraph V) [G.LocallyFinite] [DecidableEq V]
     (s : Finset V) : Finset V := s.biUnion (fun v ↦ G.neighborFinset v)
 
 /-!
-It will be convenient to write `N(s)` for the open neighbourhood of a `s : Finset V`,
+It will be convenient to write `N(s)` for the open neighbourhood of a finset `s`,
 as is standard in graph theory, so that (in a finite graph) the vertices with no
 neighbours in `s` form the finset `N(s)ᶜ`. We want to do this with a fixed `G` here
 so we use `local notation` whose expansion mentions the ambient section variable `G`
@@ -1078,7 +1091,7 @@ variable (G : SimpleGraph V)
 local notation:max "N(" s ")" => openNeighborhoodFinset G s
 variable {G}
 /-!
-Membership in `N(s)` and its complement, and the coercion of `N(s)` to a `Set`,
+Membership of `N(s)` and its complement, and the coercion from `N(s)` to a `Set`,
 unfold as expected.
 -/
 @[simp]
@@ -1105,12 +1118,12 @@ lemma IsIndepSet.mycielskian {s : Set V} (h : G.IsIndepSet s) :
     mμ[G].IsIndepSet (s.image (·ₗ) ∪ (G.openNeighborhoodSet s)ᶜ.image (·ᵣ)) := by
   rintro a ha b hb hne hf
   -- `a` and `b` are each either a left copy of a vertex of `s` or a right copy
-  --  of a vertex with no neighbour in `s`; we split on both. The right-right case
+  -- of a vertex with no neighbour in `s`; we split on both. The right-right case
   -- has no edge, so `simp` closes it, leaving the three cases below.
   obtain (⟨x, hx, rfl⟩ | ⟨x, hx, rfl⟩) := ha
     <;> obtain (⟨y, hy, rfl⟩ | ⟨y, hy, rfl⟩) := hb
       <;> simp only [mycielskian_adj] at hf
-  -- Now have `G.Adj x y` and at least one of `x` or `y` is in `s`
+  -- Now we have `G.Adj x y` and at least one of `x` or `y` is in `s`
   · exact h hx hy hf.ne hf -- both in `sₗ`: contradicts independence of `s`
   -- `y` has no neighbour in `s`, yet `x ∈ s` and `G.Adj x y`
   · exact mem_compl_openNeighborhoodSet.mp hy _ hx hf
@@ -1129,11 +1142,7 @@ lemma card_image_left_union_image_right [DecidableEq V] (s t : Finset V) :
   rw [Finset.card_union_of_disjoint,
     Finset.card_image_of_injective _ left_injective,
     Finset.card_image_of_injective _ right_injective]
-  exact Finset.disjoint_left.mpr fun a ha hb => by
-    rw [mem_image] at ha hb
-    obtain ⟨x, -, rfl⟩ := ha
-    obtain ⟨y, -, hy⟩ := hb
-    simp at hy
+  exact Finset.disjoint_left.mpr fun a ha hb => by grind
 
 /-!
 We will show that the independence number of `mμ[G]` is the maximum, over all
@@ -1141,7 +1150,7 @@ independent sets `s` of `G`, of `#s + #N(s)ᶜ`. The lower bound comes straight 
 `IsIndepSet.mycielskian`.
 -/
 lemma le_indepNum_mycielskian [Fintype V] [DecidableEq V] [G.LocallyFinite]
-    {s : Finset V} (h : G.IsIndepSet ↑s) : #s + #N(s)ᶜ ≤ mμ[G].indepNum := by
+    {s : Finset V} (h : G.IsIndepSet ↑s) : #s + #N(s)ᶜ ≤ ⍺ mμ[G] := by
   have hSindep : mμ[G].IsIndepSet ↑(s.image (·ₗ) ∪ N(s)ᶜ.image (·ᵣ)) := by
     simpa using h.mycielskian
   rw [← card_image_left_union_image_right s (N(s)ᶜ)]
@@ -1163,6 +1172,7 @@ preimage. This guarantees that the preimage of a finset is finite. Here the map
 `(·ₗ)` is injective, so we can always supply `left_injective.injOn`.
 -/
 #check Finset.preimage -- (s : Finset β) (f : α → β) (hf : Set.InjOn f (f ⁻¹' ↑s))
+
 lemma isIndepSet_preimage_left_finset {T : Finset (Option (V ⊕ V))}
     (hT : mμ[G].IsIndepSet ↑T) :
     G.IsIndepSet ↑(T.preimage (·ₗ) left_injective.injOn) := by
@@ -1191,13 +1201,12 @@ lemma compl_openNeighborhoodFinset_nonempty [Fintype V] [Nonempty V] [DecidableE
 
 /-!
 If an independent set `T` of `mμ[G]` contains `none` then, since `none` is adjacent
-to every right-vertex, `T` contains no right-vertices. Hence `T` is contained in
+to every right vertex, `T` contains no right vertices. Hence `T` is contained in
 `none` together with the left copies of its left part.
 -/
 lemma mycielskian_indepSet_subset_insert_none [DecidableEq V]
     {T : Finset (Option (V ⊕ V))} (hT : mμ[G].IsIndepSet ↑T) (hnone : none ∈ T) :
-    T ⊆ insert none
-      ((T.preimage (·ₗ) left_injective.injOn).image (·ₗ)) := by
+    T ⊆ insert none ((T.preimage (·ₗ) left_injective.injOn).image (·ₗ)) := by
   intro v hv
   rcases v with _ | (x | x)
   · exact mem_insert_self _ _
@@ -1219,7 +1228,7 @@ lemma mycielskian_indepSet_preimage_right_subset [Fintype V] [DecidableEq V]
   simpa using hT (Finset.mem_preimage.mp ha) (Finset.mem_preimage.mp hy) (by simp)
 
 /-!
-Any Finset `T` of vertices of `mμ[G]` not containing `none` is covered by the left
+Any finset `T` of vertices of `mμ[G]` not containing `none` is covered by the left
 copies of its left part together with the right copies of its right part. (This is
 just bookkeeping, no graph is involved: every vertex of `mμ[G]` is `none`, a left
 copy, or a right copy.)
@@ -1245,7 +1254,7 @@ lemma mycielskian_indepSet_card_le [Fintype V] [Nonempty V] [DecidableEq V]
     #T ≤ #(T.preimage (·ₗ) left_injective.injOn) +
       #N(T.preimage (·ₗ) left_injective.injOn)ᶜ := by
   -- `A` (resp. `B`) is the set of vertices of `G` whose
-  --  left (resp. right) copy lies in `T`.
+  -- left (resp. right) copy lies in `T`.
   let A : Finset V := T.preimage (·ₗ) left_injective.injOn
   let B : Finset V := T.preimage (·ᵣ) right_injective.injOn
   -- `A` is an independent set of `G`, so `N(A)ᶜ` is nonempty (previous lemmas).
@@ -1303,8 +1312,8 @@ theorem indepNum_mycielskian [Fintype V] [Nonempty V] [DecidableEq V]
 Taking `s = ∅` in the formula gives `⍺ mμ[G] ≥ Nat.card V`, and taking `s` to be a
 maximum independent set gives `⍺ mμ[G] ≥ 2 * ⍺ G` (since `s ⊆ N(s)ᶜ` for an
 independent set `s`). But there are examples where neither is sharp: add an isolated
-vertex to `C[5]` then the graph has `6` vertices and independence number `3`, so both
-bounds give `6`, but `s = {w}` gives `1 + 6 = 7`.
+vertex `w` to `C[5]`; the resulting graph has `6` vertices and independence number
+`3`, so both bounds give `6`, but `s = {w}` gives `1 + 6 = 7`.
 
 For the `5`-cycle the only maximizer is `s = ∅`, with `#∅ + #N(∅)ᶜ = 0 + 5 = 5`,
 while every nonempty independent `s` gives at most `4 = 2 * ⍺ C[5]`.

@@ -76,82 +76,25 @@ def hypercubeEmbedding' (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k] := sorry
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
 [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-we use it to identify the automorphism group of the 2-dimensional hypercube.
+we use it to identify the automorphism group of the `2`-dimensional hypercube.
 
 11. Show that `Q[2]` is isomorphic to the cycle `C[4]`. Both graphs are concrete
-finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` was established in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees),
-and Mathlib provides `instDecidableRelFinAdjCycleGraph` for `C[n]`), so every proof
-obligation can be checked by `decide`. Recall also that `v[i, j]` where
-`i, j ∈ {0, 1}` is scoped notation for the vertices of `Q[2]`. (The stub is marked
-`noncomputable` only so that its `sorry` does not cause problems when this guide is
-built; you can remove the keyword once you have filled in the solution.)
+finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` is
+`hypercubeDecidableRelAdj`, and Mathlib provides `instDecidableRelFinAdjCycleGraph`
+for `C[n]`), so every proof obligation can be checked by `decide`. Recall also that
+`v[i, j]` where `i, j ∈ {0, 1}` is scoped notation for the vertices of `Q[2]`.
+ (The stub is marked `noncomputable` only so that its `sorry` does not cause
+problems when this guide is built; you can remove the keyword once you have filled in
+the solution.)
 -/
 open HypercubeVert
 noncomputable def hypercubeTwoIsoCycleFour' : Q[2] ≃g C[4] := sorry
 
 /-!
-Exercises 12–16 are about the indexed tensor product `⨂g i, G i` from the starred
-section
-[Tensor Products*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-tensor-products).
+The next two exercises are about vertex transitive graphs.
 
-12. Show that for each index `j` the projection out of the indexed tensor product
-`⨂g i, G i` is a graph homomorphism to `G j`.
--/
-example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) :
-    ⨂g i, G i →g G j := sorry
-
-/-!
-13. The universal property of the indexed tensor product.
-Given graph homomorphisms from `K` to each `G i`, there is a homomorphism from `K` to
-the indexed tensor product `⨂g i, G i` (provided `ι` is nonempty, which here follows
-from the existence of `i₀`; the next exercise looks at the case when `ι` is empty).
--/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i := sorry
-
-/-!
-14. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
-to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
--/
-example {ι : Type*} [IsEmpty ι] {V : ι → Type*} {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) : Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
-  sorry
-
-/-!
-15. The degree of `f` in the indexed tensor product is the product of the degrees of
-its components. The neighbour set is the `Fintype.piFinset` of the componentwise
-neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
-automatic.
--/
-example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
-    {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    [∀ i, Fintype ((G i).neighborSet (f i))] :
-    (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
-  sorry
-
-/-!
-16. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
-graph embedding, we have a graph embedding of `K` into the indexed tensor product.
-(We say that `f i₀` is a graph embedding by giving both additional properties that
-allow the original homomorphism to be upgraded: injectivity and adjacency
-reflection.)
--/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i)
-    (inj : Function.Injective (f i₀))
-    (reflect : ∀ {x y}, (G i₀).Adj (f i₀ x) (f i₀ y) → K.Adj x y) :
-    K ↪g ⨂g i, G i where
-  toFun x i := sorry
-  inj' := sorry
-  map_rel_iff' := sorry
-
-/-!
-The next two exercises are about the starred section
-[Vertex-Transitivity](https://jt496.github.io/GraphTheoryInLean/Maps/#section-vertex-transitivity).
-
-17. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
-that the empty graph `⊥` is vertex-transitive. (Hint: as in exercise 5, an
+12. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
+that the empty graph `⊥` is vertex-transitive. (Hint: as in Exercise 5, an
 automorphism of `G` is also an automorphism of `Gᶜ`; and `compl_top` says
 `⊤ᶜ = ⊥`.)
 -/
@@ -163,7 +106,7 @@ lemma isVertexTransitive_bot' : (⊥ : SimpleGraph V).IsVertexTransitive := by
   sorry
 
 /-!
-18. Our characterization `isVertexTransitive_mycielskian_iff` of the
+13. Our characterization `isVertexTransitive_mycielskian_iff` of the
 vertex-transitive Mycielskians assumes that `V` is nonempty. Show that this
 assumption is needed: if `V` is empty then the Mycielskian of any graph on `V` is
 vertex-transitive, but the graph is not isomorphic to `K[2]`.
@@ -179,6 +122,62 @@ lemma isVertexTransitive_mycielskian_of_isEmpty' [IsEmpty V] (G : SimpleGraph V)
 lemma isEmpty_iso_completeGraph_two_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) :
     IsEmpty (G ≃g K[2]) :=
   sorry
+
+/-!
+Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
+from the starred section
+[Tensor Products*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-tensor-products).
+
+14. Show that for each index `j` the projection out of the indexed tensor product
+`⨂g i, G i` is a graph homomorphism to `G j`.
+-/
+example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) :
+    ⨂g i, G i →g G j := sorry
+
+/-!
+15. The universal property of the indexed tensor product.
+Given graph homomorphisms from `K` to each `G i`, there is a homomorphism from `K` to
+the indexed tensor product `⨂g i, G i` (provided `ι` is nonempty, which here follows
+from the existence of `i₀`; the next exercise looks at the case when `ι` is empty).
+-/
+example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i := sorry
+
+/-!
+16. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
+to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
+-/
+example {ι : Type*} [IsEmpty ι] {V : ι → Type*} {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (V i)) : Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
+  sorry
+
+/-!
+17. The degree of `f` in the indexed tensor product is the product of the degrees of
+its components. The neighbour set is the `Fintype.piFinset` of the componentwise
+neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
+automatic.
+-/
+example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
+    {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+    [∀ i, Fintype ((G i).neighborSet (f i))] :
+    (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
+  sorry
+
+/-!
+18. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
+graph embedding, we have a graph embedding of `K` into the indexed tensor product.
+(We say that `f i₀` is a graph embedding by giving both additional properties that
+allow the original homomorphism to be upgraded: injectivity `inj` and adjacency
+reflection `reflect`.)
+-/
+example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i)
+    (inj : Function.Injective (f i₀))
+    (reflect : ∀ {x y}, (G i₀).Adj (f i₀ x) (f i₀ y) → K.Adj x y) :
+    K ↪g ⨂g i, G i where
+  toFun x i := sorry
+  inj' := sorry
+  map_rel_iff' := sorry
 
 /-!
 The last exercise is about the starred section
@@ -299,13 +298,13 @@ def hypercubeEmbedding (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k]
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
 [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-we use it to identify the automorphism group of the 2-dimensional hypercube.
+we use it to identify the automorphism group of the `2`-dimensional hypercube.
 
 11. Show that `Q[2]` is isomorphic to the cycle `C[4]`. Both graphs are concrete
-finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` was established in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees),
-and Mathlib provides `instDecidableRelFinAdjCycleGraph` for `C[n]`), so every proof
-obligation can be checked by `decide`. Recall also that `v[i, j]` where
+finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` is
+`hypercubeDecidableRelAdj`, and Mathlib provides
+`instDecidableRelFinAdjCycleGraph` for `C[n]`), so every proof obligation can be
+checked by `decide`. Recall also that `v[i, j]` where
 `i, j ∈ {0, 1}` is scoped notation for the vertices of `Q[2]`.
 -/
 
@@ -323,11 +322,48 @@ def hypercubeTwoIsoCycleFour : Q[2] ≃g C[4] where
   map_rel_iff' := by decide
 
 /-!
-Exercises 12–16 are about the indexed tensor product `⨂g i, G i` from the starred
-section
+The next two exercises are about vertex transitive graphs.
+
+12. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
+that the empty graph `⊥` is vertex-transitive. (Hint: as in Exercise 5, an
+automorphism of `G` is also an automorphism of `Gᶜ`; and `compl_top` says
+`⊤ᶜ = ⊥`.)
+-/
+lemma IsVertexTransitive.compl {G : SimpleGraph V} (h : G.IsVertexTransitive) :
+    Gᶜ.IsVertexTransitive := by
+  intro u v
+  obtain ⟨f, hf⟩ := h u v
+  -- `f` preserves adjacency and distinctness, so it also preserves non-adjacency
+  exact ⟨⟨f, by simp [f.map_adj_iff, f.injective.eq_iff]⟩, hf⟩
+
+lemma isVertexTransitive_bot : (⊥ : SimpleGraph V).IsVertexTransitive := by
+  simpa using (isVertexTransitive_top (V := V)).compl
+
+/-!
+13. Our characterization `isVertexTransitive_mycielskian_iff` of the
+vertex-transitive Mycielskians assumes that `V` is nonempty. Show that this
+assumption is needed: if `V` is empty then the Mycielskian of any graph on `V` is
+vertex-transitive, but the graph is not isomorphic to `K[2]`.
+
+If `V` is empty then the Mycielskian has the single vertex `none`, so the identity
+sends any vertex to any other; and an isomorphism to `K[2]` would give an element
+`e.symm 0` of `V`.
+-/
+lemma isVertexTransitive_mycielskian_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
+    mμ[G].IsVertexTransitive :=
+  fun _ _ => ⟨.refl, Subsingleton.elim _ _⟩
+
+lemma isEmpty_iso_completeGraph_two_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
+    IsEmpty (G ≃g K[2]) :=
+  ⟨fun e => isEmptyElim (e.symm 0)⟩
+
+/-!
+Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
+from the starred section
 [Tensor Products*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-tensor-products).
 
-12. The projection out of the indexed tensor product is a graph homomorphism.
+14. Show that for each index `j` the projection out of the indexed tensor product
+`⨂g i, G i` is a graph homomorphism to `G j`.
 -/
 example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) :
     ⨂g i, G i →g G j where
@@ -335,7 +371,7 @@ example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) 
   map_rel' h := (piTensorProd_adj.1 h).1 j
 
 /-!
-13. The universal property of the indexed tensor product.
+15. The universal property of the indexed tensor product.
 Given graph homomorphisms from `K` to each `G i`, there is a homomorphism from `K` to
 the indexed tensor product `⨂g i, G i` (provided `ι` is nonempty, which here follows
 from the existence of `i₀`; the next exercise looks at the case when `ι` is empty).
@@ -349,7 +385,7 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     exact fun i => (f i).map_adj h
 
 /-!
-14. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
+16. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
 to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
 -/
 lemma piTensorProd_hom_iff_of_isEmpty {ι : Type*} [IsEmpty ι] {V : ι → Type*}
@@ -373,17 +409,17 @@ lemma piTensorProd_hom_iff_of_isEmpty {ι : Type*} [IsEmpty ι] {V : ι → Type
     have : Unique ((i : ι) → V i) := inferInstance
     -- Lean has the `Subsingleton` typeclass for types with at most one element.
     have : Subsingleton ((i : ι) → V i) := inferInstance
-    -- So `f a = f b` since they are both elements of a Subsingleton type.
+    -- So `f a = f b` since they are both elements of a `Subsingleton` type.
     apply Subsingleton.elim
-    -- Note, none of the `have` statements above are needed, they are for exposition.
+    -- Note: none of the `have` statements above are needed; they are for exposition.
   · rintro rfl
     -- We need to show that there is a graph homomorphism from `⊥` to the indexed
     -- tensor product. Since `ι` is empty there is only one choice for the
-    -- `toFun`. Since `⊥` has no edges, the proof of map_rel' is trivial.
+    -- `toFun`. Since `⊥` has no edges, the proof of `map_rel'` is trivial.
     exact ⟨{ toFun := fun _ i => isEmptyElim i, map_rel' := fun h => h.elim }⟩
 
 /-!
-15. The degree of `f` in the indexed tensor product is the product of the degrees of
+17. The degree of `f` in the indexed tensor product is the product of the degrees of
 its components. The neighbour set is the `Fintype.piFinset` of the componentwise
 neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
 automatic.
@@ -397,11 +433,11 @@ example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
   ext g
   simp
 /-!
-16. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
+18. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
 graph embedding, we have a graph embedding of `K` into the indexed tensor product.
 (We say that `f i₀` is a graph embedding by giving both additional properties that
-allow the original homomorphism to be upgraded: `inj` injectivity and `reflect`
-reflection of adjacency.)
+allow the original homomorphism to be upgraded: injectivity `inj` and adjacency
+reflection `reflect`.)
 -/
 example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i)
@@ -415,41 +451,6 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     intro x y
     rw [piTensorProd_adj_of_nonempty]
     exact ⟨fun h => reflect (h i₀), fun hk i => (f i).map_adj hk⟩
-
-/-!
-The next two exercises are about the starred section
-[Vertex-Transitivity](https://jt496.github.io/GraphTheoryInLean/Maps/#section-vertex-transitivity).
-
-17. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
-that the empty graph `⊥` is vertex-transitive.
--/
-lemma IsVertexTransitive.compl {G : SimpleGraph V} (h : G.IsVertexTransitive) :
-    Gᶜ.IsVertexTransitive := by
-  intro u v
-  obtain ⟨f, hf⟩ := h u v
-  -- `f` preserves adjacency and distinctness, so it also preserves non-adjacency
-  exact ⟨⟨f, by simp [f.map_adj_iff, f.injective.eq_iff]⟩, hf⟩
-
-lemma isVertexTransitive_bot : (⊥ : SimpleGraph V).IsVertexTransitive := by
-  simpa using (isVertexTransitive_top (V := V)).compl
-
-/-!
-18. Our characterization `isVertexTransitive_mycielskian_iff` of the
-vertex-transitive Mycielskians assumes that `V` is nonempty. Show that this
-assumption is needed: if `V` is empty then the Mycielskian of any graph on `V` is
-vertex-transitive, but the graph is not isomorphic to `K[2]`.
-
-If `V` is empty then the Mycielskian has the single vertex `none`, so the identity
-sends any vertex to any other; and an isomorphism to `K[2]` would give an element
-`e.symm 0` of `V`.
--/
-lemma isVertexTransitive_mycielskian_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
-    mμ[G].IsVertexTransitive :=
-  fun _ _ => ⟨.refl, Subsingleton.elim _ _⟩
-
-lemma isEmpty_iso_completeGraph_two_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
-    IsEmpty (G ≃g K[2]) :=
-  ⟨fun e => isEmptyElim (e.symm 0)⟩
 
 /-!
 The last exercise is about the starred section
@@ -467,8 +468,7 @@ example : K[4].ClawFree ∧ K[1, 3] ⊑ K[4] := by
     have h : K[4].Adj (f (.inr 0)) (f (.inr 1)) := by simp
     -- but `f` reflects adjacency, and the two leaves are not adjacent in the claw
     simp [f.map_adj_iff] at h
-  · exact claw_isContained (a := 0) (b := 1) (c := 2) (d := 3)
-      (by decide) (by decide) (by decide) (by decide) (by decide) (by decide)
+  · apply claw_isContained (a := 0) (b := 1) (c := 2) (d := 3) <;> decide
 
 /-! END SOLUTIONS -/
 

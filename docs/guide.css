@@ -58,10 +58,14 @@ main .content-wrapper p > img:only-child {
     height: auto;
 }
 
-/* Larger figure captions — override Verso's default 0.9em */
+/* Larger figure captions — override Verso's default 0.9em. Inset from the prose
+   measure so that multi-line captions don't read as body text. */
 figure.stil-figure figcaption {
     font-size: 1.1em;
     margin-top: 1.3em;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 85%;
     color: #333;
 }
 
@@ -139,6 +143,30 @@ figure.stil-figure img {
     padding: 0;
     margin: 0;
     display: block;
+}
+
+/* A declaration whose docstring is shown as prose (`:::lifted_docstring`, see
+   STIL/Tactic/Directives.lean): the docstring is a header strip on the code block,
+   so it reads as part of the declaration rather than as running text. */
+.content-wrapper .stil-decl {
+    margin: 1rem 0;
+}
+.content-wrapper .stil-decl > .stil-doc {
+    background-color: #fffdf7;
+    border: 1px solid #e6dfcf;
+    border-left: 3px solid #c9b87a;
+    border-bottom: 1px dashed #e6dfcf;
+    border-radius: 4px 4px 0 0;
+    padding: 0.35em 0.9em;
+    break-after: avoid;
+}
+.content-wrapper .stil-decl > .stil-doc > :is(p, ul, ol) {
+    margin: 0.25em 0;
+}
+.content-wrapper .stil-decl > code.hl.block {
+    margin-top: 0;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
 }
 
 /* ============================================================
@@ -674,6 +702,17 @@ html[data-theme="dark"] .content-wrapper pre {
     background-color: #1f2233;
     border: 1px solid #2f3347;
     border-left: 3px solid #e0af68;
+}
+
+/* Lifted docstring header on a code block */
+html[data-theme="dark"] .content-wrapper .stil-decl > .stil-doc {
+    background-color: #222536;
+    border: 1px solid #2f3347;
+    border-left: 3px solid #e0af68;
+    border-bottom: 1px dashed #2f3347;
+}
+html[data-theme="dark"] .content-wrapper .stil-decl > code.hl.block {
+    border-top: none;
 }
 
 /* Blockquotes */

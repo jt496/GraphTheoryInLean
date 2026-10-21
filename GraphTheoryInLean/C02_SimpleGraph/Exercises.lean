@@ -65,7 +65,8 @@ example : shiftedPathNat' 0 = pathNat₁ := by
   sorry
 
 /-!
-8. Define a `SimpleGraph ℕ` with edges `n` to `n + 1` iff `n < i`.
+8. For `i : ℕ`, define the graph `shortPathNat' i` to be a `SimpleGraph ℕ` with edges
+from `n` to `n + 1` iff `n < i`.
 -/
 def shortPathNat' (i : ℕ) : SimpleGraph ℕ where
   Adj n m := sorry
@@ -171,7 +172,7 @@ example {G : SimpleGraph V} {v : V} :
     rfl
 
 /-!
-6. For `i : ℕ`, define the graph `shiftedPathNat' i` to be a `SimpleGraph ℕ` with
+6. For `i : ℕ`, define the graph `shiftedPathNat i` to be a `SimpleGraph ℕ` with
 edges from `n` to `n + 1` iff `i ≤ n`.
 -/
 @[simps]
@@ -186,7 +187,8 @@ example : shiftedPathNat 0 = pathNat₁ := by
   simp
 
 /-!
-8. Define a `SimpleGraph ℕ` with edges `n` to `n + 1` iff `n < i`.
+8. For `i : ℕ`, define the graph `shortPathNat i` to be a `SimpleGraph ℕ` with edges
+from `n` to `n + 1` iff `n < i`.
 -/
 @[simps]
 def shortPathNat (i : ℕ) : SimpleGraph ℕ where
@@ -253,8 +255,6 @@ example : pathNat₁.edgeSet = {e | ∃ n, e = s(n, n + 1)} := by
   ext e
   induction e using Sym2.ind with
   | _ x y => simp only [mem_edgeSet, Set.mem_ofPred_eq, Sym2.eq_iff]; grind
-
-
 
 /-! END SOLUTIONS -/
 

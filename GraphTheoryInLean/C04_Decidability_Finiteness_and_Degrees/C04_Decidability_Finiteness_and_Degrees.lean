@@ -4,24 +4,24 @@ import Mathlib.Combinatorics.SimpleGraph.Finite
 import Mathlib.Order.Interval.Finset.Fin
 import Mathlib.Data.Finset.Sort
 import Mathlib.Combinatorics.SimpleGraph.DegreeSum
+import Mathlib.Combinatorics.Enumerative.DoubleCounting
 namespace SimpleGraph
 
 /-!
 This chapter is about *computing* with graphs in Lean, and about the typeclass
 machinery that makes computation possible. We begin with decidability: the contrast
 between `Bool` and `Prop`, the `Decidable` class, the commands and tactics that use
-it (`#eval`, `decide` and `native_decide`, and what each of them trusts), and the
-`DecidableRel G.Adj` instances required to decide adjacency. We then turn to
-finiteness, starting from the hierarchy `List` → `Multiset` → `Finset` and arriving
-at `Fintype`, which is *data*, and `Finite`, which is a proposition; along the way we
-compare the ways Mathlib has of counting the elements of a finite type or set. A
-point we return to more than once is that because `Fintype` instances are data, the
-same type can receive two different instances by two different routes of typeclass
-inference. This is known as a *diamond*, after the shape of the two routes meeting at
-one type. Such a diamond is a nuisance rather than a feature: the two instances are
-always equal, but not *by definition*, so a theorem stated using one instance will
-not apply to a goal that uses the other. We will see how to state theorems so that
-this does not happen.
+it (`#eval`, `decide` and `native_decide`), and the `DecidableRel G.Adj` instances
+required to decide adjacency. We then turn to finiteness, starting from the hierarchy
+`List` → `Multiset` → `Finset` and arriving at `Fintype`, which is *data*, and
+`Finite`, which is a proposition. Along the way we compare the ways Mathlib has of
+counting the elements of a finite type or set. A point we return to more than once is
+that because `Fintype` instances are data, the same type can receive two different
+instances by two different routes of typeclass inference. This is known as a
+*diamond*, after the shape of the two routes meeting at one type. Such a diamond is a
+nuisance rather than a feature: the two instances are always equal, but not
+*by definition*, so a theorem stated using one instance will not apply to a goal that
+uses the other. We will see how to state theorems so that this does not happen.
 
 The second half applies all this to graphs. We study finite neighbourhoods and vertex
 degrees (including minimum and maximum degree, the handshake lemma and regular
@@ -29,10 +29,10 @@ graphs). We then compute with two families of graphs, hypercubes and Mycielskian
 building the `DecidableRel` and `Fintype` instances needed both to evaluate and to
 prove facts about their degrees and edge counts.
 
-Finally, an advanced section on degree sequences defines the degree multiset
-of a graph, asks which multisets are *graphic*, states, without proof, the
-Erdős–Gallai and Havel–Hakimi characterizations, and turns the latter into a function
-that computes the edges of a graph with a given graphic degree sequence.
+Finally, an advanced section on degree sequences defines the degree multiset of a
+graph, asks which multisets are *graphic*, states, without proof, the Erdős–Gallai
+and Havel–Hakimi characterizations, and turns the latter into a function that
+computes the edges of a graph with a given graphic degree sequence.
 
 # Decidability
 
@@ -46,10 +46,9 @@ to take.
 
 Lean has two different types that can play the role of truth-values. The first is
 `Bool`, the ordinary inductive type with two elements `true` and `false`, which we
-used for the vertices of the hypercube in
-[Constructions](https://jt496.github.io/GraphTheoryInLean/Constructions/#chapter-constructions).
-The second is `Prop`, the type of propositions: a term `p : Prop` is a statement, and
-a term `h : p` is a proof of that statement.
+used for the vertices of the hypercube (`HypercubeVert`). The second is `Prop`, the
+type of propositions: a term `p : Prop` is a statement, and a term `h : p` is a proof
+of that statement.
 
 The difference is that a `Bool` is a value that a program can compute and branch on,
 while a `Prop` is a statement that we may or may not be able to prove. Lean provides
@@ -62,8 +61,7 @@ evaluate.
 
 /-!
 Lean has other `Bool`-valued functions such as `Nat.beq m n`, which checks whether
-`m = n` by recursion on `ℕ`. We can use it to write a parity test. (We mark it
-`private`, which makes it visible only in this file.)
+`m = n` by recursion on `ℕ`. We can use it to write a parity test.
 -/
 /-- Return `true` if `n` is even, `false` otherwise. -/
 private def myEven (n : ℕ) : Bool := Nat.beq (n % 2) 0
@@ -94,17 +92,16 @@ decidability typeclass provides.
 ## The Decidable Class
 
 To compute with a proposition we need to turn it into a `Bool`, that is, to *decide*
-whether it is true or false. In computability theory, decidability is a property of
-a *family* of propositions, such as "`n` is prime" for `n : ℕ`: the family is
+whether it is true or false. In computability theory, decidability is a property of a
+*family* of propositions, such as "`n` is prime" for `n : ℕ`: the family is
 *decidable* if there is a single algorithm that, given `n`, determines whether the
 proposition holds. For one fixed proposition this notion is vacuous, since one of the
 two algorithms "answer true" and "answer false" is always correct, even if we do not
 know which.
 
 In Lean, decidability is expressed by the typeclass `Decidable`. An instance of
-`Decidable p` is not the claim that `p` is decidable but a piece of *data*: a
-Boolean `decide p` giving the answer, packaged with a proof that this answer is
-correct.
+`Decidable p` is not the claim that `p` is decidable but a piece of *data*: a Boolean
+`decide p` giving the answer, packaged with a proof that this answer is correct.
 -/
 #source Decidable -- class Decidable (p : Prop) where
                   --   intro ::
@@ -114,8 +111,8 @@ correct.
 /-!
 The proof field uses `Bool.Reflects`, which is defined so that `true.Reflects p` is
 `p` and `false.Reflects p` is `¬ p`. So an instance of `Decidable p` is either
-`⟨true, h⟩` with `h : p`, or `⟨false, h⟩` with `h : ¬ p`, and Lean names these two
-as `Decidable.isTrue h` and `Decidable.isFalse h`. Proofs are erased when code is
+`⟨true, h⟩` with `h : p`, or `⟨false, h⟩` with `h : ¬ p`, and Lean names these two as
+`Decidable.isTrue h` and `Decidable.isFalse h`. Proofs are erased when code is
 compiled, so evaluating an instance amounts to computing the Boolean `decide p`,
 which tells us whether `p` is true or false.
 
@@ -137,14 +134,14 @@ for us. Each `instance` declaration, in Mathlib or in our own files, registers a
 of building one, possibly from other instances. When a definition or theorem has an
 argument in square brackets, an *instance argument* such as the `[Add α]` in `Even`
 above, the caller does not supply it. Lean finds it by *typeclass inference*: it
-searches the hypotheses in the local context first and then the registered
-instances, combining instances as needed. (We also say that Lean *synthesizes* the
-instance, and call this process *instance search*.) The term `inferInstance` asks
-for an instance in the same way:
+searches the hypotheses in the local context first and then the registered instances,
+combining instances as needed. (We also say that Lean *synthesizes* the instance, and
+call this process *instance search*.) The term `inferInstance` and the tactic
+`infer_instance` both ask for an instance in the same way.
 -/
-def natNeDec {a b : ℕ} : Decidable (a ≠ b) := inferInstance
+private def natNeDec (a b : ℕ) : Decidable (a ≠ b) := inferInstance
 
-def natEvenDec {m : ℕ} : Decidable (Even m) := inferInstance
+private def natEvenDec (m : ℕ) : Decidable (Even m) := by infer_instance
 
 /-!
 Using `#print` with `set_option pp.explicit true` below we can see exactly which
@@ -167,8 +164,8 @@ that `Even : ℕ → Prop` is a decidable predicate (i.e. `Even m` is decidable 
 #check Nat.instDecidablePredEven -- DecidablePred Even
 
 /-!
-Both examples are really families of instances: the implicit arguments `{a b : ℕ}`
-and `{m : ℕ}` make `natNeDec` and `natEvenDec` functions that produce a `Decidable`
+Both examples are really families of instances: the arguments `(a b : ℕ)` and
+`(m : ℕ)` make `natNeDec` and `natEvenDec` functions that produce a `Decidable`
 instance for every choice of these arguments.
 
 Once the arguments are supplied, the Boolean `decide` in each of these instances
@@ -196,8 +193,8 @@ using the `ite` function, which branches on the Boolean `decide c`.
 /-!
 For comparison, the law of the excluded middle gives *every* proposition a
 `Decidable` instance, `Classical.propDecidable`. It is built from `Classical.em`
-using the axiom of choice, so it asserts that one of `isTrue h` or `isFalse h`
-exists without saying which: it contains no algorithm and cannot be evaluated.
+using the axiom of choice, so it asserts that one of `isTrue h` or `isFalse h` exists
+without saying which: it contains no algorithm and cannot be evaluated.
 -/
 #check Classical.propDecidable -- (a : Prop) : Decidable a
 
@@ -209,6 +206,7 @@ is an arbitrary proposition with no `Decidable p` instance, so the `if-then-else
 uses `Classical.propDecidable`, and Lean refuses to compile the definition unless we
 mark it `noncomputable`.
 -/
+/-- Given a proposition `p`, return a string indicating its truth-value. -/
 noncomputable def myClassicalIfThenElse (p : Prop) : String := by
   classical
   exact if p then "This is true" else "This is false"
@@ -229,14 +227,15 @@ rational approximations to each, and these may agree to every precision checked 
 though `x ≠ y`.
 
 Mathlib still provides an instance of `DecidableEq ℝ`, but it is built using
-classical reasoning, so it can be used in proofs but not in computations.
+classical reasoning and so is noncomputable. It can be used in proofs but not in
+computations.
 -/
 #synth DecidableEq ℝ -- Real.decidableEq
 
 /-- error: failed to compile definition, consider marking it as 'noncomputable'
 because it depends on 'Real.decidableEq', which is 'noncomputable' -/
 #guard_msgs (substring := true) in
-#eval decide ((1 : ℝ) = 1)
+#eval decide ((1 : ℝ) ≠ 2)
 
 /-!
 The families of instances we saw for `natNeDec` and `natEvenDec` are typical: an
@@ -248,8 +247,8 @@ every `x : α`.
 #source DecidablePred -- abbrev DecidablePred {α : Sort u} (r : α → Prop) :=
                       --   (a : α) → Decidable (r a)
 /-!
-For example the predicate `Nat.Prime : ℕ → Prop` which expresses whether a number is
-prime is decidable.
+For example, the predicate `Nat.Prime : ℕ → Prop`, which expresses whether a number
+is prime, is decidable.
 -/
 #synth DecidablePred  (fun n : ℕ => n.Prime) -- Nat.decidablePrime
 #eval Nat.Prime 337031327       -- true
@@ -274,7 +273,7 @@ that depend on the truth-value of adjacency.
 ## Evaluating and Deciding
 
 We have already used `#eval` and `decide` informally above and in earlier chapters.
-So what do these commands do and how are they related to decidability?
+So what do they do and how are they related to decidability?
 
 Of the two `#eval` is the more powerful. It *runs* a program: the expression is
 compiled and then executed, and the resulting value is printed. Nothing is proved
@@ -283,7 +282,7 @@ quickly. So long as the output of the program is a value that can be printed, `#
 will work.
 
 For example, `#eval` can decide whether a pair of vertices is adjacent in the
-5-cycle. To do this it uses `instDecidableRelFinAdjCycleGraph`, the instance of
+`5`-cycle. To do this it uses `instDecidableRelFinAdjCycleGraph`, the instance of
 `DecidableRel C[n].Adj` from Mathlib. The line
 `set_option trace.Meta.synthInstance true in` asks Lean to report how it searched for
 the instances it needed: expand the trace attached to the `#eval` to see this. This
@@ -295,16 +294,13 @@ set_option trace.Meta.synthInstance true in
 /-!
 The `decide` tactic instead *proves* a decidable proposition `p`: it asks the kernel
 to reduce the Boolean `decide p` to `true`, and if this succeeds the proof is
-`of_decide_eq_true rfl`. (Strictly speaking, by default `decide` first reduces
-`decide p` in the elaborator, which is where its error messages come from, and the
-kernel then checks the resulting proof. `decide +kernel` skips the first pass and
-leaves all the reduction to the kernel.) The result is a genuine proof,
-checked by the same small trusted kernel as every other proof in Lean. The price is
-that kernel reduction is much slower than running compiled code, so `decide` is only
-suitable for small computations. Since `decide` is *proving* a proposition we can
-only use it to prove true statements, so our previous example using `#eval` has to be
-negated to be used with `decide`. Note that the `decide` tactic still uses the same
-instance of `DecidableRel C[n].Adj` as `#eval` to decide adjacency.
+`of_decide_eq_true rfl`. The result is a genuine proof, checked by the same small
+trusted kernel as every other proof in Lean. The price is that kernel reduction is
+much slower than running compiled code, so `decide` is only suitable for small
+computations. Since `decide` is *proving* a proposition we can only use it to prove
+true statements, so our previous example using `#eval` has to be negated to be used
+with `decide`. Note that the `decide` tactic still uses the same instance of
+`DecidableRel C[n].Adj` as `#eval` to decide adjacency.
 -/
 set_option trace.Meta.synthInstance true in
 example : ¬ C[5].Adj 0 2 := by decide
@@ -317,8 +313,8 @@ i.e. the number of edges in `K[n]`.
 
 Again `#eval` can compute this quickly.
 -/
-
 #eval K[1000].edgeFinset.card -- 499500
+
 /-!
 We can also use `decide` to prove that the number of edges in `K[10]` is `45`, but it
 is much slower and if we try to use `decide` to prove that the number of edges in
@@ -342,7 +338,6 @@ trusted when checking a proof see
 [Validating a Lean Proof](https://lean-lang.org/doc/reference/latest/ValidatingProofs/)
 in the Lean Language Reference.
 -/
-
 example : K[1000].edgeFinset.card = 499500 := by native_decide
 
 /-!
@@ -370,26 +365,23 @@ Where does an instance of `DecidableRel G.Adj` used by `#eval` and `decide` come
 from? Usually we would like Lean to synthesize these automatically by typeclass
 inference.
 
-To see which instance is being synthesized for a particular graph we can use the
-`#synth` command:
+To see which instance is synthesized for a particular graph we can use the `#synth`
+command:
 -/
-#synth DecidableRel K[5].Adj -- Top.adjDecidable (Fin 5) a b
-
+#synth DecidableRel K[5].Adj -- fun a b ↦ Top.adjDecidable (Fin 5) a b
 #check SimpleGraph.Top.adjDecidable -- the instance requires `[DecidableEq V]`
 
 /-!
 So the instance of decidable adjacency in the complete graph requires an instance of
-`DecidableEq`, for its vertex type. This is natural: any two vertices in a complete
-graph are adjacent if and only if they are distinct. So deciding whether or not two
-vertices are adjacent in a complete graph is the same as deciding whether or not they
-are equal.
+`DecidableEq` for its vertex type. This is natural: any two vertices in a complete
+graph are adjacent if and only if they are distinct. So deciding adjacency in a
+complete graph is the same as deciding equality of vertices.
 
 Note that for the empty graph (on any type) we always have decidability of the
 adjacency relation, since no vertices are adjacent. This holds even on `ℝ`, where
 equality itself is undecidable.
 -/
 #synth DecidableRel (⊥ : SimpleGraph ℝ).Adj
-
 #check SimpleGraph.Bot.adjDecidable -- no assumption on `V` is required
 
 /-!
@@ -410,15 +402,12 @@ out that Lean can only infer the required instance for `pathNat₁`.
 -/
 #source pathNat₁ -- abbrev pathNat₁ : SimpleGraph ℕ where
                  --   Adj x y := x + 1 = y ∨ y + 1 = x
+#synth DecidableRel pathNat₁.Adj -- fun a b ↦ instDecidableOr
 
-#synth DecidableRel pathNat₁.Adj
-          -- fun a b ↦ instDecidableOr
-          -- @instDecidableOr (a + 1 = b) (b + 1 = a) (instDecidableEqNat (a + 1) b)
-          -- (instDecidableEqNat (b + 1) a) : Decidable (a + 1 = b ∨ b + 1 = a)
 /-!
 Since `pathNat₁` is an `abbrev` Lean can see through its definition to find
-`pathNat₁.Adj a b := a + 1 = b ∨ b + 1 = a`. Since `Or` is decidable and each of the
-propositions `a + 1 = b` and `b + 1 = a` are decidable (using decidable equality on
+`pathNat₁.Adj x y := x + 1 = y ∨ y + 1 = x`. Since `Or` is decidable and each of the
+propositions `x + 1 = y` and `y + 1 = x` is decidable (using decidable equality on
 `ℕ`) Lean can infer decidability of adjacency in `pathNat₁`.
 
 For `pathNat₂` our definition is a `def` rather than an `abbrev`.
@@ -436,7 +425,7 @@ Lean can't see through the `def` so fails to infer the required instance.
 If we change the `def` to an `abbrev` then it works!
 -/
 abbrev pathNat₂' : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
-#synth DecidableRel pathNat₂'.Adj --fun a b ↦ instDecidableRelAdjFromRelOfDecidableEq
+#synth DecidableRel pathNat₂'.Adj -- fun a b ↦ instDecidableRelAdjFromRelOfDecidableEq
                                   --             (fun x1 x2 ↦ x1 + 1 = x2) a b
 /-!
 Lean sees through the `abbrev` and finds
@@ -448,12 +437,12 @@ adjacency for a graph defined from a decidable relation using the
 of `ℕ`.
 
 Rather than changing the definition of `pathNat₂` to an `abbrev` we can also provide
-a decidability instance for `pathNat₂.Adj` directly in two different ways.
-One way is by `unfold`ing its definition and then calling `infer_instance`. The
-second way is to use `inferInstanceAs` to specify the type of the instance we want to
-find. In the latter case we know that Mathlib contains an instance of `DecidableRel`
-for the adjacency relation of a graph defined using `SimpleGraph.fromRel` so we tell
-it to use this.
+a decidability instance for `pathNat₂.Adj` directly in two different ways. One way is
+by `unfold`ing its definition and then calling `infer_instance`. The second way is to
+use `inferInstanceAs` to specify the type of the instance we want to find. In the
+latter case we know that Mathlib contains an instance of `DecidableRel` for the
+adjacency relation of a graph defined using `SimpleGraph.fromRel` so we tell it to
+use this.
 -/
 instance myDecidableRelPathNat₂ : DecidableRel pathNat₂.Adj := by
   unfold pathNat₂
@@ -484,23 +473,26 @@ doesn't know how to decide whether or not a given edge `s(a, b)` is in the edge 
 `{e | ∃ n, e = s(n, n + 1)}`.
 -/
 #check instDecidableRelAdjFromEdgeSetOfDecidablePredSym2MemSetOfDecidableEq
-          -- {V : Type u} → (s : Set (Sym2 V)) → [DecidablePred fun x ↦ x ∈ s]
-          --      → [DecidableEq V] → DecidableRel (fromEdgeSet s).Adj
+          -- .. (s : Set (Sym2 V)) → [DecidablePred fun x ↦ x ∈ s]
+          --     → [DecidableEq V] → DecidableRel (fromEdgeSet s).Adj
 
 /-!
-One solution in this case is to use the fact, which we already proved, that
-`pathNat₃` is equal to `pathNat₁` and that Lean can infer decidable adjacency of
-`pathNat₁`.
+One solution in this case is to use the fact, which we already proved, that adjacency
+in `pathNat₃` is the same as in `pathNat₁` and that Lean can infer decidable
+adjacency of `pathNat₁`.
+-/
+#check pathNat₁_adj_iff_pathNat₃
 
+/-!
 Here we transfer the decidability instance from `pathNat₁` to `pathNat₃` using
-`decidable_of_iff`. (Defining it by rewriting with `rw [pathNat₃_eq_pathNat₁]` would
-also type-check and work with `#eval`, but it would leave `decide` permanently stuck:
-see
+`decidable_of_iff`. (Defining it by rewriting directly with
+`pathNat₁_adj_iff_pathNat₃` would also type-check and work with `#eval`, but it would
+leave `decide` permanently stuck: see
 [Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)
 for an explanation.)
 -/
 instance : DecidableRel (pathNat₃.Adj) := fun u v =>
-  decidable_of_iff (pathNat₁.Adj u v) (by rw [pathNat₃_eq_pathNat₁])
+  decidable_of_iff (pathNat₁.Adj u v) pathNat₁_adj_iff_pathNat₃
 
 example : pathNat₃.Adj 42 43 := by decide
 
@@ -527,7 +519,7 @@ instance boxProdDecidableRelAdj {V W : Type*} {G : SimpleGraph V} {H : SimpleGra
 
 /-!
 This instance uses `rw` to reduce adjacency in `G □ H` to a decidable proposition
-before calling `infer_instance`. This looks harmless, but can (in some cases) cause
+before calling `infer_instance`. This looks harmless, but can in some cases cause
 problems.
 
 A proof by `rw` inserts a *cast* (an application of the recursor `Eq.rec`) into the
@@ -538,14 +530,12 @@ to reduce the Boolean `decide p` to `true`, which means first reducing the
 `Decidable p` instance far enough to read off its `decide` field. The kernel can only
 reduce an `Eq.rec` cast when the equation being cast along holds by definition (so
 that, by proof irrelevance, the proof might as well be `rfl`). Otherwise the cast is
-stuck, exactly as `h ▸ v` was in the disjoint union `Σg` of
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs)
-before we substituted `i = j`.
+stuck, exactly as `h ▸ v` was in the disjoint union `Σg` (`SimpleGraph.sigma`) before
+we substituted `i = j`.
 
 For the box product instance, we got away with it: `boxProd_adj` is definitional
-(proved by `Iff.rfl`), so the cast vanishes during kernel reduction (this does
-however rely on `boxProd_adj` remaining definitional). The recipe we give below for
-`P[n]` avoids such problems entirely.
+(proved by `Iff.rfl`), so the cast vanishes during kernel reduction. The recipe we
+give below for `P[n]` avoids such problems entirely.
 -/
 example {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {x y : V × W} :
     (G □ H).Adj x y ↔ (G.Adj x.1 y.1 ∧ x.2 = y.2) ∨ (H.Adj x.2 y.2 ∧ x.1 = y.1) :=
@@ -564,7 +554,8 @@ example {n : ℕ} {u v : Fin n} :
 
 /-!
 If we define `DecidableRel P[n].Adj` using the same `rw` recipe then we hit a
-problem.
+problem. We make this a `local instance`, active only until the end of the enclosing
+`section`, so that it cannot interfere with the good instance defined below.
 -/
 section path_bad
 /-- A `Decidable` instance defined via `rw` along a non-definitional equation: it
@@ -647,10 +638,9 @@ covering relation of a locally finite order, is left to the exercises.
 
 We give two more instances of decidable adjacency, for the disjoint unions of graphs
 introduced in
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs);
-an instance for the line graph is left to the exercises.
+[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs).
 
-Recall `Σg G` the `SimpleGraph.sigma` disjoint union of an indexed family of graphs.
+Recall `Σg G`, the `SimpleGraph.sigma` disjoint union of an indexed family of graphs.
 -/
 #source SimpleGraph.sigma -- protected def sigma (G : (i : ι) → SimpleGraph (V i)) :
                           --     SimpleGraph (Σ i, V i) where
@@ -658,9 +648,9 @@ Recall `Σg G` the `SimpleGraph.sigma` disjoint union of an indexed family of gr
                           --            ∃ h : i = j, (G i).Adj u (h ▸ v)
 /-!
 We can give an instance of `DecidableRel (Σg G).Adj` for `SimpleGraph.sigma`,
-(assuming the index type has decidable equality and that each of the graphs in the
-family has decidable adjacency). Here we have to do a case split on `i = j` (using
-the decidable equality of the index type).
+assuming the index type has decidable equality and that each of the graphs in the
+family has decidable adjacency. Here we have to do a case split on `i = j` (using the
+decidable equality of the index type).
 -/
 instance {ι : Type*} {V : ι → Type*} (G : (i : ι) → SimpleGraph (V i))
     [DecidableEq ι] [∀ i, DecidableRel (G i).Adj] : DecidableRel (Σg G).Adj :=
@@ -673,8 +663,8 @@ instance {ι : Type*} {V : ι → Type*} (G : (i : ι) → SimpleGraph (V i))
       isFalse (by simp [h])
 
 /-!
-Recall `SimpleGraph.sum`, the disjoint union of two graphs `G ⊕g H`. This is missing
-an instance of `DecidableRel (G ⊕g H).Adj` in Mathlib.
+Recall `SimpleGraph.sum`, the disjoint union of two graphs `G ⊕g H`. Mathlib is
+missing an instance of `DecidableRel (G ⊕g H).Adj`.
 -/
 instance {V W : Type*} (G : SimpleGraph V) (H : SimpleGraph W) [DecidableRel G.Adj]
     [DecidableRel H.Adj] : DecidableRel (G ⊕g H).Adj := fun u v =>
@@ -691,9 +681,9 @@ instance {V W : Type*} (G : SimpleGraph V) (H : SimpleGraph W) [DecidableRel G.A
 # Finite Types
 
 The main constructive way of expressing that a type is finite in Mathlib is via the
-`Fintype` class. Before we discuss `Fintype` we introduce the three closely
-related data structures that underlie almost all finite reasoning in Mathlib:
-`List`, `Multiset` and `Finset`.
+`Fintype` class. Before we discuss `Fintype` we introduce the three closely related
+data structures that underlie almost all finite reasoning in Mathlib: `List`,
+`Multiset` and `Finset`.
 
 ## Lists, Multisets and Finsets
 
@@ -702,57 +692,62 @@ allowed) → `Multiset` (unordered, duplicates allowed) → `Finset` (unordered,
 duplicates).
 
 A `List α` is an ordered, finite sequence of elements of `α`, with duplicates
-allowed. Both the order and the multiplicity of elements matter, so `[2, 1, 1]`
-and `[1, 1, 2]` are *different* lists.
+allowed. Both the order and the multiplicity of elements matter, so `[1, 1, 2]` and
+`[2, 1, 1]` are *different* lists both containing `1` twice and `2` once.
 -/
-#check ([3, 1, 1, 2] : List ℕ)           -- [3, 1, 1, 2] : List ℕ
+#check ([1, 1, 2] : List ℕ)              --  [1, 1, 2] : List ℕ
 #eval ([2, 1, 1] : List ℕ) = [1, 1, 2]   -- false
+#eval [2, 1, 1].count 1                  -- 2
 
 /-!
 A `Multiset α` is a `List α` in which we no longer care about the *order* of the
-elements, but we *do* still record how many times each element occurs. Formally
-it is the quotient of `List α` by permutation.
+elements, but we *do* still record how many times each element occurs. Formally it is
+the quotient of `List α` by permutation.
 -/
 #source Multiset -- def Multiset.{u} (α : Type u) : Type u :=
                  --   Quotient (List.isSetoid α)
+
 /-!
-Because order is forgotten the two lists above become *equal* as multisets, but
-the repeated `1` is still counted twice.
+Because order is forgotten the two lists above become *equal* as multisets, but the
+repeated `1` is still counted twice.
 -/
 #eval ({2, 1, 1} : Multiset ℕ) = {1, 1, 2}   -- true
 #eval ({2, 1, 1} : Multiset ℕ).count 1       -- 2
+
 /-!
 Any `List α` can be coerced to a `Multiset α` by forgetting the order of its
 elements.
 -/
 #eval ([1, 3, 1, 2] : Multiset ℕ)            -- {1, 3, 1, 2}
+
 /-!
 Finally, a `Finset α` is a `Multiset α` that contains no duplicates. It is
-implemented as a `Multiset` (its `val`) bundled with a proof (`nodup`) that
-this multiset has no repeated elements.
+implemented as a `Multiset` (its `val`) bundled with a proof (`nodup`) that this
+multiset has no repeated elements.
 -/
 #source Finset -- structure Finset (α : Type*) where
                --   /- The underlying multiset -/
                --   val : Multiset α
                --   /- `val` contains no duplicates -/
                --   nodup : Nodup val
+#check ({1, 2, 4} : Finset ℕ)         -- {1, 2, 4} : Finset ℕ
 #eval ({3, 1, 1, 2} : Finset ℕ)       -- {3, 1, 2}
-#eval (({1, 1, 2} : Finset ℕ).card)   -- 2
+
 /-!
 So a `Finset` is Mathlib's basic notion of a "finite set", and the one that
 computations work with. Building one using `{...}` notation silently discards any
 duplicates.
+-/
+example : ({1, 1, 2} : Finset ℕ) = {1, 2} := rfl
 
+/-!
 ## Set-Builder Notation
 
 Both `Set` and `Finset` can be written with the same *set-builder* notation
-`{x | p x}`, but the two behave differently, and keeping the distinction in mind
-avoids confusion later. (The `Fintype` instances and `Finset.univ` mentioned below
-are introduced properly in
-[Fintypes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-fintypes).)
+`{x | p x}`, but the two behave differently.
 
-For a `Set α` the set-builder `{x | p x}` stands for `Set.ofPred (fun x => p x)`,
-the set of *all* `x : α` satisfying `p`. No finiteness or decidability is required,
+For a `Set α` the set-builder `{x | p x}` stands for `Set.ofPred (fun x => p x)`, the
+set of *all* `x : α` satisfying `p`. No finiteness or decidability is required,
 because a `Set α` is really just a predicate `α → Prop` in disguise.
 -/
 example : ({x : ℕ | x < 3} : Set ℕ) = Set.ofPred (fun x => x < 3) := rfl
@@ -763,8 +758,8 @@ instance `G.neighborSet v` is *definitionally* the set-builder `{w | G.Adj v w}`
 example {V : Type*} (G : SimpleGraph V) (v : V) :
     G.neighborSet v = {w | G.Adj v w} := rfl
 /-!
-A `Finset α`, by contrast, must actually be finite. The fundamental way to build
-one using a predicate is the form `{x ∈ s | p x}`, which carves out of an existing
+A `Finset α`, by contrast, must actually be finite. The fundamental way to build one
+using a predicate is the form `{x ∈ s | p x}`, which carves out of an existing
 `s : Finset α` the elements that satisfy `p`. This is notation for `Finset.filter`,
 and because Lean has to test `p` on each element it needs a `DecidablePred p`
 instance.
@@ -772,24 +767,26 @@ instance.
 example (s : Finset ℕ) : {x ∈ s | x < 3} = s.filter (fun x => x < 3) := rfl
 #eval ({1, 2, 4, 5} : Finset ℕ).filter (fun x => x > 3) -- {4, 5}
 /-!
-The unrestricted set-builder `{x | p x}` is then just the special case in which there
-is a `[Fintype α]` instance and so `s` is `Finset.univ`, the `Finset` of *all*
-elements of the ambient type.
+The plain set-builder `{x | p x}` can also produce a `Finset`: it is the special case
+of `{x ∈ s | p x}` in which `s` is `Finset.univ`, the `Finset` of *all* elements of
+the ambient type. This only makes sense when there is a `[Fintype α]` instance.
+(`Fintype` instances and `Finset.univ` are introduced properly in
+[Fintypes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-fintypes).)
 
 Left to its own devices `{x | p x}` defaults to producing a `Set α`, but when the
 expected type is `Finset α` and Lean can find a `Fintype α` instance (so that
 `Finset.univ` exists) together with a `DecidablePred p`, the very same notation
-elaborates to the `Finset α` `{x ∈ Finset.univ | p x}`, i.e.
-`Finset.univ.filter p`.
+elaborates to the `Finset α` `{x ∈ Finset.univ | p x}`, i.e. `Finset.univ.filter p`.
 -/
 example {α : Type*} [Fintype α] (p : α → Prop) [DecidablePred p] :
     ({x | p x} : Finset α) = Finset.univ.filter (fun x => p x) := rfl
 
 #eval ({x | x < 3} : Finset (Fin 5))                 -- {0, 1, 2}
 #eval ({x ∈ ({0, 1, 2, 3, 4} : Finset ℕ) | x < 3})   -- {0, 1, 2}
+
 /-!
-The `{x ∈ s | p x}` notation also works for `Set α` where it abbreviates
-`Set.ofPred (fun x => x ∈ s ∧ p x)`. (This does not require decidability.)
+Finally the `{x ∈ s | p x}` notation also works for `Set α` where it abbreviates
+`Set.ofPred (fun x => x ∈ s ∧ p x)`. This does not require decidability.
 
 ## Fintypes
 
@@ -802,10 +799,9 @@ the most common is to provide `Fintype` instances (for the vertex type or edge s
 etc).
 
 A `Fintype V` instance is not just the proposition that `V` is finite: it is *data*.
-A `Fintype V` instance is a `Finset V`, called `elems` together with a
-proof that `elems` contains every element of `V`. Since `Finset` already guarantees a
-lack of duplicates, this ensures that `elems` contains each element of `V` *exactly*
-once.
+A `Fintype V` instance is a `Finset V`, called `elems`, together with a proof that
+`elems` contains every element of `V`. Since `Finset` already guarantees a lack of
+duplicates, this ensures that `elems` contains each element of `V` *exactly* once.
 
 Later in this chapter (see
 [Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality))
@@ -836,10 +832,10 @@ For example, for any `n : ℕ`, there is a `Fintype` instance for `Fin n`.
 #check (Fin.fintype 5).complete --  ∀ (x : Fin 5), x ∈ Fintype.elems
 
 /-!
-This `Fintype` instance for `Fin 5` is defined using `List.finRange n`, which is
+This `Fintype` instance for `Fin n` is defined using `List.finRange n`, which is
 `[0, 1, ⋯, n - 1]`, as a `List (Fin n)`, and a proof, `List.nodup_finRange n`, that
-this list contains no duplicates. Together these define the `Finset` `elems`. While
-the proof `complete` that this contains every element of `Fin n` is given by
+this list contains no duplicates. Together these define the `Finset` `elems`. The
+proof `complete` that this contains every element of `Fin n` is given by
 `List.mem_finRange`.
 -/
 #source Fin.fintype  -- instance Fin.fintype (n : ℕ) : Fintype (Fin n) :=
@@ -849,15 +845,16 @@ the proof `complete` that this contains every element of `Fin n` is given by
 #check List.mem_finRange     -- {n : ℕ} (x : Fin n) : x ∈ List.finRange n
 
 /-!
-A set `s : Set α` can also be treated as a type, the subtype `↥s` of elements of `α`
+A set `s : Set α` can also be treated as a type, the subtype `↑s` of elements of `α`
 that lie in `s`, so it too can have a `Fintype` instance. Such an instance is exactly
-what we need to turn a `Set` into a `Finset`: `Set.toFinset s` requires `[Fintype s]`
-and has the same elements as `s`. In the other direction every `Finset` coerces to a
-`Set`, written `(t : Set α)`.
+what we need to turn a `Set` into a `Finset`: `Set.toFinset s` requires
+`[Fintype ↑s]` and has the same elements as `s`. In the other direction every
+`Finset` coerces to a `Set`, written `(t : Set α)`.
 -/
 #check Set.toFinset     -- (s : Set α) [Fintype ↑s] : Finset α
 #check Set.mem_toFinset -- a ∈ s.toFinset ↔ a ∈ s
 example (t : Finset ℕ) : (t : Set ℕ).toFinset = t := Finset.toFinset_coe t
+
 /-!
 Mathlib's `Finset` versions of the sets attached to a graph are built in this way.
 For instance, the `Finset` of edges `G.edgeFinset` is `G.edgeSet.toFinset`, so it
@@ -897,8 +894,7 @@ for `Sym2 V` *and* a way to decide whether or not any given pair of vertices are
 adjacent in `G` (and so the corresponding edge belongs to the edge set), i.e. we need
 an instance of `DecidableRel G.Adj`!
 
-Assuming `Fintype V`, Lean can easily infer `Fintype (Sym2 V)`: if a type is finite
-then the type of unordered pairs on this type is also finite.
+Assuming `Fintype V`, Lean can easily infer `Fintype (Sym2 V)`.
 -/
 example {V : Type*} [Fintype V] : Fintype (Sym2 V) := inferInstance
 #check Sym2.instFintype -- the instance for `Fintype (Sym2 V)`
@@ -928,18 +924,17 @@ While it is very common to use the `Fintype V` and `DecidableRel G.Adj` assumpti
 to *infer* a `Fintype G.edgeSet` instance, this shouldn't be baked into a theorem in
 this way. By using these instance assumptions we have proved that:
 
->  There exists `n : ℕ` such that the number of edges of `G` is `n`,
-   *provided that the finiteness of its edge set is inferred from the finiteness of
-   `V` and decidability of adjacency in `G`.*
+>  There exists `n : ℕ` such that the number of edges of `G` is `n`, provided that
+   the finiteness of its edge set is inferred from the finiteness of `V` and the
+   decidability of adjacency in `G`.
 
 So if you have a graph `G`, which for some *other* reason you know to have finitely
-many edges, then this result is useless! The simplest example is the empty graph on
+many edges, then this result does not apply! A simple example is the empty graph on
 `ℕ`. It has no edges, and Mathlib's instance `fintypeEdgeSetBot` makes its edge set a
 `Fintype` (for any vertex type), but `ℕ` is infinite, so `bad_card_edgeFinset` cannot
-even be applied to it.
+be applied to it.
 -/
 #check fintypeEdgeSetBot -- Fintype ↑⊥.edgeSet
-
 /--
 failed to synthesize instance of type class
   Fintype ℕ
@@ -949,11 +944,9 @@ failed to synthesize instance of type class
 
 /-!
 This is a lesson in how not to structure instance assumptions: a theorem should ask
-for exactly the instances that its statement actually uses (anything the proof needs
-in addition can come from `classical`). Anything stronger silently restricts the
-theorem to those callers who happen to obtain the required instances by that
-particular route. We will refine this rule a little in
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).
+for exactly the instances that its *statement* actually uses. Anything stronger
+silently restricts the theorem to those callers who happen to obtain the required
+instances by that particular route.
 
 Here the conclusion mentions only `G.edgeFinset`, and `G.edgeFinset` is by definition
 the `Finset` underlying a `[Fintype G.edgeSet]` instance. That single instance is the
@@ -976,7 +969,7 @@ such as the empty graph on `ℕ`, can supply the instance directly, with no ment
 -/
 example : ∃ n, (⊥ : SimpleGraph ℕ).edgeFinset.card = n := good_card_edgeFinset ⊥
 /-!
-Over-strong instance arguments don't make a theorem *wrong*, they just make it less
+Overly strong instance arguments don't make a theorem wrong, they just make it less
 useful. (When you don't need to *compute* at all, the cleanest choice is often to
 drop `Fintype` data entirely in favour of `Finite`/`Nat.card`; see
 [Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality).)
@@ -992,7 +985,7 @@ away with less. We don't need `G.Adj a b` to be decidable for *all* pairs of
 vertices, we only need to be able to decide whether or not any given vertex is
 adjacent to `v`, i.e. we only need `DecidablePred (· ∈ G.neighborSet v)`. With this
 Lean can filter the `Fintype V` instance down to the neighbours of `v` to produce a
-`Fintype G.neighborSet v` instance.
+`Fintype (G.neighborSet v)` instance.
 -/
 example {V : Type*} (G : SimpleGraph V) (v : V) [Fintype V]
     [DecidablePred (· ∈ G.neighborSet v)] : Fintype (G.neighborSet v) :=
@@ -1016,7 +1009,7 @@ constructors are often the most convenient starting points.
                             -- we can get `Fintype α`
 #check Subtype.fintype      -- given `Fintype α` and `p : α → Prop` with
                             -- `DecidablePred p` we can get `Fintype {x // p x}`
-#check Fintype.ofFinset     -- given `p : Set α`,  `s : Finset α` and a proof
+#check Fintype.ofFinset     -- given `p : Set α`, `s : Finset α` and a proof
                             -- `∀ (x : α), x ∈ s ↔ x ∈ p` we can get `Fintype ↑p`
 
 /-!
@@ -1039,7 +1032,7 @@ Counting crops up everywhere in graph theory: the number of vertices, the number
 edges, the degree of a vertex (the number of its neighbours), the size of a clique,
 and so on. Mathlib offers several different notions of *cardinality*, and which one
 to use depends on what kind of object we are counting and what finiteness information
-we have available. We collect the main ones here.
+we have available. We describe the main ones below.
 
 ### Counting a `Finset`: `Finset.card`
 
@@ -1078,18 +1071,19 @@ just the cardinality of that `Finset`:
 /-!
 Because it is built from `Finset.univ`, `Fintype.card` is *computable* whenever the
 `Fintype` instance is: it is the notion we use with `#eval`, `decide` and
-`native_decide`. The degree `G.degree v` is defined as a `Finset.card`, but it equals
-`Fintype.card (G.neighborSet v)` (`card_neighborSet_eq_degree`). The catch is the
-same one we met for the edge set: `Fintype.card α` requires actual `Fintype` *data*,
-not merely the knowledge that `α` is finite.
+`native_decide`. For example the degree of a vertex `v` in a graph `G` is defined as
+a `Finset.card`, but it equals `Fintype.card ↑(G.neighborSet v)`.
 -/
 #check card_neighborSet_eq_degree -- Fintype.card ↑(G.neighborSet v) = G.degree v
+
 /-!
 ### Finiteness Without Data: the `Finite` Typeclass
 
 Sometimes we know a type is finite but have no canonical enumeration of it, or we
 simply don't want to drag `Fintype` data, and the `Decidable` instances it forces,
-through a proof. For this Mathlib provides the `Finite` typeclass.
+through a proof. For this Mathlib provides the `Finite` typeclass. It tells us that
+there exist a natural number `n` and a bijection between the type and `Fin n`, the
+canonical type of cardinality `n`.
 -/
 #source Finite -- class inductive Finite (α : Sort*) : Prop
               --    | intro {n : ℕ} : α ≃ Fin n → Finite _
@@ -1099,14 +1093,14 @@ example {α : Type*} : Finite α ↔ ∃ n, Nonempty (α ≃ Fin n) :=
 
 /-!
 The crucial difference is that `Finite V` is a *proposition* whereas `Fintype V` is
-*data*:
+*data*.
 
 | Aspect | `Fintype V` | `Finite V` |
 | --- | --- | --- |
 | Nature | *data* (a bundled structure) | a *proposition* (`Prop`-valued) |
 | Carries | a `Finset V` of all elements | only `∃ n, Nonempty (V ≃ Fin n)` |
 | Says | *how* to enumerate `V` | *that* `V` can be enumerated |
-| Two instances | always equal, not always by definition | equal by definition |
+| Two instances | equal, but not always definitionally equal | definitionally equal (proof irrelevance) |
 | Computable? | if the instance is (`Fintype.card`, `decide`) | no (use `Nat.card`) |
 
 We always have `Fintype V → Finite V`; the reverse recovers data from a proof, so it
@@ -1117,11 +1111,11 @@ needs the axiom of choice and is noncomputable (but is still very useful in proo
                            --       (α : Type*) [Finite α] : Fintype α
 /-!
 So being data is not the same as being computable. `Fintype.ofFinite`, like any
-instance built with the help of the `classical` tactic, is perfectly good `Fintype`
-data for use in proofs, but `#eval` cannot run it.
+instance built with the help of the `classical` tactic, is a perfectly good `Fintype`
+instance for use in proofs, but `#eval` cannot run it.
 
 One final remark about `Fintype` instances is that because two instances for the same
-type need not be equal *by definition*, they can be the source of *diamonds* in
+type need not be *definitionally equal*, they can be the source of *diamonds* in
 typeclass inference. This can make proofs fail in mysterious ways. We will see a
 simple example of one below in
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
@@ -1141,8 +1135,7 @@ available, so the two never give conflicting answers on a finite type.
 #check Nat.card_eq_fintype_card -- [Fintype α] : Nat.card α = Fintype.card α
 /-!
 The trade-off is that `Nat.card` is noncomputable: it cannot be `#eval`-uated. Its
-advantage is that it needs no `Fintype` data, so definitions phrased with it stay
-free of `DecidableRel`/`DecidableEq` clutter.
+advantage is that it needs no `Fintype` data.
 
 Beware of the `0` convention, though: `Nat.card α = 0` can mean either "`α` is empty"
 *or* "`α` is infinite".
@@ -1150,7 +1143,7 @@ Beware of the `0` convention, though: `Nat.card α = 0` can mean either "`α` is
 ### Counting in `ℕ∞`: `ENat.card`
 
 The `0`-on-infinite convention of `Nat.card` is convenient but lossy. When we want to
-actually *distinguish* "infinite" from "empty" we use `ENat.card`, which takes values
+actually distinguish *infinite* from *empty* we use `ENat.card`, which takes values
 in the extended naturals `ℕ∞ = WithTop ℕ` and returns `⊤` for infinite types.
 -/
 #check ENat.card -- Type u_3 → ℕ∞
@@ -1167,9 +1160,7 @@ example {V : Type*} : (ENat.card V).toNat = Nat.card V := rfl
 /-!
 ### Counting a `Set`: `Set.ncard` and `Set.encard`
 
-Finally, between a bare `Finset` and a whole type sits the `Set`. The edge set
-`G.edgeSet : Set (Sym2 V)` is an obvious example. A `Set` need not be finite, so it
-gets exactly the same two-flavour treatment as a type:
+Finally these two ways of counting types extend to sets.
 
 * `Set.ncard s : ℕ` is the size as a natural number, `0` if `s` is infinite. It is
   `Nat.card` of the corresponding subtype.
@@ -1180,7 +1171,7 @@ gets exactly the same two-flavour treatment as a type:
 #check Set.encard -- {α : Type u_1} → Set α → ℕ∞
 #check Nat.card_coe_set_eq -- (s : Set α) : Nat.card ↑s = s.ncard
 /-!
-When the set is the coercion of a `Finset`, `ncard` is just that `Finset`'s `card`,
+When the set is the coercion of a `Finset`, `ncard` is just that `Finset`'s `card`.
 -/
 example {V : Type*} (s : Finset V) : (s : Set V).ncard = s.card :=
   Set.ncard_coe_finset _
@@ -1202,7 +1193,7 @@ example {V : Type*} (G : SimpleGraph V) [Fintype G.edgeSet] :
 | a type `α`   | `[Fintype α]`           | `Fintype.card α`                | yes |
 | a type `α`   | `[Finite α]` or nothing | `Nat.card α` (`0` if infinite)  | no  |
 | a type `α`   | nothing                 | `ENat.card α` (`⊤` if infinite) | no  |
-| a `Set s`    | `[Fintype s]`           | `Fintype.card s`                | yes |
+| a `Set s`    | `[Fintype ↑s]`          | `Fintype.card ↑s`               | yes |
 | a `Set s`    | (nothing)               | `s.ncard` / `s.encard`          | no  |
 
  (Here "yes" means that the counting function is computable; an actual `#eval`
@@ -1220,25 +1211,18 @@ all this, the current `SimpleGraph` API is heavily biased towards the use of
 
 # Degrees
 
-The degree of a vertex is the number of its neighbours. For this to be a natural
+The degree of a vertex is the size of its neighbourhood. For this to be a natural
 number the neighbourhood must be finite, so we begin with finite neighbourhoods.
 
 ## Finite Neighbourhoods
 
-We already saw finite neighbourhoods briefly above, using `Fintype (G.neighborSet v)`
-to form the `Finset` of neighbours of a vertex `v`.
+We already saw finite neighbourhoods briefly above, using
+`Fintype ↑(G.neighborSet v)` to form the `Finset` of neighbours of a vertex `v`.
 -/
 #source neighborFinset -- : Finset V := (G.neighborSet v).toFinset
 /-!
-When `V` is finite and adjacency is decidable, this is the `Finset` set-builder
-`{w | G.Adj v w}` (see
-[Set-Builder Notation](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-set-builder-notation)).
--/
-example {V : Type*} [Fintype V] (G : SimpleGraph V) (v : V) [DecidableRel G.Adj] :
-    G.neighborFinset v = ({w | G.Adj v w} : Finset V) :=
-  G.neighborFinset_eq_filter
-/-!
-In this case the *degree* of `v` is the cardinality of its neighbourhood.
+So the *degree* of a vertex is the cardinality of its neighbourhood, assuming that
+this neighbourhood is finite in the sense of `Fintype ↑(G.neighborSet v)`.
 -/
 #source degree -- def degree : ℕ := #(G.neighborFinset v)
 
@@ -1247,58 +1231,52 @@ In this case the *degree* of `v` is the cardinality of its neighbourhood.
 #eval K[3, 2].neighborFinset (Sum.inl 1) -- {Sum.inr 0, Sum.inr 1}
 
 /-!
-Reasoning about finite neighbourhoods does not require the vertex type to be finite.
-(Although `Fintype V` with `DecidableRel G.Adj` is an easy way to get
-`Fintype (G.neighborSet v)` for all vertices `v`).
+Whenever we have `Fintype V` and `DecidableRel G.Adj` we automatically get an
+instance of `Fintype ↑(G.neighborSet v)` for all vertices `v`.
+-/
+example {V : Type*} {v : V} {G : SimpleGraph V} [Fintype V] [DecidableRel G.Adj] :
+    Fintype (G.neighborSet v) := inferInstance
 
-In theorems we can simply assume a vertex has a finite neighbourhood.
+/-!
+However a vertex can have a finite neighbourhood even if the vertex set is infinite.
+In results we can simply assume a vertex has a finite neighbourhood.
 -/
 example {V : Type*} (G : SimpleGraph V) (v : V) [Fintype (G.neighborSet v)] :
     G.degree v = 0 ↔ G.neighborFinset v = ∅ := by
   rw [← card_neighborFinset_eq_degree, Finset.card_eq_zero]
 
 /-!
-If we want to assume that *all* vertices have finite neighbourhoods, we can do this
-using `LocallyFinite G`.
+If we want to assume that all vertices have finite neighbourhoods, we can do this by
+assuming `[G.LocallyFinite]`.
 -/
 #source LocallyFinite -- abbrev LocallyFinite := ∀ v : V, Fintype (G.neighborSet v)
+
 /-!
 In a locally finite graph, with no isolated vertices, all vertices have positive
 degree. (Recall `G.support` is the set of non-isolated vertices.)
 -/
-example {V : Type*} (G : SimpleGraph V) [LocallyFinite G] (h : ∀ v, v ∈ G.support) :
+example {V : Type*} (G : SimpleGraph V) [G.LocallyFinite] (h : ∀ v, v ∈ G.support) :
     ∀ v, 0 < G.degree v := by
   intro v
   obtain ⟨w, hadj⟩ := h v
   exact hadj.degree_pos_left
 
-/-!
-Mathlib states such facts using the predicate `IsIsolated` from
-[Neighbours](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-neighbours).
--/
-#check degree_pos      -- 0 < G.degree v ↔ ¬G.IsIsolated v
-#check degree_eq_zero  -- G.degree v = 0 ↔ G.IsIsolated v
+example {V : Type*} {G : SimpleGraph V} [Fintype V] [DecidableRel G.Adj] :
+    G.LocallyFinite := inferInstance
 
 /-!
-Another situation in which we can obtain `LocallyFinite G` without requiring
-`Fintype V` is if we know that `G` has finitely many edges: every neighbour of `v` is
-the other endpoint of an edge at `v`. Mathlib's equivalence
+Another situation in which we can obtain an instance of `G.LocallyFinite` without
+requiring `Fintype V` is if we know that `G` has finitely many edges: every neighbour
+of `v` is the other endpoint of an edge at `v`. Mathlib's equivalence
 `incidenceSetEquivNeighborSet` between the edges at `v` and the neighbours of `v`
 turns a `Fintype G.edgeSet` instance into a `Fintype (G.neighborSet v)` instance.
-(Mathlib uses the same equivalence in the other direction to define
-`incidenceSetFintype`.) Notice that, unlike the instance built from `Fintype V`, this
-needs no decidable adjacency.
+Notice that, unlike the instance built from `Fintype V`, this does not require
+`DecidableRel G.Adj`.
 
 We make this a `def` rather than an `instance`. As an instance it would give a second
 route to `Fintype (G.neighborSet v)`, alongside the one through `Fintype V` and
 `DecidableRel G.Adj`: a *diamond* of the kind we will meet in
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
-It would also make every search for a neighbourhood instance go looking for a
-`Fintype G.edgeSet` first. Lean asks for definitions that produce instances to be
-marked `@[instance_reducible]`, the status that the `instance` command gives
-automatically, so that typeclass inference can see through the definition if it is
-ever registered as an instance locally (with
-`attribute [local instance] locallyFiniteOfFintypeEdgeSet`).
 -/
 /-- A graph with finitely many edges is locally finite. -/
 @[instance_reducible]
@@ -1323,6 +1301,7 @@ Lean can infer these automatically using the `Fintype` instances for `Fin s` and
 `Fin t` and decidability of adjacency in `K[s, t]`.
 -/
 example (s t : ℕ) : K[s, t].LocallyFinite := inferInstance
+
 /-!
 Here we use the maps `Sum.inl` and `Sum.inr` that embed a type into the left and
 right parts of a `Sum` type to describe the neighbourhoods. The neighbourhood of a
@@ -1335,9 +1314,9 @@ injective there are no duplicates to remove, so unlike `Finset.image` it needs n
 `DecidableEq β`, and `Finset.card_map` says that it preserves cardinality.
 -/
 #check Finset.card_map -- (s.map f).card = s.card
+
 @[simp]
-lemma completeBipartiteGraph.degree_inl (s t : ℕ) (i : Fin s)
-    [Fintype (K[s, t].neighborSet (Sum.inl i))] :
+lemma degree_completeBipartiteGraph_inl (s t : ℕ) (i : Fin s) :
     K[s, t].degree (Sum.inl i) = t := by
   rw [← card_neighborFinset_eq_degree]
   -- the neighbourhood of a vertex in the left part is the entire right part,
@@ -1347,8 +1326,7 @@ lemma completeBipartiteGraph.degree_inl (s t : ℕ) (i : Fin s)
   simp [this]
 
 @[simp]
-lemma completeBipartiteGraph.degree_inr (s t : ℕ) (j : Fin t)
-    [Fintype (K[s, t].neighborSet (Sum.inr j))] :
+lemma degree_completeBipartiteGraph_inr (s t : ℕ) (j : Fin t) :
     K[s, t].degree (Sum.inr j) = s := by
   rw [← card_neighborFinset_eq_degree]
   have : K[s, t].neighborFinset (Sum.inr j) = Finset.univ.map .inl := by
@@ -1358,8 +1336,7 @@ lemma completeBipartiteGraph.degree_inr (s t : ℕ) (j : Fin t)
 /-!
 ## Degrees in the `n`-Uniform Blow-up of a Graph
 
-Recall the `n`-uniform blow-up `G[n]` of a graph `G` (see
-[Blow-ups](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-blow-ups)).
+Recall the `n`-uniform blow-up `G[n]` of a graph `G` (see `blowUpN`).
 -/
 #source blowUpGraph -- abbrev blowUpGraph (G : SimpleGraph ι) (V : ι → Type*) :
                     --   SimpleGraph (Σ i, V i) := SimpleGraph.comap Sigma.fst G
@@ -1367,7 +1344,7 @@ Recall the `n`-uniform blow-up `G[n]` of a graph `G` (see
                 --   SimpleGraph (Σ _ : ι, Fin n) := G.blowUpGraph (fun _ => Fin n)
 /-!
 If `v : V` is a vertex with a finite neighbourhood in `G` then, in the `n`-uniform
-blow-up `G[n]`, every vertex `⟨v, i⟩`, where `i : Fin n`, has finite neighbourhood.
+blow-up `G[n]`, every vertex `⟨v, i⟩`, where `i : Fin n`, has a finite neighbourhood.
 The neighbourhood of `⟨v, i⟩` in `G[n]` is `{⟨w, j⟩ | G.Adj v w}`, which is in
 bijection with `G.neighborSet v × Fin n`, which in turn is finite since both factors
 are finite.
@@ -1379,11 +1356,11 @@ inverse `invFun : β → α`, and proofs `left_inv` and `right_inv` that the two
 mutually inverse (see
 [Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps)).
 -/
-/-- If `w` is a vertex in the `n`-uniform-blow-up `G[n]` and `w.fst` has finite
-neighbourhood in `G` then `w` has a finite neighbourhood in `G[n]`. -/
+/-- A vertex `w` in the `n`-uniform blow-up `G[n]` has a finite neighbourhood in
+`G[n]` assuming `w.fst` has a finite neighbourhood in `G`. -/
 instance {V : Type*} (G : SimpleGraph V) (n : ℕ) (w : Σ _ : V, Fin n)
-    [Fintype (G.neighborSet w.fst)] : Fintype (G[n].neighborSet w):=
-  -- Given any vertex `w = ⟨v, i⟩` in the blowup, its neighbourhood is equivalent to
+    [Fintype (G.neighborSet w.fst)] : Fintype (G[n].neighborSet w) :=
+  -- Given any vertex `w = ⟨v, i⟩` in the blow-up, its neighbourhood is equivalent to
   -- the product of the neighbourhood of `v` in `G` and `Fin n`.
   -- Lean can infer that the product `G.neighborSet v × Fin n` is finite since
   -- both factors are finite, so we just need to give the equivalence.
@@ -1393,7 +1370,7 @@ instance {V : Type*} (G : SimpleGraph V) (n : ℕ) (w : Σ _ : V, Fin n)
     { toFun := fun ⟨⟨x, hx⟩, j⟩ => ⟨⟨x, j⟩, hx⟩
       invFun := fun ⟨⟨x, j⟩, hadj⟩ => ⟨⟨x, hadj⟩, j⟩
      -- since the proofs of `left_inv` and `right_inv` are `rfl` we can omit them
-     }
+    }
 
 /-!
 This instance lets us talk about the degrees of vertices in the `n`-uniform blow-up
@@ -1402,7 +1379,7 @@ of any locally finite graph, and relate them to the degrees in the original grap
 If `v` has a finite neighbourhood in `G` then each vertex `⟨v, i⟩` of `G[n]` has
 degree `G.degree v * n`. (The statement takes both neighbourhood instances as
 arguments, as recommended in
-[Fintypes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-fintypes);
+[Instance Arguments in Statements](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-instance-arguments-in-statements);
 the instance above is what supplies the second one whenever the lemma is used.)
 -/
 lemma degree_blowUpN {V : Type*} (G : SimpleGraph V) (n : ℕ) (v : V) (i : Fin n)
@@ -1422,13 +1399,13 @@ For a finite graph we can talk about the minimum degree `δ(G)` and maximum degr
 `Fintype V` and `DecidableRel G.Adj`, and (very reasonably) default to `0` if `G` has
 no vertices.
 
-[Figure: A graph with a min-degree and max-degree vertex indicated](https://jt496.github.io/GraphTheoryInLean/figures/minmaxdegree.svg)
+[Figure: A graph with vertices of minimum and maximum degree marked](https://jt496.github.io/GraphTheoryInLean/figures/minmaxdegree.svg)
 -/
 #source minDegree  -- def minDegree [DecidableRel G.Adj] : ℕ :=
                    --   WithTop.untopD 0 (univ.image fun v => G.degree v).min
 
 #source maxDegree  -- def maxDegree [DecidableRel G.Adj] : ℕ :=
-                  --    WithBot.unbotD 0 (univ.image fun v => G.degree v).max
+                   --   WithBot.unbotD 0 (univ.image fun v => G.degree v).max
 /-!
 We introduce the standard notation `δ(G)` for the minimum degree and `Δ(G)` for the
 maximum degree of the graph `G`.
@@ -1443,33 +1420,29 @@ Every vertex has degree at least the minimum degree and at most the maximum degr
 #check degree_le_maxDegree  -- G.degree v ≤ Δ(G)
 
 /-!
-If `G` is a subgraph of `H` then `G.minDegree ≤ H.minDegree`.
+If `G` is a subgraph of `H` then `δ(G) ≤ δ(H)`.
 -/
 #check minDegree_le_minDegree -- G ≤ H → δ(G) ≤ δ(H)
 /-!
 The junk value `0` has a cost when we go the other way. If every vertex has degree at
-least `k` then `k ≤ δ(G)`, but only when `V` is nonempty: on an empty vertex type
-`δ(G) = 0` whatever `k` is. Likewise a vertex of minimum (or maximum) degree exists
-only when `V` is nonempty. The upper bound for `Δ(G)` needs no such hypothesis, since
-the junk value `0` satisfies it anyway.
+least `k` then `k ≤ δ(G)`, but only when `V` is nonempty. Likewise a vertex of
+minimum (or maximum) degree exists only when `V` is nonempty. The upper bound for
+`Δ(G)` needs no such hypothesis, since the junk value `0` satisfies it anyway.
 -/
 #check le_minDegree_of_forall_le_degree -- [Nonempty V] (k : ℕ) :
                                         --   (∀ v, k ≤ G.degree v) → k ≤ δ(G)
 #check maxDegree_le_of_forall_degree_le -- (k : ℕ) : (∀ v, G.degree v ≤ k) → Δ(G) ≤ k
 #check exists_minimal_degree_vertex     -- [Nonempty V] : ∃ v, δ(G) = G.degree v
 #check exists_maximal_degree_vertex     -- [Nonempty V] : ∃ v, Δ(G) = G.degree v
+
 /-!
 One problem with the definitions of `minDegree` and `maxDegree` is that they require
 `Fintype V`, but plenty of graphs have finite minimum and maximum degree without
-having finite vertex sets. For example the infinite path graph `pathNat₁` has
-minimum degree `1` and maximum degree `2` but we can't state these facts using
-`minDegree` and `maxDegree` (because `pathNat₁` has infinitely many vertices). We
-would have to fall back on something like
-`IsLeast {n | ∃ v, pathNat₁.degree v = n} 1` instead.
+having finite vertex sets. For example the infinite path graph `pathNat₁` has minimum
+degree `1` and maximum degree `2` but we can't state these facts using `minDegree`
+and `maxDegree` (because `pathNat₁` has infinitely many vertices).
 
 We can however characterize the neighbourhoods and degrees of vertices in `pathNat₁`.
-(Proving the `IsLeast` statement above, and its `IsGreatest` counterpart for the
-maximum degree, is left to the exercises.)
 -/
 @[simp]
 lemma neighborFinset_pathNat₁ (n : ℕ) [Fintype (pathNat₁.neighborSet n)] :
@@ -1480,6 +1453,7 @@ lemma neighborFinset_pathNat₁ (n : ℕ) [Fintype (pathNat₁.neighborSet n)] :
 lemma degree_pathNat₁ (n : ℕ) [Fintype (pathNat₁.neighborSet n)] :
     pathNat₁.degree n = if n = 0 then 1 else 2 := by
   rw [← card_neighborFinset_eq_degree, neighborFinset_pathNat₁]
+  -- the `split_ifs` tactic is a convenient way to handle `if` statements
   split_ifs <;> grind
 
 /-!
@@ -1489,7 +1463,6 @@ In a finite graph the sum of all vertex degrees equals twice the number of edges
 
 [Figure: Each edge contributes two darts, one from each endpoint](https://jt496.github.io/GraphTheoryInLean/figures/handshake.svg)
 -/
-
 #check sum_degrees_eq_twice_card_edges -- ∑ v, G.degree v = 2 * G.edgeFinset.card
 
 /-!
@@ -1508,22 +1481,21 @@ darts of `G` whose first element is `v`.
 -/
 #check dartOfNeighborSet_injective -- Function.Injective (G.dartOfNeighborSet v)
 #check dart_fst_fiber -- {d | d.toProd.1 = v} = image (G.dartOfNeighborSet v) univ
+
 /-!
-Mathlib calls `sum_degrees_eq_twice_card_edges` the *degree-sum formula*, and notes
-that the name *handshaking lemma* more specifically refers to its best-known
-consequence: since the sum of the degrees is even, every finite graph has an even
-number of vertices of odd degree.
+As noted in Mathlib's documentation, the handshake lemma sometimes refers to the
+following consequence of this lemma: the number of vertices of odd degree is even.
 -/
 #check even_card_odd_degree_vertices -- Even #{v | Odd (G.degree v)}
 /-!
 Since we spent some time looking at instance arguments earlier, we note that the
 signature of `sum_degrees_eq_twice_card_edges` follows the pattern of
 `bad_card_edgeFinset`. It takes `[Fintype V]` and `[DecidableRel G.Adj]`, and its
-*statement* derives two further instances from these: the `Fintype` instance for each
+statement derives two further instances from these: the `Fintype` instance for each
 neighbourhood (used by `degree`) and the one for the edge set (used by `edgeFinset`).
-So it only applies to graphs whose instances arrive by that route. The instances its
-statement actually mentions are `[Fintype V]` (to sum over all vertices),
-`[G.LocallyFinite]` and `[Fintype G.edgeSet]`.
+So it only applies to graphs whose instances are synthesized by that route. The
+instances its statement actually mentions are `[Fintype V]`, to sum over all
+vertices, `[G.LocallyFinite]` and `[Fintype G.edgeSet]`.
 
 We can easily derive a more general version with only these arguments. But we first
 show how the obvious proof fails.
@@ -1536,9 +1508,8 @@ but is expected to have type
   ∑ v, @degree V G v (inst✝ v) = 2 * G.edgeFinset.card
 -/
 #guard_msgs in
-example {V : Type*} (G : SimpleGraph V)
-    [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] :
-    ∑ v, G.degree v = 2 * G.edgeFinset.card := by
+example {V : Type*} (G : SimpleGraph V) [Fintype V] [Fintype G.edgeSet]
+    [G.LocallyFinite] : ∑ v, G.degree v = 2 * G.edgeFinset.card := by
   classical
   -- This makes `DecidableRel G.Adj` available,
   -- so we can use the original lemma.
@@ -1555,14 +1526,13 @@ uses a different route: namely `Fintype V` + `DecidableRel G.Adj` to synthesize 
 Lean refuses to unify them, and the proof fails. The same happens with
 `G.edgeFinset`: the lemma builds its `Fintype G.edgeSet` instance from `Fintype V`
 and `DecidableRel G.Adj`, while we supplied one directly. The error message only
-reports the first mismatch, because `G.edgeFinset` is printed without its instance.
+reports the first mismatch.
 
-Any two `Fintype` instances `inst₁` and `inst₂` for the same type, however they may
-be constructed, are propositionally equal. Each instance consists of a `Finset`
-together with a proof that the `Finset` contains every element of the type. Since
-both contain every element of the type, the two `Finset`s have the same members and
-so are equal by extensionality; while, by proof irrelevance, the two proofs of
-completeness are equal: so `inst₁ = inst₂`.
+However any two `Fintype` instances `inst₁` and `inst₂` for the same type are
+propositionally equal. Each instance consists of a `Finset` together with a proof
+that the `Finset` contains every element of the type. So the two `Finset`s have the
+same members and hence are equal by extensionality; while, by proof irrelevance, the
+two proofs of completeness are equal: so `inst₁ = inst₂`.
 
 This general argument means that `Fintype` is a `Subsingleton` (a type in which any
 two elements are equal). We have the instance `Fintype.subsingleton`, so
@@ -1579,21 +1549,9 @@ lemma sum_degrees_eq_twice_card_edges' {V : Type*} (G : SimpleGraph V)
   convert G.sum_degrees_eq_twice_card_edges
 
 /-!
-Combining this version of the handshake lemma with our earlier computation of degrees
-in the complete bipartite graph `K[s, t]`, we can count its edges.
--/
-lemma completeBipartiteGraph.card_edgeFinset (s t : ℕ) [Fintype K[s, t].edgeSet] :
-    K[s, t].edgeFinset.card = s * t := by
-  have h := sum_degrees_eq_twice_card_edges' K[s, t]
-  simp only [Fintype.sum_sum_type, completeBipartiteGraph.degree_inl,
-    completeBipartiteGraph.degree_inr, Finset.sum_const, Finset.card_univ,
-    Fintype.card_fin, smul_eq_mul] at h
-  grind
-
-/-!
 ## Regular Graphs
 
-If `G` is locally finite then we can talk about `G` being *regular of degree `d`* for
+If `G` is locally finite then we can talk about `G` being *regular of degree* `d` for
 some `d : ℕ`.
 -/
 #source IsRegularOfDegree -- .. (d : ℕ) : Prop := ∀ v : V, G.degree v = d
@@ -1609,12 +1567,8 @@ lemma IsRegularOfDegree.blowUpN {V : Type*} (G : SimpleGraph V) [G.LocallyFinite
   rw [degree_blowUpN, h v]
 
 /-!
-To use this result, Lean must synthesize an instance of `G[n].LocallyFinite`, as in
-the following example for blow-ups of complete graphs. It does this using the
-vertex-wise instance above. That instance is stated for an arbitrary vertex
-`w : Σ _ : V, Fin n` rather than for `⟨v, i⟩`, because `LocallyFinite` asks for an
-instance at an arbitrary vertex `w`, and instance search will not split `w` into
-`⟨w.1, w.2⟩`.
+So the `n`-uniform blow-up of the complete graph on `m` vertices is regular of degree
+`(m - 1) * n`.
 -/
 example (m n : ℕ) : K[m][n].IsRegularOfDegree ((m - 1) * n) :=
   IsRegularOfDegree.blowUpN K[m] n (m - 1)
@@ -1624,9 +1578,8 @@ example (m n : ℕ) : K[m][n].IsRegularOfDegree ((m - 1) * n) :=
 Mathlib knows that the complete graph on a finite vertex type is regular, but it
 doesn't state the converse: any graph that is regular of degree `n - 1`, where
 `Fintype.card V = n`, is complete. It does, however, have the two ingredients. A
-vertex is *universal* (`G.IsUniversal v`) if it is adjacent to every other vertex;
-it has degree `Fintype.card V - 1` iff it is universal; and a graph is complete iff
-every vertex is universal.
+vertex is *universal* (`G.IsUniversal v`) iff it has degree `Fintype.card V - 1` and
+a graph is complete iff every vertex is universal.
 -/
 #check degree_eq_card_sub_one -- G.degree v = Fintype.card V - 1 ↔ G.IsUniversal v
 #check eq_top_iff_forall_isUniversal -- G = ⊤ ↔ ∀ v, G.IsUniversal v
@@ -1681,9 +1634,12 @@ lemma IsRegularOfDegree.card_edgeFinset {V : Type*} {G : SimpleGraph V} {d : ℕ
 /-!
 ## Neighbours in a Set
 
-It is often useful to count only the neighbours of a vertex `a` that lie in a given
-finite set `s`. We call this number `G.degIn s a`, and prove a few simple lemmas
-about it. We will use them in
+It is often useful to count only the neighbours of a vertex `v` that lie in a given
+finite set `s`. We call this number `G.degIn s v`. We define it as the size of
+`s.bipartiteAbove G.Adj v`, which is Mathlib's name for `{w ∈ s | G.Adj v w}`. It
+comes from Mathlib's double-counting library, so facts about `degIn` can be fed
+straight into Mathlib's double-counting lemmas. We prove a few simple lemmas about
+`degIn`, which we will use in
 [Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem),
 for the Moore and cage bounds in
 [Moore and Cage Bounds](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-and-cage-bounds),
@@ -1694,86 +1650,92 @@ section degIn
 open Finset
 variable {V : Type*} {G : SimpleGraph V}
 
-/-- The number of neighbours of `a` lying in `s`. -/
-def degIn (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V) (a : V) : ℕ :=
-    #{v ∈ s | G.Adj a v}
 
-/-!
-The set of neighbours of `a` lying in `s` is exactly `G.neighborFinset a ∩ s`.
--/
+/-- The number of neighbours of `v` lying in `s`. -/
+def degIn (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V) (v : V) : ℕ :=
+    #(s.bipartiteAbove G.Adj v)
+
+/-- `G.degIn s v` counts the vertices `w ∈ s` adjacent to `v`. -/
+lemma degIn_eq_card_filter [DecidableRel G.Adj] (s : Finset V) (v : V) :
+    G.degIn s v = #{w ∈ s | G.Adj v w} := rfl
+
+/-- The set of neighbours of `x` lying in `s` is exactly `G.neighborFinset x ∩ s`. -/
 lemma filter_adj_eq_inter [DecidableEq V] [DecidableRel G.Adj]
-    [G.LocallyFinite] (s : Finset V) (a : V) :
-    {v ∈ s | G.Adj a v} = G.neighborFinset a ∩ s := by
+    [G.LocallyFinite] (s : Finset V) (x : V) :
+    {v ∈ s | G.Adj x v} = G.neighborFinset x ∩ s := by
   ext v; simp [mem_filter, mem_inter, mem_neighborFinset, and_comm]
 
-/-!
-The `degIn s a` is at most the degree of `a`, since it counts only those neighbours
-of `a` that lie in `s`.
--/
+/-- Since `G.Adj` is symmetric, `bipartiteBelow` and `bipartiteAbove` give the same
+set of neighbours of `v` in `s`. -/
+lemma bipartiteBelow_adj (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V)
+    (v : V) : s.bipartiteBelow G.Adj v = s.bipartiteAbove G.Adj v := by
+  ext; simp [adj_comm]
+
+/-- The number of neighbours of `x` in `s` is at most its degree. -/
 lemma degIn_le_degree [DecidableRel G.Adj] [G.LocallyFinite]
-    (s : Finset V) (a : V) : G.degIn s a ≤ G.degree a := by
+    (s : Finset V) (x : V) : G.degIn s x ≤ G.degree x := by
   classical
-  rw [degIn, filter_adj_eq_inter, ← card_neighborFinset_eq_degree]
+  rw [degIn_eq_card_filter, filter_adj_eq_inter, ← card_neighborFinset_eq_degree]
   exact card_le_card inter_subset_left
 
-/-!
-If `a` has at least as many neighbours in `s` as its degree, then (since it can have
-no more) in fact every neighbour of `a` lies in `s`.
--/
+/-- If `x` has at least as many neighbours in `s` as its degree, then every
+neighbour of `x` lies in `s`. -/
 lemma neighborFinset_subset_of_degree_le_degIn [DecidableRel G.Adj] [G.LocallyFinite]
-    (s : Finset V) (a : V) (hle : G.degree a ≤ G.degIn s a) :
-    G.neighborFinset a ⊆ s := by
+    (s : Finset V) (x : V) (hle : G.degree x ≤ G.degIn s x) :
+    G.neighborFinset x ⊆ s := by
   classical
-  have : G.degIn s a = G.degree a := (degIn_le_degree s a).antisymm hle
-  rw [degIn, filter_adj_eq_inter, ← card_neighborFinset_eq_degree] at this
+  have : G.degIn s x = G.degree x := (degIn_le_degree s x).antisymm hle
+  rw [degIn_eq_card_filter, filter_adj_eq_inter,
+    ← card_neighborFinset_eq_degree] at this
   have heq := eq_of_subset_of_card_le inter_subset_left (le_of_eq this.symm)
   grind
 
-/-!
-The `degIn` is monotone in the vertex set.
--/
-lemma degIn_mono [DecidableRel G.Adj] {s t : Finset V} (h : s ⊆ t) (a : V) :
-    G.degIn s a ≤ G.degIn t a :=
+/-- If every neighbour of `x` lies in `s`, then `x` has `G.degree x` neighbours in
+`s`. -/
+lemma degIn_eq_degree [DecidableRel G.Adj] [G.LocallyFinite] {s : Finset V} {x : V}
+    (h : G.neighborFinset x ⊆ s) : G.degIn s x = G.degree x := by
+  classical
+  rw [degIn_eq_card_filter, filter_adj_eq_inter, inter_eq_left.mpr h,
+    card_neighborFinset_eq_degree]
+
+/-- The `degIn` of a vertex is monotone in the set. -/
+lemma degIn_mono [DecidableRel G.Adj] {s t : Finset V} (h : s ⊆ t) (x : V) :
+    G.degIn s x ≤ G.degIn t x :=
   card_le_card (filter_subset_filter _ h)
 
-/-!
-`degIn` is additive over a disjoint union of vertex sets.
--/
+/-- `degIn` is additive over a disjoint union of sets. -/
 lemma degIn_union [DecidableRel G.Adj] [DecidableEq V] (s t : Finset V)
-    (a : V) (h : Disjoint s t) :
-    G.degIn (s ∪ t) a = G.degIn s a + G.degIn t a := by
-  rw [degIn, degIn, degIn, filter_union,
+    (x : V) (h : Disjoint s t) :
+    G.degIn (s ∪ t) x = G.degIn s x + G.degIn t x := by
+  simp only [degIn_eq_card_filter]
+  rw [filter_union,
     card_union_of_disjoint (h.mono (filter_subset _ _) (filter_subset _ _))]
 
-/-!
-If some neighbour of `z` lies outside `s`, then `z` has strictly less than
-`G.degree z` neighbours in `s`.
--/
+/-- If some neighbour of `x` lies outside `s`, then `x` has strictly less than
+`G.degree x` neighbours in `s`. -/
 lemma degIn_lt_degree_of_adj_notMem [DecidableRel G.Adj] [G.LocallyFinite]
-     {z y : V} (s : Finset V) (hadj : G.Adj z y) (hy : y ∉ s) :
-    G.degIn s z < G.degree z := by
+     {x y : V} (s : Finset V) (hadj : G.Adj x y) (hy : y ∉ s) :
+    G.degIn s x < G.degree x := by
   classical
-  rw [degIn, filter_adj_eq_inter, ← card_neighborFinset_eq_degree]
+  rw [degIn_eq_card_filter, filter_adj_eq_inter, ← card_neighborFinset_eq_degree]
   apply card_lt_card
   rw [ssubset_iff_of_subset inter_subset_left]
   exact ⟨y, (mem_neighborFinset _ _ _).mpr hadj, fun h => hy (mem_inter.mp h).2⟩
 
-/-!
-Conversely, if every neighbour of `u` except possibly `w` lies in `B`, then `u` has
-at most one neighbour outside `B`.
--/
+/-- If every neighbour of `x` except possibly `w` lies in `B`, then `x` has at most
+one neighbour outside `B`. -/
 lemma degree_le_degIn_add_one [DecidableRel G.Adj] [G.LocallyFinite] (B : Finset V)
-    {u : V} (w : V) (h : ∀ x, G.Adj u x → x ≠ w → x ∈ B) :
-    G.degree u ≤ G.degIn B u + 1 := by
+    {x : V} (w : V) (h : ∀ y, G.Adj x y → y ≠ w → y ∈ B) :
+    G.degree x ≤ G.degIn B x + 1 := by
   rw [← card_neighborFinset_eq_degree]
   classical
-  calc #(G.neighborFinset u) ≤ #(insert w {v ∈ B | G.Adj u v}) :=
-        card_le_card fun x hx => by
-          rw [mem_neighborFinset] at hx
-          by_cases hxw : x = w
-          · simp [hxw]
-          · simp [h x hx hxw, hx]
-    _ ≤ G.degIn B u + 1 := card_insert_le _ _
+  calc #(G.neighborFinset x) ≤ #(insert w {v ∈ B | G.Adj x v}) :=
+        card_le_card fun y hy => by
+          rw [mem_neighborFinset] at hy
+          by_cases hyw : y = w
+          · simp [hyw]
+          · simp [h y hy hyw, hy]
+    _ ≤ G.degIn B x + 1 := card_insert_le _ _
 
 end degIn
 
@@ -1785,6 +1747,7 @@ of its vertices and the size of its edge set, we need decidable equality of its
 vertices, decidable adjacency, and a `Fintype` instance for its vertices. As with
 many proofs for the hypercube, each of these drops out easily by induction on `n`.
 -/
+/-- Vertices of the hypercube have decidable equality. -/
 instance (n : ℕ) : DecidableEq (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
 
@@ -1797,16 +1760,9 @@ Since we used the box product to define the hypercube, decidability of adjacency
 instance hypercubeDecidableRelAdj (n : ℕ) : DecidableRel Q[n].Adj := by
   induction n <;> unfold hypercube <;> infer_instance
 
-/-!
-This instance uses only `unfold`, which is purely definitional, before delegating to
-the box product instance, so `decide` can reduce it (see
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)).
--/
 example : Q[2].Adj (((), false), false) (((), false), true) := by decide
 
-/-!
-The vertex type `HypercubeVert n` is finite.
--/
+/-- The vertex type `HypercubeVert n` is finite. -/
 instance hypercubeFintype (n : ℕ) : Fintype (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
 
@@ -1816,14 +1772,17 @@ The `n`-dimensional hypercube has `2 ^ n` vertices. We state this for an arbitra
 caller has: `convert` reduces it to the instance `hypercubeFintype`, since any two
 `Fintype` instances on a type are equal.
 -/
-@[simp]
-lemma card_hypercubeVert (n : ℕ) [Fintype (HypercubeVert n)] :
+/-- The `n`-dimensional hypercube has `2 ^ n` vertices. -/
+@[simp] lemma card_hypercubeVert (n : ℕ) [Fintype (HypercubeVert n)] :
     Fintype.card (HypercubeVert n) = 2 ^ n := by
   suffices h : @Fintype.card (HypercubeVert n) (hypercubeFintype n) = 2 ^ n by
     convert h
   induction n with
   | zero => simp
   | succ n ih => rw [pow_succ, ← ih]; exact Fintype.card_prod _ _
+
+
+example : Fintype.card (HypercubeVert 3) = 8 := by simp
 
 /-!
 We also give a `Nonempty` instance for `HypercubeVert n` since this will be useful in
@@ -1875,8 +1834,7 @@ scoped macro_rules
 
 #eval Q[3].neighborFinset v[0,1,1] -- {111, 010, 001}
 
-example : Q[3].Adj v[1, 1, 1] v[1, 0, 1] := by
-  simp
+example : Q[3].Adj v[1, 1, 1] v[1, 0, 1] := by simp
 
 end HypercubeVert
 
@@ -1887,10 +1845,11 @@ using `DecidableRel Q[n].Adj` and `Fintype (HypercubeVert n)`.
 
 We can use this to compute the degree of a vertex in `Q[15]`. However this is a bad
 idea since this is basically looking at each of the `2 ^ 15` vertices and checking
-adjacency. (In the case of a `Q[30]` vertex this would simply timeout.)
+adjacency. (In the case of a `Q[30]` vertex this would simply time out.)
 -/
 
-#synth Q[15].LocallyFinite -- Subtype.fintype (Membership.mem (Q[15].neighborSet v))
+#synth Q[15].LocallyFinite
+-- fun v ↦ Subtype.fintype (Membership.mem (Q[15].neighborSet v))
 
 open HypercubeVert -- for the `v[...]` vertex notation
 
@@ -1899,7 +1858,7 @@ open HypercubeVert -- for the `v[...]` vertex notation
 /-!
 We can however give a more efficient `Fintype` instance for the neighbourhoods of
 vertices in `Q[n]` using Mathlib's custom `boxProdFintypeNeighborSet` instance for
-the box product: which is exactly how `Q[n]` is defined (for `n ≠ 0`).
+the box product, which is exactly how `Q[n]` is defined (for `n ≠ 0`).
 -/
 #check boxProdFintypeNeighborSet
 /-!
@@ -1907,7 +1866,6 @@ We use `inferInstanceAs` to tell Lean to build the neighbourhood through the box
 product, and the trace output confirms that it does indeed use it. (Here `f <| x`
 means `f x`; it saves writing brackets around a long argument.)
 -/
-set_option trace.Meta.synthInstance true in
 /-- An efficient `Fintype` instance for the neighbourhood of a vertex in `Q[n]`,
 built through the box product rather than by filtering all `2 ^ n` vertices. -/
 instance hypercubeFintypeNeighborSet (n : ℕ) (v : HypercubeVert n) :
@@ -1928,28 +1886,10 @@ set_option trace.Meta.synthInstance true in
   0,1,1,0,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,0,0,1,1,0] -- 60
 
 /-!
-With these instances in place we can now prove that `Q[n]` is regular of degree `n`.
-The induction is the obvious one; what is worth noting is the form of the
-*statement*, and the two lines of instance bookkeeping that open the proof. Both are
-explained in
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)
-below.
--/
-lemma hypercube_isRegularOfDegree (n : ℕ) [Q[n].LocallyFinite] :
-    Q[n].IsRegularOfDegree n := by
-  -- swap out the fintype instance for the canonical one
-  let : Q[n].LocallyFinite := fun v => hypercubeFintypeNeighborSet n v
-  convert_to Q[n].IsRegularOfDegree n
-  induction n with
-  | zero => exact IsRegularOfDegree.bot
-  | succ n ih =>
-    intro v
-    -- `Q[n + 1]` is `Q[n] □ ⊤` by definition, and so is the instance fixed above
-    change (Q[n] □ ⊤).degree v = n + 1
-    rw [degree_boxProd, ih v.1]
-    simp
+The efficient instance also allows us to give a short proof that `Q[n]` is regular of
+degree `n`, but now that `Q[n].neighborSet v` has two `Fintype` instances, stating
+this result takes some care. We do so in the next section.
 
-/-!
 ## Stating Results Across a Diamond *
 
 We have just created a `Fintype` *diamond*: `Q[n].neighborSet v` now has two
@@ -1963,58 +1903,59 @@ and explored in
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma),
 so how much trouble does it actually cause?
 
-Mathlib has the same diamond: `boxProdFintypeNeighborSet` is a global instance, and
-Lean prefers it to the filtering instance whenever the graph is a box product.
--/
-#synth Fintype ((⊤ □ ⊤ : SimpleGraph (Fin 3 × Fin 3)).neighborSet (0, 0))
-        -- boxProdFintypeNeighborSet (0, 0)
-/-!
-Nothing in Mathlib breaks because of it. The reason is visible in `degree_boxProd`,
-the lemma the induction above rewrites with: its third instance argument is an
-*arbitrary* `Fintype` for the box-product neighbourhood, not
+Mathlib has the same diamond, since `boxProdFintypeNeighborSet` is a global instance,
+and nothing in Mathlib breaks because of it. The reason is visible in
+`degree_boxProd`: its third instance argument is an *arbitrary* `Fintype` for the
+box product neighbourhood `[Fintype ↑((G □ H).neighborSet x)]`, not
 `boxProdFintypeNeighborSet`.
 -/
-#check degree_boxProd  -- .. (x : α × β) [Fintype ↑(G.neighborSet x.1)]
-                       --    [Fintype ↑(H.neighborSet x.2)]
-                       --    [Fintype ↑((G □ H).neighborSet x)] :
-                       --      (G □ H).degree x = G.degree x.1 + H.degree x.2
+#check degree_boxProd
 /-!
-So `degree_boxProd` works with whichever instance happens to be in scope where it is
-used. Two instances only cause difficulty when a theorem *statement* names one of
-them.
+So `degree_boxProd` works with whichever instance is in scope where it is used. Two
+instances only cause difficulty when a theorem *statement* names one of them.
 
-That is what we were careful to avoid. Had we stated our lemma the obvious way,
-taking only `n` and concluding `Q[n].IsRegularOfDegree n`, Lean would have filled in
-the `LocallyFinite` instance by synthesis and written `hypercubeFintypeNeighborSet`
-into the statement. The lemma would still be true, but it could only be used where
-that is the instance in scope. Taking the instance as an argument, as
-`degree_boxProd` does, lets the caller choose:
--/
-set_option pp.explicit true in
-#check hypercube_isRegularOfDegree
-        -- ∀ (n : Nat) [inst : @LocallyFinite (HypercubeVert n) (hypercube n)],
-        --   @IsRegularOfDegree (HypercubeVert n) (hypercube n) inst n
-/-!
-The first two lines of the proof of `hypercube_isRegularOfDegree` deal with the
-instance. The first, `let : Q[n].LocallyFinite := …`, introduces the efficient
-instance as a local definition. We never refer to it by name (Lean calls it `this`):
-being a local hypothesis of class type, it is found by typeclass inference, which
-tries local instances first, most recent first. It must be a `let` rather than a
-`have`, because an instance is data: `have` would forget its value, and the `change`
-in the induction step could no longer see that it is the box-product instance.
+We therefore state the regularity of `Q[n]` with its `LocallyFinite` instance as an
+argument. Without this, Lean would have written the synthesized instance, the
+efficient `hypercubeFintypeNeighborSet`, into the statement, and the lemma could then
+only be used where that is the instance in scope.
 
-The second line, `convert_to Q[n].IsRegularOfDegree n`, restates the goal, so that
-its instance is now synthesized as `this` rather than being the one the caller
-supplied, and proves that the old goal follows from the new one. It does this by
-congruence; the only difference it finds is the pair of instances, and it closes that
-using the `Subsingleton` argument from
+The proof, however, needs the efficient instance: because it is built through the box
+product, `change` can restate a degree in `Q[n + 1]` as a degree in `Q[n] □ ⊤`, ready
+for `degree_boxProd`. Since the instance is now an argument, the proof has to switch
+to the efficient one itself, and this is what its first two lines do. The `let` puts
+the efficient instance in the local context, where typeclass inference looks first.
+(It must be a `let`, not a `have`: an instance is data, and `change` needs to see its
+value.) Then `convert_to` restates the goal, so that its instance is synthesized as
+the local one, and closes the gap between the two instances using the `Subsingleton`
+argument from
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
-The induction then uses a fixed instance. Doing this inside the proof means that no
-caller ever needs a `convert` to use the lemma. Mathlib handles it the same way: the
-proof of `neighborFinset_boxProd` opens with exactly these two lines.
+In the InfoView the goal looks the same before and after, since instance arguments
+are not displayed; hovering over `IsRegularOfDegree` in the goal shows that `inst✝`
+has become `this`. Because the switch happens inside the proof, no caller ever needs
+a `convert`.
+-/
+lemma hypercube_isRegularOfDegree (n : ℕ) [Q[n].LocallyFinite] :
+    Q[n].IsRegularOfDegree n := by
+  -- swap out the instance for the efficient one
+  let : Q[n].LocallyFinite := fun v => hypercubeFintypeNeighborSet n v
+  -- the goal is `@IsRegularOfDegree _ Q[n] inst✝ n`, with the caller's instance
+  convert_to Q[n].IsRegularOfDegree n
+  -- the goal is now `@IsRegularOfDegree _ Q[n] this n`, with the efficient one
+  induction n with
+  | zero => exact IsRegularOfDegree.bot
+  | succ n ih =>
+    intro v
+    -- `Q[n + 1]` is `Q[n] □ ⊤` by definition, and `this` is the box product instance
+    change (Q[n] □ ⊤).degree v = n + 1
+    rw [degree_boxProd, ih v.1]
+    simp
 
-The lemma now applies with whatever instance *typeclass inference* finds where it is
-used.
+/-!
+The lemma now applies with whatever instance typeclass inference finds where it is
+used. In the first example below, that is the global instance
+`hypercubeFintypeNeighborSet`. In the second, it is the instance argument
+`[Q[n].LocallyFinite]`, about which nothing is known; inference finds it because
+local instances are tried first.
 -/
 example (n : ℕ) (v : HypercubeVert n) : Q[n].degree v = n :=
   hypercube_isRegularOfDegree n v
@@ -2024,14 +1965,12 @@ example (n : ℕ) [Q[n].LocallyFinite] (v : HypercubeVert n) :
   rw [hypercube_isRegularOfDegree n v]
 
 /-!
-Note however the words "typeclass inference". An instance argument such as
-`[Q[n].LocallyFinite]` is filled in by inference, not by matching the type that the
-caller expects, and for `Q[n]` inference finds the efficient instance. So the lemma
-does not adapt by itself to a situation that needs the filtering instance, and such
-situations are common. For example, Mathlib's `IsRegularOfDegree.minDegree_eq` says
-that a graph that is regular of degree `d` has minimum degree `d`. Like `minDegree`
-itself it takes `[DecidableRel G.Adj]`, so at `Q[n]` it asks for regularity with
-respect to the filtering instance, and the obvious proof fails.
+Note, however, that an instance argument is filled in by *inference*, which for
+`Q[n]` finds the efficient instance, not by matching the type that the caller
+expects. Mathlib's `IsRegularOfDegree.minDegree_eq`, which says that a graph that is
+regular of degree `d` has minimum degree `d`, takes `[DecidableRel G.Adj]` like
+`minDegree` itself. So for `Q[n]` it asks for regularity with respect to the
+filtering instance, and the obvious proof fails.
 -/
 /-- error: Application type mismatch: The argument
   hypercube_isRegularOfDegree n
@@ -2040,42 +1979,24 @@ has type
 but is expected to have type -/
 #guard_msgs (substring := true) in
 example (n : ℕ) : δ(Q[n]) = n := (hypercube_isRegularOfDegree n).minDegree_eq
+
 /-!
-Because our lemma takes its instance as an argument, we can put the filtering
-instance in scope with `let`, and the lemma then uses it. (Had the efficient instance
-been written into the statement this would not help, and we would need `convert`
-instead.) This `let` is the price of the diamond: we need it whenever we combine the
-lemma with a result stated using `[Fintype V]` and `[DecidableRel G.Adj]`, such as
-`minDegree_eq` here, or the results on adjacency and Laplacian matrices in
-[Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory).
+Because our lemma takes its instance as an argument, putting the filtering instance
+in scope with `let` fixes this. (Had the efficient instance been written into the
+statement, we would need `convert` instead.) This `let` is the price of the diamond:
+we need it whenever we combine the lemma with a result stated using `[Fintype V]` and
+`[DecidableRel G.Adj]`.
 -/
 example (n : ℕ) : δ(Q[n]) = n := by
   let : Q[n].LocallyFinite := fun v => Subtype.fintype _
   exact (hypercube_isRegularOfDegree n).minDegree_eq
 
 /-!
-Our own `IsRegularOfDegree.card_edgeFinset` takes its instances as arguments, so it
-combines with `hypercube_isRegularOfDegree` directly, as in
-`card_edgeFinset_hypercube` below.
-
-This leads to the rule we follow in the rest of the guide. A second `Fintype`
-instance is fine, and sometimes worth having for computation, but a theorem statement
-should not commit to either instance. Whenever a statement depends on a `Fintype` (or
-`LocallyFinite`) instance, for example through `degree`, `neighborFinset` or
-`edgeFinset`, take that instance as an argument. If the proof needs a particular
-instance, switch to it at the start of the proof with `let` and `convert_to`, as
-above, and get any further instances the proof needs by using the `classical` tactic.
-
-The rule concerns the instances a statement can mention. Mathlib's `minDegree` and
-`maxDegree` take `[Fintype V]` and `[DecidableRel G.Adj]` and derive the
-neighbourhood instances from them, as do our `degreeMultiset` and `degreeSequence` in
-[Degree Sequences*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-degree-sequences).
-A statement about these takes those two instances as arguments instead, and the
-neighbourhood instance is then always the filtering one, which is why `minDegree_eq`
-needed the `let` above.
+Our own `IsRegularOfDegree.card_edgeFinset`, by contrast, takes its instances as
+arguments, so it combines with `hypercube_isRegularOfDegree` directly, with no `let`
+required.
 -/
-
-/-- The n-dimensional hypercube has `n2ⁿ⁻¹` edges -/
+/-- The `n`-dimensional hypercube has `n * 2 ^ (n - 1)` edges. -/
 lemma card_edgeFinset_hypercube (n : ℕ) [Fintype Q[n].edgeSet] :
     Q[n].edgeFinset.card = n * 2 ^ (n - 1) := by
   rw [(hypercube_isRegularOfDegree n).card_edgeFinset, card_hypercubeVert]
@@ -2084,13 +2005,27 @@ lemma card_edgeFinset_hypercube (n : ℕ) [Fintype Q[n].edgeSet] :
   | succ n => rw [pow_succ, Nat.add_sub_cancel]; grind
 
 /-!
+All of this leads to the rule we follow in the rest of the guide. A second `Fintype`
+instance is fine, and sometimes worth having for computation, but a theorem statement
+should not commit to either instance. Whenever a statement depends on a `Fintype` (or
+`LocallyFinite`) instance, for example through `degree`, `neighborFinset` or
+`edgeFinset`, take that instance as an argument. If the proof needs a particular
+instance, switch to it at the start of the proof with `let` and `convert_to`, as
+above, and get any further instances the proof needs by using the `classical` tactic.
+
+The rule can only be applied to instances that a definition takes as arguments.
+Mathlib's `minDegree` and `maxDegree` take no neighbourhood instance: they take
+`[Fintype V]` and `[DecidableRel G.Adj]` and build the neighbourhood instances from
+these, by filtering. A statement about them therefore takes `[Fintype V]` and
+`[DecidableRel G.Adj]` as arguments, and its neighbourhood instance is always the
+filtering one. This is why `minDegree_eq` needed the `let` above.
+
 # Computations with Mycielskians
 
-Recall the iterated Mycielskian graphs (see
-[Mycielskian](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-mycielskian)).
-In order to do computations with these graphs we need to provide computable instances
-of `Fintype` for their vertices and `DecidableRel` for adjacency. We do this first
-for the Mycielskian of a graph and then for the iterated Mycielskian.
+Recall the iterated Mycielskian graphs (`iterMycielskian`). In order to do
+computations with these graphs we need to provide computable instances of `Fintype`
+for their vertices and `DecidableRel` for adjacency. We do this first for the
+Mycielskian of a graph and then for the iterated Mycielskian.
 -/
 
 variable {V : Type*} {G : SimpleGraph V}
@@ -2105,47 +2040,41 @@ variable {V : Type*} {G : SimpleGraph V}
                     --     | some (Sum.inr v), none => True
                     --     | _, _ => False
 
-/-!
-The Mycielskian of a graph with decidable adjacency also has decidable adjacency.
--/
+/--
+The Mycielskian of a graph with decidable adjacency also has decidable adjacency. -/
 instance [DecidableRel G.Adj] : DecidableRel mμ[G].Adj :=
   fun x y => by
     rcases x with _ | (_ | _) <;> rcases y with _ | (_ | _)
        <;> unfold mycielskian <;> infer_instance
 
-#source MycielskianVert -- notation:  `mμᵥ^n V`
-/-!
-The vertex type of the `n`-th iterated Mycielskian of a graph with decidable vertex
-equality also has decidable vertex equality.
--/
+#source MycielskianVert -- notation: `mμᵥ^n V`
+
+/-- The vertex type of the `n`-th iterated Mycielskian of a graph with decidable
+vertex equality also has decidable vertex equality. -/
 instance (n : ℕ) [DecidableEq V] : DecidableEq (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
-/-!
-The vertex type of the `n`-th iterated Mycielskian of a graph with finitely many
-vertices also has finitely many vertices.
--/
+/-- The vertex type of the `n`-th iterated Mycielskian of a graph with finitely many
+vertices also has finitely many vertices. -/
 instance (n : ℕ) [Fintype V] : Fintype (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
 #source iterMycielskian -- notation: `mμ^n G`
 
-/-!
-If `G` has decidable adjacency then so does the `n`-th iterated Mycielskian of `G`.
--/
+/-- If `G` has decidable adjacency then so does the `n`-th iterated Mycielskian of
+`G`. -/
 instance (n : ℕ) [DecidableRel G.Adj] : DecidableRel (mμ^n G).Adj := by
   induction n <;> unfold iterMycielskian <;> infer_instance
 
 /-!
 These instances combine with those from earlier in the chapter. For example, Lean can
 find a `Fintype` instance for the edge set of the 4th iterated Mycielskian of
-`C[5][2]`, the 2-uniform blow-up of `C[5]` (see
-[Blow-ups](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-blow-ups)).
+`C[5][2]`, the `2`-uniform blow-up of `C[5]` (see `blowUpN`).
 -/
-#synth Fintype (mμ^4 (C[5][2])).edgeSet -- (C[5][2].iterMycielskian 4).fintypeEdgeSet
+#synth Fintype (mμ^4 (C[5][2])).edgeSet -- (mμ^4 C[5][2]).fintypeEdgeSet
 
 /-!
-The 6th iterated Mycielskian of `C[5]` has 383 vertices and 7271 edges, it has
+The 6th iterated Mycielskian of `C[5]` has 383 vertices and 7271 edges; it has
 minimum degree 8 and maximum degree 191.
 -/
 #eval Fintype.card (mμᵥ^6 (Fin 5)) -- 383
@@ -2164,11 +2093,8 @@ adjacency so we can reason about it in proofs using `decide`.
 example : grotzschGraph.Adj 2 ₗ 3 ᵣ := by
   decide
 
-example : (mμ^7 C[5]).Adj (0 : Fin 5)ₗₗᵣᵣᵣₗₗ (1 : Fin 5)ᵣᵣₗₗₗᵣₗ := by
-  decide
-
-#eval (mμ^7 C[5]).degree (0 : Fin 5)ᵣₗᵣₗᵣₗᵣ -- 31
-#eval (mμ^7 C[5]).degree none ₗₗᵣ -- 189
+example : (mμ^7 C[5]).Adj (0 : Fin 5)ₗₗᵣᵣᵣₗₗ (1 : Fin 5)ᵣᵣₗₗₗᵣₗ := by decide
+#eval (mμ^10 C[5]).degree none ᵣₗᵣₗᵣₗᵣ -- 199
 
 /-!
 ## Mycielskian Degrees
@@ -2189,12 +2115,9 @@ The statement below mentions `G.degree v` and `mμ[G].degree v ₗ`, so, followi
 rule from
 [Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond),
 it takes the `Fintype` instances for these two neighbourhoods as arguments. It needs
-nothing else; in particular it holds whether or not `V` is finite. This matters even
-for finite graphs. For the Mycielskian of `Q[n]`, for example, Lean computes
-`Q[n].degree` using the efficient instance `hypercubeFintypeNeighborSet`, and a
-statement that derived its instances from `[Fintype V]` and `[DecidableRel G.Adj]`
-would not apply. The proof begins with the `classical` tactic, which supplies the
-`DecidableEq V` needed to form the images and the union of finsets below.
+nothing else; in particular it holds whether or not `V` is finite. The proof begins
+with the `classical` tactic, which supplies the `DecidableEq V` needed to form the
+images and the union of finsets below.
 -/
 open Finset in
 @[simp]
@@ -2218,7 +2141,7 @@ left as an exercise.)
 @[simp]
 lemma card_mycielskianVert_one [Fintype V] :
     Fintype.card (Option (V ⊕ V)) = 2 * Fintype.card V + 1 := by
-  rw [Fintype.card_option, Fintype.card_sum, two_mul]
+  simp [two_mul]
 
 /-!
 We can list the edges of the Mycielskian of `C[5]` as follows but the output isn't
@@ -2227,17 +2150,18 @@ very readable.
 #eval (mμ[C[5]]).edgeFinset -- {s(none, some (Sum.inr 0)),...
 
 /-!
-The obvious solution is to provide a custom `Repr` instance for the vertices of the
-Mycielskian. We make it a `scoped instance`: it is active inside `namespace
-SimpleGraph` (and wherever `SimpleGraph` is opened), so later chapters print
-Mycielskian vertices this way, but other code using `Option (α ⊕ α)` is unaffected.
+The solution is to provide a custom `Repr` instance for the vertices of the
+Mycielskian. We make it a `scoped instance`: it is active inside
+`namespace SimpleGraph` (and wherever `SimpleGraph` is opened), so later chapters
+print Mycielskian vertices this way, but other code using `Option (α ⊕ α)` is
+unaffected.
 -/
 scoped instance {V : Type*} [Repr V] :
     Repr (Option (V ⊕ V)) where
   reprPrec x _ := match x with
-    | none             => "∗"
-    | some (Sum.inl v) => repr v ++ "ₗ"
-    | some (Sum.inr v) => repr v ++ "ᵣ"
+    | none => "∗"
+    | v ₗ => repr v ++ "ₗ"
+    | v ᵣ => repr v ++ "ᵣ"
 
 #eval (mμ[C[5]]).edgeFinset -- {s(∗, 0ᵣ), s(∗, 1ᵣ),..., s(4ₗ, 3ᵣ)}
 
@@ -2261,19 +2185,19 @@ We start with the `Finset.univ` of all vertices of a `SimpleGraph V` and then ta
 its underlying `Multiset` (`univ.val`) and map it to the `Multiset` of degrees. We
 will call this the `degreeMultiset` of the graph. (In
 [The Laplacian](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-laplacian)
-we meet the *degree matrix*, the diagonal matrix whose entries, and hence whose
-eigenvalues, are these degrees.)
+we meet the *degree matrix*, the diagonal matrix whose entries are these degrees.)
 -/
-/-- The multiset of degrees of a finite graph -/
+/-- The multiset of degrees of a finite graph. -/
 def degreeMultiset [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
     Multiset ℕ := Finset.univ.val.map (G.degree ·)
 
 /-!
 The *degree sequence* is then the sorted non-increasing list of degrees of the
-vertices (of a finite graph) as a `List ℕ`.
+vertices of a finite graph as a `List ℕ`.
 -/
 #check Multiset.sort -- returns a `List`
-/-- The degree sequence of a finite graph, sorted in non-increasing order -/
+
+/-- The degree sequence of a finite graph, sorted in non-increasing order. -/
 def degreeSequence [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
     List ℕ := G.degreeMultiset.sort (· ≥ ·)
 
@@ -2298,12 +2222,13 @@ graph.
 Since `G.degreeMultiset` requires `Fintype V` and `DecidableRel G.Adj` instances, we
 will quantify over an arbitrary finite vertex type `V : Type` and carry the `Fintype`
 and `DecidableRel` instances as existential witnesses that `degreeMultiset`
-requires. (Every finite type is equivalent to a type in `Type ≡ Type 0` (indeed
-to `Fin n` for some `n`), and a graph carries over along such an equivalence, so
-restricting to `Type` here loses no generality.)
+requires. (Every finite type, in any universe, is equivalent to a type in `Type`
+(indeed to `Fin n` for some `n`), and transporting a graph along such an equivalence
+leaves its degree multiset unchanged, so restricting to `Type` here loses no
+generality.)
 -/
 /-- A multiset of degrees is *graphic* if it is the degree multiset of some finite
-simple graph -/
+simple graph. -/
 def Graphic (m : Multiset ℕ) : Prop :=
   ∃ (V : Type) (_ : Fintype V) (G : SimpleGraph V) (_ : DecidableRel G.Adj),
     m = G.degreeMultiset
@@ -2330,13 +2255,12 @@ theorem graphic_degreeMultiset {V : Type} [Fintype V] (G : SimpleGraph V)
   ⟨V, inferInstance, G, inferInstance, rfl⟩
 
 /-!
-Since a `Multiset` is just a `List` with its order forgotten, (i.e. quotiented by the
-permutation relation) there is a natural coercion from `List` to `Multiset`.
+Since a `Multiset` is just a `List` with its order forgotten (i.e. quotiented by the
+permutation relation), there is a natural coercion from `List` to `Multiset`.
 -/
 #synth Coe (List ℕ) (Multiset ℕ) -- Multiset.instCoeList
-/-!
-So we can also say that every finite simple graph has a graphic degree sequence.
--/
+
+/-- Every finite simple graph has a graphic degree sequence. -/
 theorem graphic_degreeSequence {V : Type} [Fintype V] (G : SimpleGraph V)
     [DecidableRel G.Adj] : Graphic (G.degreeSequence) :=
   ⟨V, inferInstance, G, inferInstance, by simp [degreeSequence]⟩
@@ -2346,9 +2270,8 @@ The multiset consisting of `n` copies of `k` is defined by `Multiset.replicate n
 -/
 #check Multiset.replicate -- Multiset.replicate (n : ℕ) (a : α) : Multiset α
 #eval Multiset.replicate 5 3 -- {3, 3, 3, 3, 3}
-/-!
-The empty graph of order `n` has the all-zeros degree multiset.
--/
+
+/-- The empty graph on `Fin n` has the all-zeros degree multiset. -/
 theorem degreeMultiset_bot (n : ℕ) :
     E[n].degreeMultiset = Multiset.replicate n 0 := by
   simp [degreeMultiset]
@@ -2367,20 +2290,21 @@ theorem graphic_zero : Graphic 0 := graphic_zeros 0
 ## The Erdős–Gallai Theorem
 
 There are two major results in graph theory that characterize graphic sequences. One
-is the *Erdős–Gallai* theorem: given a non-increasing sequence `[d₁, d₂, …, dₙ]`
-this says that the sequence is graphic iff its sum is even and for each `1 ≤ k ≤ n`
-we have
+is the *Erdős–Gallai* theorem: given a non-increasing sequence `[d₁, d₂, …, dₙ]` this
+says that the sequence is graphic iff its sum is even and for each `1 ≤ k ≤ n` we
+have
 `(d₁ + d₂ + … + dₖ) ≤ k * (k - 1) + (min(k, dₖ₊₁) + min(k, dₖ₊₂) + … + min(k, dₙ))`.
 
 The necessity of this is easy informally: suppose we have a graph with this degree
-sequence and `degree(vᵢ) = dᵢ`. Summing the first `k` terms we count the edges in the
+sequence and `deg(vᵢ) = dᵢ`. Summing the first `k` terms we count the edges in the
 subgraph induced by `sₖ = {v₁, …, vₖ}` twice and the edges in the bipartite graph
 between `sₖ` and its complement once. No subgraph has more edges than a clique, so
 the induced subgraph on `sₖ` has at most `k * (k - 1) / 2` edges and hence
 contributes at most `k * (k - 1)` to the sum, while the number of edges in the
-bipartite graph can be bounded above by
-considering how many edges each vertex `vₖ₊ᵢ` sends to `sₖ`, which is clearly at most
-`min(k, dₖ₊ᵢ)`.
+bipartite graph can be bounded above by considering how many edges each vertex `vₖ₊ᵢ`
+sends to `sₖ`, which is clearly at most `min(k, dₖ₊ᵢ)`.
+
+[Figure: The case $k = 3$ for degrees $(4, 4, 4, 4, 2, 2)$. The sum $d_1 + d_2 + d_3 = 12$ counts each edge inside $s_3$ (blue) twice and each edge leaving $s_3$ (orange) once, and is at most $3 \cdot 2 + \min(3, 4) + \min(3, 2) + \min(3, 2) = 13$](https://jt496.github.io/GraphTheoryInLean/figures/erdosGallai.svg)
 
 We can use `List.take` and `List.drop` to express this predicate in Lean. The
 `List.take k` function takes the first `k` elements of a list (or the whole list if
@@ -2390,7 +2314,7 @@ list (or returns the empty list if it has less than `k` elements).
 #check List.take
 #check List.drop
 
-/-- The predicate `erdosGallaiLE m k` is true if the `k`th Erdős–Gallai inequality
+/-- The predicate `erdosGallaiLE m k` is true if the `k`-th Erdős–Gallai inequality
 holds for `m : Multiset ℕ` and `k : ℕ`. -/
 abbrev erdosGallaiLE (m : Multiset ℕ) (k : ℕ) : Prop :=
     ((m.sort (· ≥ ·)).take k).sum ≤
@@ -2406,8 +2330,8 @@ theorem erdos_gallai (m : Multiset ℕ) :
 /-!
 The Erdős–Gallai conditions are easy to check by computer, so (modulo its proof) the
 theorem gives an efficient decision procedure for graphic sequences. It is a
-beautiful and very useful result, but it doesn't actually give us a construction of
-a graph from a given graphic sequence.
+beautiful and very useful result, but it doesn't actually give us a construction of a
+graph from a given graphic sequence.
 
 ## The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences
 
@@ -2429,14 +2353,13 @@ from scratch we can *merge*: the `d` decremented entries are still in non-increa
 order (subtracting `1` preserves the order, and since each was at least `1` no entry
 is truncated at `0`), and so are the remaining entries, being a suffix of a sorted
 list. Merging two sorted lists with `List.merge` takes linear time and gives exactly
-the list that sorting would.
+the same list that sorting would have produced.
 
 The check that none of the first `d` entries is zero matters even more in Lean than
 on paper. Subtraction on `ℕ` is truncated, so `0 - 1 = 0`, and without the check
 `[1, 0]` would reduce to `[0]` and then to `[]`, and so be accepted, although no
 graph has one vertex of degree `1` and one of degree `0`.
 -/
-
 /-- *Havel–Hakimi*, assuming the input list is sorted in non-increasing order. -/
 def havelHakimiAux : List ℕ → Bool
   | [] => true -- the empty graph on no vertices
@@ -2449,8 +2372,9 @@ def havelHakimiAux : List ℕ → Bool
     else
       false
   -- The recursive call is not on a sub-list of the input, so Lean cannot see for
-  -- itself that `havelHakimiAux` terminates. `termination_by` tells it to check that
-  -- the length of the list decreases at each call, and `decreasing_by` proves this.
+  -- itself that `havelHakimiAux` terminates.
+  -- `termination_by` tells it to check that the length of the list decreases
+  --  at each call, and `decreasing_by` proves this.
 termination_by l => l.length
 decreasing_by
   grind [List.length_merge]
@@ -2473,11 +2397,12 @@ theorem havel_hakimi (m : Multiset ℕ) : havelHakimi m ↔ Graphic m := by
 
 /-!
 Modulo a proof of the Havel–Hakimi theorem, we have an efficient decision procedure.
-We make it a `local instance`, so that an instance resting on a `sorry` is not
-available outside this chapter.
+We make it a `local instance`, so that an instance based on a `sorry` is not
+available outside of this chapter.
 -/
 local instance : DecidablePred Graphic := fun m =>
   decidable_of_iff _ (havel_hakimi m)
+
 /-!
 Since this instance relies on the `sorry` in the proof of `havel_hakimi`, `#eval`
 will refuse to evaluate it, but we can still use it with `#eval!`, and the answers it
@@ -2486,30 +2411,31 @@ gives are still meaningful. As we saw in
 the verdict of `decidable_of_iff` comes entirely from the `Decidable` instance for
 its left-hand side, here `havelHakimi m = true`; the proof of the `Iff` is used only
 to build the accompanying proof terms, and compiled code erases those. So `#eval!`
-genuinely runs `havelHakimi`. What the `sorry` leaves unverified is only the claim
+genuinely runs `havelHakimi`. What the `sorry` leaves unverified is *only* the claim
 that its verdict agrees with `Graphic`.
 -/
 #eval! Graphic (mμ^3 C[5]).degreeMultiset -- true
 #eval! Graphic [6, 5, 4, 3, 2, 1, 1] -- false
 
 /-!
-As with the Erdős–Gallai theorem we won't attempt a proof, but one of the
-crucial ingredients is the following `coneGraph` construction. Given
-`H : SimpleGraph V` and `s : Set V` this is the graph formed by adding a new vertex
-adjacent to exactly the vertices in `s`. We build this on the vertex type `Option V`
-in the obvious way.
+As with the Erdős–Gallai theorem we won't attempt a proof, but one of the crucial
+ingredients is the following `coneGraph` construction. Given `H : SimpleGraph V` and
+`s : Set V` this is the graph formed by adding a new vertex adjacent to exactly the
+vertices in `s`. We build this on the vertex type `Option V` in the obvious way.
 
-The cone graph appears naturally in the proof of the Havel–Hakimi theorem. We need
-to show that a sequence `[d₁, d₂, …, dₙ]` is graphic iff the sequence
-`[d₂ - 1, …, dₖ₊₁ - 1, dₖ₊₂, …, dₙ]` is graphic where `k = d₁`. The reverse
-direction is easy: if the second sequence is graphic and it is realized by the graph
-`H`, and `s` is the set of `d₁` vertices of `H` with degrees `d₂ - 1`, ...,
-`dₖ₊₁ - 1` then `coneGraph H s` is a graph that realizes the original degree
-sequence.
+The cone graph appears naturally in the proof of the Havel–Hakimi theorem. We need to
+show that a sequence `[d₁, d₂, …, dₙ]` is graphic iff the sequence
+`[d₂ - 1, …, dₖ₊₁ - 1, dₖ₊₂, …, dₙ]` is graphic where `k = d₁`. The reverse direction
+is easy: if the second sequence is graphic and it is realized by the graph `H`, and
+`s` is the set of `d₁` vertices of `H` with degrees `d₂ - 1`, ..., `dₖ₊₁ - 1` then
+`coneGraph H s` is a graph that realizes the original degree sequence.
+
+[Figure: The sequence $(3, 3, 2, 2, 2)$ reduces to $(2, 2, 1, 1)$, which the path $H$ realizes. `coneGraph H s` joins the new vertex `none` to the $d_1 = 3$ vertices of $s$ (orange edges). The numbers are the degrees in $H$ and then in `coneGraph H s`, which realizes $(3, 3, 2, 2, 2)$](https://jt496.github.io/GraphTheoryInLean/figures/coneGraph.svg)
 -/
 
-/-- `coneGraph H s` adjoins a new vertex `none` to `H`, adjacent to precisely the
-vertices in `s`. -/
+/-- `coneGraph H s` adds a new vertex `none` to `H`, adjacent to precisely the
+vertices in the set `s`. -/
+@[simps]
 def coneGraph (H : SimpleGraph V) (s : Set V) : SimpleGraph (Option V) where
   Adj x y := match x, y with
     | none, some w => w ∈ s
@@ -2518,18 +2444,6 @@ def coneGraph (H : SimpleGraph V) (s : Set V) : SimpleGraph (Option V) where
     | none, none => False
   symm := ⟨by rintro (_ | a) (_ | b) h <;> simp_all [SimpleGraph.adj_comm]⟩
   loopless := ⟨by rintro (_ | a) h <;> simp_all⟩
-
-@[simp]
-theorem coneGraph_adj_none_some (H : SimpleGraph V) (s : Set V) (w : V) :
-    (coneGraph H s).Adj none (some w) ↔ w ∈ s := Iff.rfl
-
-@[simp]
-theorem coneGraph_adj_some_none (H : SimpleGraph V) (s : Set V) (w : V) :
-    (coneGraph H s).Adj (some w) none ↔ w ∈ s := Iff.rfl
-
-@[simp]
-theorem coneGraph_adj_some_some (H : SimpleGraph V) (s : Set V) (a b : V) :
-    (coneGraph H s).Adj (some a) (some b) ↔ H.Adj a b := Iff.rfl
 
 /-!
 If membership of the set `s` is decidable then the cone graph has a decidable
@@ -2543,7 +2457,7 @@ instance (H : SimpleGraph V) (s : Set V) [DecidablePred (· ∈ s)]
 If the set `s` is finite then the new vertex has degree `s.card`.
 -/
 @[simp]
-theorem coneGraph_degree_none (H : SimpleGraph V) (s : Finset V)
+theorem degree_coneGraph_none (H : SimpleGraph V) (s : Finset V)
     [Fintype ((coneGraph H s).neighborSet none)] :
     (coneGraph H s).degree none = s.card := by
   have h : (coneGraph H s).neighborFinset none = s.map Function.Embedding.some := by
@@ -2551,9 +2465,6 @@ theorem coneGraph_degree_none (H : SimpleGraph V) (s : Finset V)
   rw [← card_neighborFinset_eq_degree, h, Finset.card_map]
 
 /-!
-The degrees of the old vertices, and the whole `degreeMultiset` of the cone, are left
-to the exercises.
-
 This is still a long way from the proof of Havel–Hakimi but we have at least one
 crucial ingredient!
 
@@ -2580,7 +2491,7 @@ def havelHakimiEdges : List (ℕ × ℕ) → Option (List (ℕ × ℕ))
   | (d, v) :: tail =>  -- vertex `v` has degree `d` (possibly `0`)
     let s := tail.take d
     if (s.length == d) && s.all (·.1 != 0) then
-      -- This is the `coneGraph` reverse direction above made constructive.
+      -- This is the `coneGraph` reverse direction above.
       let next := (s.map (fun (p : ℕ × ℕ) => (p.1 - 1, p.2))).merge (tail.drop d)
                     (fun a b => a.1 ≥ b.1)
       -- Recurse to realize the sequence `next` by a graph `H` with edge list `E`
@@ -2589,13 +2500,13 @@ def havelHakimiEdges : List (ℕ × ℕ) → Option (List (ℕ × ℕ))
         -- The edges `coneGraph H s` adds are `v` joined to each vertex of `s`.
         let new := s.map fun (p : ℕ × ℕ) => (v, p.2)
         some (new ++ E)
-      | none => none -- `next` was not graphic, so neither is the original sequence
+      | none => none -- `next` is not graphic, so neither is the original sequence
     else none
 termination_by l => l.length
 decreasing_by
   grind [List.length_merge]
 
-#eval havelHakimiEdges [(5, 0), (4, 1), (4, 2), (4, 3), (4, 4), (3, 5), (2, 6)]
+#eval havelHakimiEdges <| [5, 4, 4, 4, 4, 3, 2].zip (.range 7)
     -- some [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1, 2), (1, 3), (1, 4),
     --       (2, 3), (2, 4), (5, 6), (5, 3), (6, 4)]
 /-!
@@ -2608,8 +2519,12 @@ decidable, provided the graph is an `abbrev`, so we can compute its degree seque
 abbrev graphOfEdgeList (n : ℕ) (E : List (ℕ × ℕ)) : SimpleGraph (Fin n) :=
   SimpleGraph.fromRel fun v w => (v.val, w.val) ∈ E
 
-#eval (havelHakimiEdges [(5, 0), (4, 1), (4, 2), (4, 3), (4, 4), (3, 5), (2, 6)]).map
+#eval (havelHakimiEdges <| [5, 4, 4, 4, 4, 3, 2].zip (.range 7)).map
   fun E => (graphOfEdgeList 7 E).degreeSequence -- some [5, 4, 4, 4, 4, 3, 2]
+
+#eval (havelHakimiEdges <| [6, 5, 4, 3, 2, 1, 1].zip (.range 7)).map
+  fun E => (graphOfEdgeList 7 E).degreeMultiset -- none
+
 /-!
 If we give the `havelHakimiEdges` function a graphic degree sequence for a particular
 graph there is absolutely no reason it should return the edges of the same graph (or
@@ -2620,7 +2535,7 @@ disjoint copies of `C[3]`, i.e. `C[3] ⊕g C[3]`.
 -/
 #eval C[6].degreeSequence -- [2, 2, 2, 2, 2, 2]
 #eval havelHakimiEdges                              -- some [(0, 1), (0, 2), (3, 4),
-          <| C[6].degreeSequence.zip (List.range 6) --       (3, 5), (4, 5), (1, 2)]
+          <| C[6].degreeSequence.zip (.range 6) --       (3, 5), (4, 5), (1, 2)]
 
 #eval (C[3] ⊕g C[3]).degreeSequence = C[6].degreeSequence -- true
 

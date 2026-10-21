@@ -70,13 +70,17 @@ example (h : G.IsTree) : Subsingleton G.ConnectedComponent := by
 
 /-!
 9. Show that a finite tree has at least as many leaves (vertices of degree one) as
-the degree of any of its vertices. Hint: every vertex `u ≠ v` has degree at least
-one, so `degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over
-all vertices and compare with the Handshaking Lemma
-(`sum_degrees_eq_twice_card_edges`) and `IsTree.card_edgeFinset`.
+the degree of any of its vertices.
+
+Hint: every vertex `u ≠ v` has degree at least one
+(`Preconnected.degree_pos_of_nontrivial`), so
+`degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
+vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
+form `sum_degrees_eq_twice_card_edges'` from
+[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
 -/
 open Finset in
-lemma IsTree.degree_le_card_leaves' [Fintype V] [DecidableRel G.Adj] (h : G.IsTree)
+lemma IsTree.degree_le_card_leaves' [Fintype V] [G.LocallyFinite] (h : G.IsTree)
     (v : V) : G.degree v ≤ #{u | G.degree u = 1} := by
   sorry
 
@@ -103,20 +107,9 @@ example [G.LocallyFinite] (hT : G.IsTree) {v : V}
   sorry
 
 /-!
-12. Strengthen `Walk.exists_odd_isCycle`: a closed walk of odd length `k` contains a
-cycle of odd length at most `k`. Hint: first strengthen
-`Walk.exists_isPath_or_odd_isCycle` so that the path and the cycle it produces are
-no longer than the original walk, then follow the proof of `Walk.exists_odd_isCycle`.
--/
-theorem Walk.exists_odd_isCycle_length_le' {u : V} (w : G.Walk u u)
-    (hw : Odd w.length) :
-    ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length ∧ c.length ≤ w.length := by
-  sorry
-
-/-!
-13. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that
-the complete graph on an odd number of vertices has an Eulerian circuit, and so does
-the hypercube `Q[2 * n + 2]`.
+12. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that the
+complete graph `K[2 * n + 3]` has an Eulerian circuit, and so does the hypercube
+`Q[2 * n + 2]`.
 -/
 example (n : ℕ) : ∃ u, ∃ p : K[2 * n + 3].Walk u u, p.IsEulerian := by
   sorry
@@ -125,16 +118,7 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian := by
   sorry
 
 /-!
-14. Show that the hypercube `Q[n + 2]` has no bridges. Hint: `Q[n + 2]` is
-`2`-edge-connected by `hypercube_isEdgeConnected` and `IsEdgeConnected.anti`; now use
-`isBridge_iff_not_isEdgeReachable_two`.
--/
-example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
-    ¬ Q[n + 2].IsBridge s(u, v) := by
-  sorry
-
-/-!
-15. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
+13. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
 `IsVertexConnected.le_degree` and `le_minDegree_of_forall_le_degree`.
 -/
 lemma IsVertexConnected.le_minDegree' {k : ℕ} [Fintype V] [Nonempty V]
@@ -142,7 +126,103 @@ lemma IsVertexConnected.le_minDegree' {k : ℕ} [Fintype V] [Nonempty V]
   sorry
 
 /-!
-16. Show that the edge connectivity of a finite graph with at least two vertices is
+14. Exercises 14–16 show that if `G` is connected and `k`-vertex-connected then
+`G □ K₂` is `(k + 1)`-vertex-connected, and deduce that the hypercube `Q[n]` is
+`n`-vertex-connected.
+
+For a finset `S` of vertices of `G □ K₂` and `b : Bool`, let `S.fiberProj b` be the
+finset of vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at `b` lies in
+`S`.
+-/
+/-- The vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at `b` of `G □ K₂`
+lies in `S`. -/
+noncomputable def _root_.Finset.fiberProj (S : Finset (V × Bool)) (b : Bool) :
+    Finset V :=
+  S.preimage (·, b) (Prod.mk_left_injective b).injOn
+
+@[simp] lemma _root_.Finset.mem_fiberProj {S : Finset (V × Bool)} {b : Bool}
+    {z : V} :
+    z ∈ S.fiberProj b ↔ (z, b) ∈ S := Finset.mem_preimage
+
+/-!
+Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre contains
+less than `k` vertices of `S`.
+
+Hint: the sizes of `S.fiberProj false` and `S.fiberProj true` add up to the size of
+`S`; use `Finset.card_preimage` and `Finset.card_filter_add_card_filter_not`.
+-/
+lemma _root_.Finset.exists_fiberProj_card_lt' {k : ℕ} {S : Finset (V × Bool)}
+    (hS : S.card ≤ k) (hk : 0 < k) : ∃ b, (S.fiberProj b).card < k := by
+  sorry
+
+/-!
+15. Let `G` be `k`-vertex-connected and let `S` be a finset of at most `k` vertices
+of `G □ K₂`. Show that from any vertex `(z, c)` not in `S` there is a walk into the
+`G`-fibre at `b` that avoids `S`.
+
+Hint: if `c ≠ b` and `(z, b) ∈ S`, find a neighbour `w` of `z` such that neither
+`(w, false)` nor `(w, true)` lies in `S`: `z` has at least `k` neighbours by
+`IsVertexConnected.le_encard_neighborSet`, but less than `k` elements of `S` have a
+first coordinate other than `z`. Then step to `(w, c)` and cross to `(w, b)`.
+-/
+lemma IsVertexConnected.exists_walk_to_fiber' {k : ℕ} (hG : G.IsVertexConnected k)
+    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {c : Bool} (hzc : (z, c) ∉ S)
+    (b : Bool) :
+    ∃ (z' : V) (p : (G □ (⊤ : SimpleGraph Bool)).Walk (z, c) (z', b)),
+      ∀ x ∈ p.support, x ∉ S := by
+  sorry
+
+/-!
+16. Mathlib's `Walk.boxProdLeft` copies a walk of `G` into the `G`-fibre at `b` of
+`G □ H`. It is defined as a `Walk.map`, but its type records the endpoints as
+`(u, b)` and `(v, b)`, whereas the endpoints of the `Walk.map` walk only reduce to
+these after unfolding `boxProdLeft`. We record the support of the copy as a `simp`
+lemma.
+-/
+@[simp] lemma Walk.support_boxProdLeft {β : Type*} (H : SimpleGraph β) (b : β)
+    {u v : V} (p : G.Walk u v) :
+    (p.boxProdLeft H b).support = p.support.map (·, b) :=
+  Walk.support_map _ _
+
+/-!
+Show that if `G` is connected and `k`-vertex-connected then `G □ K₂` is
+`(k + 1)`-vertex-connected, and deduce that the hypercube `Q[n]` is
+`n`-vertex-connected. (For `k ≥ 1` connectedness follows from
+`k`-vertex-connectivity, but two isolated vertices form a `0`-vertex-connected graph
+`G` for which `G □ K₂` is disconnected.)
+
+Hint: `G □ K₂` has twice as many vertices as `G`, and by
+`IsVertexConnected.of_finset` it is enough to avoid finsets `S`. If `k = 0` then `S`
+is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, given vertices
+`(u, c)` and `(v, d)` not in `S`, pick `b` such that the `G`-fibre at `b` contains
+less than `k` vertices of `S` (Exercise 14), walk from both vertices into the
+`G`-fibre at `b` avoiding `S` (Exercise 15), and join the ends of these walks by a
+walk in `G` avoiding `S.fiberProj b`, copied into the `G`-fibre at `b` with
+`Walk.boxProdLeft`.
+-/
+lemma IsVertexConnected.boxProd_top_bool' {k : ℕ} (hG : G.IsVertexConnected k)
+    (hG_conn : G.Connected) :
+    (G □ (⊤ : SimpleGraph Bool)).IsVertexConnected (k + 1) := by
+  sorry
+
+lemma hypercube_isVertexConnected' {n : ℕ} : Q[n].IsVertexConnected n := by
+  sorry
+
+/-!
+17. Deduce that the hypercube `Q[n]` is `n`-edge-connected, and that `Q[n + 2]` has
+no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
+`Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
+`isBridge_iff_not_isEdgeReachable_two`.
+-/
+lemma hypercube_isEdgeConnected' {n : ℕ} : Q[n].IsEdgeConnected n := by
+  sorry
+
+example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
+    ¬ Q[n + 2].IsBridge s(u, v) := by
+  sorry
+
+/-!
+18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
 this gives Whitney's inequalities `κ(G) ≤ λ(G) ≤ δ(G)`. Hint:
 `exists_minimal_degree_vertex` and `edgeConnectivity_le_degree`.
@@ -152,7 +232,7 @@ lemma edgeConnectivity_le_minDegree' [Fintype V] [Nontrivial V]
   sorry
 
 /-!
-17. The *bowtie* consists of two triangles `0, 1, 2` and `0, 3, 4` sharing the vertex
+19. The *bowtie* consists of two triangles `0, 1, 2` and `0, 3, 4` sharing the vertex
 `0`. Instance search does not unfold the definition of `bowtie`, so we supply its
 `DecidableRel` instance by hand; this lets `decide` check properties of the bowtie.
 -/
@@ -173,47 +253,71 @@ example : κ(bowtie) < λ(bowtie) := by
   sorry
 
 /-!
-18. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
-the lower bound is `hypercube_isVertexConnected` (via `le_vertexConnectivity_iff`);
-for the upper bound use `vertexConnectivity_le_encard_neighborSet` at any vertex,
-together with `hypercube_isRegularOfDegree`.
+20. The *barbell* consists of two copies of `K[4]`, on `0, 1, 2, 3` and on
+`4, 5, 6, 7`, joined by the edge `3 — 4`. As for the bowtie, we supply its
+`DecidableRel` instance by hand.
 -/
-lemma hypercube_vertexConnectivity' (n : ℕ) : κ(Q[n]) = n := by
+/-- The *barbell*: two copies of `K[4]`, on `0, 1, 2, 3` and `4, 5, 6, 7`, joined by
+the edge `3 — 4`. -/
+def barbell : SimpleGraph (Fin 8) :=
+  fromRel fun i j => (i < 4 ∧ j < 4) ∨ (4 ≤ i ∧ 4 ≤ j) ∨ (i = 3 ∧ j = 4)
+
+instance : DecidableRel barbell.Adj := inferInstanceAs (DecidableRel (fromRel _).Adj)
+
+/-!
+Show that `λ(barbell) < δ(barbell)`, so the second of Whitney's inequalities can also
+be strict. Hint: the barbell is not `2`-edge-connected, by `isEdgeConnected_two` with
+`e = s(3, 4)` and `decide`. Every vertex has degree at least `3`, by
+`le_minDegree_of_forall_le_degree` and `decide`.
+-/
+example : λ(barbell) < δ(barbell) := by
   sorry
 
 /-!
-19. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
+21. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
+the lower bound is Exercise 16 (via `le_vertexConnectivity_iff`);
+for the upper bound use `vertexConnectivity_le_encard_neighborSet` at any vertex,
+together with `hypercube_isRegularOfDegree`.
+-/
+lemma vertexConnectivity_hypercube' (n : ℕ) : κ(Q[n]) = n := by
+  sorry
+
+/-!
+22. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
 connectivity of `Q[0]` is `⊤`. Hint: use `vertexConnectivity_le_edgeConnectivity` and
 `edgeConnectivity_le_degree`, which needs a `Nontrivial (HypercubeVert (n + 1))`
 instance, and `edgeConnectivity_of_subsingleton`. Instance search deliberately does
 not see through `HypercubeVert`, so you will have to supply these instances yourself,
 for example with `inferInstanceAs (Nontrivial (HypercubeVert n × Bool))`.
 -/
-lemma hypercube_edgeConnectivity' (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
+lemma edgeConnectivity_hypercube_succ' (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
   sorry
 
-lemma hypercube_zero_edgeConnectivity' : λ(Q[0]) = ⊤ := by
+lemma edgeConnectivity_hypercube_zero' : λ(Q[0]) = ⊤ := by
   sorry
 
 /-!
-20. Show that in a forest the block of an edge `e` consists of the single edge `e`.
-Hint: show that block-equivalent edges of a forest are equal, by induction on
-`BlockEquivalent`.
+23. Show that in a forest the block of an edge `u — v` is `G.subgraphOfAdj h`, the
+subgraph consisting of that edge and its two endpoints. Hint: show that
+block-equivalent edges of a forest are equal, by induction on `BlockEquivalent`, and
+use `blockMk_eq_blockMk_iff`.
 -/
-lemma IsAcyclic.blockOf_eq' (hG : G.IsAcyclic) (e : Sym2 V) :
-    G.blockOf e = fromEdgeSet {e} := by
+lemma IsAcyclic.toSubgraph_blockMk' (hG : G.IsAcyclic) {u v : V} (h : G.Adj u v) :
+    h.block.toSubgraph = G.subgraphOfAdj h := by
   sorry
 
 /-!
-21. Show that for `n ≥ 1` a graph is `n`-colourable iff each of its blocks is. Hint:
-the forward direction follows from `blockOf_le`. For the reverse direction use the De
-Bruijn–Erdős theorem (`colorable_of_forall_finite_subgraph_colorable`) to reduce to a
-finite subgraph `H`, which is colourable by `colorable_of_forall_block` provided its
-blocks are. Each block of `H` maps into a block of `G` via `blockOfHom` applied to
-`H.hom`.
+24. Show that for `n ≥ 1` a graph is `n`-colourable iff each of its blocks is. Hint:
+the forward direction follows from `Colorable.of_hom` and `Subgraph.hom`. For the
+reverse direction use the De Bruijn–Erdős theorem
+(`colorable_of_forall_finite_subgraph_colorable`) to reduce to a finite subgraph `H`,
+which is colourable by `colorable_of_forall_block` provided its blocks are. Each
+block of `H` maps into a block of `G` along the copy `H.coeCopy`
+(`Block.map_toSubgraph_le`), and `Subgraph.homOfMapLE` turns this into a
+homomorphism.
 -/
 theorem colorable_iff_forall_block' {n : ℕ} (hn : 1 ≤ n) :
-    G.Colorable n ↔ ∀ B : G.Block, B.toGraph.Colorable n := by
+    G.Colorable n ↔ ∀ B : G.Block, B.toSubgraph.coe.Colorable n := by
   sorry
 
 /-! SOLUTIONS -/
@@ -365,18 +469,17 @@ example (h : G.IsTree) : Subsingleton G.ConnectedComponent :=
 
 /-!
 9. Show that a finite tree has at least as many leaves (vertices of degree one) as
-the degree of any of its vertices. Hint: every vertex `u ≠ v` has degree at least
-one, so `degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over
-all vertices and compare with the Handshaking Lemma
-(`sum_degrees_eq_twice_card_edges`) and `IsTree.card_edgeFinset`.
+the degree of any of its vertices.
 
-Note that no lower bound on the number of vertices is needed. (Mathlib has the
-existence of one leaf in a nontrivial tree,
-`IsTree.exists_vert_degree_one_of_nontrivial`, and of two distinct leaves,
-`IsTree.exists_ne_and_degree_eq_one`, but not this count.)
+Hint: every vertex `u ≠ v` has degree at least one
+(`Preconnected.degree_pos_of_nontrivial`), so
+`degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
+vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
+form `sum_degrees_eq_twice_card_edges'` from
+[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
 -/
 open Finset in
-lemma IsTree.degree_le_card_leaves [Fintype V] [DecidableRel G.Adj] (h : G.IsTree)
+lemma IsTree.degree_le_card_leaves [Fintype V] [G.LocallyFinite] (h : G.IsTree)
     (v : V) : G.degree v ≤ #{u | G.degree u = 1} := by
   classical
   -- each vertex `u ≠ v` has degree ≥ 1, so its degree plus leaf indicator is ≥ 2
@@ -384,8 +487,7 @@ lemma IsTree.degree_le_card_leaves [Fintype V] [DecidableRel G.Adj] (h : G.IsTre
       2 ≤ G.degree u + if G.degree u = 1 then 1 else 0 := by
     intro u hu
     have : Nontrivial V := ⟨u, v, ne_of_mem_erase hu⟩
-    have := h.connected.preconnected.minDegree_pos_of_nontrivial
-    have := G.minDegree_le_degree u
+    have := h.connected.preconnected.degree_pos_of_nontrivial u
     split_ifs <;> grind
   have hsum := sum_le_sum hge
   rw [sum_const, card_erase_of_mem (mem_univ v), card_univ, smul_eq_mul] at hsum
@@ -394,7 +496,7 @@ lemma IsTree.degree_le_card_leaves [Fintype V] [DecidableRel G.Adj] (h : G.IsTre
     (fun u => G.degree u + if G.degree u = 1 then 1 else 0) (mem_univ v)
   have htot : ∑ u, (G.degree u + if G.degree u = 1 then 1 else 0)
       = 2 * #G.edgeFinset + #{u | G.degree u = 1} := by
-    rw [sum_add_distrib, G.sum_degrees_eq_twice_card_edges, card_filter]
+    rw [sum_add_distrib, G.sum_degrees_eq_twice_card_edges', card_filter]
   have hcard := h.card_edgeFinset
   grind
 
@@ -422,61 +524,18 @@ example [Finite V] [Nontrivial V] (h : G.Connected) :
 
 /-!
 11. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
+Hint: search Mathlib (see
+[Finding Lemmas](https://jt496.github.io/GraphTheoryInLean/Introduction/#section-finding-lemmas))
+for a lemma about `induce` and a vertex of degree one.
 -/
 example [G.LocallyFinite] (hT : G.IsTree) {v : V}
     (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree :=
   ⟨hT.connected.induce_compl_singleton_of_degree_eq_one hv, hT.isAcyclic.induce _⟩
 
 /-!
-12. Strengthen `Walk.exists_odd_isCycle`: a closed walk of odd length `k` contains a
-cycle of odd length at most `k`. Hint: first strengthen
-`Walk.exists_isPath_or_odd_isCycle` so that the path and the cycle it produces are
-no longer than the original walk, then follow the proof of `Walk.exists_odd_isCycle`.
-
-The proof of `Walk.exists_isPath_or_odd_isCycle` goes through unchanged, carrying the
-length bounds along: at each step the new path or cycle consists of part of the old
-path together with at most one new edge, which is also the one new edge of the walk.
--/
-lemma Walk.exists_isPath_or_odd_isCycle_le {a b : V} (p : G.Walk a b) :
-    (∃ q : G.Walk a b, q.IsPath ∧ (Even q.length ↔ Even p.length) ∧
-        q.length ≤ p.length) ∨
-      ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length ∧
-        c.length ≤ p.length := by
-  classical
-  induction p with
-  | nil => exact .inl ⟨nil, .nil, Iff.rfl, le_rfl⟩
-  | @cons a _ _ h p ih =>
-    rcases ih with ⟨q, hq, hpar, hle⟩ | ⟨v, c, hc, hodd, hle⟩
-    · by_cases ha : a ∈ q.support
-      · have hlen := congrArg length (q.take_spec ha)
-        rw [length_append] at hlen
-        rcases Nat.even_or_odd (q.takeUntil a ha).length with he | ho
-        · exact .inr ⟨a, cons h (q.takeUntil a ha),
-            (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq.takeUntil ha, by grind⟩,
-            by grind [length_cons], by grind [length_cons]⟩
-        · exact .inl ⟨q.dropUntil a ha, hq.dropUntil ha, by grind [length_cons],
-            by grind [length_cons]⟩
-      · exact .inl ⟨cons h q, hq.cons ha, by grind [length_cons],
-          by grind [length_cons]⟩
-    · exact .inr ⟨v, c, hc, hodd, by grind [length_cons]⟩
-
-theorem Walk.exists_odd_isCycle_length_le {u : V} (w : G.Walk u u)
-    (hw : Odd w.length) :
-    ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length ∧ c.length ≤ w.length := by
-  cases w with
-  | nil => simp at hw
-  | cons h p =>
-    rcases p.exists_isPath_or_odd_isCycle_le with
-      ⟨q, hq, hpar, hle⟩ | ⟨v, c, hc, hodd, hle⟩
-    · have hqe : Even q.length := by grind [length_cons]
-      exact ⟨_, cons h q, (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq, by grind⟩,
-        by grind [length_cons], by grind [length_cons]⟩
-    · exact ⟨v, c, hc, hodd, by grind [length_cons]⟩
-
-/-!
-13. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that
-the complete graph on an odd number of vertices has an Eulerian circuit, and so does
-the hypercube `Q[2 * n + 2]`.
+12. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that the
+complete graph `K[2 * n + 3]` has an Eulerian circuit, and so does the hypercube
+`Q[2 * n + 2]`.
 
 Both graphs are connected with all degrees even, so Euler's theorem applies directly.
 -/
@@ -495,17 +554,7 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian :=
     exact ⟨n + 1, by grind⟩
 
 /-!
-14. Show that the hypercube `Q[n + 2]` has no bridges. Hint: `Q[n + 2]` is
-`2`-edge-connected by `hypercube_isEdgeConnected` and `IsEdgeConnected.anti`; now use
-`isBridge_iff_not_isEdgeReachable_two`.
--/
-example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
-    ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
-  (isBridge_iff_not_isEdgeReachable_two h).mp hb
-    ((hypercube_isEdgeConnected (n := n + 2)).anti (by grind) u v)
-
-/-!
-15. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
+13. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
 `IsVertexConnected.le_degree` and `le_minDegree_of_forall_le_degree`.
 -/
 lemma IsVertexConnected.le_minDegree {k : ℕ} [Fintype V] [Nonempty V]
@@ -513,7 +562,137 @@ lemma IsVertexConnected.le_minDegree {k : ℕ} [Fintype V] [Nonempty V]
   G.le_minDegree_of_forall_le_degree k fun v => hG.le_degree v
 
 /-!
-16. Show that the edge connectivity of a finite graph with at least two vertices is
+14. Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre
+contains less than `k` vertices of `S`.
+
+Hint: the sizes of `S.fiberProj false` and `S.fiberProj true` add up to the size of
+`S`; use `Finset.card_preimage` and `Finset.card_filter_add_card_filter_not`.
+
+The two sizes add up to at most `k`, so they cannot both be at least `k > 0`.
+-/
+lemma _root_.Finset.exists_fiberProj_card_lt {k : ℕ} {S : Finset (V × Bool)}
+    (hS : S.card ≤ k) (hk : 0 < k) : ∃ b, (S.fiberProj b).card < k := by
+  classical
+  have hc (b : Bool) : (S.fiberProj b).card = (S.filter (·.2 = b)).card := by
+    rw [Finset.fiberProj, Finset.card_preimage]; congr 1; ext ⟨x, c⟩; simp [eq_comm]
+  have h := Finset.card_filter_add_card_filter_not (s := S) (fun x => x.2 = false)
+  simp only [Bool.not_eq_false, ← hc] at h
+  grind
+
+/-!
+15. Let `G` be `k`-vertex-connected and let `S` be a finset of at most `k` vertices
+of `G □ K₂`. Show that from any vertex `(z, c)` not in `S` there is a walk into the
+`G`-fibre at `b` that avoids `S`.
+
+Hint: if `c ≠ b` and `(z, b) ∈ S`, find a neighbour `w` of `z` such that neither
+`(w, false)` nor `(w, true)` lies in `S`: `z` has at least `k` neighbours by
+`IsVertexConnected.le_encard_neighborSet`, but less than `k` elements of `S` have a
+first coordinate other than `z`. Then step to `(w, c)` and cross to `(w, b)`.
+
+If `c = b` the empty walk works, and if `(z, b) ∉ S` we cross directly. Otherwise
+the counting argument of the hint gives a neighbour `w` of `z` with both copies
+outside `S`, and we step to `(w, c)` and cross to `(w, b)`.
+-/
+private lemma exists_good_neighbor {k : ℕ} (hG : G.IsVertexConnected k)
+    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {b : Bool} (hzb : (z, b) ∈ S) :
+    ∃ w, G.Adj z w ∧ ∀ c, (w, c) ∉ S := by
+  classical
+  by_contra! h
+  have hz : z ∈ S.image Prod.fst := Finset.mem_image_of_mem _ hzb
+  -- every neighbour of `z` is a first coordinate of `S` other than `z`
+  have hsub : G.neighborSet z ⊆ ↑((S.image Prod.fst).erase z) := fun w hw => by
+    obtain ⟨c, hc⟩ := h w hw
+    exact Finset.mem_erase.mpr ⟨hw.ne', Finset.mem_image_of_mem Prod.fst hc⟩
+  have hk := (hG.le_encard_neighborSet z).trans (Set.encard_le_encard hsub)
+  grind [Set.encard_coe_eq_coe_finsetCard, Nat.cast_le, Finset.card_erase_of_mem hz]
+
+lemma IsVertexConnected.exists_walk_to_fiber {k : ℕ} (hG : G.IsVertexConnected k)
+    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {c : Bool} (hzc : (z, c) ∉ S)
+    (b : Bool) :
+    ∃ (z' : V) (p : (G □ (⊤ : SimpleGraph Bool)).Walk (z, c) (z', b)),
+      ∀ x ∈ p.support, x ∉ S := by
+  by_cases hcb : c = b
+  · subst hcb
+    exact ⟨z, .nil, by simp [hzc]⟩
+  have hcross (w : V) : (G □ ⊤).Adj (w, c) (w, b) := boxProd_adj_right.mpr hcb
+  by_cases hzb : (z, b) ∈ S
+  · obtain ⟨w, hzw, hw⟩ := exists_good_neighbor hG hS hzb
+    exact ⟨w, .cons (boxProd_adj_left.mpr hzw) (hcross w).toWalk, by simp [hzc, hw]⟩
+  · exact ⟨z, (hcross z).toWalk, by simp [hzc, hzb]⟩
+
+/-!
+16. Show that if `G` is connected and `k`-vertex-connected then `G □ K₂` is
+`(k + 1)`-vertex-connected, and deduce that the hypercube `Q[n]` is
+`n`-vertex-connected. (For `k ≥ 1` connectedness follows from
+`k`-vertex-connectivity, but two isolated vertices form a `0`-vertex-connected graph
+`G` for which `G □ K₂` is disconnected.)
+
+Hint: `G □ K₂` has twice as many vertices as `G`, and by
+`IsVertexConnected.of_finset` it is enough to avoid finsets `S`. If `k = 0` then `S`
+is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, given vertices
+`(u, c)` and `(v, d)` not in `S`, pick `b` such that the `G`-fibre at `b` contains
+less than `k` vertices of `S` (Exercise 14), walk from both vertices into the
+`G`-fibre at `b` avoiding `S` (Exercise 15), and join the ends of these walks by a
+walk in `G` avoiding `S.fiberProj b`, copied into the `G`-fibre at `b` with
+`Walk.boxProdLeft`.
+
+The walk from `(u, c)` into the `G`-fibre at `b`, the copy of the walk in `G`, and
+the reverse of the walk from `(v, d)` into the `G`-fibre at `b` together form a walk
+from `(u, c)` to `(v, d)`. It avoids `S`, since the copy only visits vertices
+`(z, b)` with `z ∉ S.fiberProj b`. Since `Q[n + 1]` is `Q[n] □ K₂`, the statement
+about the hypercube follows by induction on `n`.
+-/
+lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
+    (hG_conn : G.Connected) :
+    (G □ (⊤ : SimpleGraph Bool)).IsVertexConnected (k + 1) := by
+  refine .of_finset ?_ ?_
+  · -- `|V × Bool| = 2 |V|` and `k + 1 ≤ |V|`
+    have h := hG.1
+    rw [ENat.card_prod, ENat.card_eq_coe_fintype_card (α := Bool), Fintype.card_bool,
+      Nat.cast_ofNat]
+    calc ((k + 1 : ℕ) : ℕ∞) + 1 ≤ ((k : ℕ∞) + 1) * 2 := by norm_cast; grind
+      _ ≤ _ := by gcongr
+  intro S hS ⟨u, c⟩ ⟨v, d⟩ hu hv
+  rcases Nat.eq_zero_or_pos k with rfl | hk
+  · -- for `k = 0` the set `S` is empty and `G □ K₂` is connected
+    obtain ⟨p⟩ := (hG_conn.boxProd connected_top).preconnected (u, c) (v, d)
+    exact ⟨p, by simp [Finset.card_eq_zero.mp (Nat.lt_one_iff.mp hS)]⟩
+  have hS' : S.card ≤ k := Nat.le_of_lt_succ hS
+  obtain ⟨b, hb⟩ := S.exists_fiberProj_card_lt hS' hk
+  obtain ⟨u', pu, hpu⟩ := hG.exists_walk_to_fiber hS' hu b
+  obtain ⟨v', pv, hpv⟩ := hG.exists_walk_to_fiber hS' hv b
+  obtain ⟨q, hq⟩ := hG.exists_walk (S.fiberProj b) hb u' v'
+    (by simpa using hpu _ pu.end_mem_support)
+    (by simpa using hpv _ pv.end_mem_support)
+  refine ⟨pu.append ((q.boxProdLeft ⊤ b).append pv.reverse), fun x hx => ?_⟩
+  simp only [Walk.mem_support_append_iff, Walk.support_reverse, List.mem_reverse,
+    Walk.support_boxProdLeft, List.mem_map] at hx
+  grind [Finset.mem_fiberProj]
+
+lemma hypercube_isVertexConnected {n : ℕ} : Q[n].IsVertexConnected n := by
+  induction n with
+  | zero =>
+    refine ⟨?_, fun S hS => absurd hS (by simp)⟩
+    simp
+  | succ n ih =>
+    exact ih.boxProd_top_bool (hypercube_connected n)
+
+/-!
+17. Deduce that the hypercube `Q[n]` is `n`-edge-connected, and that `Q[n + 2]` has
+no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
+`Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
+`isBridge_iff_not_isEdgeReachable_two`.
+-/
+lemma hypercube_isEdgeConnected {n : ℕ} : Q[n].IsEdgeConnected n :=
+  hypercube_isVertexConnected.isEdgeConnected
+
+example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
+    ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
+  (isBridge_iff_not_isEdgeReachable_two h).mp hb
+    ((hypercube_isEdgeConnected (n := n + 2)).anti (by grind) u v)
+
+/-!
+18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
 this gives Whitney's inequalities `κ(G) ≤ λ(G) ≤ δ(G)`. Hint:
 `exists_minimal_degree_vertex` and `edgeConnectivity_le_degree`.
@@ -525,7 +704,7 @@ lemma edgeConnectivity_le_minDegree [Fintype V] [Nontrivial V]
   exact edgeConnectivity_le_degree v
 
 /-!
-17. Show that `κ(bowtie) < λ(bowtie)`, so the first of Whitney's inequalities can be
+19. Show that `κ(bowtie) < λ(bowtie)`, so the first of Whitney's inequalities can be
 strict. Hint: the bowtie is `2`-edge-connected by `isEdgeConnected_two` and
 `decide`. It is not `2`-vertex-connected, by `isVertexConnected_iff_induce` with
 `S = {0}` and `decide`. Finally use `le_edgeConnectivity_iff` and
@@ -543,15 +722,32 @@ example : κ(bowtie) < λ(bowtie) := by
   exact hκ.trans_le (le_edgeConnectivity_iff.mpr h2e)
 
 /-!
-18. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
-the lower bound is `hypercube_isVertexConnected` (via `le_vertexConnectivity_iff`);
+20. Show that `λ(barbell) < δ(barbell)`, so the second of Whitney's inequalities can
+also be strict. Hint: the barbell is not `2`-edge-connected, by `isEdgeConnected_two`
+with `e = s(3, 4)` and `decide`. Every vertex has degree at least `3`, by
+`le_minDegree_of_forall_le_degree` and `decide`.
+
+In fact `λ(barbell) = 1`, since `3 — 4` is a bridge, and `δ(barbell) = 3`.
+-/
+example : λ(barbell) < δ(barbell) := by
+  -- deleting the bridge `3 — 4` disconnects the barbell
+  have h2e : ¬ barbell.IsEdgeConnected 2 := fun h =>
+    absurd (isEdgeConnected_two.mp h s(3, 4)) (by decide)
+  have hl : λ(barbell) < (2 : ℕ) := not_le.mp (mt le_edgeConnectivity_iff.mp h2e)
+  -- every vertex has degree at least `3`
+  have hδ : 3 ≤ δ(barbell) := barbell.le_minDegree_of_forall_le_degree 3 (by decide)
+  exact hl.trans_le (by exact_mod_cast (by norm_num : 2 ≤ 3).trans hδ)
+
+/-!
+21. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
+the lower bound is Exercise 16 (via `le_vertexConnectivity_iff`);
 for the upper bound use `vertexConnectivity_le_encard_neighborSet` at any vertex,
 together with `hypercube_isRegularOfDegree`.
 
 The lower bound is `n`-vertex-connectivity of `Q[n]`, and the upper bound is the
 degree `n` of any vertex.
 -/
-lemma hypercube_vertexConnectivity (n : ℕ) : κ(Q[n]) = n := by
+lemma vertexConnectivity_hypercube (n : ℕ) : κ(Q[n]) = n := by
   obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
   refine le_antisymm ((vertexConnectivity_le_encard_neighborSet v).trans_eq ?_)
     (le_vertexConnectivity_iff.mpr hypercube_isVertexConnected)
@@ -559,7 +755,7 @@ lemma hypercube_vertexConnectivity (n : ℕ) : κ(Q[n]) = n := by
     card_neighborFinset_eq_degree, hypercube_isRegularOfDegree n v]
 
 /-!
-19. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
+22. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
 connectivity of `Q[0]` is `⊤`. Hint: use `vertexConnectivity_le_edgeConnectivity` and
 `edgeConnectivity_le_degree`, which needs a `Nontrivial (HypercubeVert (n + 1))`
 instance, and `edgeConnectivity_of_subsingleton`. Instance search deliberately does
@@ -571,29 +767,30 @@ most the degree `n + 1` of any vertex, since `Q[n + 1]` has at least two vertice
 The graph `Q[0]` has a single vertex, and Mathlib's `IsEdgeConnected k` has no
 condition on the number of vertices, so `Q[0]` is `k`-edge-connected for every `k`.
 -/
-lemma hypercube_edgeConnectivity (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
+lemma edgeConnectivity_hypercube_succ (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
   have : Nontrivial (HypercubeVert (n + 1)) :=
     inferInstanceAs (Nontrivial (HypercubeVert n × Bool))
   obtain ⟨v⟩ : Nonempty (HypercubeVert (n + 1)) := inferInstance
   refine le_antisymm ((edgeConnectivity_le_degree v).trans_eq ?_) ?_
   · rw [hypercube_isRegularOfDegree (n + 1) v]; rfl
-  · exact_mod_cast (hypercube_vertexConnectivity (n + 1)).symm.le.trans
+  · exact_mod_cast (vertexConnectivity_hypercube (n + 1)).symm.le.trans
       vertexConnectivity_le_edgeConnectivity
 
-lemma hypercube_zero_edgeConnectivity : λ(Q[0]) = ⊤ :=
+lemma edgeConnectivity_hypercube_zero : λ(Q[0]) = ⊤ :=
   have : Subsingleton (HypercubeVert 0) := inferInstanceAs (Subsingleton Unit)
   edgeConnectivity_of_subsingleton
 
 /-!
-20. Show that in a forest the block of an edge `e` consists of the single edge `e`.
-Hint: show that block-equivalent edges of a forest are equal, by induction on
-`BlockEquivalent`.
+23. Show that in a forest the block of an edge `u — v` is `G.subgraphOfAdj h`, the
+subgraph consisting of that edge and its two endpoints. Hint: show that
+block-equivalent edges of a forest are equal, by induction on `BlockEquivalent`, and
+use `blockMk_eq_blockMk_iff`.
 
 Two distinct edges of a forest never lie on a common cycle, so cycle-equivalence, and
 hence block-equivalence, is just equality.
 -/
-lemma IsAcyclic.blockOf_eq (hG : G.IsAcyclic) (e : Sym2 V) :
-    G.blockOf e = fromEdgeSet {e} := by
+lemma IsAcyclic.toSubgraph_blockMk (hG : G.IsAcyclic) {u v : V} (h : G.Adj u v) :
+    h.block.toSubgraph = G.subgraphOfAdj h := by
   -- block-equivalent edges of a forest are equal
   have key {f g : Sym2 V} (h : G.BlockEquivalent f g) : f = g := by
     induction h with
@@ -601,40 +798,52 @@ lemma IsAcyclic.blockOf_eq (hG : G.IsAcyclic) (e : Sym2 V) :
     | refl x => rfl
     | symm x y _ ih => exact ih.symm
     | trans x y z _ _ ih₁ ih₂ => exact ih₁.trans ih₂
-  unfold blockOf
-  congr 1
-  ext f
-  exact ⟨fun h => (key h).symm, fun h => h ▸ .refl e⟩
+  ext x y
+  · simp only [Block.mem_toSubgraph_verts, subgraphOfAdj_verts, Set.mem_insert_iff,
+      Set.mem_singleton_iff]
+    constructor
+    · -- the edge through `x` is `s(u, v)` itself
+      rintro ⟨e, hx, he⟩
+      rw [key (blockMk_eq_blockMk_iff.mp he)] at hx
+      simpa using hx
+    · rintro (rfl | rfl)
+      exacts [⟨⟨_, h⟩, Sym2.mem_mk_left _ _, rfl⟩,
+        ⟨⟨_, h⟩, Sym2.mem_mk_right _ _, rfl⟩]
+  · simp only [blockMk_toSubgraph_adj, subgraphOfAdj_adj]
+    refine ⟨fun ⟨_, hy⟩ => key hy, fun hy => ⟨?_, hy ▸ .refl _⟩⟩
+    rcases Sym2.eq_iff.mp hy with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    exacts [h, h.symm]
 
 /-!
-21. Show that for `n ≥ 1` a graph is `n`-colourable iff each of its blocks is. Hint:
-the forward direction follows from `blockOf_le`. For the reverse direction use the De
-Bruijn–Erdős theorem (`colorable_of_forall_finite_subgraph_colorable`) to reduce to a
-finite subgraph `H`, which is colourable by `colorable_of_forall_block` provided its
-blocks are. Each block of `H` maps into a block of `G` via `blockOfHom` applied to
-`H.hom`.
+24. Show that for `n ≥ 1` a graph is `n`-colourable iff each of its blocks is. Hint:
+the forward direction follows from `Colorable.of_hom` and `Subgraph.hom`. For the
+reverse direction use the De Bruijn–Erdős theorem
+(`colorable_of_forall_finite_subgraph_colorable`) to reduce to a finite subgraph `H`,
+which is colourable by `colorable_of_forall_block` provided its blocks are. Each
+block of `H` maps into a block of `G` along the copy `H.coeCopy`
+(`Block.map_toSubgraph_le`), and `Subgraph.homOfMapLE` turns this into a
+homomorphism.
 
 A colouring of `G` restricts to each block, since blocks are subgraphs of `G`. For
 the converse, by De Bruijn–Erdős it suffices to colour every finite subgraph `H` of
-`G`. Each block of `H` maps, via the injective homomorphism `H.hom`, into a block of
-`G` (`Block.mapHom`, which is `blockOfHom` at the level of blocks), so a colouring of
-the blocks of `G` restricts to a colouring of the blocks of `H`, and
+`G`. Each block of `H` maps, via the copy `H.coeCopy`, into a block of
+`G` (`Block.map_toSubgraph_le`), so a colouring of the blocks of `G` pulls back to a
+colouring of the blocks of `H` (`Subgraph.homOfMapLE`), and
 `colorable_of_forall_block` colours `H`.
 -/
 theorem colorable_iff_forall_block {n : ℕ} (hn : 1 ≤ n) :
-    G.Colorable n ↔ ∀ B : G.Block, B.toGraph.Colorable n := by
+    G.Colorable n ↔ ∀ B : G.Block, B.toSubgraph.coe.Colorable n := by
   constructor
-  · -- a colouring of `G` restricts to every block, since each block is a subgraph.
-    intro hG B
-    induction B using Quotient.inductionOn' with
-    | h e => exact hG.mono_left (G.blockOf_le e.2)
+  · -- a colouring of `G` restricts to every block, along its inclusion into `G`
+    exact fun hG B => hG.of_hom B.toSubgraph.hom
   · intro hcol
     -- by De Bruijn–Erdős it suffices to colour every finite subgraph `H` of `G`
     refine colorable_of_forall_finite_subgraph_colorable fun H hf => ?_
     have := hf.to_subtype
-    -- each block `B` of `H` maps into the block `B.map H.hom _` of `G`
+    -- each block `B` of `H` maps into the block `B.map H.coeCopy` of `G`
     exact colorable_of_forall_block hn H.coe fun B =>
-      (hcol _).of_hom (B.mapHom H.hom Subgraph.hom_injective)
+      (hcol _).of_hom (Subgraph.homOfMapLE _
+        (B.map_toSubgraph_le H.coeCopy))
 
 /-! END SOLUTIONS -/
 

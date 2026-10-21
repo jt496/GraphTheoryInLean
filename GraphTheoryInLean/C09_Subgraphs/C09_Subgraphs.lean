@@ -9,12 +9,11 @@ open Subgraph
 section basics
 variable {V : Type*} {G : SimpleGraph V} {H : G.Subgraph}
 /-!
-A *subgraph* of a graph `G` is a graph `H` with `V(H) ⊆ V(G)` and `E(H) ⊆ E(G)`.
-
-We have already seen the subgraph order `G ≤ H` on `SimpleGraph V`, which describes
-subgraphs with *the same vertex set* (or more precisely the same vertex type). For a
-general subgraph we need to allow the vertex set to vary. Mathlib formalizes this
-with the type `SimpleGraph.Subgraph`.
+Informally, a *subgraph* of a graph `G` is a graph `H` with `V(H) ⊆ V(G)` and
+`E(H) ⊆ E(G)`. We have already seen the subgraph order `H ≤ G` on `SimpleGraph V`,
+which describes subgraphs with *the same vertex set* (or more precisely the same
+vertex type). For a general subgraph we need to allow the vertex set to vary. Mathlib
+formalizes this with the type `SimpleGraph.Subgraph`.
 
 In this chapter we introduce `SimpleGraph.Subgraph` and the bounded lattice structure
 of subgraphs. We then look at ways of constructing subgraphs: from vertices, edges
@@ -23,8 +22,8 @@ and walks, by taking induced subgraphs, and by deleting vertices and edges. Sinc
 two (`Subgraph.coe`, `Subgraph.spanningCoe` and `toSubgraph`), spanning subgraphs,
 and the parts of the `SimpleGraph` API that have to be duplicated for `Subgraph`.
 Since we now have four different ways of talking about subgraphs, we compare them and
-say when to use each. As a first application we use the *De Bruijn–Erdős theorem* to
-extend our greedy colouring bound to infinite graphs. We then introduce maps and
+discuss when to use each. As a first application we use the *De Bruijn–Erdős theorem*
+to extend our greedy colouring bound to infinite graphs. We then introduce maps and
 comaps of subgraphs, with subgraphs of the Mycielskian as a worked example.
 
 Matchings are subgraphs, so we next define the *matching number* `ν G` of a graph,
@@ -38,17 +37,18 @@ proof of *Brooks' theorem* in
 
 # Subgraphs
 
-Given `G : SimpleGraph V` a `G.Subgraph` is the type of general subgraphs of `G`.
+Given `G : SimpleGraph V`, `G.Subgraph` is the type of general subgraphs of `G`.
 -/
 #source Subgraph
+
 /-!
 If `H : G.Subgraph` then we have the following data:
 -/
 #check H.verts      -- `Set V` the vertex set of the subgraph `H`
-#check H.Adj        -- `V → V → Prop` the edges of the subgraph `H`
+#check H.Adj        -- `V → V → Prop` the adjacency relation of the subgraph `H`
 #check H.adj_sub    -- `H.Adj v w → G.Adj v w` (i.e. `E(H) ⊆ E(G)`)
 #check H.edge_vert  -- `H.Adj v w → v ∈ H.verts` edges of `H` only join verts of `H`
-#check H.symm       -- `H.Adj v w → H.Adj w v` (i.e. edges in `H` are unoriented)
+#check H.symm       -- `Std.Symm H.Adj`: `H.Adj v w → H.Adj w v` (unoriented edges)
 
 example (H : G.Subgraph) (v w : V) (h : H.Adj v w) : H.Adj w v := h.symm
 
@@ -89,12 +89,12 @@ the union of both.
 #check Subgraph.sup_adj
 
 /-!
-[Figure: The inf and sup of two subgraphs](https://jt496.github.io/GraphTheoryInLean/figures/inf_subgraph.svg)
+[Figure: Left: a graph $G$. Top: subgraphs $H_1$ (blue) and $H_2$ (red) of $G$, with the vertices they omit dashed. Bottom: their inf $H_1 \sqcap H_2$ and sup $H_1 \sqcup H_2$, with the edges in both subgraphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf_subgraph.svg)
 
 If `G : SimpleGraph V` then the top subgraph `⊤` of `G` has the same vertex set and
-edge set as `G`, while the bottom subgraph `⊥` has empty vertex set and edge set, so
-mathematically `⊤ : G.Subgraph` *is* `G` (but with type `G.Subgraph` rather than
-`SimpleGraph V`).
+edge set as `G`, so mathematically `⊤ : G.Subgraph` *is* `G` (but with type
+`G.Subgraph` rather than `SimpleGraph V`). The bottom subgraph `⊥` has empty vertex
+set and edge set.
 -/
 #check Subgraph.verts_top
 #check Subgraph.top_adj
@@ -107,7 +107,7 @@ complement `Gᶜ` with `G ⊓ Gᶜ = ⊥` and `G ⊔ Gᶜ = ⊤`.
 
 The `G.Subgraph` lattice is *not* Boolean: in fact it is complemented if and only if
 `G` is the empty graph. To see why complements fail to exist, suppose that `G` is not
-the empty graph with an edge `u — v`. Take `H₁` to be the subgraph with vertex set
+the empty graph and has an edge `u — v`. Take `H₁` to be the subgraph with vertex set
 `{u}` and no edges, and suppose that `H₂` is a complement of `H₁`; i.e. `H₁ ⊓ H₂ = ⊥`
 and `H₁ ⊔ H₂ = ⊤`. Since `H₁.verts` and `H₂.verts` are disjoint, neither `H₁` nor
 `H₂` can contain the edge, so `H₁ ⊔ H₂` also cannot contain it. (`H : G.Subgraph`
@@ -144,7 +144,7 @@ variable {u v w : V}
 The `G.Subgraph` corresponding to a walk `p` is the subgraph with vertex set the
 vertices of `p` and edge set the edges of `p`.
 -/
-#source Walk.toSubgraph -- w.toSubgraph : G.Subgraph
+#source Walk.toSubgraph -- p.toSubgraph : G.Subgraph
 
 /-!
 The vertex set of the subgraph of a walk is exactly the set of vertices in its
@@ -194,9 +194,9 @@ example (p : G.Walk u v) (h : ¬ p.Nil) [DecidableEq V] :
   grind
 
 /-!
-Recall that `Set.ncard` is essentially `Nat.card` for sets, both take the junk value
-`0` for infinite types/sets
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality).
+Recall that `Set.ncard` is essentially `Nat.card` for sets: both take the junk value
+`0` for infinite types/sets (see
+[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality)).
 
 If `c : G.Walk u u` is a cycle and `v` is a vertex in `c` then the set of neighbours
 of `v` in the subgraph corresponding to `c` has cardinality two. (Here
@@ -217,7 +217,7 @@ by `s`, and also has type `G.Subgraph`.
 #source Subgraph.induce  -- G'.induce s : G.Subgraph (for G' : G.Subgraph)
 
 example {u v : V} (s : Set V) (H : G.Subgraph) :
-  (H.induce s).Adj u v ↔ u ∈ s ∧ v ∈ s ∧ H.Adj u v := by rfl
+    (H.induce s).Adj u v ↔ u ∈ s ∧ v ∈ s ∧ H.Adj u v := by rfl
 
 /-!
 The vertex set of a subgraph induced by `s : Set V` is `s`. (Notice that this allows
@@ -250,9 +250,9 @@ example {u v : V} (s t : Set V) : (((⊤ : G.Subgraph).induce s).induce t).Adj u
 Compare the above with the corresponding statement using `SimpleGraph.induce` below.
 
 Since `G.induce s` is a `SimpleGraph ↑s`, the second `induce` below cannot take a
-`Set V`, it needs a `Set ↑s`. To lift `t` to `↑s` we must assume `t ⊆ s` (and even
+`Set V`; it needs a `Set ↑s`. To lift `t` to `↑s` we must assume `t ⊆ s` (and even
 then the lifted set is written as the preimage `(Subtype.val : s → V) ⁻¹' t`).
-Vertices of the graph are doubly-nested subtype elements, so the `Adj` arguments have
+Vertices of the graph are doubly nested subtype elements, so the `Adj` arguments have
 to be built explicitly out of `u v : V` together with proofs of their memberships.
 The resulting statement is almost unreadable (even if the proof is easy).
 -/
@@ -302,12 +302,12 @@ the vertex set unchanged).
 #source Subgraph.deleteEdges -- G'.deleteEdges s : G.Subgraph
 
 example {v w : V} (s : Set (Sym2 V)) {H : G.Subgraph} :
-  (H.deleteEdges s).Adj v w ↔ H.Adj v w ∧ s(v, w) ∉ s := by rfl
+    (H.deleteEdges s).Adj v w ↔ H.Adj v w ∧ s(v, w) ∉ s := by rfl
 
 #check Subgraph.deleteEdges_verts -- (G'.deleteEdges s).verts = G'.verts
 
 /-!
-[Figure: Vertex and edge deletion](https://jt496.github.io/GraphTheoryInLean/figures/deletion.svg)
+[Figure: Left: a graph $G$. Centre: deleting the vertices $v_1$ and $v_3$, which also removes their edges. Right: deleting the edges $v_1 v_4$ and $v_2 v_5$. Removed vertices and edges are dashed](https://jt496.github.io/GraphTheoryInLean/figures/deletion.svg)
 -/
 /-!
 # Subgraphs as Simple Graphs
@@ -339,8 +339,7 @@ In order to treat a `G.Subgraph` as a `SimpleGraph` we need to use a *coercion*.
 There are two different ways to do this. If `H : G.Subgraph` then `H.coe` gives a
 graph on the vertex type `H.verts`, the subtype of `V` consisting of the vertices of
 `H`, i.e. `{v // v ∈ H.verts}`. The other coercion is `H.spanningCoe` which gives a
-graph on the original vertex set `V` with the edges of `H` but with all the vertices
-of `G`.
+graph on the vertex type `V` with the edges of `H` but with all the vertices of `G`.
 -/
 #source Subgraph.coe -- H.coe : SimpleGraph ↑H.verts
 
@@ -353,8 +352,8 @@ The second example hides a change of meaning: `⊥ : G.Subgraph` is the *empty*
 subgraph, with no vertices, while `⊥ : SimpleGraph V` has every vertex of `V` and no
 edges. This is because `spanningCoe` forgets the vertex set and keeps only the edges,
 so it is not injective. Two subgraphs have the same `spanningCoe` iff they have the
-same edges, whatever their vertices. (For example the spanning coercion of a single
-vertex subgraph `G.singletonSubgraph v` is also `⊥`; see the exercises.)
+same edges, whatever their vertices. (For example the spanning coercion of a
+single-vertex subgraph `G.singletonSubgraph v` is also `⊥`; see the exercises.)
 -/
 #check Subgraph.spanningCoe_inj -- H₁.spanningCoe = H₂.spanningCoe ↔ H₁.Adj = H₂.Adj
 /-!
@@ -370,7 +369,7 @@ ordinary functions, not coercions in Lean's technical sense. There is no `Coe`
 instance behind them, so Lean never inserts them for you: you must write `H.coe` or
 `H.spanningCoe` explicitly to get the corresponding `SimpleGraph`. (An example
 of a genuine coercion is the one from `ℕ` to `ℝ`: if `n : ℕ` and `x : ℝ` then `x + n`
-typechecks because Lean inserts `↑n : ℝ` automatically. We have in fact just seen an
+type-checks because Lean inserts `↑n : ℝ` automatically. We have in fact just seen an
 example of such a coercion: the `↑` in `SimpleGraph ↑H.verts`, which turns the set
 `H.verts` into a type.)
 
@@ -390,8 +389,8 @@ every vertex in `V`.
 example (H : G.Subgraph) : H.IsSpanning ↔ H.verts = Set.univ := isSpanning_iff
 
 /-!
-If `G H : SimpleGraph V` and `H ≤ G` then `H.toSubgraph` is a spanning subgraph of
-`G`.
+If `G H : SimpleGraph V` and `h : H ≤ G` then `toSubgraph H h` is a spanning subgraph
+of `G`.
 -/
 example (H : SimpleGraph V) (h : H ≤ G) : (toSubgraph H h).IsSpanning :=
   toSubgraph.isSpanning _ _
@@ -430,14 +429,13 @@ example (H : G.Subgraph) (h : H.IsSpanning) :
 /-!
 ## Duplication
 
-For a `G.Subgraph` we don't even have access to the many definitions we have already
-seen for `SimpleGraph V` such as `neighborSet`, `degree`, `edgeSet`, `incidenceSet`,
-`support`, `map`, `comap` (as well as some we will meet later such as `Connected`, in
-[Connected Components](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-connected-components)).
+For a `G.Subgraph` we don't have access to the many definitions we have already seen
+for `SimpleGraph V` such as `neighborSet`, `degree`, `edgeSet`, `incidenceSet`,
+`support`, `map`, `comap` (as well as some we will meet later such as `Connected`).
 These have to be defined separately for `G.Subgraph` and then related back to the
 original graph `G` when needed. This means there is a certain amount of unavoidable
 duplication between the theory of `Subgraph` and `SimpleGraph`. We have already met
-`Subgraph.support`, some of the others are listed below.
+`Subgraph.support`; some of the others are listed below.
 -/
 #source Subgraph.neighborSet  -- the neighbour set of a vertex in a subgraph
 #source Subgraph.degree       -- the number of neighbours of a vertex in a subgraph
@@ -451,7 +449,7 @@ original graph.
 #check Subgraph.degree_le
 
 /-!
-The duplicated definitions are related to each other by *bridge lemmas*. For example
+The duplicated definitions are related to each other by bridging lemmas. For example
 `Subgraph.coe_degree` says that the degree of `v` in the graph `H.coe` is its degree
 in the subgraph `H`. This lets us apply a theorem about degrees in a `SimpleGraph` to
 a subgraph, as we do in the proof of `colorable_of_degree_le` below.
@@ -488,11 +486,9 @@ we choose can make a big difference to how easy a proof is.
   ([Matching Number](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-matching-number)).
   A matching must be a `G.Subgraph`: its vertex set is the set of matched vertices,
   and a *perfect* matching is one that is spanning.
-* `Copy A G`
-  ([Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies)) is a
-  labelled copy of a graph `A` whose vertices may have any type, and `A ⊑ G` says
-  that such a copy exists. Use it to talk about containment (or non-containment) of a
-  fixed graph, as in `A.Free G`.
+* `Copy A G` is a labelled copy of a graph `A` whose
+  vertices may have any type, and `A ⊑ G` says that such a copy exists. Use it to
+  talk about containment (or non-containment) of a fixed graph, as in `A.Free G`.
 
 We have already met most of the conversions between these: `toSubgraph H h` turns
 `h : H ≤ G` into a `G.Subgraph`, while `H.spanningCoe` and `H.coe` turn
@@ -505,37 +501,38 @@ following three definitions.
 /-!
 Finally there are useful hybrids. When we define partial colourings in
 [Partial Colourings*](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-partial-colourings)
-we will use the graph `((⊤ : G.Subgraph).induce s).spanningCoe`: a `SimpleGraph V`,
-so that the `SimpleGraph.Coloring` API applies, whose edges are those of `G` induced
-by `s`.
+we will use the graph `((⊤ : G.Subgraph).induce s).spanningCoe` whose edges are those
+of `G` induced by `s`. Since it is a `SimpleGraph V`, we can use the
+`SimpleGraph.Coloring` API.
 
 ## De Bruijn–Erdős Theorem
 
-The *De Bruijn–Erdős theorem* says that if every finite subgraph of an infinite graph
-`G` is `n`-colourable then `G` itself is `n`-colourable.
+The *De Bruijn–Erdős theorem* says that if every finite subgraph of a (possibly
+infinite) graph `G` is `n`-colourable then `G` itself is `n`-colourable.
 
 Mathlib contains the following natural generalization of this theorem: if every
 finite subgraph of `G` has a homomorphism to a *finite* graph `F` then there is a
-homomorphism from `G` to `F`. The finiteness of `F` cannot be dropped: every finite
-subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to the disjoint union of all the
-complete graphs `K[n]`, but `⊤` itself does not. (The proof is a compactness
-argument, using `nonempty_sections_of_finite_inverse_system`.)
+homomorphism from `G` to `F`. (The finiteness of `F` cannot be
+dropped: every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to the
+disjoint union of all the complete graphs `K[n]`, but `⊤` itself does not; see the
+exercises for details.)
 -/
 #check nonempty_hom_of_forall_finite_subgraph_hom
+
 /-!
-Taking `F` to be the complete graph on `Fin n` gives the De Bruijn–Erdős theorem
-itself: if every finite subgraph of `G` is `n`-colourable then so is `G`.
+Since an `n`-colouring is a homomorphism to`K[n]`, the De Bruijn–Erdős theorem is the
+special case in which `F` is `K[n]`.
 -/
 /-- *De Bruijn–Erdős*: if every finite subgraph of `G` is `n`-colourable then `G` is
 `n`-colourable. -/
 theorem colorable_of_forall_finite_subgraph_colorable {n : ℕ}
     (h : ∀ H : G.Subgraph, H.verts.Finite → H.coe.Colorable n) : G.Colorable n :=
   nonempty_hom_of_forall_finite_subgraph_hom fun H hH => (h H hH).some
+
 /-!
 This allows us to give the general greedy colouring bound using our earlier result
-for countable graphs, `colorable_of_degree_le_of_countable` (see
-[Greedy Colouring*](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-greedy-colouring)),
-since a finite subgraph is countable.
+for countable graphs, `colorable_of_degree_le_of_countable`, since a finite subgraph
+is countable.
 -/
 theorem colorable_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     (hdeg : ∀ v, G.degree v ≤ Δ) : G.Colorable (Δ + 1) :=
@@ -544,6 +541,91 @@ theorem colorable_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     have := hH.to_subtype
     exact colorable_of_degree_le_of_countable fun _ =>
       H.coe_degree _ ▸ (H.degree_le _).trans (hdeg _)
+
+/-!
+It remains to explain why `nonempty_hom_of_forall_finite_subgraph_hom` is true.
+
+If `G` is finite there is nothing to prove, since `G` is then a finite subgraph of
+itself, so suppose that `G` is infinite. The standard proof is a compactness
+argument. Let `W` be the vertex type of `F`, with the discrete topology. Since `W` is
+finite, the space of all functions `V → W` is compact by Tychonoff's theorem. A
+homomorphism from `G` to `F` is a function `φ : V → W` satisfying one condition for
+each edge `u — v` of `G`, namely that `φ u` and `φ v` are adjacent in `F`. Let
+`A ⊆ W × W` be the set of pairs `(a, b)` with `a` adjacent to `b` in `F`. For each
+edge `u — v` of `G`, let `πᵤᵥ : (V → W) → W × W` be the projection
+`πᵤᵥ(φ) = (φ u, φ v)` onto the coordinates `u` and `v`. The functions satisfying the
+condition for `u — v` then form the set `πᵤᵥ⁻¹(A)`, which is closed: `πᵤᵥ` is
+continuous, being a projection in the product topology, and every subset of the
+discrete space `W × W` is closed.
+
+The homomorphisms from `G` to `F` are exactly the functions in the intersection of
+all the sets `πᵤᵥ⁻¹(A)`, so we must show that this intersection is nonempty. In a
+compact space, a family of closed sets has nonempty intersection provided it has the
+*finite intersection property*: any finitely many of the sets have a common point.
+Given finitely many edges of `G`, let `H` be the finite subgraph consisting of these
+edges and their endpoints. By hypothesis there is a homomorphism from `H` to `F`, and
+extending it arbitrarily to the other vertices gives a function in the sets
+`πᵤᵥ⁻¹(A)` for all of the given edges.
+
+Mathlib organizes the argument differently, so that most of it becomes an instance of
+a general compactness result. Instead of a single function on all of `V`, it looks
+for a homomorphism from each finite subgraph, chosen so that they fit together. A
+*consistent family* consists of a homomorphism `ψ H` from `H` to `F` for each finite
+subgraph `H` of `G`, such that whenever `H₁ ≤ H₂`, the homomorphism `ψ H₁` is the
+restriction of `ψ H₂` to `H₁`.
+
+Any homomorphism `φ` from `G` to `F` gives a consistent family, by taking `ψ H` to be
+the restriction of `φ` to `H`. Conversely, a consistent family can be glued together
+to give a homomorphism from `G` to `F`: send each vertex `v` to its image under
+`ψ (G.singletonSubgraph v)`. If `h : G.Adj u v`, then the singleton subgraphs of `u`
+and `v` are both contained in the subgraph `G.subgraphOfAdj h` consisting of the edge
+`u — v`. So by consistency `u` and `v` have the same images as under
+`ψ (G.subgraphOfAdj h)`, and these are adjacent in `F`. Restricting and gluing are
+inverse to each other. (In the language of category theory, the consistent families
+form the *inverse limit* of the sets of homomorphisms from the finite subgraphs, so
+restriction identifies the set of homomorphisms from `G` to `F` with this inverse
+limit.)
+
+So it is enough to find a consistent family, and for this only three facts matter:
+the finite subgraphs form a *directed* set (any two have a common upper bound, namely
+their union); the set of homomorphisms from each finite subgraph to `F` is finite (as
+`F` is finite) and nonempty (by hypothesis); and the restriction maps are
+*compatible*: restricting a homomorphism from `H` to `H` itself leaves it unchanged,
+and if `H₁ ≤ H₂ ≤ H₃`, then restricting a homomorphism from `H₃` to `H₂` and then to
+`H₁` gives the same result as restricting it from `H₃` to `H₁` directly.
+
+To find a consistent family we again use Tychonoff's theorem. For each finite
+subgraph `H`, let `X H` be the set of homomorphisms from `H` to `F`, with the
+discrete topology. Since each `X H` is finite, the product `P` of all the sets `X H`
+is compact. A point `ψ` of `P` is a choice of a homomorphism `ψ H` in `X H` for every
+finite subgraph `H`. For each pair `H₁ ≤ H₂`, whether `ψ` satisfies the consistency
+condition for this pair depends only on `(ψ H₁, ψ H₂)`. So the points satisfying it
+form the preimage of a subset of `X H₁ × X H₂` under the projection
+`ψ ↦ (ψ H₁, ψ H₂)`, and this set is closed for the same reason as before: the
+projection is continuous and `X H₁ × X H₂` is discrete.
+
+The consistent families are exactly the points in the intersection of all these
+closed sets, so again it is enough to check the finite intersection property. Given
+finitely many pairs `H₁ ≤ H₂`, let `K` be the union of all the subgraphs involved, a
+finite subgraph containing each of them; this is where directedness is used. By
+hypothesis there is a homomorphism `θ` from `K` to `F`. Take `ψ H` to be the
+restriction of `θ` to `H` for each subgraph `H` involved, and choose the other `ψ H`
+arbitrarily, which is possible since each `X H` is nonempty. For each of the given
+pairs, `ψ H₁` is the restriction of `θ` to `H₁`, which by compatibility is the
+restriction to `H₁` of `ψ H₂`. So `ψ` satisfies all of the given conditions, and by
+compactness a consistent family exists. The Mathlib proof is this argument, couched
+in the language of category theory, with the compactness step proved as a general
+result:
+-/
+open CategoryTheory in
+#check nonempty_sections_of_finite_inverse_system
+
+/-!
+In our application, `J` is `G.Finsubgraph`, the directed set of finite subgraphs of
+`G`. The functor in the theorem packages the sets `X H` and their restriction maps.
+It is defined on `Jᵒᵖ` because restriction goes from larger to smaller subgraphs; its
+*sections* are the consistent families.
+-/
 
 /-!
 # Maps and Comaps
@@ -563,14 +645,14 @@ of the given graph `K`.
 There is also `Subgraph.comap` which is a *pullback* operation: given a homomorphism
 `f : G →g K` and a subgraph `H` of `K`, `H.comap f` is the subgraph of `G` whose
 vertex set is the preimage `f⁻¹' H.verts` and whose edges are those edges `u — v` of
-`G` for which `f u — f v` is an edge of `H`.
+`G` for which `f u` and `f v` are adjacent in `H`.
 -/
 #source Subgraph.comap
 
 /-!
 As for simple graphs
 ([Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps)), `map f` and
-`comap f` form a *Galois connection*. Here this holds for every homomorphism `f`, not
+`comap f` form a Galois connection. Here this holds for every homomorphism `f`, not
 just for embeddings: a homomorphism never sends two adjacent vertices to the same
 vertex, so no edge is lost when we map forwards.
 -/
@@ -588,9 +670,9 @@ the original graph `G`.
 #check Subgraph.hom -- .. (H : G.Subgraph) : H.coe →g G
 
 /-!
-Combining `Subgraph.map` with `Subgraph.hom` gives `coeSubgraph` which allows us to
-take a subgraph of a subgraph coerced to `SimpleGraph` and get a subgraph of the
-original graph.
+Combining `Subgraph.map` with `Subgraph.hom` gives `Subgraph.coeSubgraph` which
+allows us to take a subgraph of a subgraph coerced to `SimpleGraph` and get a
+subgraph of the original graph.
 -/
 #source Subgraph.coeSubgraph --  G'.coe.Subgraph → G.Subgraph
 
@@ -648,26 +730,30 @@ end basics
 # Matching Number
 
 Mathlib has the predicates `Subgraph.IsMatching` and `Subgraph.IsPerfectMatching`
-which say that a `G.Subgraph` is a matching or perfect matching; as well as
+which say that a `G.Subgraph` is a matching or a perfect matching, as well as
 `SimpleGraph.IsMatchingFree` which says that a graph has no perfect matching.
 -/
-#source Subgraph.IsMatching -- ∀ ⦃v⦄, v ∈ M.verts → ∃! w, M.Adj v w
+#source Subgraph.IsMatching        -- ∀ ⦃v⦄, v ∈ M.verts → ∃! w, M.Adj v w
 #source Subgraph.IsPerfectMatching -- M.IsMatching ∧ M.IsSpanning
 #source SimpleGraph.IsMatchingFree --  ∀ M : Subgraph G, ¬ M.IsPerfectMatching
 
 /-!
 A matching `M` is not spanning in general: its vertex set is the set of *matched*
 vertices, and each of these has exactly one neighbour in `M`. A perfect matching is
-then simply a spanning matching. (This is why matchings must be `G.Subgraph`s; see
-[Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph).)
+then simply a spanning matching. (This is why matchings must be `G.Subgraph`s.)
 
-Mathlib also has the classical existence theorems (Hall's marriage theorem and
-Tutte's theorem) which we will discuss in
+[Figure: Left: a matching $M$, which leaves $c$ and $f$ unmatched. Right: a perfect matching](https://jt496.github.io/GraphTheoryInLean/figures/matching.svg)
+
+Mathlib has the classical existence theorems (Hall's marriage theorem and Tutte's
+theorem) which we will discuss in
 [Matchings](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-matchings).
 But it does not (yet) define the *matching number* `ν G`: the maximum number of edges
 in a matching of `G`. Following Mathlib's `SimpleGraph.vertexCoverNum`, we define it
 as an indexed supremum in the extended naturals `ℕ∞`, measuring each matching with
-`Set.encard`. So a graph with arbitrarily large matchings has matching number `⊤`.
+`Set.encard`. So a graph with arbitrarily large matchings has matching number `⊤`. In
+the definition below, the second binder `(_ : M.IsMatching)` ranges over proofs that
+`M` is a matching, so a subgraph that is not a matching contributes an empty
+supremum, `⊥ = 0`, and only matchings count.
 -/
 section matchingnumber
 variable {V : Type*} {G : SimpleGraph V}
@@ -676,19 +762,18 @@ variable {V : Type*} {G : SimpleGraph V}
 #source vertexCoverNum
 
 /-!
-We introduce the standard `τ G` notation for vertex cover number.
+We introduce the standard `τ G` notation for the vertex cover number.
 -/
 @[inherit_doc vertexCoverNum]
 scoped notation "τ" => SimpleGraph.vertexCoverNum
 
 /-- The *matching number* `ν G` of `G` is the maximum number of edges in a matching
-of `G`, as an element of `ℕ∞` (so `⊤` if `G` has arbitrarily large matchings). This
-mirrors the shape of Mathlib's `SimpleGraph.vertexCoverNum`. -/
+of `G`, as an element of `ℕ∞` (so `⊤` if `G` has arbitrarily large matchings). -/
 noncomputable def matchingNum (G : SimpleGraph V) : ℕ∞ :=
   ⨆ (M : G.Subgraph) (_ : M.IsMatching), M.edgeSet.encard
 
 /-!
-We introduce the "standard" notation for matching number.
+We introduce the standard notation `ν G` for the matching number.
 -/
 @[inherit_doc matchingNum]
 scoped notation "ν" => SimpleGraph.matchingNum
@@ -741,9 +826,9 @@ In a finite graph the supremum is attained by some matching. Completeness of `�
 does not give this for free, but with `[Finite V]` there are only finitely many
 subgraphs (`instance : Finite G.Subgraph`), so the supremum, taken over the finite
 nonempty subtype of matchings, is a maximum (`exists_eq_ciSup_of_finite`).
-(Finiteness is not necessary here, but the proof when `ν G = ⊤` is more involved,
-requiring either a greedy chain argument or Zorn's lemma. See the exercises for
-details.)
+(Mathematically, finiteness is not necessary here, but the proof when `ν G = ⊤` is
+more involved, requiring either a greedy chain argument or Zorn's lemma. See the
+exercises for details.)
 -/
 lemma exists_isMatching_matchingNum [Finite V] :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ν G := by
@@ -754,8 +839,9 @@ lemma exists_isMatching_matchingNum [Finite V] :
   exact ⟨M, M.2, by rw [matchingNum_eq_iSup_subtype]; exact hM⟩
 
 /-!
-As a sanity check we compute the matching number of the empty graph, which is
-itself an empty matching. Note how the API keeps `iSup` out of the proof.
+As a sanity check we show that the empty graph has matching number `0`: it has no
+edges, so neither does any of its matchings. Note how our API keeps `iSup` out of
+the proof.
 -/
 lemma matchingNum_bot : ν (⊥ : SimpleGraph V) = 0 :=
   nonpos_iff_eq_zero.mp <| matchingNum_le fun M _ => by
@@ -808,19 +894,24 @@ lemma Subgraph.IsMatching.ncard_inter_le_of_isIndepSet {p₁ : Set V}
     (fun v => if hv : v ∈ M.verts then (hM.toEdge ⟨v, hv⟩ : Sym2 V) else s(v, v))
     (fun v hv => by simp [hv.2]) (fun x hx y hy hxy => ?_) (Set.toFinite _)
   by_contra hne
-  simp only [hx.2, hy.2, dite_true] at hxy
-  have hxe := hM.mem_coe_toEdge hx.2
-  have hye := hM.mem_coe_toEdge hy.2
-  rw [hxy] at hxe
-  have he := M.edgeSet_subset (hM.toEdge ⟨y, hy.2⟩).2
-  rw [(Sym2.mem_and_mem_iff hne).1 ⟨hxe, hye⟩, mem_edgeSet] at he
-  exact h₁ hx.1 hy.1 hne he
+  -- `x` and `y` are sent to the same edge of `M`, so both lie on the edge at `y`
+  have hxy' : (hM.toEdge ⟨x, hx.2⟩ : Sym2 V) = hM.toEdge ⟨y, hy.2⟩ := by
+    simpa only [hx.2, hy.2, dite_true] using hxy
+  have hxe : x ∈ (hM.toEdge ⟨y, hy.2⟩ : Sym2 V) := hxy' ▸ hM.mem_coe_toEdge hx.2
+  have hye : y ∈ (hM.toEdge ⟨y, hy.2⟩ : Sym2 V) := hM.mem_coe_toEdge hy.2
+  -- since `x ≠ y`, this edge must be `s(x, y)`
+  have he : (hM.toEdge ⟨y, hy.2⟩ : Sym2 V) = s(x, y) :=
+    (Sym2.mem_and_mem_iff hne).1 ⟨hxe, hye⟩
+  -- so `x` and `y` are adjacent in `G`, contradicting the independence of `p₁`
+  have hadj : G.Adj x y := by
+    rw [← mem_edgeSet, ← he]
+    exact M.edgeSet_subset (hM.toEdge ⟨y, hy.2⟩).2
+  exact h₁ hx.1 hy.1 hne hadj
 
 /-!
-In particular, if `G` is bipartite with parts `p₁` and `p₂`
-([Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-bipartite-graphs))
-then `p₁` is independent, so a matching with finitely many edges has at least as many
-edges as it has vertices in `p₁`. We use this in the proof of
+In particular, if `G` is bipartite with parts `p₁` and `p₂` (`IsBipartiteWith`) then
+`p₁` is independent, so a matching with finitely many edges has at least as many
+edges as it has vertices in `p₁`. We use this later in the proof of
 [Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem).
 -/
 lemma Subgraph.IsMatching.ncard_inter_le {p₁ p₂ : Set V}
@@ -864,6 +955,8 @@ distinct vertex from each of them. For *bipartite* graphs this is an equality
 [Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)),
 but it can be strict: the odd cycle `C[2 * k + 3]` has `ν = k + 1` and `τ = k + 2`.
 (The exercises check the smallest case, `K[3]`.)
+
+[Figure: Left: in $C_5$ a maximum matching (red) has $2$ edges, but a minimum vertex cover (green) needs $3$ vertices, so $\nu = 2 < 3 = \tau$. Right: in the bipartite graph $C_6$ the two are equal, $\nu = \tau = 3$](https://jt496.github.io/GraphTheoryInLean/figures/matching_cover.svg)
 
 The proof of `ν G ≤ τ G` rests on two elementary facts, which we isolate as reusable
 lemmas. The first says that a matching is *locally injective* on edges: since every
@@ -921,13 +1014,13 @@ matching by recursion on `n`.)
 
 Rather than reason about the hypercube directly, we isolate the underlying general
 fact about box products: if `M` is a perfect matching of `G`, then copying `M` into
-every `H`-fibre of `G □ H` is a perfect matching of `G □ H`, for any graph `H`, whose
+every `G`-fibre of `G □ H` is a perfect matching of `G □ H`, for any graph `H`, whose
 edges play no role at all.
 -/
-/-- Copy a subgraph `M` of `G` into every `H`-fibre of `G □ H`: the vertex `(v, b)`
-is present iff `v ∈ M.verts`, and `(a, b) — (c, b)` is an edge iff `a — c` is an
-edge of `M`. This is the box product of `M` with the edgeless (but fully spanning)
-subgraph on `H`. -/
+/-- Copy a subgraph `M` of `G` into every `G`-fibre of `G □ H`: the vertex `(v, b)`
+is present iff `v ∈ M.verts`, and `(a, b)` and `(c, b)` are adjacent iff `a` and `c`
+are adjacent in `M`. This is the box product of `M` with the edgeless (but fully
+spanning) subgraph on `H`. -/
 @[simps]
 def Subgraph.boxProdLeft {β : Type*} (M : G.Subgraph) (H : SimpleGraph β) :
     (G □ H).Subgraph where
@@ -956,8 +1049,7 @@ lemma Subgraph.IsPerfectMatching.boxProdLeft {β : Type*} {M : G.Subgraph}
 The recursive perfect matching of the hypercube is now immediate.
 -/
 /-- A perfect matching of `Q[n + 1]` defined recursively: `⊤` on `Q[1]`, and on
-`Q[n + 2]` the fibre-copy (`Subgraph.boxProdLeft`) of `hypercube.matching n` along
-`K₂`. -/
+`Q[n + 2]` the `Subgraph.boxProdLeft` of `hypercube.matching n` along `K₂`. -/
 def hypercube.matching : (n : ℕ) → Q[n + 1].Subgraph
   | 0 => ⊤
   | n + 1 => (hypercube.matching n).boxProdLeft ⊤
@@ -982,7 +1074,7 @@ lemma hypercube.matching_isPerfectMatching :
 Since `Q[n + 1]` has `2 ^ (n + 1)` vertices, this perfect matching gives
 `ν Q[n + 1] = 2 ^ n`.
 -/
-lemma hypercube.matchingNum_succ (n : ℕ) : ν Q[n + 1] = 2 ^ n := by
+lemma matchingNum_hypercube_succ (n : ℕ) : ν Q[n + 1] = 2 ^ n := by
   rw [(hypercube.matching_isPerfectMatching n).matchingNum_eq]
   have h : Nat.card (HypercubeVert (n + 1)) / 2 = 2 ^ n := by
     rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ]; grind
@@ -993,8 +1085,9 @@ end hypercubematching
 ## Matching Number of the Mycielskian
 
 If `M` is a matching in `G` then we can construct a matching in the Mycielskian
-`mμ[G]` by taking the edges `x ₗ y ᵣ` and `x ᵣ y ₗ` for each edge `x y` in `M`. This
-makes sense for any subgraph `M` of `G` (although it won't be a matching in general).
+`mμ[G]` by taking the edges `x ₗ — y ᵣ` and `x ᵣ — y ₗ` for each edge `x — y` in `M`.
+This makes sense for any subgraph `M` of `G` (although it won't be a matching in
+general).
 -/
 section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
@@ -1017,7 +1110,7 @@ of the vertices of `M` is matched with the right copy of its match in `M`.
 lemma Subgraph.IsMatching.mycielskianDouble {M : G.Subgraph}
     (h : M.IsMatching) : M.mycielskianDouble.IsMatching := by
   rintro a (⟨x, hx, rfl⟩ | ⟨x, hx, rfl⟩) <;> obtain ⟨y, hxy, huniq⟩ := h hx
-  · -- `a = x ₗ`: its unique neighbour is `y ᵣ`, where `y` is the M-match of `x`.
+  · -- `a = x ₗ`: its unique neighbour is `y ᵣ`, where `y` is the `M`-partner of `x`.
     refine ⟨y ᵣ, ⟨x, y, hxy, Or.inl ⟨rfl, rfl⟩⟩, ?_⟩
     rintro w ⟨x', y', hx'y', (⟨hl, rfl⟩ | ⟨hl, rfl⟩)⟩ <;> simp_all
   · -- `a = x ᵣ`: its unique neighbour is `y ₗ`.
@@ -1031,7 +1124,7 @@ def Subgraph.mycielskianDoubleDartEmbedding (M : G.Subgraph) :
   toFun d := ⟨s(d.1.1.val ₗ, d.1.2.val ᵣ), by
     simp only [Subgraph.mem_edgeSet, Subgraph.mycielskianDouble]
     exact ⟨d.1.1.val, d.1.2.val, d.adj, Or.inl ⟨rfl, rfl⟩⟩⟩
-  inj' d₁ d₂ h := by aesop
+  inj' d₁ d₂ h := by ext <;> simp_all
 
 /-!
 Each dart of `M` gives a distinct edge of `M.mycielskianDouble`, and a finite
@@ -1057,7 +1150,8 @@ lemma Subgraph.two_mul_edgeSet_encard_le_mycielskianDouble [Finite V]
   exact_mod_cast hle
 
 /-!
-The matching number of `mμ[G]` is at least twice the matching number of `G`.
+The matching number of the Mycielskian of `G` is at least twice the matching number
+of `G`.
 -/
 lemma two_mul_matchingNum_le_matchingNum_mycielskian [Finite V] :
     2 * ν G ≤ ν mμ[G] := by
@@ -1075,8 +1169,8 @@ has `2 * |V| + 1` vertices, so by `matchingNum_le_card_div_two` no matching of
 
 (For graphs without a perfect matching the lower bound `2 * ν G` can be far from
 exact. If `G` is a disjoint union of two triangles it has matching number `2`, but
-the cross edges `a ₗ b ᵣ`, `b ₗ c ᵣ`, `c ₗ a ᵣ` of each triangle form a matching of
-size `6` in the Mycielskian, which even exceeds `2 * ν G + 1 = 5`.)
+the cross edges `a ₗ — b ᵣ`, `b ₗ — c ᵣ`, `c ₗ — a ᵣ` of each triangle form a
+matching of size `6` in the Mycielskian.)
 -/
 lemma Subgraph.IsPerfectMatching.matchingNum_mycielskian_eq [Finite V]
     {M : G.Subgraph} (h : M.IsPerfectMatching) : ν mμ[G] = 2 * ν G := by
@@ -1107,9 +1201,10 @@ Informally, a *partial `γ`-colouring* of `G : SimpleGraph V` should be a map
 means something like `∀ a b ∈ s, G.Adj a b → C a ≠ C b`.
 
 There is currently no definition of partial colourings in Mathlib. However they arise
-in many situations, for instance in proofs of classical results such as Brooks'
-theorem, which we prove using them in
-[Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem).
+in many situations, such as the proof of Brooks' theorem. (Indeed we will use them
+for exactly this; see
+[Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem).)
+
 Below we discuss a possible implementation making use of the existing
 `SimpleGraph.Coloring` API where possible.
 
@@ -1122,20 +1217,19 @@ retained: i.e. a colouring of `(G.induce s).spanningCoe`, where `spanningCoe` is
 Alternatively we could ask for `C` to be a colouring of
 `((⊤ : G.Subgraph).induce s).spanningCoe`, using `Subgraph.spanningCoe` instead.
 
-These are the same graph (the first example below proves that they are equal; this is
-Mathlib's `spanningCoe_induce_top`), but they are not *definitionally* equal
+These are the same graph (this is Mathlib's `spanningCoe_induce_top`), but they are
+not *definitionally* equal
 ([Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
 and the latter is much easier to work with. Its adjacency relation is definitionally
-`a ∈ s ∧ b ∈ s ∧ G.Adj a b`. In `(G.induce s).spanningCoe`, adjacency instead unfolds
+`a ∈ s ∧ b ∈ s ∧ G.Adj a b`. While in `(G.induce s).spanningCoe`, adjacency unfolds
 to an existential over vertices of the subtype `↑s`, coming from `SimpleGraph.map`:
 `a ≠ b ∧ ∃ u v : ↑s, (G.induce s).Adj u v ∧ ↑u = a ∧ ↑v = b`.
 -/
 section partcol
 variable {V : Type*} {G : SimpleGraph V}
 example {s : Set V} :
-    ((⊤ : G.Subgraph).induce s).spanningCoe = (G.induce s).spanningCoe := by
-  ext a b
-  simp [and_left_comm]
+    ((⊤ : G.Subgraph).induce s).spanningCoe = (G.induce s).spanningCoe :=
+  spanningCoe_induce_top _
 
 example {a b : V} {s : Set V} :
     ((⊤ : G.Subgraph).induce s).spanningCoe.Adj a b ↔ a ∈ s ∧ b ∈ s ∧ G.Adj a b :=
@@ -1147,7 +1241,7 @@ example {a b : V} {s : Set V} :
 
 variable (G)
 /-- A `ColoringOn γ s` of `G : SimpleGraph V` is a `γ`-colouring of all vertices of
-`G` that is a valid colouring on the set `s` -/
+`G` that is a valid colouring on the set `s`. -/
 abbrev ColoringOn (γ : Type*) (s : Set V) :=
   ((⊤ : G.Subgraph).induce s).spanningCoe.Coloring γ
 
@@ -1164,6 +1258,7 @@ function and note that the validity condition holds for the subset. We call this
 `ColoringOn.restrict`.
 -/
 /-- Restrict `C : G.ColoringOn γ s` to any `t ⊆ s`. -/
+@[simps]
 protected def ColoringOn.restrict (C : G.ColoringOn γ s) (h : t ⊆ s) :
     G.ColoringOn γ t where
   toFun := C
@@ -1174,22 +1269,20 @@ Notice that whereas `Walk.copy` was the cast `hu ▸ hv ▸ p`, which is stuck u
 substitute the endpoints, here we reuse the underlying function `C` unchanged and
 discharge the validity condition directly: an edge of the subgraph induced by `t` is
 an edge of the subgraph induced by `s`, so `C.valid` applies. Because the underlying
-function is untouched, a restriction is *equal as a function* to the original, by
-`rfl` and with no substitution needed. We record this as the `@[simp]` lemma
-`coe_restrict`, it lets `simp` rewrite `(C.restrict h) v` to `C v` automatically, so
-downstream proofs need not unfold restrictions by hand.
+function is untouched, a restriction agrees with the original at every vertex, by
+`rfl` and with no substitution needed. The `@[simps]` attribute records this as the
+`simp` lemma `restrict_apply`, which lets `simp` rewrite `(C.restrict h) v` to `C v`
+automatically, so downstream proofs need not unfold restrictions by hand.
 -/
-@[simp]
-theorem ColoringOn.coe_restrict (C : G.ColoringOn γ s) (h : t ⊆ s) :
-    ⇑(C.restrict h) = ⇑C := rfl
+#check ColoringOn.restrict_apply -- (C.restrict h) a = C a
 
 /-!
 In practice the most common use of `restrict` is the trivial one where the subset is
 equal to the original set. `ColoringOn` is a type that encodes data, and just as with
 `Walk.copy` we frequently need to change the set on which a colouring is valid to one
 that is equal but not definitionally equal to it, for example `↑(insert a s)` versus
-`insert a ↑s`. This is the idea behind the *range copy pattern* of
-[Plumbing](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-fixing-type-mismatches),
+`insert a ↑s`. This is the idea behind the *range copy pattern* from
+[Plumbing Elsewhere in the API](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-elsewhere-in-the-api),
 applied, as for `Walk.copy`, to data in the type rather than in a field, and it is
 just restriction along `h.ge : t ⊆ s`. We call this `ColoringOn.copy`. (Mathlib's
 `Subgraph.copy` is an instance of the pattern itself: it replaces the `verts` and
@@ -1197,37 +1290,34 @@ just restriction along `h.ge : t ⊆ s`. We call this `ColoringOn.copy`. (Mathli
 -/
 #check Subgraph.copy
 
-/--
-Construct a `G.ColoringOn γ t` from `C : G.ColoringOn γ s` and proof that `s = t` -/
-protected
-def ColoringOn.copy (C : G.ColoringOn γ s) (h : s = t) : G.ColoringOn γ t :=
+/-- Construct a `G.ColoringOn γ t` from `C : G.ColoringOn γ s` and a proof that
+`s = t`. -/
+@[simps!]
+protected def ColoringOn.copy (C : G.ColoringOn γ s) (h : s = t) :
+    G.ColoringOn γ t :=
   C.restrict h.ge
 
-@[simp]
-theorem ColoringOn.coe_copy (C : G.ColoringOn γ s) (h : s = t) : ⇑(C.copy h) = ⇑C :=
-  rfl
-
 /-!
-The pointwise form. It follows from `coe_copy` under `simp`, so it is not itself a
-`simp` lemma; we keep it as a named lemma for the explicit `rw` chains that step
-through a copy to expose the underlying `union`/`insert`.
+The body of `copy` is an application of `restrict` rather than a structure, so we
+need `@[simps!]` to unfold it. The generated `simp` lemma `copy_apply` also serves
+as a named lemma for the explicit `rw` chains that step through a copy to expose the
+underlying `union`/`insert`.
 -/
-lemma ColoringOn.copy_apply (C : G.ColoringOn γ s) (h : s = t) {v : V} :
-    (C.copy h) v = C v := rfl
+#check ColoringOn.copy_apply -- (C.copy h) a = C a
 
 /-!
 By far the most common source of such mismatches for us will be due to the coercion
 from `Finset V` to `Set V`. Following the Mathlib convention that definitions are
 made for the more general type, our basic constructors are stated for `Set V`. In
-practice, however, we almost always colour finite sets. If we pass `ColoringOn` a
-`Finset V`, then it is coerced to a `Set V` (since `Finset` has a `SetLike`
+practice, however, we almost always colour finite sets. When we pass `ColoringOn` a
+`Finset V` it is automatically coerced to a `Set V` (since `Finset` has a `SetLike`
 instance). Depending on how this coercion is applied we may end up with a type
 mismatch that we will need to fix with `copy`.
 
 For example, we might end up with a colouring of `↑s ∪ ↑t` (the `Set V` given by
 coercing each of `s t : Finset V` to `Set V` and then taking their union) when the
 goal asks for a colouring of `↑(s ∪ t)` (the coercion of the `Finset V` that is the
-Finset union of `s` and `t`). These two sets are obviously equal but the proof
+`Finset` union of `s` and `t`). These two sets are obviously equal but the proof
 is not `rfl` (it is the `simp` lemma `Finset.coe_union`).
 -/
 /-- error: Type mismatch -/
@@ -1240,7 +1330,7 @@ example (s t : Finset V) [DecidableEq V] (C : G.ColoringOn γ (↑s ∪ ↑t)) :
 
 /-!
 For this reason we will need to use `copy` frequently in proofs. Fortunately
-`Finset.coe_insert`, `Finset.coe_union`, `Finset.coe_empty` etc are all `simp`
+`Finset.coe_insert`, `Finset.coe_union`, `Finset.coe_empty` etc. are all `simp`
 lemmas, so the proof obligation that `copy` requires will almost always be discharged
 by `simp`.
 -/
@@ -1255,15 +1345,13 @@ Fundamentally we are interested in partial colourings as a tool to build total
 colourings, so we want to be able to turn a `G.ColoringOn γ Set.univ` into a
 `G.Coloring γ`.
 -/
-/-- A `G.ColoringOn γ Set.univ` is a `G.Coloring γ` -/
+/-- A `G.ColoringOn γ Set.univ` is a `G.Coloring γ`. -/
+@[simps]
 def ColoringOn.toColoring (C : G.ColoringOn γ Set.univ) : G.Coloring γ :=
     ⟨C, fun h ↦ C.valid (by simpa using h)⟩
 
-@[simp]
-lemma ColoringOn.coe_toColoring (C : G.ColoringOn γ Set.univ) :
-    ⇑C.toColoring = ⇑C := rfl
-
-/-- A colouring gives rise to a partial colouring on any set -/
+/-- A colouring gives rise to a partial colouring on any set. -/
+@[simps]
 def Coloring.toColoringOn (C : G.Coloring γ) (s : Set V) : G.ColoringOn γ s :=
     ⟨C, fun h ↦ C.valid (by simpa using h.2.2)⟩
 
@@ -1278,49 +1366,44 @@ lemma colorableOn_univ_iff_colorable (n : ℕ) :
   · exact ⟨c.toColoringOn _⟩
 
 /-!
-There are a few fundamental partial colourings that we will need to construct: the
-partial colouring of the empty set, the partial colouring of a singleton, and the
-partial colouring of a pair of non-adjacent vertices.
+There are a few basic partial colourings that we will need to construct: the partial
+colouring of the empty set, the partial colouring of a singleton, and the partial
+colouring of a pair of non-adjacent vertices.
 -/
 
 /-- The partial colouring of the empty set by a colour `c`. -/
+@[simps!]
 def coloringOnEmpty (c : γ) : G.ColoringOn γ ∅ :=
   Coloring.mk (fun _ => c) fun h => h.1.elim
 
 
 /-- The partial colouring of the singleton set `{a}` by a colour `c`. -/
+@[simps]
 def coloringOnOfSingleton {γ : Type*} (a : V) (c : γ) :
-    G.ColoringOn γ ({a} : Set V) where
+    G.ColoringOn γ {a} where
   toFun := fun _ ↦ c
   map_rel' := by simp
 
-@[simp]
-lemma coloringOnOfSingleton_apply {γ : Type*} {a v : V} {c : γ} :
-  G.coloringOnOfSingleton a c v = c := rfl
-
 /-- The partial colouring of a pair of non-adjacent vertices by a colour `c`. -/
+@[simps]
 def coloringOnOfNotAdj {γ : Type*} {a b : V} (h : ¬ G.Adj a b) (c : γ) :
-    G.ColoringOn γ ({a, b} : Set V) where
+    G.ColoringOn γ {a, b} where
   toFun := fun _ ↦ c
   map_rel' := by
     rintro x y ⟨hx, hy, hxy⟩ -
-    aesop (add simp adj_comm)
-
-@[simp]
-lemma coloringOnOfNotAdj_apply {γ : Type*} {a b v : V} {h : ¬ G.Adj a b} {c : γ} :
-  G.coloringOnOfNotAdj h c v = c := rfl
+    grind [adj_comm]
 
 variable {G}
-
 /-!
 We can combine two partial colourings by extending the first using the second,
 provided they are compatible in the sense that there is no edge between a vertex
 coloured by `C₁` and a vertex coloured only by `C₂` using the same colour. This gives
 a partial colouring on the union of the two sets.
 -/
-/-- We can combine colourings `C₁` of `s` and `C₂` of `t` if they are compatible i.e.
-`∀ v w, v ∈ s → w ∈ t \ s → G.Adj v w → C₁ v ≠ C₂ w` to get a colouring of `s ∪ t`.
-It agrees with `C₁` on `s` and with `C₂` on `t \ s`. -/
+/-- We can combine colourings `C₁` of `s` and `C₂` of `t` if they are compatible,
+i.e. `∀ v w, v ∈ s → w ∈ t \ s → G.Adj v w → C₁ v ≠ C₂ w` to get a colouring of
+`s ∪ t`. It agrees with `C₁` on `s` and with `C₂` on `t \ s`. -/
+@[simps]
 def ColoringOn.union [DecidablePred (· ∈ s)] (C₁ : G.ColoringOn γ s)
     (C₂ : G.ColoringOn γ t)
     (h : ∀ ⦃v w⦄, v ∈ s → w ∈ t \ s → G.Adj v w → C₁ v ≠ C₂ w) :
@@ -1334,33 +1417,35 @@ def ColoringOn.union [DecidablePred (· ∈ s)] (C₁ : G.ColoringOn γ s)
     · exact h hw ⟨hv'.resolve_left hv, hv⟩ hadj.symm hf.symm
     · exact C₂.valid ⟨hv'.resolve_left hv, hw'.resolve_left hw, hadj⟩ hf
 
-@[simp]
-lemma ColoringOn.union_apply [DecidablePred (· ∈ s)] {v : V} (C₁ : G.ColoringOn γ s)
-    (C₂ : G.ColoringOn γ t)
-    (h : ∀ ⦃v w⦄, v ∈ s → w ∈ t \ s → G.Adj v w → C₁ v ≠ C₂ w) :
-  (C₁.union C₂ h) v = ite (v ∈ s) (C₁ v) (C₂ v) := rfl
+#check ColoringOn.union_apply -- (C₁.union C₂ h) v = if v ∈ s then C₁ v else C₂ v
 
 /-!
-The extension of a colouring of `s` to `insert a s` using a colour `c` that is not
-used by `C` to colour a neighbour of `a` in `s`.
+Next we extend a colouring `C` of `s` to `insert x s` using a colour `c` that is not
+used by `C` to colour a neighbour of `x` in `s`. We could build this as
+`(G.coloringOnOfSingleton x c).union C _`, followed by a `copy` from `{x} ∪ s` to
+`insert x s`, but then `@[simps!]` would only unfold it as far as that `union`.
+Instead we define it directly, with the same four cases in the validity proof as for
+`union`, and `@[simps]` then generates exactly the lemma we want.
 -/
-protected def ColoringOn.insert [DecidableEq V] (a : V) {c : γ}
-    (C : G.ColoringOn γ s) (h : ∀ ⦃v⦄, v ∈ s → G.Adj a v → C v ≠ c) :
-    G.ColoringOn γ (insert a s) :=
-  ((G.coloringOnOfSingleton a c).union C (by
-    simp only [Set.mem_singleton_iff, Set.mem_sdiff, and_imp]
-    rintro _ _ rfl h' h1 had h2
-    exact h h' had h2.symm)).copy (by simp [Set.union_comm])
+/-- Extend `C : G.ColoringOn γ s` to `insert x s` by colouring `x` with a colour `c`
+that `C` does not use on any neighbour of `x` in `s`. -/
+@[simps]
+protected def ColoringOn.insert [DecidableEq V] (x : V) {c : γ}
+    (C : G.ColoringOn γ s) (h : ∀ ⦃v⦄, v ∈ s → G.Adj x v → C v ≠ c) :
+    G.ColoringOn γ (insert x s) where
+  toFun v := if v = x then c else C v
+  map_rel' := by
+    rintro v w ⟨hv, hw, hadj⟩ hf
+    split_ifs at hf with hvx hwx hwx
+    · exact hadj.ne (hvx.trans hwx.symm)
+    · exact h (hw.resolve_left hwx) (hvx ▸ hadj) hf.symm
+    · exact h (hv.resolve_left hvx) (hwx ▸ hadj.symm) hf
+    · exact C.valid ⟨hv.resolve_left hvx, hw.resolve_left hwx, hadj⟩ hf
 
 /-!
-So `C.insert a h` colours `a` with `c` and agrees with `C` elsewhere.
+So `C.insert x h` colours `x` with `c` and agrees with `C` elsewhere.
 -/
-@[simp]
-lemma ColoringOn.insert_apply [DecidableEq V] {a v : V} {c : γ}
-    (C : G.ColoringOn γ s) (h : ∀ ⦃x⦄, x ∈ s → G.Adj a x → C x ≠ c) :
-    (C.insert a h) v = ite (v = a) c (C v) := by
-  rw [ColoringOn.insert, copy_apply, union_apply]
-  simp
+#check ColoringOn.insert_apply -- (C.insert x h) v = if v = x then c else C v
 
 /-!
 Finally we can relabel the colours of a partial colouring along any injective map (in
@@ -1368,13 +1453,12 @@ particular along any permutation of the colours): validity is preserved, since a
 injection cannot merge two distinct colours.
 -/
 /-- Relabel the colours of a partial colouring along an embedding. -/
+@[simps!]
 def ColoringOn.map {β : Type*} (f : γ ↪ β) (C : G.ColoringOn γ s) :
     G.ColoringOn β s :=
   (Embedding.completeGraph f).toHom.comp C
 
-@[simp]
-lemma ColoringOn.map_apply {β : Type*} (f : γ ↪ β) (C : G.ColoringOn γ s)
-    {v : V} : C.map f v = f (C v) := rfl
+#check ColoringOn.map_apply --  (ColoringOn.map f C) x = f (C x)
 
 end partcol
 end SimpleGraph

@@ -47,7 +47,58 @@ private def getFullSrcSearchPath : IO Lean.SearchPath := do
     p.parent >>= (·.parent) >>= (·.parent) >>= (·.parent)
   return primary ++ fallback
 
-private def extractSource (name : Lean.Name) : Lean.Elab.Command.CommandElabM (List String) := do
+/-- Whether `c` can occur in a (possibly dotted) name. -/
+private def isNameChar (c : Char) : Bool :=
+  c.isAlphanum || c == '_' || c == '\'' || c == '!' || c == '?' || c == '.' ||
+    (c.toNat ≥ 0x80 && !c.isWhitespace)
+
+/--
+Whether the declaration ranges `r` of `name` fit `lines`, the current text of its
+source file. The ranges are those recorded when the module was compiled, as loaded by
+the current file; they stop fitting when the source is edited afterwards (say, an
+earlier chapter is edited while a later one is open), and the excerpt would then be
+shifted. The check: the recorded name position holds a whole token that names the
+declaration (part of `name`, the keyword `instance` of an anonymous instance, or the
+attribute or class that generated it, as in `@[simps]` or `deriving`), and the
+declaration ends at the end of a token; unless it was generated, nothing but a
+comment may follow its last line.
+-/
+private def rangesFit (name : Lean.Name) (r : Lean.DeclarationRanges)
+    (lines : Array String) : Bool := Id.run do
+  let s := r.selectionRange
+  let e := r.range.endPos
+  let some selLine := lines[s.pos.line - 1]? | return false
+  let some endLine := lines[e.line - 1]? | return false
+  let endChars := endLine.toList
+  unless 0 < e.column && e.column ≤ endChars.length
+      && !endChars[e.column - 1]!.isWhitespace do
+    return false
+  let chars := selLine.toList
+  let len := if s.pos.line == s.endPos.line then s.endPos.column - s.pos.column
+    else chars.length - s.pos.column
+  let sel := String.ofList ((chars.drop s.pos.column).take len)
+  let before := String.ofList (chars.take s.pos.column)
+  -- A whole token (a `.` may follow it, as in `Multiset.{u}`).
+  let after := (chars.drop (s.pos.column + len)).head?
+  if sel.isEmpty || before.back?.any isNameChar
+      || after.any (fun c => c != '.' && isNameChar c) then
+    return false
+  let comps := "_root_" ::
+    name.components.filterMap fun | .str _ c => some c | _ => none
+  let unescape (c : String) := (c.replace "«" "").replace "»" ""
+  let named := sel == "instance"
+    || (sel.splitOn ".").all (comps.contains <| unescape ·)
+  let b := before.trimAsciiEnd
+  let generated := sel.all isNameChar
+    && (b.endsWith "[" || b.endsWith "," || b.endsWith "deriving")
+  let rest := (String.ofList (endChars.drop e.column)).trimAsciiStart
+  return generated
+    || (named && (e.line == s.pos.line || rest.isEmpty || rest.startsWith "--"))
+
+/-- The source lines of `name`, or `none` (with a warning) if its source file has
+changed since its module was loaded (see `rangesFit`). -/
+private def extractSource (name : Lean.Name) :
+    Lean.Elab.Command.CommandElabM (Option (List String)) := do
   let some ranges ← Lean.findDeclarationRanges? name
     | throwError "#source: no source range found for '{name}'"
   let modName ← match ← Lean.findModuleOf? name with
@@ -58,10 +109,15 @@ private def extractSource (name : Lean.Name) : Lean.Elab.Command.CommandElabM (L
   let some path ← srcPath.findModuleWithExt "lean" modName
     | throwError "#source: could not find source file for module '{modName}'"
   let content ← IO.FS.readFile path
-  let lines     := content.splitOn "\n"
+  let lines     := content.splitOn "\n" |>.toArray
+  unless rangesFit name ranges lines do
+    Lean.logWarning m!"#source: '{modName}' has been edited since this file \
+      loaded it, so the source of '{name}' cannot be located. Use the \
+      \"Restart File\" command in your editor."
+    return none
   let startLine := ranges.range.pos.line - 1
   let endLine   := ranges.range.endPos.line - 1
-  return (lines.toArray.extract startLine (endLine + 1)).toList
+  return some (lines.extract startLine (endLine + 1)).toList
 
 open Lean Elab Command in
 /-- Shared implementation of the `#source` commands: log the source of `id` at `tk`,
@@ -69,7 +125,7 @@ after applying `clean` to its lines. -/
 private def elabSource (tk : Syntax) (id : Ident)
     (clean : List String → List String) : CommandElabM Unit := do
   let name ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo id
-  let excerpt ← extractSource name
+  let some excerpt ← withRef tk <| extractSource name | return
   withRef tk <| logInfo (String.intercalate "\n" (clean excerpt))
 
 -- The commands below have plain comments, not doc-strings: the HTML would show a

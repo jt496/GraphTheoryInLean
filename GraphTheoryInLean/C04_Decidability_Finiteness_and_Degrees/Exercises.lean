@@ -11,8 +11,7 @@ The first exercises are on finiteness and counting.
 
 1. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
 statement used. Prove that a graph has at most `Fintype.card (Sym2 V)` edges,
-assuming only the two instances that the statement itself mentions. (Why would it
-have been a mistake to assume `[Fintype V] [DecidableRel G.Adj]` instead?)
+assuming only the two instances that the statement itself mentions.
 -/
 example [Fintype G.edgeSet] [Fintype (Sym2 V)] :
     G.edgeFinset.card ≤ Fintype.card (Sym2 V) := by
@@ -105,17 +104,16 @@ example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
 be regular with respect to the filtering instance for its neighbourhoods; see
 [Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).)
 -/
-example (n : ℕ) : (Q[n])ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
+example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
   sorry
 
 /-!
-13. We saw that an `n`-uniform blow-up of a locally finite graph is locally finite.
+13. We saw that the `n`-uniform blow-up of a locally finite graph is locally finite.
 In this exercise we generalize this to the case when each of the classes in the
 blow-up is finite (but they may have different sizes). We make this a `def` rather
 than an `instance`: since `G[n]` is `G.blowUpGraph (fun _ => Fin n)`, an instance
 would give a second route to `Fintype (G[n].neighborSet w)`, alongside the instance
-from the chapter, creating a diamond (see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)).
+from the chapter, creating a diamond.
 -/
 @[instance_reducible]
 def locallyFiniteBlowUpGraph' {ι : Type*} (H : SimpleGraph ι) [H.LocallyFinite]
@@ -125,8 +123,8 @@ def locallyFiniteBlowUpGraph' {ι : Type*} (H : SimpleGraph ι) [H.LocallyFinite
     sorry
 
 /-!
-14. Prove that if `V` is finite then the number of vertices in the `n`th iterated
-Mycielskian is `2 ^ n * Fintype.card V + 2 ^ n - 1`.
+14. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
+`2 ^ n * Fintype.card V + 2 ^ n - 1` vertices.
 -/
 lemma card_mycielskianVert' (n : ℕ) [Fintype V] :
     Fintype.card (mμᵥ^n V) = 2 ^ n * Fintype.card V + 2 ^ n - 1 := by
@@ -140,10 +138,8 @@ As in
 statements about degrees and edge sets take the `Fintype` instances they mention as
 arguments. Those about `δ`, `Δ` and `degreeMultiset` take `[Fintype V]` and
 `[DecidableRel G.Adj]` instead, since these definitions build their own instances
-from them (see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)).
-Use the `classical` tactic for any further instances a proof needs. (We also
-`open Finset` since we will need quite a few lemmas about `Finset`.)
+from them. Use the `classical` tactic for any further instances a proof needs. (We
+also `open Finset` since we will need quite a few lemmas about `Finset`.)
 
 15. The degree of the new vertex `none` in the Mycielskian is the number of vertices
 in the original graph.
@@ -192,8 +188,8 @@ lemma minDegree_mycielskian_of_one_le' [Fintype V] [DecidableRel G.Adj]
   sorry
 
 /-!
-20. The degreeMultiset of the complete graph `K[n]` is the multiset of `n` copies of
-`n - 1`.
+20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
+of `n - 1`.
 -/
 theorem degreeMultiset_top' (n : ℕ) :
     K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
@@ -218,7 +214,7 @@ theorem Graphic.even_sum' {m : Multiset ℕ} (h : Graphic m) : Even m.sum := by
 23. In the chapter we computed the degree of the new vertex of `coneGraph H s`. Show
 that an old vertex gains one on its degree exactly when it lies in `s`.
 -/
-lemma coneGraph_degree_some' [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
+lemma degree_coneGraph_some' [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
     (w : V) [Fintype (H.neighborSet w)]
     [Fintype ((coneGraph H s).neighborSet (some w))] :
     (coneGraph H s).degree (some w) = H.degree w + (if w ∈ s then 1 else 0) := by
@@ -230,7 +226,7 @@ vertex has its old degree plus one when it lies in `s`. (Hint: the stub below re
 that `Finset.univ` on `Option V` is `none` followed by the image of `Finset.univ`
 under `some`. This holds by `rfl`.)
 -/
-theorem coneGraph_degreeMultiset' [Fintype V] [DecidableEq V] (H : SimpleGraph V)
+theorem degreeMultiset_coneGraph' [Fintype V] [DecidableEq V] (H : SimpleGraph V)
     [DecidableRel H.Adj] (s : Finset V) :
     (coneGraph H s).degreeMultiset = #s ::ₘ (Finset.univ : Finset V).val.map
       (fun w => H.degree w + if w ∈ s then 1 else 0) := by
@@ -242,7 +238,7 @@ theorem coneGraph_degreeMultiset' [Fintype V] [DecidableEq V] (H : SimpleGraph V
 25. The `degreeMultiset` of `mμ[G]` is the multiset of degrees
 of `G` with each degree doubled, together with the degrees of the new vertices.
 (Hint: the stub below records how `Finset.univ` unfolds on `Option α` and on
-`α ⊕ β`. Both facts hold by `rfl`, as in exercise 24.)
+`α ⊕ β`. Both facts hold by `rfl`, as in Exercise 24.)
 -/
 lemma degreeMultiset_mycielskian' [Fintype V] [DecidableRel G.Adj] :
     mμ[G].degreeMultiset = {Fintype.card V} + (G.degreeMultiset.map (2 * · ))
@@ -277,7 +273,7 @@ of `G`, and that two of them are adjacent iff they are distinct and share a vert
 four equalities `a = c`, `a = d`, `b = c` and `b = d` with `decidable_of_iff`.
 Recursion on `Sym2` is only allowed when the result cannot depend on the order of the
 two endpoints; `recOnSubsingleton` ensures this by requiring the result to lie in a
-`Subsingleton`, which `Decidable p` is.)
+`Subsingleton` (a type with at most one element), which `Decidable p` is.)
 -/
 example {V : Type*} (G : SimpleGraph V) [DecidableEq V] : DecidableRel L[G].Adj :=
   sorry
@@ -306,8 +302,7 @@ example (α : Type*) [Preorder α] [DecidableRel ((· ⋖ ·) : α → α → Pr
 /-!
 1. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
 statement used. Prove that a graph has at most `Fintype.card (Sym2 V)` edges,
-assuming only the two instances that the statement itself mentions. (Why would it
-have been a mistake to assume `[Fintype V] [DecidableRel G.Adj]` instead?)
+assuming only the two instances that the statement itself mentions.
 -/
 example [Fintype G.edgeSet] [Fintype (Sym2 V)] :
     G.edgeFinset.card ≤ Fintype.card (Sym2 V) :=
@@ -337,7 +332,8 @@ example [Fintype G.edgeSet] : G.edgeSet.encard = G.edgeFinset.card := by
 /-!
 4. The infinite path `pathNat₁` has infinitely many edges. Show that the `ℕ∞`-valued
 `encard` of its edge set is therefore `⊤`, while the `ℕ`-valued `ncard` returns the
-junk value `0`.
+junk value `0`. Hint: the edges `s(n, n + 1)` are distinct for distinct `n`, so
+`Set.infinite_of_injective_forall_mem` shows that the edge set is infinite.
 -/
 example : pathNat₁.edgeSet.encard = ⊤ ∧ pathNat₁.edgeSet.ncard = 0 := by
   have h : pathNat₁.edgeSet.Infinite :=
@@ -422,7 +418,7 @@ example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
 be regular with respect to the filtering instance for its neighbourhoods; see
 [Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).)
 -/
-example (n : ℕ) : (Q[n])ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
+example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
   -- put the filtering instance in scope, so that `hypercube_isRegularOfDegree`
   -- produces the regularity statement `IsRegularOfDegree.compl` expects
   let : Q[n].LocallyFinite := fun v => Subtype.fintype _
@@ -430,13 +426,12 @@ example (n : ℕ) : (Q[n])ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
   rwa [card_hypercubeVert] at this
 
 /-!
-13. We saw that an `n`-uniform blow-up of a locally finite graph is locally finite.
+13. We saw that the `n`-uniform blow-up of a locally finite graph is locally finite.
 In this exercise we generalize this to the case when each of the classes in the
 blow-up is finite (but they may have different sizes). We make this a `def` rather
 than an `instance`: since `G[n]` is `G.blowUpGraph (fun _ => Fin n)`, an instance
 would give a second route to `Fintype (G[n].neighborSet w)`, alongside the instance
-from the chapter, creating a diamond (see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)).
+from the chapter, creating a diamond.
 -/
 /-- A blow-up of a locally finite graph with finite classes is locally finite. -/
 @[instance_reducible]
@@ -447,8 +442,8 @@ def locallyFiniteBlowUpGraph {ι : Type*} (H : SimpleGraph ι) [H.LocallyFinite]
       invFun := fun ⟨⟨k, y⟩, hadj⟩ => ⟨⟨k, hadj⟩, y⟩}
 
 /-!
-14. Prove that if `V` is finite then the number of vertices in the `n`th iterated
-Mycielskian is `2 ^ n * Fintype.card V + 2 ^ n - 1`.
+14. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
+`2 ^ n * Fintype.card V + 2 ^ n - 1` vertices.
 -/
 lemma card_mycielskianVert (n : ℕ) [Fintype V] :
     Fintype.card (mμᵥ^n V) = 2 ^ n * Fintype.card V + 2 ^ n - 1 := by
@@ -561,8 +556,8 @@ lemma minDegree_mycielskian_of_one_le [Fintype V] [DecidableRel G.Adj]
   grind
 
 /-!
-20. The degreeMultiset of the complete graph `K[n]` is the multiset of `n` copies of
-`n - 1`.
+20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
+of `n - 1`.
 -/
 theorem degreeMultiset_top (n : ℕ) :
     K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
@@ -592,7 +587,7 @@ theorem Graphic.even_sum {m : Multiset ℕ} (h : Graphic m) : Even m.sum := by
 that an old vertex gains one on its degree exactly when it lies in `s`.
 -/
 @[simp]
-theorem coneGraph_degree_some [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
+theorem degree_coneGraph_some [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
     (w : V) [Fintype (H.neighborSet w)]
     [Fintype ((coneGraph H s).neighborSet (some w))] :
     (coneGraph H s).degree (some w) = H.degree w + (if w ∈ s then 1 else 0) := by
@@ -609,7 +604,7 @@ theorem coneGraph_degree_some [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
 24. The `degreeMultiset` of the cone: the new vertex contributes `#s`, and every old
 vertex has its old degree plus one when it lies in `s`.
 -/
-theorem coneGraph_degreeMultiset [Fintype V] [DecidableEq V] (H : SimpleGraph V)
+theorem degreeMultiset_coneGraph [Fintype V] [DecidableEq V] (H : SimpleGraph V)
     [DecidableRel H.Adj] (s : Finset V) :
     (coneGraph H s).degreeMultiset = #s ::ₘ (Finset.univ : Finset V).val.map
       (fun w => H.degree w + if w ∈ s then 1 else 0) := by
@@ -623,7 +618,7 @@ theorem coneGraph_degreeMultiset [Fintype V] [DecidableEq V] (H : SimpleGraph V)
 25. The `degreeMultiset` of `mμ[G]` is the multiset of degrees
 of `G` with each degree doubled, together with the degrees of the new vertices.
 (Hint: the stub below records how `Finset.univ` unfolds on `Option α` and on
-`α ⊕ β`. Both facts hold by `rfl`, as in exercise 24.)
+`α ⊕ β`. Both facts hold by `rfl`, as in Exercise 24.)
 -/
 lemma degreeMultiset_mycielskian [Fintype V] [DecidableRel G.Adj] :
     mμ[G].degreeMultiset = {Fintype.card V} + (G.degreeMultiset.map (2 * · ))
@@ -665,9 +660,9 @@ of `G`, and that two of them are adjacent iff they are distinct and share a vert
 four equalities `a = c`, `a = d`, `b = c` and `b = d` with `decidable_of_iff`.
 Recursion on `Sym2` is only allowed when the result cannot depend on the order of the
 two endpoints; `recOnSubsingleton` ensures this by requiring the result to lie in a
-`Subsingleton`, which `Decidable p` is.)
+`Subsingleton` (a type with at most one element), which `Decidable p` is.)
 -/
-/-- Decidability of the adjacency relation for the line graph -/
+/-- Decidability of the adjacency relation for the line graph. -/
 instance {V : Type*} (G : SimpleGraph V) [DecidableEq V] :
     DecidableRel L[G].Adj := by
   intro e₁ e₂
@@ -686,10 +681,11 @@ example : L[C[5]].Adj ⟨s(0, 1), by decide⟩ ⟨s(1, 2), by decide⟩ := by de
 building it with `decidable_of_iff` rather than `rw` so that `decide` can still
 reduce it.
 
-Note `_root_.` puts the instance at `CovBy.decidableRel`, outside the `SimpleGraph`
-namespace that we are working in, since it is about orders rather than graphs.
+Note that `_root_.` puts the instance at `CovBy.decidableRel`, outside the
+`SimpleGraph` namespace that we are working in, since it is about orders rather than
+graphs.
 -/
-/-- Decidability of the covering relation of a locally finite order -/
+/-- Decidability of the covering relation of a locally finite order. -/
 instance _root_.CovBy.decidableRel {α : Type*} [Preorder α] [DecidableEq α]
     [DecidableLT α] [LocallyFiniteOrder α] :
     DecidableRel ((· ⋖ ·) : α → α → Prop) := fun a b =>
@@ -700,7 +696,7 @@ instance _root_.CovBy.decidableRel {α : Type*} [Preorder α] [DecidableEq α]
 29. Show that the `hasse` graph of a preorder with a decidable covering relation has
 decidable adjacency.
 -/
-/-- Decidability of the adjacency relation for the Hasse graph -/
+/-- Decidability of the adjacency relation for the Hasse graph. -/
 instance hasseAdjDecidable (α : Type*) [Preorder α]
     [DecidableRel ((· ⋖ ·) : α → α → Prop)] :
     DecidableRel (hasse α).Adj := fun u v =>

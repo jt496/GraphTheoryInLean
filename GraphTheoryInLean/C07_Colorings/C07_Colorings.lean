@@ -15,9 +15,7 @@ vertices receive different colours, and the *chromatic number* is the least numb
 colours that suffice. Colourings are among the most studied topics in graph theory.
 Any clique needs as many colours as it has vertices, so the clique number is a lower
 bound for the chromatic number, and the Mycielskian shows that this bound can be
-arbitrarily bad. Colourings are also a good place to see Lean's computational side:
-the natural definition of the greedy algorithm is easy to prove correct but hopeless
-to run, and we will see how Lean lets us keep the former while fixing the latter.
+arbitrarily bad.
 
 In this chapter we study graph colourings (`Coloring`), colourability (`Colorable`),
 the chromatic number (`chromaticNumber`) and bipartite graphs (`IsBipartite`). We
@@ -28,11 +26,12 @@ products and hypercubes. We show that the chromatic number of the Mycielskian is
 exactly one more than that of the original graph, which is what makes the clique
 bound arbitrarily bad. We also look briefly at edge colourings.
 
-Finally we turn to the *greedy* colouring. We first define it in a form that is easy
-to reason about, using `Nat.find` and well-founded recursion, and use this to prove
-that any locally finite graph on a countable vertex type with all degrees at most `Δ`
-is `(Δ + 1)`-colourable. The crown graph shows that the greedy colouring can perform
-as badly as possible. We end by looking at how to make `greedy` efficient to run.
+Finally we turn to the *greedy* colouring algorithm. We first define it in a form
+that is easy to reason about, using `Nat.find` and well-founded recursion, and use
+this to prove that any locally finite graph on a countable vertex type with all
+degrees at most `Δ` is `(Δ + 1)`-colourable. We look at the crown graph to see how
+badly the greedy colouring can perform. We end by looking at how to make it more
+efficient to run.
 
 # Colourings
 
@@ -47,6 +46,7 @@ corresponds exactly to a proper `γ`-colouring.
 Adjacent vertices get different colours.
 -/
 #check Coloring.valid  -- C.valid : G.Adj u v → C u ≠ C v
+
 /-!
 The colour class of a colour `c` is the set of vertices coloured `c`.
 -/
@@ -66,8 +66,8 @@ sets, one for each colour. Mathlib makes this precise with `Coloring.toPartition
 #check partitionable_iff_colorable -- G.Partitionable n ↔ G.Colorable n
 
 /-!
-Any cycle graph can be 3-coloured, and any even cycle can be 2-coloured using `Bool`
-as the set of colours. Colourings of concrete graphs can also be evaluated.
+Any cycle graph can be `3`-coloured, and any even cycle can be `2`-coloured using
+`Bool` as the set of colours. Colourings of concrete graphs can also be evaluated.
 -/
 #eval cycleGraph.tricoloring 7 (by decide) -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 0, 3 ↦ 1,
                                            --         4 ↦ 0, 5 ↦ 1, 6 ↦ 2}
@@ -88,17 +88,20 @@ example (n : ℕ) : G.Colorable n ↔ Nonempty (G.Coloring (Fin n)) := Iff.rfl
 In the other direction, a colouring `C : G.Coloring α` with a finite type of colours
 `α` shows that `G` is `Fintype.card α`-colourable.
 -/
-#check Coloring.colorable -- [Fintype α] (C : G.Coloring α) : G.Colorable (card α)
+#check Coloring.colorable
+-- [Fintype α] (C : G.Coloring α) : G.Colorable (Fintype.card α)
 
 /-!
 Note that `G.Colorable 0` holds iff `G` can be coloured with the colours `Fin 0`.
 Since `Fin 0` has no elements, this is possible iff `G` has no vertices.
 -/
 #check colorable_zero_iff -- G.Colorable 0 ↔ IsEmpty V
+
 /-!
 If `G` is `n`-colourable and `n ≤ m`, then `G` is `m`-colourable.
 -/
 #check Colorable.mono
+
 /-!
 Since colourings are homomorphisms to `⊤`, we can compose them with any other
 homomorphism: if `G →g G'` and `G'` is `n`-colourable then so is `G`.
@@ -114,6 +117,7 @@ colour `G`. In Mathlib, this is defined using `ℕ∞` which is `ℕ` together w
 `⊤` if there is no such `n`.
 -/
 #source SimpleGraph.chromaticNumber  -- .. := ⨅ n ∈ Set.ofPred G.Colorable, (n : ℕ∞)
+
 /-!
 We introduce the standard `χ G` notation for the chromatic number of `G`.
 -/
@@ -121,30 +125,32 @@ We introduce the standard `χ G` notation for the chromatic number of `G`.
 scoped notation "χ" => SimpleGraph.chromaticNumber
 
 /-!
-The basic tool for working with `χ G` is that, for `n : ℕ`, we have `χ G ≤ n` iff
-`G` is `n`-colourable. Almost every proof about the chromatic number below starts by
-rewriting with this.
+The basic tool for working with `χ G` is that, for `n : ℕ`, we have `χ G ≤ n` iff `G`
+is `n`-colourable. Many proofs about the chromatic number start by rewriting with
+this.
 -/
 #check chromaticNumber_le_iff_colorable -- χ G ≤ n ↔ G.Colorable n
+
 /-!
 The chromatic number is `n + 1` iff `G` is `(n + 1)`-colourable but not
 `n`-colourable.
 -/
 #check chromaticNumber_eq_iff_colorable_not_colorable
+
 /-!
 If there is a homomorphism `G →g G'` then `χ G ≤ χ G'`. In particular a subgraph
 has chromatic number at most that of the whole graph.
 -/
 #check chromaticNumber_mono_of_hom -- (f : G →g G') : χ G ≤ χ G'
 #check chromaticNumber_mono -- (G' : SimpleGraph V) (h : G ≤ G') : χ G ≤ χ G'
+
 /-!
 Any graph on a finite set of vertices can be coloured with at most as many colours as
 there are vertices.
 -/
-#check SimpleGraph.chromaticNumber_le_card  -- G.chromaticNumber ≤ Fintype.card V
-/-!
-So any graph on a finite vertex type has finite chromatic number.
--/
+#check SimpleGraph.chromaticNumber_le_card  -- χ G ≤ Fintype.card V
+
+/-- Any graph on a finite vertex type has finite chromatic number. -/
 theorem chromaticNumber_ne_top_of_finite (G : SimpleGraph V) [Finite V] :
     χ G ≠ ⊤ :=
   chromaticNumber_ne_top_iff_exists.mpr ⟨_, G.colorable_chromaticNumber_of_fintype⟩
@@ -152,9 +158,7 @@ theorem chromaticNumber_ne_top_of_finite (G : SimpleGraph V) [Finite V] :
 /-!
 On an infinite vertex type the chromatic number can genuinely be `⊤`: the complete
 graph on `ℕ` cannot be coloured with finitely many colours. Compare this with the
-`ℕ`-valued clique number of
-[Clique Number](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-clique-number),
-for which `ω (⊤ : SimpleGraph ℕ) = 0` is a junk value.
+`ℕ`-valued clique number, for which `ω (⊤ : SimpleGraph ℕ) = 0` is a junk value.
 -/
 example : χ (⊤ : SimpleGraph ℕ) = ⊤ := chromaticNumber_top_eq_top_of_infinite ℕ
 
@@ -172,15 +176,18 @@ number of a graph is at most its chromatic number.
 -/
 #check cliqueNum_le_chromaticNumber
 example {s : Finset V} (h : G.IsClique s) : #s ≤ χ G := h.card_le_chromaticNumber
+
 /-!
 So if `χ G < n` then `G` is `n`-clique-free.
 -/
 #check cliqueFree_of_chromaticNumber_lt
+
 /-!
 If a clique has at least as many vertices as there are colours, then every colour
 appears on the clique.
 -/
 #check Coloring.surjOn_of_card_le_isClique
+
 /-!
 A proper colouring is injective on any clique: two distinct vertices of a clique are
 adjacent, so they receive different colours. Since a colouring is a homomorphism,
@@ -191,17 +198,20 @@ which dot notation finds for us.
 example {α : Type*} (c : G.Coloring α) {s : Set V} (hs : G.IsClique s) :
     Set.InjOn c s :=
   c.injOn_of_isClique hs
+
 /-!
 If `H` is not `n`-colourable and `G` is `n`-colourable then `G` cannot contain a copy
 of `H`, e.g. a bipartite graph cannot contain a triangle.
 -/
 #check free_of_colorable
+
 /-!
 What can we say about maximally clique-free graphs? Suppose that `G` is
 `(r + 1)`-clique-free but adding any edge creates an `(r + 1)`-clique. Then `G` is
 `r`-colourable iff it is complete multipartite.
 -/
 #check colorable_iff_isCompleteMultipartite_of_maximal_cliqueFree
+
 /-!
 A graph is *complete multipartite* if its vertices split into parts so that two
 vertices are adjacent iff they lie in different parts. Mathlib defines this as
@@ -210,15 +220,16 @@ no loops) and symmetric, so transitivity makes it an equivalence relation, and i
 equivalence classes are the parts.
 -/
 #source IsCompleteMultipartite
+
 /-!
 Colour classes give a bound in the other direction, in terms of independent sets.
-If `G` is `n`-colourable then its vertices are covered by `n` colour classes, each
-an independent set of at most `⍺ G` vertices, so `G` has at most `n * ⍺ G` vertices.
+If `G` is `k`-colourable then its vertices are covered by `k` colour classes, each
+an independent set of at most `⍺ G` vertices, so `G` has at most `k * ⍺ G` vertices.
 No finiteness assumption is needed: if `V` is infinite then `Nat.card V` is the junk
 value `0`, so the inequality holds trivially, and we dispose of this case first.
 -/
-theorem Colorable.natCard_le_mul_indepNum {n : ℕ} (h : G.Colorable n) :
-    Nat.card V ≤ n * ⍺ G := by
+theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
+    Nat.card V ≤ k * ⍺ G := by
   classical
   cases finite_or_infinite V with
   | inr => simp -- `Nat.card V` is the junk value `0`
@@ -228,25 +239,25 @@ theorem Colorable.natCard_le_mul_indepNum {n : ℕ} (h : G.Colorable n) :
   calc Nat.card V = ∑ i, #{v | C v = i} := by
         rw [Nat.card_eq_fintype_card, ← card_univ,
           card_eq_sum_card_fiberwise fun v _ => mem_univ (C v)]
-    _ ≤ ∑ _i : Fin n, ⍺ G := sum_le_sum fun i _ => IsIndepSet.card_le_indepNum <| by
+    _ ≤ ∑ _ : Fin k, ⍺ G := sum_le_sum fun i _ => IsIndepSet.card_le_indepNum <| by
         simpa [Coloring.colorClass] using C.isIndepSet_colorClass i
-    _ = n * ⍺ G := by simp
+    _ = k * ⍺ G := by simp
 
 /-!
-Taking `n = χ G` shows that a finite graph has at most `χ G * ⍺ G` vertices. As
+Taking `k = χ G` shows that a finite graph has at most `χ G * ⍺ G` vertices. As
 before, the Lean statement needs no finiteness assumption, since it holds trivially
 when `V` is infinite. Since `χ G` takes values in `ℕ∞`, the statement lives in `ℕ∞`:
 the natural numbers `Nat.card V` and `⍺ G` are silently cast to `ℕ∞` (compare
 [Counting in ℕ∞ : ENat.card](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-counting-in-enat-card)).
 
-For finite `V` we cannot apply `Colorable.natCard_le_mul_indepNum` with `n = χ G`
-directly, since `n` must be a natural number. This is a job for the `lift` tactic,
+For finite `V` we cannot apply `Colorable.natCard_le_mul_indepNum` with `k = χ G`
+directly, since `k` must be a natural number. This is a job for the `lift` tactic,
 which moves a value from `ℕ∞` down to `ℕ` once we know that it is finite. Given a
 proof that `χ G ≠ ⊤` (`chromaticNumber_ne_top_of_finite`),
-`lift χ G to ℕ using … with n hn` introduces a natural number `n` with
-`hn : ↑n = χ G` and replaces `χ G` by `↑n` in the goal. (We must name `n` here,
+`lift χ G to ℕ using … with k hk` introduces a natural number `k` with
+`hk : ↑k = χ G` and replaces `χ G` by `↑k` in the goal. (We must name `k` here,
 since `χ G` is an expression rather than a variable; when lifting a variable `x`,
-`lift` reuses the name `x`.) Now `G` is `n`-colourable by
+`lift` reuses the name `x`.) Now `G` is `k`-colourable by
 `chromaticNumber_le_iff_colorable`, and `exact_mod_cast` transfers the inequality
 from `ℕ` to `ℕ∞`.
 -/
@@ -254,8 +265,8 @@ theorem natCard_le_chromaticNumber_mul_indepNum : Nat.card V ≤ χ G * ⍺ G :=
   cases finite_or_infinite V with
   | inr => simp -- `Nat.card V` is the junk value `0`
   | inl =>
-  lift χ G to ℕ using G.chromaticNumber_ne_top_of_finite with n hn
-  exact_mod_cast (chromaticNumber_le_iff_colorable.mp hn.ge).natCard_le_mul_indepNum
+  lift χ G to ℕ using G.chromaticNumber_ne_top_of_finite with k hk
+  exact_mod_cast (chromaticNumber_le_iff_colorable.mp hk.ge).natCard_le_mul_indepNum
 
 /-!
 ## Amalgamating Colourings over a Clique *
@@ -267,6 +278,8 @@ palette can be amalgamated into a colouring of the union `G₁ ⊔ G₂` — a *
 On a clique both colourings are injective, so `Equiv.Perm.exists_extending_pair`
 gives a permutation `σ` of the palette with `σ (c₂ x) = c₁ x` for every `x` in the
 overlap. Then `c₁` on `G₁` and the recoloured `c₂` elsewhere agree on the overlap.
+
+[Figure: Top left: $G_1$ coloured by $c_1$ and $G_2$ coloured by $c_2$; their supports meet in the triangle on $x$, $y$, $z$, and $c_1$ and $c_2$ disagree at $x$ and $y$. Bottom left: $G_1$ again, and $G_2$ recoloured by $\sigma \circ c_2$, where $\sigma$ swaps red and blue, so that it agrees with $c_1$ on the triangle. Right: the glued colouring of $G_1 \sqcup G_2$](https://jt496.github.io/GraphTheoryInLean/figures/clique_sum_colouring.svg)
 -/
 theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
     (hs₁ : G₁.IsClique (G₁.support ∩ G₂.support))
@@ -292,7 +305,9 @@ theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
   -- On `G₂`'s support, `f` coincides with the recoloured `c₂` (they agree on the
   -- shared clique).
   have key : ∀ {x}, x ∈ G₂.support → f x = σ (c₂ x) := fun {x} hx => by
-    simp only [f]; split_ifs with hx1; exacts [(hσkey x ⟨hx1, hx⟩).symm, rfl]
+    simp only [f]; split_ifs with hx1
+    -- we use the `exacts` tactic to close the two goals
+    exacts [(hσkey x ⟨hx1, hx⟩).symm, rfl]
   refine ⟨Coloring.mk f ?_⟩
   rintro a b (hab | hab)
   · -- An edge of `G₁`: both endpoints use `c₁`.
@@ -310,9 +325,9 @@ subsingleton, hence vacuously a clique in each part.
 theorem Colorable.sup_of_subsingleton_inter {G₁ G₂ : SimpleGraph V}
     {v : V} (hmeet : G₁.support ∩ G₂.support ⊆ {v})
     {n : ℕ} (h₁ : G₁.Colorable n) (h₂ : G₂.Colorable n) :
-    (G₁ ⊔ G₂).Colorable n :=
+    (G₁ ⊔ G₂).Colorable n := by
   have hsub := Set.subsingleton_of_subset_singleton hmeet
-  Colorable.sup_of_isClique_inter (hsub.pairwise _) (hsub.pairwise _) h₁ h₂
+  exact Colorable.sup_of_isClique_inter (hsub.pairwise _) (hsub.pairwise _) h₁ h₂
 
 /-!
 This last result is the key step in colouring a graph block by block: in
@@ -324,12 +339,12 @@ we use it to show that if `n ≥ 1` and every block of a finite graph `G` is
 
 A graph is *bipartite* iff its vertices can be partitioned into two parts with no
 edges within parts. In Mathlib this is defined in the obvious way via
-2-colourability, so `G.IsBipartite` is exactly `G.Colorable 2`.
+`2`-colourability, so `G.IsBipartite` is exactly `G.Colorable 2`.
 -/
 #source IsBipartite -- abbrev IsBipartite (G : SimpleGraph V) : Prop := G.Colorable 2
 
 /-!
-Any complete bipartite graph is 2-colourable (bipartite). Mathlib gives the natural
+Any complete bipartite graph is `2`-colourable (bipartite). Mathlib gives the natural
 colouring, `CompleteBipartiteGraph.bicoloring`, which uses `Bool` as the set of
 colours (`true` on the right part). By Mathlib's naming conventions it should be
 called `completeBipartiteGraph.bicoloring` (compare `pathGraph.bicoloring`), so we
@@ -352,8 +367,6 @@ When both parts are nonempty there is an edge, so the chromatic number is exactl
 `2`. In general, a graph has chromatic number `2` iff it is bipartite and has an
 edge.
 -/
-#check CompleteBipartiteGraph.chromaticNumber
-  -- [Nonempty V] [Nonempty W] : χ (completeBipartiteGraph V W) = 2
 #check chromaticNumber_eq_two_iff -- χ G = 2 ↔ G.IsBipartite ∧ G ≠ ⊥
 
 /-!
@@ -379,18 +392,15 @@ copies. (Mathlib also has this as `IsBipartiteWith.completeBipartiteGraph`.)
 -/
 example (V W : Type*) : (completeBipartiteGraph V W).IsBipartiteWith
     (Set.range Sum.inl) (Set.range Sum.inr) where
-  disjoint := by simp [Set.disjoint_iff_inter_eq_empty]
-  mem_of_adj {u v} h := by
-    rcases u with (u | u)
-      <;> rcases v  with (v | v)
-        <;> simp_all
+  disjoint := by grind
+  mem_of_adj {u v} h := by grind
 
 /-!
 Mathlib also shows that acyclic graphs, and in particular trees (see
 [Acyclic Graphs, Trees and Forests](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-acyclic-graphs-trees-and-forests)),
 are bipartite. The classical characterization, that a graph is bipartite iff it has
 no odd cycles, is the subject of
-[Odd Cycles and Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-odd-cycles-and-bipartite-graphs).
+[Odd Cycles and Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Walks/#section-odd-cycles-and-bipartite-graphs).
 -/
 #check IsAcyclic.colorable_two -- (hG : G.IsAcyclic) : G.Colorable 2
 #check IsTree.colorable_two -- (hG : G.IsTree) : G.Colorable 2
@@ -444,25 +454,23 @@ def boxProdColoringRight {α : Type*} (C : (G □ H).Coloring α) (v : V) :
 
 /-!
 Conversely, given `k`-colourings of `G` and `H` we can `k`-colour `G □ H` as follows.
-If `C₁ : G.Coloring (Fin k)` and `C₂ : H.Coloring (Fin k)` then `C : G □ H → Fin k`
+If `C₁ : G.Coloring (Fin k)` and `C₂ : H.Coloring (Fin k)` then `C : V × W → Fin k`
 defined by `C (v, w) = C₁ v + C₂ w`, with addition modulo `k` in `Fin k`, is a valid
 colouring of `G □ H`. Along an edge one coordinate is fixed, so the colours differ
-because the colouring of the other factor is valid.
+because the colouring of the other factor is valid. (In the proof we need to
+use `add_left/right_inj` in the final `simpa`s. These require `NeZero k`.)
 -/
 /-- The `k`-colouring of `G □ H` induced by `k`-colourings of `G` and `H`. -/
 def boxProdColoring {k : ℕ} (C₁ : G.Coloring (Fin k)) (C₂ : H.Coloring (Fin k)) :
     (G □ H).Coloring (Fin k) :=
-  Coloring.mk (fun p => C₁ p.1 + C₂ p.2) <| by
+  Coloring.mk (fun x => C₁ x.1 + C₂ x.2) <| by
     rintro ⟨v, w⟩ ⟨v', w'⟩ (⟨hadj, rfl⟩ | ⟨hadj, rfl⟩)
-    -- `add_left/right_inj` need `NeZero k`, which holds since `C₁ v : Fin k`.
+    -- For these `simpa`s we need `NeZero k`, which holds since `C₁ v : Fin k`
       <;> have : NeZero k := ⟨by rintro rfl; exact (C₁ v).elim0⟩
     · simpa using C₁.valid hadj
     · simpa using C₂.valid hadj
 
-/-!
-If `G` and `H` are both `k`-colourable then so is `G □ H`, using the colouring we
-have just defined.
--/
+/-- If `G` and `H` are both `k`-colourable then so is `G □ H`. -/
 theorem Colorable.boxProd {k : ℕ} (h₁ : G.Colorable k) (h₂ : H.Colorable k) :
     (G □ H).Colorable k :=
   ⟨boxProdColoring h₁.some h₂.some⟩
@@ -507,9 +515,8 @@ end boxprod
 ## Colouring Hypercubes
 
 Recall that `Q[n + 1]` is defined to be `Q[n] □ ⊤`, where `⊤` is the complete graph
-on `Bool` (`hypercube_succ` holds by `rfl`). So `Colorable.boxProd` and induction on
-`n` show at once that every hypercube is bipartite: `Q[0]` has no edges, and `⊤` on
-`Bool` is `2`-colourable.
+on `Bool`. So `Colorable.boxProd` and induction on `n` show at once that every
+hypercube is bipartite: `Q[0]` has no edges, and `⊤` on `Bool` is `2`-colourable.
 -/
 lemma hypercube_isBipartite (n : ℕ) : Q[n].IsBipartite := by
   induction n with
@@ -519,7 +526,7 @@ lemma hypercube_isBipartite (n : ℕ) : Q[n].IsBipartite := by
 /-!
 Behind this proof is an explicit colouring, but we cannot compute it from the proof:
 `IsBipartite` is a `Prop`, and `Colorable.boxProd` picks its colourings with
-`.some`. So we define the colouring directly. The box-product colouring of
+`.some`. So we define the colouring directly. The box product colouring of
 `Q[n] □ ⊤` gives `(v, b)` the colour of `v` plus `b`, modulo `2`. With `Bool` as the
 colours, addition modulo `2` is `Bool.xor`, so we colour each vertex by the parity
 of its coordinates.
@@ -557,7 +564,7 @@ example (n : ℕ) : Q[n].IsBipartiteWith {v | v.bool} {v | ¬ v.bool} where
     by_cases u.bool <;> simp_all
 
 /-!
-Bipartite graphs are 3-clique-free, hence `Q[n]` is 3-clique-free.
+Bipartite graphs are `3`-clique-free, hence `Q[n]` is `3`-clique-free.
 -/
 lemma hypercube_cliqueFree_three (n : ℕ) : Q[n].CliqueFree 3 :=
   (hypercube_isBipartite _).cliqueFree (by decide)
@@ -573,13 +580,10 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Colouring Mycielskians
 
-We now come to the main reason for defining the Mycielskian `mμ[G]` in
-[Mycielskian](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-mycielskian):
+We now come to the main reason for defining the Mycielskian `mμ[G]` (`mycielskian`):
 its chromatic number is exactly one more than that of `G`. Since `mμ[G]` is also
-triangle-free whenever `G` is
-([Triangle-Free Mycielskians](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-triangle-free-mycielskians)),
-iterating the construction gives triangle-free graphs of arbitrarily large chromatic
-number.
+triangle-free whenever `G` is (`CliqueFree.mycielskian`), iterating the construction
+gives triangle-free graphs of arbitrarily large chromatic number.
 
 To show that `χ mμ[G] = χ G + 1` we will need to construct a `k`-colouring of `G`
 from a `(k + 1)`-colouring of `mμ[G]` and also construct a `(k + 1)`-colouring of
@@ -602,8 +606,8 @@ their preimages in `G` and colouring `none` with the new colour `k`.
 In `Fin (k + 1)` the top colour `k` is `Fin.last k`, and `Fin.castSucc` is the
 inclusion of the colours `Fin k = {0, ..., k - 1}` into `Fin (k + 1)`. To move the
 colour of `none` to `k` we use `recolorOfEquiv`, which recolours a colouring along a
-bijection of the colours, here the transposition swapping `k` with the colour of
-`none`: `Equiv.swap (Fin.last k) (c none)`.
+bijection of the colours, in this case the transposition swapping `k` with the colour
+of `none`: `Equiv.swap (Fin.last k) (c none)`.
 -/
 /-- Given any `(k + 1)`-colouring of `mμ[G]` this is the equivalent
 `(k + 1)`-colouring in which the vertex `none` receives colour `k`. -/
@@ -630,10 +634,19 @@ def Coloring.ofMycielskian {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1))) :
                 ⟨(c.mycielskianLast v ₗ), Fin.val_lt_last h⟩
   map_rel' := by
     intro a b hab hf
-    split_ifs at hf with h1 h2 <;>
-      simp only [Fin.mk.injEq, Fin.val_inj] at hf <;>
-        try exact (c.mycielskianLast).valid (by simpa using hab) hf
-    exact (c.mycielskianLast).valid (by simpa using hab) (h1 ▸ h2.symm)
+    -- the edge `a — b` of `G` gives three edges of `mμ[G]`
+    have hll : mμ[G].Adj (a ₗ) (b ₗ) := by simpa using hab
+    have hlr : mμ[G].Adj (a ₗ) (b ᵣ) := by simpa using hab
+    have hrl : mμ[G].Adj (a ᵣ) (b ₗ) := by simpa using hab
+    split_ifs at hf with ha hb hb
+    · -- `a ₗ` and `b ₗ` both have colour `k`, but they are adjacent
+      exact c.mycielskianLast.valid hll (ha.trans hb.symm)
+    · -- `hf` says that the adjacent `a ᵣ` and `b ₗ` have the same colour
+      exact c.mycielskianLast.valid hrl (by grind)
+    · -- `hf` says that the adjacent `a ₗ` and `b ᵣ` have the same colour
+      exact c.mycielskianLast.valid hlr (by grind)
+    · -- `hf` says that the adjacent `a ₗ` and `b ₗ` have the same colour
+      exact c.mycielskianLast.valid hll (by grind)
 
 /-!
 `Coloring.ofMycielskian` gives the harder direction; the easier direction is the
@@ -644,21 +657,17 @@ def Coloring.mycielskian {k : ℕ} (c : G.Coloring (Fin k)) :
     mμ[G].Coloring (Fin (k + 1)) where
   toFun v :=
     match v with
-    | some (Sum.inl v)  | some (Sum.inr v) => (c v).castSucc
     | none => Fin.last k
+    | v ₗ | v ᵣ => (c v).castSucc
   map_rel' := by
-      intro a b hab
-      rcases a with - | ⟨v | v⟩ <;> rcases b with - | ⟨w | w⟩ <;>
-      simp only [mycielskian_adj, completeGraph_eq_top, top_adj, ne_eq,
-                  Fin.castSucc_inj] at * <;>
-      first
-      | exact c.valid hab
-      | exact (Fin.castSucc_lt_last _).ne
-      | exact (Fin.castSucc_lt_last _).ne.symm
+    -- check all nine kinds of pair: an edge `none — v ᵣ` has the distinct colours
+    -- `k` and `(c v).castSucc`; an edge between the copies has the colours of two
+    -- adjacent vertices of `G`, which differ by `c.valid`; the other pairs are
+    -- non-edges
+    rintro (_ | v | v) (_ | w | w) hab <;>
+      simp_all [c.valid, (Fin.castSucc_ne_last _).symm]
 
-/-!
-Hence `G` is `k`-colourable iff `mμ[G]` is `(k + 1)`-colourable.
--/
+/-- `G` is `k`-colourable iff `mμ[G]` is `(k + 1)`-colourable. -/
 lemma colorable_mycielskian_succ_iff (k : ℕ) :
     mμ[G].Colorable (k + 1) ↔ G.Colorable k := by
   constructor <;> intro ⟨c⟩
@@ -672,6 +681,7 @@ a natural number we split further into the cases `m = 0` (neither side is at mos
 `0`, since `mμ[G]` has the vertex `none`) and `m = k + 1`, which is
 `colorable_mycielskian_succ_iff`.
 -/
+/-- The chromatic number of the Mycielskian of `G`. -/
 theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ[G] = χ G + 1 := by
   refine eq_of_forall_ge_iff fun m => ?_
   induction m using ENat.recTopCoe with
@@ -687,11 +697,9 @@ theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ[G] = χ G + 1 :
 Notice that `chromaticNumber_mycielskian` needs no hypotheses at all. If `G` has no
 finite colouring then both sides are `⊤` (in `ℕ∞` we have `⊤ + 1 = ⊤`), and if `V` is
 empty then `χ G = 0` while `mμ[G]` is the single vertex `none`, so `χ mμ[G] = 1`.
-Compare this with `cliqueNum_mycielskian_of_ne_bot` from
-[Clique Number of the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-clique-number-of-the-mycielskian),
-which needs both `[Finite V]` and `G ≠ ⊥`: the `ℕ`-valued clique number has the junk
-value `0` when there are arbitrarily large cliques, and if `V` is nonempty then
-`ω ⊥ = 1` but `ω mμ[⊥] = 2`.
+Compare this with `cliqueNum_mycielskian_of_ne_bot`, which needs both `[Finite V]`
+and `G ≠ ⊥`: the `ℕ`-valued clique number has the junk value `0` when there are
+arbitrarily large cliques, and if `V` is nonempty then `ω ⊥ = 1` but `ω mμ[⊥] = 2`.
 
 Since the Mycielskian is functorial (`Hom.mapMycielskian`), any homomorphism
 `G →g H` lets us turn colourings of `mμ[H]` into colourings of `mμ[G]`, so
@@ -706,34 +714,36 @@ example {W : Type*} {H : SimpleGraph W} (f : G →g H) (c : mμ[H].Coloring V) :
 example {W : Type*} {H : SimpleGraph W} (f : G →g H) : χ mμ[G] ≤ χ mμ[H] :=
   chromaticNumber_mono_of_hom f.mapMycielskian
 
-/-!
-Iterating, the `n`-th iterated Mycielskian of `G` has chromatic number `χ G + n`.
--/
+/-- The `n`-th iterated Mycielskian of `G` has chromatic number `χ G + n`. -/
 theorem chromaticNumber_iterMycielskian (n : ℕ) : χ (mμ^n G) = χ G + n := by
   induction n with
   | zero => simp
   | succ n ih =>
     rw [iterMycielskian_succ, chromaticNumber_mycielskian, ih, add_assoc]
+    -- `norm_cast` moves the casts `↑ : ℕ → ℕ∞` outwards and cancels them, here
+    -- turning `↑n + 1` into `↑(n + 1)`; it is the tactic behind `exact_mod_cast`
     norm_cast
 
 /-!
-Since `C[5]` is an odd cycle it has chromatic number `3`, so `mμ^n C[5]` has
-chromatic number `n + 3`. (In particular the Grötzsch graph `mμ[C[5]]` is
-`4`-chromatic.)
+Since `K[2]` has chromatic number `2` (`chromaticNumber_top`), `mμ^n K[2]` has
+chromatic number `n + 2`. (In particular `C[5] ≃g mμ[K[2]]` is `3`-chromatic and the
+Grötzsch graph `mμ[C[5]]` is `4`-chromatic.)
 -/
-theorem chromaticNumber_iterMycielskian_C5 (n : ℕ) : χ (mμ^n C[5]) = n + 3 := by
-  rw [chromaticNumber_iterMycielskian,
-    chromaticNumber_cycleGraph_of_odd 5 (by decide) (by decide), add_comm]
+theorem chromaticNumber_iterMycielskian_completeGraph_two (n : ℕ) :
+    χ (mμ^n K[2]) = n + 2 := by
+  simp [chromaticNumber_iterMycielskian, add_comm]
 
 /-!
-Combining this with `cliqueNum_iterMycielskian_cycleGraph` from
-[Clique Number of the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-clique-number-of-the-mycielskian)
-gives what we promised: the graphs `mμ^n C[5]` all have clique number `2`, but their
-chromatic numbers are unbounded. So the clique number can be an arbitrarily bad lower
-bound for the chromatic number.
+Combining this with `cliqueNum_iterMycielskian_completeGraph_two` gives what we
+promised, Mycielski's theorem: the graphs `mμ^n K[2]` all have clique number `2`,
+but their chromatic numbers are unbounded. So the clique number can be an arbitrarily
+bad lower bound for the chromatic number.
 -/
-example (n : ℕ) : ω (mμ^n C[5]) = 2 ∧ χ (mμ^n C[5]) = n + 3 :=
-  ⟨cliqueNum_iterMycielskian_cycleGraph n, chromaticNumber_iterMycielskian_C5 n⟩
+/-- *Mycielski's theorem*: the nth-iterated Mycielskian of `K[2]` has clique number
+`2` and chromatic number `n + 2`. -/
+theorem mycielski (n : ℕ) : ω (mμ^n K[2]) = 2 ∧ χ (mμ^n K[2]) = n + 2 :=
+  ⟨cliqueNum_iterMycielskian_completeGraph_two n,
+    chromaticNumber_iterMycielskian_completeGraph_two n⟩
 
 end mycielskian
 
@@ -746,11 +756,10 @@ So far we have coloured vertices. A *proper edge colouring* of `G` colours the e
 of `G` so that edges sharing an endpoint receive different colours. Mathlib has no
 separate notion of this (its `EdgeLabeling` assigns labels to edges with no
 properness condition), and we don't need one. Two edges share an endpoint exactly
-when they are adjacent vertices of the line graph `L[G]`
-([Line Graphs](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-line-graphs)),
-so a proper edge colouring of `G` with colours `γ` is just a colouring
-`L[G].Coloring γ`, and the *chromatic index* `χ'(G)`, the least number of colours in
-a proper edge colouring, is `χ L[G]`.
+when they are adjacent vertices of the line graph `L[G]` (`lineGraph`), so a proper
+edge colouring of `G` with colours `γ` is just a colouring `L[G].Coloring γ`, and the
+*chromatic index* `χ'(G)`, the least number of colours in a proper edge colouring, is
+`χ L[G]`.
 
 The edges at a vertex `v` pairwise share the endpoint `v`, so they form a clique in
 `L[G]`. Hence the chromatic index is at least the degree of any vertex.
@@ -781,12 +790,12 @@ theorem maxDegree_le_chromaticNumber_lineGraph [Fintype V] [DecidableRel G.Adj] 
 
 /-!
 Vizing's theorem says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for
-every finite graph `G`, and König's line colouring theorem says that `χ'(G) = Δ(G)`
-for every finite bipartite graph `G`. Neither is in Mathlib yet. (The greedy bound
-of the next section, applied to `L[G]`, whose vertices have degree at most
-`2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`.) Nor does Mathlib yet
-have other standard topics of colouring theory such as chromatic polynomials and
-list colourings.
+every finite graph `G`, and Kőnig's line colouring theorem says that `χ'(G) = Δ(G)`
+for every finite bipartite graph `G`. Neither is in Mathlib yet. The greedy bound of
+the next section, applied to `L[G]`, whose vertices have degree at most
+`2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib is also
+missing many other standard topics of colouring theory such as chromatic polynomials
+and list colourings.)
 -/
 end edgeColorings
 
@@ -794,10 +803,11 @@ end edgeColorings
 # Greedy Colouring *
 
 *Greedy colouring* means constructing a colouring one vertex at a time, choosing the
-smallest valid colour at each step, i.e. the smallest colour not used by any of the
-neighbours of `v` that we've already coloured. How many colours this uses depends
-not on the degrees of the vertices but on the number of neighbours that *precede*
-each vertex in the order in which we colour them, so we start by defining this.
+smallest valid colour at each step, i.e. for the current vertex `v`, the smallest
+colour not used by any of the neighbours of `v` that we've already coloured. How many
+colours this uses depends not on the degrees of the vertices but on the number of
+neighbours that *precede* each vertex in the order in which we colour them, so we
+start by defining this.
 
 ## Degree-less-than
 
@@ -861,7 +871,7 @@ section greedy
 
 variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
-/-- Any `G : SimpleGraph ℕ` with `DecidableRel G.Adj` is `LocallyLTFinite`. -/
+/-- Any `SimpleGraph ℕ` with decidable adjacency is `LocallyLTFinite`. -/
 instance : G.LocallyLTFinite :=
   fun v => Fintype.ofFinset {u < v | G.Adj v u} (by simp [neighborLTSet])
 
@@ -1004,8 +1014,9 @@ lemma Adj.greedy_ne {u v : ℕ} (hadj : G.Adj u v) :
   · exact hadj.greedy_ne_of_gt h
 
 /-!
-Together these pin down the greedy colour exactly when the earlier neighbours of `v`
-use precisely the colours `0, 1, ..., k - 1`: the colour of `v` is then `k`.
+Together these results pin down the greedy colour exactly when the earlier neighbours
+of `v` use precisely the colours `0, 1, ..., k - 1`: the colour of `v` is then `k`.
+(This rather special lemma will be useful when we look at the crown graph later.)
 -/
 lemma greedy_eq_of_image_eq_range {v k : ℕ}
     (h : (G.neighborLTFinset v).image G.greedy = range k) : G.greedy v = k := by
@@ -1026,10 +1037,8 @@ def greedyColoringNat : G.Coloring ℕ where
   toFun := G.greedy
   map_rel' := fun hadj hf => hadj.greedy_ne hf
 
-/-!
-*The Greedy Colouring Bound:* Any graph on `ℕ` in which every vertex has at most `Δ`
-earlier neighbours is `(Δ + 1)`-colourable.
--/
+/-- *The Greedy Colouring Bound:* Any graph on `ℕ` in which every vertex has at most
+`Δ` earlier neighbours is `(Δ + 1)`-colourable. -/
 theorem colorable_of_degreeLT_le {Δ : ℕ} (hdeg : ∀ v, G.degreeLT v ≤ Δ) :
     G.Colorable (Δ + 1) :=
   (colorable_iff_exists_bdd_nat_coloring _).2
@@ -1054,8 +1063,7 @@ Our greedy colouring construction allows us to colour graphs on `ℕ`, for examp
 
 /-!
 The `#eval`s above are deliberately timid: colouring vertex `6` of `⊤` is fine, but
-vertex `10` would take several minutes. We will see why, and fix it, at the end of
-this section.
+vertex `10` would take several minutes. We will see why, and fix it, below.
 -/
 end greedy
 
@@ -1067,12 +1075,12 @@ balanced complete bipartite graph with the obvious perfect matching removed, kno
 the *crown graph*, with its vertices ordered left, right, left, right, ...
 
 We will look at its countably infinite incarnation. We will show that the greedy
-colouring will use arbitrarily large colours, despite the graph being 2-colourable.
+colouring will use arbitrarily large colours, despite the graph being `2`-colourable.
 
-[Figure: Greedy vs.\ optimal colouring of `crownGraph`](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
+[Figure: Left: the greedy colouring of `crownGraph`, which gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
 -/
 
-/-- The *crown graph* is the complete bipartite graph on Even and Odd naturals,
+/-- The *crown graph* is the complete bipartite graph on even and odd naturals,
 minus the perfect matching `2 * n ↦ 2 * n + 1`. -/
 @[simps]
 def crownGraph : SimpleGraph ℕ where
@@ -1096,10 +1104,10 @@ lemma crownGraph_neighborLTFinset (n : ℕ) :
   simp only [mem_neighborLTFinset, crownGraph_adj, mem_image]
   constructor
   · intro ⟨hlt, hadj⟩
-    exact ⟨m / 2, by grind, by grind⟩
+    exact ⟨m / 2, by grind⟩
   · grind
 
-/-- The natural 2-colouring of the `crownGraph`. -/
+/-- The natural `2`-colouring of the `crownGraph`. -/
 def crownGraph.twoColoring : crownGraph.Coloring (Fin 2) where
   toFun n := ⟨n % 2, by grind⟩
   map_rel' h := by simp_all
@@ -1128,7 +1136,7 @@ theorem greedy_crownGraph_eq (n : ℕ) :
   grind
 
 /-!
-## Beyond `ℕ`: Encodable Vertex Types
+## Encodable Vertex Types
 
 So far we have computed greedy colourings of graphs on `ℕ`. Suppose instead that we
 have a graph `G : SimpleGraph V`, where `V` is countable. Informally we might say
@@ -1183,8 +1191,8 @@ can define it with a `match` statement on `Encodable.decode₂ V a` and
 -/
 #check decode₂
 
-/-- If `G : SimpleGraph V` has an encodable vertex type `V`, then we can encode `G`
-as a `SimpleGraph ℕ` via its encoding. -/
+/-- The `SimpleGraph ℕ` corresponding to a graph `G : SimpleGraph V` with encodable
+vertex type `V`, using `Encodable.decode₂` to preserve decidability of adjacency. -/
 @[simps!]
 protected def encode (G : SimpleGraph V) : SimpleGraph ℕ where
     Adj := fun a b =>
@@ -1192,8 +1200,7 @@ protected def encode (G : SimpleGraph V) : SimpleGraph ℕ where
       | some u, some v => G.Adj u v
       | _, _ => False
     symm := ⟨fun a b => by
-      cases decode₂ V a
-        <;> cases decode₂ V b <;> simp_all [Adj.symm]⟩
+      cases decode₂ V a <;> cases decode₂ V b <;> simp_all [Adj.symm]⟩
     loopless := ⟨fun a => by cases decode₂ V a <;> simp_all⟩
 
 /-!
@@ -1246,10 +1253,9 @@ lemma encode_degreeLT_le {G : SimpleGraph V} [DecidableRel G.Adj] [G.LocallyFini
   exact (card_le_card (encode_neighborLTFinset_subset v)).trans card_image_le
 
 /-!
-Using these lemmas we can now give the greedy `Δ + 1` colouring of a graph with
-maximum degree `Δ` on an encodable vertex type with decidable adjacency.
-
-(Note that we don't actually refer to `maxDegree` below, since this would require a
+Using these lemmas we can now give the greedy `(Δ + 1)`-colouring of a graph with
+maximum degree `Δ` on an encodable vertex type with decidable adjacency. (Note that
+we don't actually refer to `maxDegree` below, since this would require a
 mathematically unnecessary `Fintype V` instance. Instead we assume that all vertices
 have finite neighbourhoods using `G.LocallyFinite` and a bound `Δ : ℕ` such that
 `∀ v, G.degree v ≤ Δ`.)
@@ -1299,7 +1305,7 @@ variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
 Lean provides the debugging tool `dbg_trace`: the expression `dbg_trace "msg"; e`
 evaluates to `e`, printing `msg` as a side effect each time it is evaluated. We make
-a copy of `greedy` that prints a `*` each time it is called:
+a version of `greedy` that prints a `*` each time it is called:
 -/
 /-- A copy of `greedy` that prints one `*` per call. -/
 def greedyTraced : ℕ → ℕ :=
@@ -1326,8 +1332,8 @@ Before looking at the trace counts below, can you work out how bad it is?
 #eval do -- [1, 3, 13, 69, 431, 3103, 25341, 231689, 2345851]
   -- returns the number of calls made by `greedy` for
   -- the complete graph on `ℕ` when evaluated at `0, 1, ..., 8`
- let counts ← (List.range 9).mapM fun n =>
-     withTraceCount fun _ => (⊤ : SimpleGraph ℕ).greedyTraced n
+  let counts ← (List.range 9).mapM fun n =>
+    withTraceCount fun _ => (⊤ : SimpleGraph ℕ).greedyTraced n
   return counts.map Prod.snd
 
 /-!
@@ -1339,7 +1345,7 @@ neighbours, takes a truly unreasonable `2,345,851` calls! Even on the path
 Firstly, nothing is stored: each time the algorithm needs the colour of an earlier
 vertex `m`, it recomputes `greedy m` completely from scratch. Secondly, `Nat.find`
 finds the least valid colour by testing `0, 1, 2, ...` in turn, and every test
-recomputes the Finset `(G.neighborLTFinset v).image c`, thereby recomputing the
+recomputes the finset `(G.neighborLTFinset v).image c`, thereby recomputing the
 colour of *every* earlier neighbour of `v`.
 
 Writing `C(n)` for the number of calls made when colouring `n`, and `c(n)` for the
@@ -1364,7 +1370,7 @@ colour can be chosen as the minimum of the *finite* set:
 `{0, ..., k} \ (G.neighborLTFinset v).image c`. We can do this using `Finset.min'`.
 
 Given a nonempty `Finset` of natural numbers (or of any type with a linear order),
-`Finset.min'` returns the least element of that `Finset`.
+`Finset.min'` returns the smallest element of that `Finset`.
 -/
 #check Finset.min'     -- .. [LinearOrder α] → (s : Finset α) → s.Nonempty → α
 #check Finset.min'_le  -- If `s : Finset α` and `x ∈ s` then `Finset.min' s ≤ x`
@@ -1398,7 +1404,7 @@ lemma greedyChoice_eq_greedyChoiceMin (c : ℕ → ℕ) (v : ℕ) :
   · -- `greedyChoiceMin c v` is a valid colour, so `Nat.find` returns at most it
     exact Nat.find_min' _
       (mem_sdiff.mp (min'_mem _ (G.greedyChoiceMin_sdiff_nonempty c v))).2
-  · -- `greedyChoice c v` lies in the Finset that `greedyChoiceMin c v` minimizes
+  · -- `greedyChoice c v` lies in the finset that `greedyChoiceMin c v` minimizes
     apply min'_le
     rw [mem_sdiff, mem_range, Order.lt_add_one_iff]
     exact ⟨G.greedyChoice_le_card_image c v,
@@ -1409,8 +1415,8 @@ If we use `greedyChoiceMin` in place of `greedyChoice` in the definition of `gre
 each call evaluates the partial colouring only once per earlier neighbour. So the
 recurrence loses its `(c(n) + 1)` factor and becomes `C(n) = 1 + ∑ C(m)`, summing
 over the earlier neighbours `m` of `n`. On the path this is linear, but on the
-complete graph it gives `C(n) = 1 + C(0) + ⋯ + C(n - 1) = 2 ^ n`: much better than
-before, but still exponential, because of the first problem.
+complete graph it is still exponential because of the first problem:
+`C(n) = 1 + C(0) + ⋯ + C(n - 1) = 2 ^ n`.
 
 To fix the first problem we build a list of colours `[c 0, c 1, …, c (n - 1)]` by
 ordinary structural recursion on `n`, so that each colour is computed exactly once,
@@ -1472,7 +1478,7 @@ calls to `greedyChoiceMin`, whatever the graph. (You can check this by tracing
 the running time is not, since appending to a list and looking up its entries take
 time proportional to its length.
 
-Of our two fixes, memoization is the decisive one: even with the original
+Of our two fixes, memoization is the decisive one: even paired with the original
 `Nat.find`-based `greedyChoice`, it would remove the exponential blow-up, since
 every colour would still be computed only once. Using `greedyChoiceMin` as well
 saves recomputing the image for every candidate colour, which matters for larger
@@ -1566,17 +1572,17 @@ We can now compute greedy colourings of many concrete graphs:
 
 #eval mμ[C[5]].greedyColoring -- {∗ ↦ 0, 0ₗ ↦ 0, ..., 3ₗ ↦ 2, ..., 4ᵣ ↦ 1}
 
-#eval (mμ^4 C[5]).greedyColoring -- {* ↦ 0, ∗ₗ ↦ 0, ∗ₗₗ ↦ 0, ∗ₗₗₗ ↦ 0,..., 4ᵣᵣᵣᵣ ↦ 1}
+#eval (mμ^4 C[5]).greedyColoring -- {∗ ↦ 0, ∗ₗ ↦ 0, ∗ₗₗ ↦ 0, ∗ₗₗₗ ↦ 0,..., 4ᵣᵣᵣᵣ ↦ 1}
 
 /-!
 Unlike on the crown graph, `greedy` does well on all of these examples: each
 colouring above is optimal. For instance the colouring of `mμ^4 C[5]` uses the
-colours `0, ..., 6`, and `chromaticNumber_iterMycielskian_C5` shows that `7` colours
-are needed. Similarly the `6` colours used for `paleyGraph (ZMod 17)` are optimal:
-its independence number is `3` (see the exercises of
-[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques)), so
-`natCard_le_chromaticNumber_mul_indepNum` gives `17 ≤ χ * 3`, forcing at least `6`
-colours.
+colours `0, ..., 6`, and since `χ C[5] = 3`, `chromaticNumber_iterMycielskian` shows
+that `7` colours are needed. Similarly the `6` colours used for
+`paleyGraph (ZMod 17)` are optimal: its independence number is `3` (see the exercises
+of [Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques)), so
+`natCard_le_chromaticNumber_mul_indepNum` gives `17 ≤ χ (paleyGraph (ZMod 17)) * 3`,
+forcing at least `6` colours.
 
 Now that `greedy` is faster we can also evaluate it much further along the crown
 graph.

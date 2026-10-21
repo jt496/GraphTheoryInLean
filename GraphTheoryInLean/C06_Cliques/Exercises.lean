@@ -21,8 +21,8 @@ example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by
   sorry
 
 /-!
-3. Show that the Paley graph on `17` vertices is `4`-clique free. (Although `decide`
-should be able to prove this it will probably time-out; you may want to use
+3. Show that the Paley graph on `17` vertices is `4`-clique-free. (Although `decide`
+should be able to prove this, it will probably time out; you may want to use
 `native_decide` instead.)
 -/
 lemma paleyGraph_seventeen_cliqueFree_four' :
@@ -52,11 +52,21 @@ lemma cliqueNum_mono' [Finite V] {H : SimpleGraph V} (h : G ≤ H) : ω G ≤ ω
   sorry
 
 /-!
-7. Show that the clique number of the Paley graph on `17` vertices is `3`.
-(Recall we have: `IsNClique.cliqueNum_eq_of_cliqueFree` so we just need to give an
-example of a `3`-clique and show that the graph is `4`-clique free.)
+7. Show that the clique number of the Paley graph on `17` vertices is `3`. (Recall
+that we have `IsNClique.cliqueNum_eq_of_cliqueFree`, so we just need to give an
+example of a `3`-clique and show that the graph is `4`-clique-free.)
 -/
 example : ω (paleyGraph (ZMod 17)) = 3 := by
+  sorry
+
+/-!
+8. Unlike the junk value `⍺ pathNat₁ = 0` of the independence number, the clique
+number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat₁ = 2`.
+Hint: `pathNat₁` is triangle-free, since adjacent vertices have different parity. The
+lemma `IsNClique.le_cliqueNum` needs `[Finite V]`, but
+`IsNClique.cliqueNum_eq_of_cliqueFree` needs no finiteness.
+-/
+example : ω pathNat₁ = 2 := by
   sorry
 
 /-!
@@ -64,17 +74,6 @@ In the next few exercises we look at the clique number of graph products startin
 with the tensor product `G ⊗g H`. Recall that two vertices `(v₁, w₁), (v₂, w₂)` of
 the tensor product are adjacent if and only if `G.Adj v₁ v₂` and `H.Adj w₁ w₂`.
 -/
-/-!
-8. Unlike the junk value `⍺ pathNat₁ = 0` of
-[Independence Number of the Infinite Path on ℕ](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-infinite-path-on),
-the clique number of the infinite path is an honest value. Show that
-`ω pathNat₁ = 2`. Hint: `pathNat₁` is triangle-free, since adjacent vertices have
-different parity. The lemma `IsNClique.le_cliqueNum` needs `[Finite V]`, so for the
-lower bound unfold `cliqueNum` as a supremum and use `le_csSup`.
--/
-example : ω pathNat₁ = 2 := by
-  sorry
-
 /-!
 9. The first projection of a clique in the tensor product `G ⊗g H` is a clique in
 `G`.
@@ -168,10 +167,10 @@ lemma cliqueNum_boxProd' {W : Type*} [Finite V] [Finite W] [Nonempty V]
   sorry
 
 /-!
-19. The clique number of the hypercube `Q[n]` is `1` for `n = 0` and `2`
-otherwise. (There are easier ways to prove this, for instance once we have colourings
-we could use a two-colouring to prove `ω Q[n] ≤ 2`, but we can also use the result of
-the previous exercise.)
+19. The clique number of the hypercube `Q[n]` is `1` for `n = 0` and `2` otherwise.
+(There are easier ways to prove this: for instance, once we have colourings we could
+use a two-colouring to prove `ω Q[n] ≤ 2`, but we can also use the result of the
+previous exercise.)
 -/
 lemma cliqueNum_hypercube' {n : ℕ} : ω Q[n] = if n = 0 then 1 else 2 := by
   sorry
@@ -183,7 +182,7 @@ Mycielskians.
 /-!
 20. Show that the Paley graph on `17` vertices has independence number `3`. (As in
 the chapter, rewrite with `cliqueFree_compl` before using `decide` or
-`native_decide`.) Together with exercise 3 this shows that there is a graph on `17`
+`native_decide`.) Together with Exercise 3 this shows that there is a graph on `17`
 vertices with no `4`-clique and no independent set of size `4`, so the Ramsey number
 `R(4, 4)` is at least `18`. (In fact `R(4, 4) = 18`.)
 -/
@@ -225,7 +224,7 @@ lemma cliqueNum_mycielskian_bot_of_isEmpty' [IsEmpty V] :
     ω mμ[(⊥ : SimpleGraph V)] = 1 := by
   sorry
 
-lemma cliqueNum_mycielskian_bot' [Finite V] [Nonempty V] :
+lemma cliqueNum_mycielskian_bot' [Nonempty V] :
     ω mμ[(⊥ : SimpleGraph V)] = 2 := by
   sorry
 
@@ -237,12 +236,12 @@ their Mycielskians).
 25. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
-lemma completeBipartiteGraph.not_adj_inl' {V W : Type*} {v : V} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inl' {V W : Type*} {v : V} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
       x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
   sorry
 
-lemma completeBipartiteGraph.not_adj_inr' {V W : Type*} {w : W} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inr' {V W : Type*} {w : W} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
       x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
   sorry
@@ -252,7 +251,7 @@ lemma completeBipartiteGraph.not_adj_inr' {V W : Type*} {w : W} {x : V ⊕ W} :
 left part or entirely in the right part: if it contains a left vertex then all its
 vertices are non-neighbours of that vertex, so all lie in the left part.
 -/
-lemma completeBipartiteGraph.isIndepSet_subset_left_or_right' {V W : Type*}
+lemma completeBipartiteGraph_isIndepSet_subset_left_or_right' {V W : Type*}
     {s : Set (V ⊕ W)} (hs : (completeBipartiteGraph V W).IsIndepSet s) :
     s ⊆ Set.range Sum.inl ∨ s ⊆ Set.range Sum.inr := by
   sorry
@@ -271,7 +270,7 @@ lemma card_le_of_subset_range' {α β : Type*} [Finite α] {f : α → β} {s : 
 28. Any set of vertices contained in one part of a complete bipartite graph is
 independent, since a part contains no edges (we only need this for the right part).
 -/
-lemma completeBipartiteGraph.isIndepSet_of_subset_range_inr' {V W : Type*}
+lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr' {V W : Type*}
     {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   sorry
@@ -279,9 +278,9 @@ lemma completeBipartiteGraph.isIndepSet_of_subset_range_inr' {V W : Type*}
 /-!
 29. The independence number of a complete bipartite graph is the size of the larger
 part; we state this as `⍺ K[a, b] = b` when `a ≤ b`. The right part is a `b`-element
-independent set, and by exercises 26 and 27 no independent set is larger.
+independent set, and by Exercises 26 and 27 no independent set is larger.
 -/
-theorem completeBipartiteGraph.indepNum_eq' {a b : ℕ} (h : a ≤ b) :
+theorem indepNum_completeBipartiteGraph' {a b : ℕ} (h : a ≤ b) :
     ⍺ K[a, b] = b := by
   sorry
 
@@ -289,20 +288,20 @@ theorem completeBipartiteGraph.indepNum_eq' {a b : ℕ} (h : a ≤ b) :
 If we want to bound the independence number of the Mycielskian of a complete
 bipartite graph we need a bound on the size of any independent set `s` of `K[a, b]`
 plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give this bound
-in the next exercise. The last two exercises use `le_indepNum_mycielskian` and
+in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
 `mycielskian_indepSet_card_le` from the starred section
 [Independence Number of the Mycielskian*](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-mycielskian).
 -/
 /-!
 30. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies
-`#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract Finset `t` in place of
+`#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract finset `t` in place of
 `N(s)ᶜ`, characterized by its membership property, so that the lemma applies
 whatever decidability instances `N(s)ᶜ` is written with. If `s` is empty then `t`
-is all `a + b` vertices; otherwise `s` lies in a single part (exercise 26) and
+is all `a + b` vertices; otherwise `s` lies in a single part (Exercise 26) and
 `t` lies in the same part (every vertex of the other part is a neighbour of any
 vertex of `s`), so each has size at most that of the part.
 -/
-lemma completeBipartiteGraph.indepSet_card_add_le' {a b : ℕ} (hab : a ≤ b)
+lemma completeBipartiteGraph_isIndepSet_card_add_le' {a b : ℕ} (hab : a ≤ b)
     {s t : Finset (Fin a ⊕ Fin b)} (hs : K[a, b].IsIndepSet ↑s)
     (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬ K[a, b].Adj y x) :
     #s + #t ≤ 2 * b := by
@@ -315,8 +314,8 @@ so it contributes at least `2 * b`, and no independent set does better by the
 previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
 `none`, so its independence number is `1`.)
 -/
-theorem indepNum_mycielskian_completeBipartite' {a b : ℕ} [NeZero b] (h : a ≤ b) :
-    ⍺ mμ[K[a, b]] = 2 * b := by
+theorem indepNum_mycielskian_completeBipartiteGraph' {a b : ℕ} [NeZero b]
+    (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
   sorry
 
 /-! SOLUTIONS -/
@@ -335,8 +334,8 @@ example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by
   decide
 
 /-!
-3. Show that the Paley graph on `17` vertices is `4`-clique free. (Although `decide`
-should be able to prove this it will probably time-out; you may want to use
+3. Show that the Paley graph on `17` vertices is `4`-clique-free. (Although `decide`
+should be able to prove this, it will probably time out; you may want to use
 `native_decide` instead.)
 -/
 lemma paleyGraph_seventeen_cliqueFree_four :
@@ -377,28 +376,24 @@ lemma cliqueNum_mono [Finite V] {H : SimpleGraph V} (h : G ≤ H) : ω G ≤ ω 
   (Hom.ofLE h).cliqueNum_le
 
 /-!
-7. Show that the clique number of the Paley graph on `17` vertices is `3`.
-(Recall we have: `IsNClique.cliqueNum_eq_of_cliqueFree` so we just need to give an
-example of a `3`-clique and show that the graph is `4`-clique free.)
+7. Show that the clique number of the Paley graph on `17` vertices is `3`. (Recall
+that we have `IsNClique.cliqueNum_eq_of_cliqueFree`, so we just need to give an
+example of a `3`-clique and show that the graph is `4`-clique-free.)
 -/
 example : ω (paleyGraph (ZMod 17)) = 3 := by
-  -- the Paley graph on 17 vertices is 4-cliquefree (exercise 3)
+  -- the Paley graph on 17 vertices is `4`-clique-free (Exercise 3)
   have h4 : (paleyGraph (ZMod 17)).CliqueFree 4 :=
     paleyGraph_seventeen_cliqueFree_four
-  -- and it contains a triangle (exercise 2)
+  -- and it contains a triangle (Exercise 2)
   have h3 : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by decide
   exact h3.cliqueNum_eq_of_cliqueFree h4
 
 /-!
-In the next few exercises we look at the clique number of graph products starting
-with the tensor product `G ⊗g H`. Recall that two vertices `(v₁, w₁), (v₂, w₂)` of
-the tensor product are adjacent if and only if `G.Adj v₁ v₂` and `H.Adj w₁ w₂`.
--/
-/-!
-8. Unlike the junk value `⍺ pathNat₁ = 0` of
-[Independence Number of the Infinite Path on ℕ](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-infinite-path-on),
-the clique number of the infinite path is an honest value. Show that
-`ω pathNat₁ = 2`.
+8. Unlike the junk value `⍺ pathNat₁ = 0` of the independence number, the clique
+number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat₁ = 2`.
+Hint: `pathNat₁` is triangle-free, since adjacent vertices have different parity. The
+lemma `IsNClique.le_cliqueNum` needs `[Finite V]`, but
+`IsNClique.cliqueNum_eq_of_cliqueFree` needs no finiteness.
 -/
 example : ω pathNat₁ = 2 := by
   -- `pathNat₁` is triangle-free: adjacent vertices have different parity
@@ -414,6 +409,11 @@ example : ω pathNat₁ = 2 := by
   have h2 : pathNat₁.IsNClique 2 {0, 1} := is2Clique_pair_iff.mpr (by decide)
   exact h2.cliqueNum_eq_of_cliqueFree h3
 
+/-!
+In the next few exercises we look at the clique number of graph products starting
+with the tensor product `G ⊗g H`. Recall that two vertices `(v₁, w₁), (v₂, w₂)` of
+the tensor product are adjacent if and only if `G.Adj v₁ v₂` and `H.Adj w₁ w₂`.
+-/
 /-!
 9. The first projection of a clique in the tensor product `G ⊗g H` is a clique in
 `G`.
@@ -573,10 +573,10 @@ lemma cliqueNum_boxProd {W : Type*} [Finite V] [Finite W] [Nonempty V]
       (boxProdRight G H (Classical.arbitrary V)).toHom.cliqueNum_le
 
 /-!
-19. The clique number of the hypercube `Q[n]` is `1` for `n = 0` and `2`
-otherwise. (There are easier ways to prove this, for instance once we have colourings
-we could use a two-colouring to prove `ω Q[n] ≤ 2`, but we can also use the result of
-the previous exercise.)
+19. The clique number of the hypercube `Q[n]` is `1` for `n = 0` and `2` otherwise.
+(There are easier ways to prove this: for instance, once we have colourings we could
+use a two-colouring to prove `ω Q[n] ≤ 2`, but we can also use the result of the
+previous exercise.)
 -/
 lemma cliqueNum_hypercube {n : ℕ} : ω Q[n] = if n = 0 then 1 else 2 := by
   induction n with
@@ -595,12 +595,12 @@ Mycielskians.
 /-!
 20. Show that the Paley graph on `17` vertices has independence number `3`. (As in
 the chapter, rewrite with `cliqueFree_compl` before using `decide` or
-`native_decide`.) Together with exercise 3 this shows that there is a graph on `17`
+`native_decide`.) Together with Exercise 3 this shows that there is a graph on `17`
 vertices with no `4`-clique and no independent set of size `4`, so the Ramsey number
 `R(4, 4)` is at least `18`. (In fact `R(4, 4) = 18`.)
 -/
 example : ⍺ (paleyGraph (ZMod 17)) = 3 := by
-  -- `{0, 3, 6}` is independent since `3` is not a square mod `17`
+  -- `{0, 3, 6}` is independent since `3` and `6` are not squares mod `17`
   have h3 : (paleyGraph (ZMod 17)).IsNIndepSet 3 {0, 3, 6} := by decide
   exact h3.indepNum_eq_of_indepSetFree (by rw [← cliqueFree_compl]; native_decide)
 
@@ -680,7 +680,7 @@ lemma cliqueNum_mycielskian_bot_of_isEmpty [IsEmpty V] :
   one_le_cliqueNum.antisymm'
     (by simpa using mμ[(⊥ : SimpleGraph V)].cliqueNum_le_natCard)
 
-lemma cliqueNum_mycielskian_bot [Finite V] [Nonempty V] :
+lemma cliqueNum_mycielskian_bot [Nonempty V] :
     ω mμ[(⊥ : SimpleGraph V)] = 2 := by
   classical
   -- `none` and `v ᵣ` are adjacent, giving a `2`-clique
@@ -698,12 +698,12 @@ their Mycielskians).
 25. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
-lemma completeBipartiteGraph.not_adj_inl {V W : Type*} {v : V} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inl {V W : Type*} {v : V} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
       x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
   cases x <;> simp
 
-lemma completeBipartiteGraph.not_adj_inr {V W : Type*} {w : W} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inr {V W : Type*} {w : W} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
       x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
   cases x <;> simp
@@ -713,12 +713,13 @@ lemma completeBipartiteGraph.not_adj_inr {V W : Type*} {w : W} {x : V ⊕ W} :
 left part or entirely in the right part: if it contains a left vertex then all its
 vertices are non-neighbours of that vertex, so all lie in the left part.
 -/
-lemma completeBipartiteGraph.isIndepSet_subset_left_or_right {V W : Type*}
+lemma completeBipartiteGraph_isIndepSet_subset_left_or_right {V W : Type*}
     {s : Set (V ⊕ W)} (hs : (completeBipartiteGraph V W).IsIndepSet s) :
     s ⊆ Set.range Sum.inl ∨ s ⊆ Set.range Sum.inr := by
   by_cases h : ∃ v, Sum.inl v ∈ s
   · obtain ⟨v, hv⟩ := h
-    exact Or.inl fun x hx => not_adj_inl.mp fun hadj => hs hv hx hadj.ne hadj
+    exact Or.inl fun x hx =>
+      completeBipartiteGraph_not_adj_inl.mp fun hadj => hs hv hx hadj.ne hadj
   · refine Or.inr fun x hx => ?_
     rcases x with x | x
     · exact absurd ⟨x, hx⟩ h
@@ -743,7 +744,7 @@ lemma card_le_of_subset_range {α β : Type*} [Finite α] {f : α → β} {s : F
 28. Any set of vertices contained in one part of a complete bipartite graph is
 independent, since a part contains no edges (we only need this for the right part).
 -/
-lemma completeBipartiteGraph.isIndepSet_of_subset_range_inr {V W : Type*}
+lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr {V W : Type*}
     {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   intro u hu v hv hne hadj
@@ -754,54 +755,54 @@ lemma completeBipartiteGraph.isIndepSet_of_subset_range_inr {V W : Type*}
 /-!
 29. The independence number of a complete bipartite graph is the size of the larger
 part; we state this as `⍺ K[a, b] = b` when `a ≤ b`. The right part is a `b`-element
-independent set, and by exercises 26 and 27 no independent set is larger.
+independent set, and by Exercises 26 and 27 no independent set is larger.
 -/
-theorem completeBipartiteGraph.indepNum_eq {a b : ℕ} (h : a ≤ b) :
+theorem indepNum_completeBipartiteGraph {a b : ℕ} (h : a ≤ b) :
     ⍺ K[a, b] = b := by
   apply IsNIndepSet.indepNum_eq_of_indepSetFree (s := univ.map .inr)
-  · exact ⟨completeBipartiteGraph.isIndepSet_of_subset_range_inr (by simp), by simp⟩
+  · exact ⟨completeBipartiteGraph_isIndepSet_of_subset_range_inr (by simp), by simp⟩
   · intro s hs
-    rcases completeBipartiteGraph.isIndepSet_subset_left_or_right hs.isIndepSet
+    rcases completeBipartiteGraph_isIndepSet_subset_left_or_right hs.isIndepSet
       with h | h <;> grind [hs.card_eq, card_le_of_subset_range h, Nat.card_fin]
 
 /-!
 If we want to bound the independence number of the Mycielskian of a complete
 bipartite graph we need a bound on the size of any independent set `s` of `K[a, b]`
 plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give this bound
-in the next exercise. The last two exercises use `le_indepNum_mycielskian` and
+in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
 `mycielskian_indepSet_card_le` from the starred section
 [Independence Number of the Mycielskian*](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-mycielskian).
 -/
 /-!
 30. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies
-`#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract Finset `t` in place of
+`#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract finset `t` in place of
 `N(s)ᶜ`, characterized by its membership property, so that the lemma applies
 whatever decidability instances `N(s)ᶜ` is written with. If `s` is empty then `t`
-is all `a + b` vertices; otherwise `s` lies in a single part (exercise 26) and
+is all `a + b` vertices; otherwise `s` lies in a single part (Exercise 26) and
 `t` lies in the same part (every vertex of the other part is a neighbour of any
 vertex of `s`), so each has size at most that of the part.
 -/
-lemma completeBipartiteGraph.indepSet_card_add_le {a b : ℕ} (hab : a ≤ b)
+lemma completeBipartiteGraph_isIndepSet_card_add_le {a b : ℕ} (hab : a ≤ b)
     {s t : Finset (Fin a ⊕ Fin b)} (hs : K[a, b].IsIndepSet ↑s)
     (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬ K[a, b].Adj y x) :
     #s + #t ≤ 2 * b := by
   rcases s.eq_empty_or_nonempty with rfl | ⟨x, hx⟩
   · -- `s = ∅` : `t` has at most `a + b ≤ 2 * b` vertices
     grind [Fintype.card_sum, Fintype.card_fin, t.card_le_univ]
-  rcases completeBipartiteGraph.isIndepSet_subset_left_or_right hs with hL | hR
+  rcases completeBipartiteGraph_isIndepSet_subset_left_or_right hs with hL | hR
   · -- `s` lies in the left part, and so does `t`
     obtain ⟨y, rfl⟩ := hL (mem_coe.mpr hx)
     have h1 : #s ≤ a := by simpa using card_le_of_subset_range hL
     have h2 : #t ≤ a := by
       simpa using card_le_of_subset_range fun z hz =>
-        completeBipartiteGraph.not_adj_inl.mp ((ht z).mp (mem_coe.mp hz) _ hx)
+        completeBipartiteGraph_not_adj_inl.mp ((ht z).mp (mem_coe.mp hz) _ hx)
     grind
   · -- `s` lies in the right part, and so does `t`
     obtain ⟨y, rfl⟩ := hR (mem_coe.mpr hx)
     have h1 : #s ≤ b := by simpa using card_le_of_subset_range hR
     have h2 : #t ≤ b := by
       simpa using card_le_of_subset_range fun z hz =>
-        completeBipartiteGraph.not_adj_inr.mp ((ht z).mp (mem_coe.mp hz) _ hx)
+        completeBipartiteGraph_not_adj_inr.mp ((ht z).mp (mem_coe.mp hz) _ hx)
     grind
 
 /-!
@@ -811,20 +812,20 @@ so it contributes at least `2 * b`, and no independent set does better by the
 previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
 `none`, so its independence number is `1`.)
 -/
-theorem indepNum_mycielskian_completeBipartite {a b : ℕ} [NeZero b] (h : a ≤ b) :
-    ⍺ mμ[K[a, b]] = 2 * b := by
+theorem indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
+    (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
   refine le_antisymm ?_ ?_
   · -- `≤` : a maximum independent set `T` of `mμ[K[a, b]]` satisfies
     -- `#T ≤ #A + #N(A)ᶜ ≤ 2 * b`, where `A` is the left part of `T`
     obtain ⟨T, hT⟩ := (mμ[K[a, b]]).exists_isNIndepSet_indepNum
     rw [← hT.card_eq]
     exact le_trans (mycielskian_indepSet_card_le hT.isIndepSet)
-      (completeBipartiteGraph.indepSet_card_add_le h
+      (completeBipartiteGraph_isIndepSet_card_add_le h
         (isIndepSet_preimage_left_finset hT.isIndepSet)
         fun _ => by simp)
   · -- `≥` : the right part is an independent set `s` with `#s = b` and `s ⊆ N(s)ᶜ`
     have hind : K[a, b].IsIndepSet (↑(univ.map .inr : Finset (Fin a ⊕ Fin b))) :=
-      completeBipartiteGraph.isIndepSet_of_subset_range_inr (by simp)
+      completeBipartiteGraph_isIndepSet_of_subset_range_inr (by simp)
     refine le_trans ?_ (le_indepNum_mycielskian hind)
     have h1 : #(univ.map .inr : Finset (Fin a ⊕ Fin b)) = b := by simp
     have h2 := card_le_card (subset_compl_openNeighborhoodFinset hind)

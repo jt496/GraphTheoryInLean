@@ -59,14 +59,42 @@ example {M M' : G.Subgraph} (hM : M.IsPerfectMatching) (hM' : M'.IsPerfectMatchi
   sorry
 
 /-!
-7. Show that the Turán graph `turanGraph n r` is `r`-colourable for `r > 0`. (So by
-Turán's theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+7. Show that a `k`-regular bipartite graph with `k > 0` has a perfect matching. The
+graph need not be finite. Hint: check Hall's condition for a finite set `s` by
+counting the edges between `s` and its neighbourhood in two ways, using
+`Finset.card_mul_le_card_mul`.
 -/
-example (n r : ℕ) (hr : 0 < r) : (turanGraph n r).Colorable r := by
+theorem IsRegularOfDegree.exists_isPerfectMatching' [G.LocallyFinite] {k : ℕ}
+    (hb : G.IsBipartite) (hG : G.IsRegularOfDegree k) (hk : 0 < k) :
+    ∃ M : G.Subgraph, M.IsPerfectMatching := by
   sorry
 
 /-!
-8. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
+8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
+chromatic index `χ'(G) = Δ(G)` (see
+[Edge Colourings](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-edge-colourings)).
+Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
+properly coloured with `k` colours. (The general case reduces to this one, since
+every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
+Hint: removing a perfect matching leaves a `(k - 1)`-regular bipartite graph, so
+induct on `k`. Deduce that the hypercube `Q[n]` has chromatic index `n`.
+-/
+theorem IsRegularOfDegree.colorable_lineGraph' [G.LocallyFinite] {k : ℕ}
+    (hb : G.IsBipartite) (hG : G.IsRegularOfDegree k) : L[G].Colorable k := by
+  sorry
+
+example (n : ℕ) : χ L[Q[n]] = n := by
+  sorry
+
+/-!
+9. Show that the Turán graph `T[n, r]` is `r`-colourable for `r > 0`. (So by Turán's
+theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+-/
+example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r := by
+  sorry
+
+/-!
+10. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
 triangle-free graph.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
@@ -74,14 +102,16 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
   sorry
 
 /-!
-9. Show that a bipartite graph on `n` vertices has at most `n ^ 2 / 4` edges.
+11. Deduce from Füredi's theorem that an `(r + 1)`-clique-free graph with
+`turanNumber n r` edges is `r`-colourable. Hint: the subgraph `H` then has as many
+edges as `G`, so `H = G` (`eq_of_subset_of_card_le`, `edgeFinset_inj`).
 -/
-example [Fintype V] [DecidableRel G.Adj] (h : G.IsBipartite) :
-    #G.edgeFinset ≤ Fintype.card V ^ 2 / 4 := by
+example [Fintype V] [DecidableRel G.Adj] {r : ℕ} (h : G.CliqueFree (r + 1))
+    (he : #G.edgeFinset = turanNumber (Fintype.card V) r) : G.Colorable r := by
   sorry
 
 /-!
-10. Show that the bound in the Andrásfai–Erdős–Sós theorem cannot be improved for
+12. Show that the bound in the Andrásfai–Erdős–Sós theorem cannot be improved for
 `r = 2`: the blow-up `C[5][t]` has `n = 5t` vertices and is triangle-free with
 minimum degree `2t = 2n / 5`, but it is not bipartite.
 -/
@@ -91,7 +121,21 @@ example (t : ℕ) :
   sorry
 
 /-!
-11. Use Zykov's theorem to show that a `4`-clique-free graph on `6` vertices has at
+13. Restate Mantel's theorem as a formula for an extremal number.
+-/
+example (n : ℕ) : extremalNumber n K[3] = n ^ 2 / 4 := by
+  sorry
+
+/-!
+14. Deduce that a graph on `n` vertices with more than `n ^ 2 / 4` edges contains a
+triangle.
+-/
+example [Fintype V] [DecidableRel G.Adj]
+    (h : Fintype.card V ^ 2 / 4 < #G.edgeFinset) : K[3] ⊑ G := by
+  sorry
+
+/-!
+15. Use Zykov's theorem to show that a `4`-clique-free graph on `6` vertices has at
 most as many triangles as the octahedron `completeEquipartiteGraph 3 2`. Hint:
 Mathlib's `completeEquipartiteGraph.turanGraph` is an isomorphism from
 `completeEquipartiteGraph r t` to `turanGraph (r * t) r`.
@@ -102,7 +146,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (hV : Fintype.card V = 
   sorry
 
 /-!
-12. Show that a graph has as many `2`-cliques as edges. Hint: `Sym2.toFinset` sends
+16. Show that a graph has as many `2`-cliques as edges. Hint: `Sym2.toFinset` sends
 the edge `s(x, y)` to `{x, y}`.
 -/
 lemma card_cliqueFinset_two' [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
@@ -110,7 +154,7 @@ lemma card_cliqueFinset_two' [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
   sorry
 
 /-!
-13. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
+17. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
 Zykov's theorem with `s = 2`.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
@@ -118,21 +162,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
   sorry
 
 /-!
-14. Restate Mantel's theorem as a formula for an extremal number.
--/
-example (n : ℕ) : extremalNumber n K[3] = n ^ 2 / 4 := by
-  sorry
-
-/-!
-15. Deduce that a graph on `n` vertices with more than `n ^ 2 / 4` edges contains a
-triangle.
--/
-example [Fintype V] [DecidableRel G.Adj]
-    (h : Fintype.card V ^ 2 / 4 < #G.edgeFinset) : K[3] ⊑ G := by
-  sorry
-
-/-!
-16. Show that a graph on `n` vertices whose triangles are edge-disjoint has at most
+18. Show that a graph on `n` vertices whose triangles are edge-disjoint has at most
 `n.choose 2 / 3` triangles.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
@@ -141,20 +171,38 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
   sorry
 
 /-!
-17. Let `G` have no triangles and no 5-cycles. Use the count of 5-cycles in `mμ[G]`
-from
-[Counting 5-Cycles in Mycielskians](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-counting-5-cycles-in-mycielskians)
-to bound the number of edges that `killCopies` deletes from `mμ[G]` to make it free
-of 5-cycles.
+19. The necessity of the Erdős–Gallai conditions (`erdos_gallai`) is a
+double-counting argument like those in this chapter. Show that the degrees of any set
+`S` of `k` vertices satisfy
+`∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
+degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
+part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
+`sum_degIn_comm`, as in the proof of Füredi's theorem
+([Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem)).
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3)
-    (h5 : C[5].Free G) :
-    2 * #mμ[G].edgeFinset ≤ 2 * #(mμ[G].killCopies C[5]).edgeFinset +
-      ∑ u, ∑ v ∈ G.neighborFinset u, G.degree u * G.degree v := by
+theorem sum_degree_le_erdosGallai' [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
+    (S : Finset V) :
+    ∑ v ∈ S, G.degree v ≤ #S * (#S - 1) + ∑ v ∈ Sᶜ, min #S (G.degree v) := by
   sorry
 
 /-!
-18. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
+20. Deduce that every graphic multiset satisfies the Erdős–Gallai inequalities.
+(Together with `Graphic.even_sum` this proves that the conditions in `erdos_gallai`
+are necessary.) Hint: first show that a sub-multiset of `s.map f` is the image of a
+sub-multiset of `s`, using `Multiset.coe_le` and `List.sublist_map_iff`. Then, with
+`L` the sorted list of degrees, realize `L.take k` as the degrees of a set `S` of `k`
+vertices, so that `L.drop k` is the list of degrees of `Sᶜ`.
+-/
+theorem _root_.Multiset.exists_le_map_eq' {α β : Type*} {f : α → β}
+    {s : Multiset α} {t : Multiset β} (h : t ≤ s.map f) : ∃ u ≤ s, u.map f = t := by
+  sorry
+
+theorem Graphic.erdosGallaiLE' {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
+    (hk : k ≤ m.card) : erdosGallaiLE m k := by
+  sorry
+
+/-!
+21. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
 [Ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-ends). Hint: if
 `K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
 square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
@@ -234,7 +282,7 @@ example [G.LocallyFinite] {p₁ p₂ : Set V} (h₁ : G.IsBipartiteWith p₁ p�
     have hN₂ : N (s ∩ p₂) ⊆ p₁ :=
       Set.iUnion₂_subset fun x hx => isBipartiteWith_neighborSet_subset h₁.symm hx.2
     calc s.ncard = (s ∩ p₁).ncard + (s ∩ p₂).ncard := by
-          conv_lhs => rw [hsplit]
+          nth_rw 1 [hsplit]
           exact Set.ncard_union_eq
             (h₁.disjoint.mono Set.inter_subset_right Set.inter_subset_right)
             (hs.subset Set.inter_subset_left) (hs.subset Set.inter_subset_left)
@@ -243,7 +291,7 @@ example [G.LocallyFinite] {p₁ p₂ : Set V} (h₁ : G.IsBipartiteWith p₁ p�
       _ = (N s).ncard := by
           rw [← Set.ncard_union_eq (h₁.disjoint.symm.mono hN₁ hN₂)
             (hfin Set.inter_subset_left) (hfin Set.inter_subset_left)]
-          conv_rhs => rw [hsplit]
+          nth_rw 3 [hsplit]
           simp only [N, Set.biUnion_union]
   · simp [hs.ncard]
 
@@ -272,15 +320,118 @@ example {M M' : G.Subgraph} (hM : M.IsPerfectMatching) (hM' : M'.IsPerfectMatchi
   · exact (hM.symmDiff_isCycles hM' h).le
 
 /-!
-7. Show that the Turán graph `turanGraph n r` is `r`-colourable for `r > 0`. (So by
-Turán's theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+7. Show that a `k`-regular bipartite graph with `k > 0` has a perfect matching. The
+graph need not be finite. Hint: check Hall's condition for a finite set `s` by
+counting the edges between `s` and its neighbourhood in two ways, using
+`Finset.card_mul_le_card_mul`.
 -/
-example (n r : ℕ) (hr : 0 < r) : (turanGraph n r).Colorable r :=
+/-- A `k`-regular bipartite graph with `k > 0` has a perfect matching. -/
+theorem IsRegularOfDegree.exists_isPerfectMatching [G.LocallyFinite] {k : ℕ}
+    (hb : G.IsBipartite) (hG : G.IsRegularOfDegree k) (hk : 0 < k) :
+    ∃ M : G.Subgraph, M.IsPerfectMatching := by
+  obtain ⟨p₁, p₂, h₁⟩ := hb.exists_isBipartiteWith
+  refine exists_isPerfectMatching_of_forall_ncard_le h₁ fun s => ?_
+  classical
+  rcases s.finite_or_infinite with hs | hs
+  · -- `s` sends `k * |s|` edges to `N`, and each vertex of `N` receives at most `k`
+    let t := hs.toFinset
+    let N := t.biUnion fun x => G.neighborFinset x
+    have hN : ⋃ x ∈ s, G.neighborSet x = N := by ext; simp [N, t]
+    have hcount : #t * k ≤ #N * k := by
+      refine card_mul_le_card_mul G.Adj (fun a ha => ?_) (fun b _ => ?_)
+      · -- each `a ∈ t` has all `k` of its neighbours in `N`
+        have hsub : G.neighborFinset a ⊆ N :=
+          subset_biUnion_of_mem (fun x => G.neighborFinset x) ha
+        exact (hG a).ge.trans (degIn_eq_degree hsub).ge
+      · -- each `b ∈ N` has at most `k` neighbours in `t`
+        rw [G.bipartiteBelow_adj, ← hG b]
+        exact degIn_le_degree t b
+    rw [hN, Set.ncard_coe_finset, Set.ncard_eq_toFinset_card s hs]
+    exact Nat.le_of_mul_le_mul_right hcount hk
+  · simp [hs.ncard]
+
+/-!
+8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
+chromatic index `χ'(G) = Δ(G)` (see
+[Edge Colourings](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-edge-colourings)).
+Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
+properly coloured with `k` colours. (The general case reduces to this one, since
+every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
+Hint: removing a perfect matching leaves a `(k - 1)`-regular bipartite graph, so
+induct on `k`. Deduce that the hypercube `Q[n]` has chromatic index `n`.
+-/
+/-- *Kőnig's line colouring theorem* for regular graphs: the edges of a
+`k`-regular bipartite graph can be properly coloured with `k` colours. -/
+theorem IsRegularOfDegree.colorable_lineGraph [G.LocallyFinite] {k : ℕ}
+    (hb : G.IsBipartite) (hG : G.IsRegularOfDegree k) : L[G].Colorable k := by
+  classical
+  induction k generalizing G with
+  | zero =>
+    -- a `0`-regular graph has no edges
+    refine colorable_zero_iff.2 ⟨fun ⟨e, he⟩ => ?_⟩
+    induction e using Sym2.ind with | h a b => ?_
+    have := hG a
+    rw [← ncard_neighborSet, Set.ncard_eq_zero (Set.toFinite _)] at this
+    exact this.subset (mem_neighborSet _ _ _ |>.2 he)
+  | succ k ih =>
+    -- remove a perfect matching `M`
+    obtain ⟨M, hM⟩ := hG.exists_isPerfectMatching hb k.succ_pos
+    let G' := G \ M.spanningCoe
+    have hle : G' ≤ G := sdiff_le
+    let : G'.LocallyFinite := fun v =>
+      ((G.neighborSet v).toFinite.subset fun w hw => hle hw).fintype
+    -- what is left is `k`-regular
+    have hG' : G'.IsRegularOfDegree k := fun v => by
+      obtain ⟨w, hw, hw'⟩ := Subgraph.isPerfectMatching_iff.1 hM v
+      have : G'.neighborSet v = G.neighborSet v \ {w} := by
+        ext x
+        have hMx : M.Adj v x ↔ x = w := ⟨hw' x, fun h => h ▸ hw⟩
+        simp only [G', mem_neighborSet, sdiff_adj, Subgraph.spanningCoe_adj,
+          Set.mem_sdiff, Set.mem_singleton_iff, hMx]
+      rw [← ncard_neighborSet, this,
+        Set.ncard_sdiff_singleton_of_mem ((G.mem_neighborSet v w).2 hw.adj_sub),
+        ncard_neighborSet, hG v, Nat.add_sub_cancel]
+    obtain ⟨C⟩ := ih (hb.mono_left hle) hG'
+    -- colour the edges of `M` with the new colour `k`
+    have hmem {e : Sym2 V} (he : e ∈ G.edgeSet) (heM : e ∉ M.edgeSet) :
+        e ∈ G'.edgeSet := by
+      simpa [G', edgeSet_sdiff, he] using heM
+    refine ⟨Coloring.mk (fun e => if h : (e : Sym2 V) ∈ M.edgeSet then Fin.last k
+      else (C ⟨e, hmem e.2 h⟩).castSucc) ?_⟩
+    rintro ⟨e, he⟩ ⟨f, hf⟩ ⟨hne, x, hxe, hxf⟩
+    by_cases heM : e ∈ M.edgeSet <;> by_cases hfM : f ∈ M.edgeSet <;>
+      simp only [heM, hfM, dite_true, dite_false, ne_eq]
+    · -- two edges of a matching sharing the vertex `x` are equal
+      obtain ⟨y, rfl⟩ := Sym2.mem_iff_exists.1 hxe
+      obtain ⟨z, rfl⟩ := Sym2.mem_iff_exists.1 hxf
+      obtain rfl := hM.1.eq_of_adj_left heM hfM
+      exact (hne rfl).elim
+    · -- `e` has the new colour `k`, `f` an old colour
+      exact (Fin.castSucc_ne_last _).symm
+    · -- `f` has the new colour `k`, `e` an old colour
+      exact Fin.castSucc_ne_last _
+    · -- both edges keep their colours from `C`, and they are adjacent in `L[G']`
+      have hadj : L[G'].Adj ⟨e, hmem he heM⟩ ⟨f, hmem hf hfM⟩ :=
+        ⟨by simpa using hne, x, hxe, hxf⟩
+      exact Fin.castSucc_injective _ |>.ne (C.valid hadj)
+
+example (n : ℕ) : χ L[Q[n]] = n := by
+  have hG := hypercube_isRegularOfDegree n
+  refine le_antisymm ((hG.colorable_lineGraph (hypercube_isBipartite n))
+    |>.chromaticNumber_le) ?_
+  have := Q[n].degree_le_chromaticNumber_lineGraph (Classical.arbitrary _)
+  rwa [hG] at this
+
+/-!
+9. Show that the Turán graph `T[n, r]` is `r`-colourable for `r > 0`. (So by Turán's
+theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+-/
+example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r :=
   ⟨Coloring.mk (fun v => ⟨v % r, Nat.mod_lt _ hr⟩) fun h => by
     simpa [Fin.ext_iff] using turanGraph_adj.1 h⟩
 
 /-!
-8. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
+10. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
 triangle-free graph.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
@@ -290,15 +441,19 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
     at this
 
 /-!
-9. Show that a bipartite graph on `n` vertices has at most `n ^ 2 / 4` edges.
+11. Deduce from Füredi's theorem that an `(r + 1)`-clique-free graph with
+`turanNumber n r` edges is `r`-colourable. Hint: the subgraph `H` then has as many
+edges as `G`, so `H = G` (`eq_of_subset_of_card_le`, `edgeFinset_inj`).
 -/
-example [Fintype V] [DecidableRel G.Adj] (h : G.IsBipartite) :
-    #G.edgeFinset ≤ Fintype.card V ^ 2 / 4 := by
-  rw [← turanNumber_two]
-  exact (Colorable.cliqueFree h (by norm_num)).card_edgeFinset_le
+example [Fintype V] [DecidableRel G.Adj] {r : ℕ} (h : G.CliqueFree (r + 1))
+    (he : #G.edgeFinset = turanNumber (Fintype.card V) r) : G.Colorable r := by
+  obtain ⟨H, _, hHG, hH, h2⟩ := h.exists_colorable_two_mul_card_edgeFinset_le
+  have hsub := edgeFinset_mono hHG
+  have : H.edgeFinset = G.edgeFinset := eq_of_subset_of_card_le hsub (by grind)
+  rwa [edgeFinset_inj.1 this] at hH
 
 /-!
-10. Show that the bound in the Andrásfai–Erdős–Sós theorem cannot be improved for
+12. Show that the bound in the Andrásfai–Erdős–Sós theorem cannot be improved for
 `r = 2`: the blow-up `C[5][t]` has `n = 5t` vertices and is triangle-free with
 minimum degree `2t = 2n / 5`, but it is not bipartite.
 -/
@@ -313,7 +468,25 @@ example (t : ℕ) :
     rw [degree_blowUpN, cycleGraph_degree_three_le, mul_comm]
 
 /-!
-11. Use Zykov's theorem to show that a `4`-clique-free graph on `6` vertices has at
+13. Restate Mantel's theorem as a formula for an extremal number.
+-/
+example (n : ℕ) : extremalNumber n K[3] = n ^ 2 / 4 := by
+  rw [extremalNumber_top, Fintype.card_fin]
+  exact turanNumber_two
+
+/-!
+14. Deduce that a graph on `n` vertices with more than `n ^ 2 / 4` edges contains a
+triangle.
+-/
+example [Fintype V] [DecidableRel G.Adj]
+    (h : Fintype.card V ^ 2 / 4 < #G.edgeFinset) : K[3] ⊑ G := by
+  have h3 : extremalNumber (Fintype.card V) K[3] = Fintype.card V ^ 2 / 4 := by
+    rw [extremalNumber_top, Fintype.card_fin]
+    exact turanNumber_two
+  exact IsContained.of_extremalNumber_lt_card_edgeFinset (h3 ▸ h)
+
+/-!
+15. Use Zykov's theorem to show that a `4`-clique-free graph on `6` vertices has at
 most as many triangles as the octahedron `completeEquipartiteGraph 3 2`. Hint:
 Mathlib's `completeEquipartiteGraph.turanGraph` is an isomorphism from
 `completeEquipartiteGraph r t` to `turanGraph (r * t) r`.
@@ -326,7 +499,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (hV : Fintype.card V = 
   rwa [hV, ← e.card_cliqueFinset_eq] at this
 
 /-!
-12. Show that a graph has as many `2`-cliques as edges. Hint: `Sym2.toFinset` sends
+16. Show that a graph has as many `2`-cliques as edges. Hint: `Sym2.toFinset` sends
 the edge `s(x, y)` to `{x, y}`.
 -/
 /-- A graph has as many `2`-cliques as edges. -/
@@ -348,7 +521,7 @@ lemma card_cliqueFinset_two [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     exact ht.isClique (by simp) (by simp) hxy
 
 /-!
-13. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
+17. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
 Zykov's theorem with `s = 2`.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
@@ -357,25 +530,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
   rwa [card_cliqueFinset_two, card_cliqueFinset_two] at this
 
 /-!
-14. Restate Mantel's theorem as a formula for an extremal number.
--/
-example (n : ℕ) : extremalNumber n K[3] = n ^ 2 / 4 := by
-  rw [extremalNumber_top, Fintype.card_fin]
-  exact turanNumber_two
-
-/-!
-15. Deduce that a graph on `n` vertices with more than `n ^ 2 / 4` edges contains a
-triangle.
--/
-example [Fintype V] [DecidableRel G.Adj]
-    (h : Fintype.card V ^ 2 / 4 < #G.edgeFinset) : K[3] ⊑ G := by
-  have h3 : extremalNumber (Fintype.card V) K[3] = Fintype.card V ^ 2 / 4 := by
-    rw [extremalNumber_top, Fintype.card_fin]
-    exact turanNumber_two
-  exact IsContained.of_extremalNumber_lt_card_edgeFinset (h3 ▸ h)
-
-/-!
-16. Show that a graph on `n` vertices whose triangles are edge-disjoint has at most
+18. Show that a graph on `n` vertices whose triangles are edge-disjoint has at most
 `n.choose 2 / 3` triangles.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
@@ -384,22 +539,85 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
   h.card_edgeFinset_le.trans card_edgeFinset_le_card_choose_two
 
 /-!
-17. Let `G` have no triangles and no 5-cycles. Use the count of 5-cycles in `mμ[G]`
-from
-[Counting 5-Cycles in Mycielskians](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-counting-5-cycles-in-mycielskians)
-to bound the number of edges that `killCopies` deletes from `mμ[G]` to make it free
-of 5-cycles.
+19. The necessity of the Erdős–Gallai conditions (`erdos_gallai`) is a
+double-counting argument like those in this chapter. Show that the degrees of any set
+`S` of `k` vertices satisfy
+`∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
+degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
+part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
+`sum_degIn_comm`, as in the proof of Füredi's theorem
+([Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem)).
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3)
-    (h5 : C[5].Free G) :
-    2 * #mμ[G].edgeFinset ≤ 2 * #(mμ[G].killCopies C[5]).edgeFinset +
-      ∑ u, ∑ v ∈ G.neighborFinset u, G.degree u * G.degree v := by
-  rw [← copyCount_mycielskian_cycleGraph_five h3 h5]
-  have := le_card_edgeFinset_killCopies_add_copyCount (G := mμ[G]) (H := C[5])
+theorem sum_degree_le_erdosGallai [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
+    (S : Finset V) :
+    ∑ v ∈ S, G.degree v ≤ #S * (#S - 1) + ∑ v ∈ Sᶜ, min #S (G.degree v) := by
+  -- each degree splits into the neighbours in `S` and those in `Sᶜ`
+  have hsplit (v : V) : G.degree v = G.degIn S v + G.degIn Sᶜ v := by
+    rw [← degIn_union _ _ _ disjoint_compl_right, union_compl, degIn_eq_card_filter,
+      ← card_neighborFinset_eq_degree]
+    congr 1; ext; simp
+  -- a vertex of `S` has at most `#S - 1` neighbours in `S`
+  have h1 : ∑ v ∈ S, G.degIn S v ≤ #S * (#S - 1) := by
+    rw [← smul_eq_mul]
+    refine sum_le_card_nsmul _ _ _ fun v hv => ?_
+    calc G.degIn S v ≤ #(S.erase v) := card_le_card fun w hw => by
+            rw [mem_bipartiteAbove] at hw
+            exact mem_erase.2 ⟨(G.ne_of_adj hw.2).symm, hw.1⟩
+      _ = #S - 1 := card_erase_of_mem hv
+  -- count the edges between `S` and `Sᶜ` from the `Sᶜ` side
+  have h2 : ∑ v ∈ S, G.degIn Sᶜ v ≤ ∑ v ∈ Sᶜ, min #S (G.degree v) := by
+    rw [sum_degIn_comm]
+    exact sum_le_sum fun v _ => le_min (card_filter_le _ _) (degIn_le_degree _ _)
+  rw [sum_congr rfl fun v _ => hsplit v, sum_add_distrib]
   grind
 
 /-!
-18. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
+20. Deduce that every graphic multiset satisfies the Erdős–Gallai inequalities.
+(Together with `Graphic.even_sum` this proves that the conditions in `erdos_gallai`
+are necessary.) Hint: first show that a sub-multiset of `s.map f` is the image of a
+sub-multiset of `s`, using `Multiset.coe_le` and `List.sublist_map_iff`. Then, with
+`L` the sorted list of degrees, realize `L.take k` as the degrees of a set `S` of `k`
+vertices, so that `L.drop k` is the list of degrees of `Sᶜ`.
+-/
+theorem _root_.Multiset.exists_le_map_eq {α β : Type*} {f : α → β}
+    {s : Multiset α} {t : Multiset β} (h : t ≤ s.map f) : ∃ u ≤ s, u.map f = t := by
+  induction s using Quotient.inductionOn
+  induction t using Quotient.inductionOn
+  obtain ⟨l', hp, hs⟩ := Multiset.coe_le.1 h
+  obtain ⟨l'', hl'', rfl⟩ := List.sublist_map_iff.1 hs
+  exact ⟨l'', Multiset.coe_le.2 hl''.subperm, Multiset.coe_eq_coe.2 hp⟩
+
+theorem Graphic.erdosGallaiLE {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
+    (hk : k ≤ m.card) : erdosGallaiLE m k := by
+  obtain ⟨V, _, G, _, rfl⟩ := h
+  classical
+  set L := G.degreeMultiset.sort (· ≥ ·)
+  have hL : (L.take k : Multiset ℕ) + L.drop k = G.degreeMultiset := by
+    rw [Multiset.coe_add, List.take_append_drop, Multiset.sort_eq]
+  -- `L.take k` is the multiset of degrees of a set `S` of vertices
+  obtain ⟨u, hu, hmap⟩ := Multiset.exists_le_map_eq
+    (hL ▸ Multiset.le_add_right _ _ : (L.take k : Multiset ℕ) ≤ G.degreeMultiset)
+  let S : Finset V := ⟨u, Multiset.nodup_of_le hu univ.nodup⟩
+  have hS : #S = k := by
+    rw [card_mk, ← Multiset.card_map, hmap, Multiset.coe_card,
+      List.length_take, Multiset.length_sort]
+    exact min_eq_left hk
+  -- and `L.drop k` is the multiset of degrees of `Sᶜ`
+  have hc : Sᶜ.val.map (G.degree ·) = (L.drop k : Multiset ℕ) := by
+    have := hL
+    rw [degreeMultiset, ← union_compl S,
+      ← disjUnion_eq_union _ _ disjoint_compl_right, disjUnion_val,
+      Multiset.map_add] at this
+    exact (add_left_cancel (this.trans (by rw [← hmap]))).symm
+  calc (L.take k).sum = ∑ v ∈ S, G.degree v := by
+        rw [← Multiset.sum_coe, ← hmap]; rfl
+    _ ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v) :=
+        hS ▸ sum_degree_le_erdosGallai S
+    _ = _ := by
+        rw [← Multiset.sum_coe, ← Multiset.map_coe, ← hc, Multiset.map_map]; rfl
+
+/-!
+21. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
 [Ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-ends). Hint: if
 `K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
 square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and

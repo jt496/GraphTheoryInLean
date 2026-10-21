@@ -3,7 +3,7 @@ namespace SimpleGraph
 /-!
 # Exercises
 
-1. Show that a Cayley graph defined in a commutative additive group is simply a
+1. Show that a Cayley graph defined on a commutative additive group is simply a
 circulant graph.
 -/
 example (G : Type*) [AddCommGroup G] (s : Set G) :
@@ -39,7 +39,7 @@ example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := b
   sorry
 
 /-!
-5. Prove that the complete 1-partite graph (on ℕ) is empty.
+5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
 -/
 example : multiNat 1 = ⊥ := by
   sorry
@@ -55,7 +55,7 @@ example {ι : Type*} (V : ι → Type*) :
 7. Prove that the cycle graph `C[3]` is the complete graph on `Fin 3`. (Mathlib has
 this as `cycleGraph_three_eq_top`, but try to prove it directly.)
 -/
-example : C[3] = (⊤ : SimpleGraph (Fin 3)) := by
+example : C[3] = K[3] := by
   sorry
 
 /-!
@@ -74,7 +74,7 @@ example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
   sorry
 
 /-!
-10. Prove that the cycle graph `C[n + 2]` is the `circulantGraph {1}`. (Mathlib has
+10. Prove that the cycle graph `C[n + 2]` is `circulantGraph {1}`. (Mathlib has
 this, for `C[n + 1]`, as `cycleGraph_eq_circulantGraph`, but prove it directly.)
 -/
 example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
@@ -83,7 +83,7 @@ example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
 /-! SOLUTIONS -/
 
 /-!
-1. Show that a Cayley graph defined in a commutative additive group is simply a
+1. Show that a Cayley graph defined on a commutative additive group is simply a
 circulant graph.
 -/
 example (G : Type*) [AddCommGroup G] (s : Set G) :
@@ -94,7 +94,11 @@ example (G : Type*) [AddCommGroup G] (s : Set G) :
 
 /-!
 2. Show that the Paley graph on 17 vertices is a circulant graph with the following
-differences.
+differences. Hint: first show that the set of squares in `ZMod 17` is
+`{0, 1, 2, 4, 8, 9, 13, 15, 16}`. After `ext` the goal mentions a new variable of
+type `ZMod 17`, but `decide` only works on statements with no free variables. Instead
+use `decide +revert`, which first reverts the variable and then checks the resulting
+statement `∀ y : ZMod 17, …` case by case.
 -/
 lemma paleyGraph₁₇_eq_circulant :
     paleyGraph (ZMod 17) = circulantGraph ({1, 2, 4, 8, 9, 13, 15, 16}) := by
@@ -120,7 +124,7 @@ example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := b
   cases u <;> cases v <;> simp
 
 /-!
-5. Prove that the complete 1-partite graph (on ℕ) is empty.
+5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
 -/
 example : multiNat 1 = ⊥ := by
   ext ⟨i, _⟩ ⟨j, _⟩
@@ -157,7 +161,7 @@ example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
   rcases x with _ | (v | v) <;> simp
 
 /-!
-10. Prove that the cycle graph `C[n + 2]` is the `circulantGraph {1}`. (Mathlib has
+10. Prove that the cycle graph `C[n + 2]` is `circulantGraph {1}`. (Mathlib has
 this, for `C[n + 1]`, as `cycleGraph_eq_circulantGraph`, but prove it directly.)
 -/
 example (n : ℕ) : C[n + 2] = circulantGraph {1} := by

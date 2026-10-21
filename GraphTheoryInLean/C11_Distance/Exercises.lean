@@ -40,8 +40,11 @@ example : ∃ (G : SimpleGraph (Fin 3)) (u v w : Fin 3),
   sorry
 
 /-!
-5. Use `edist_eq_hammingDist` to show that the Hamming distance satisfies the
-triangle inequality.
+5. Use `edist_eq_hammingDist` to show that the Hamming distance (between vertices of
+the hypercube) satisfies the triangle inequality.
+
+Hint: rewrite the triangle inequality for `edist` in `Q[n]` using
+`edist_eq_hammingDist`, and cast the result back to `ℕ`.
 -/
 example {n : ℕ} (u v w : HypercubeVert n) :
     u.hammingDist w ≤ u.hammingDist v + v.hammingDist w := by
@@ -49,8 +52,12 @@ example {n : ℕ} (u v w : HypercubeVert n) :
 
 /-!
 6. Show that every vertex of the cycle graph `C[n + 3]` has eccentricity
-`(n + 3) / 2`. Hint: in a vertex-transitive graph all the eccentricities are equal
+`(n + 3) / 2`.
+
+Hint: in a vertex-transitive graph all the eccentricities are equal
 (`IsVertexTransitive.eccent_eq`), and the diameter is their supremum (`ediam`).
+Since all the eccentricities equal `C[n + 3].eccent v`, so does their supremum, the
+diameter, which we computed in `ediam_cycleGraph`.
 -/
 example (n : ℕ) (v : Fin (n + 3)) : C[n + 3].eccent v = ((n + 3) / 2 : ℕ) := by
   sorry
@@ -69,7 +76,9 @@ example (s t : ℕ) : K[s + 2, t + 1].ediam = 2 := by
 
 /-!
 9. Show that if `G` has diameter at least `3` then its complement has diameter at
-most `3`. Hint: take two vertices `u` and `v` at distance more than `2` in `G`
+most `3`.
+
+Hint: take two vertices `u` and `v` at distance more than `2` in `G`
 (`two_lt_edist_iff`), and show that every vertex is adjacent to `u` or to `v` in
 `Gᶜ`, or equal to one of them.
 -/
@@ -84,14 +93,15 @@ example {u v : V} (h : G.Adj u v) : mμ[G].edist (v ₗ) (v ᵣ) = 2 := by
   sorry
 
 /-!
-11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`.
+11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`. Hint: use
+`egirth_mycielskian_eq_four`.
 -/
 example : grotzschGraph.egirth = 4 := by
   sorry
 
 /-!
-12. Use the Moore bound to show that a cubic graph of diameter at most `2` has at
-most `10` vertices. (The Petersen graph shows that this is best possible.)
+12. Use the Moore bound to show that a `3`-regular graph of diameter at most `2` has
+at most `10` vertices. (The Petersen graph shows that this is best possible.)
 -/
 example [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (h : G.IsRegularOfDegree 3) (hd : G.ediam ≤ 2) : Fintype.card V ≤ 10 := by
@@ -171,8 +181,7 @@ example : ∃ (G : SimpleGraph (Fin 3)) (u v w : Fin 3),
     obtain ⟨p⟩ := h
     cases p with
     | nil => rfl
-    | cons ha _ =>
-      rename_i y _
+    | @cons _ y _ ha _ =>
       fin_cases y <;> exact absurd ha (by decide)
   have h01 : G.dist 0 1 = 1 := dist_eq_one_iff_adj.mpr (by decide)
   have h02 : G.dist 0 2 = 0 := dist_eq_zero_iff_eq_or_not_reachable.mpr
@@ -182,10 +191,10 @@ example : ∃ (G : SimpleGraph (Fin 3)) (u v w : Fin 3),
   exact ⟨G, 0, 2, 1, by rw [h01, h02, h21]; norm_num⟩
 
 /-!
-5. Use `edist_eq_hammingDist` to show that the Hamming distance satisfies the
-triangle inequality.
+5. Use `edist_eq_hammingDist` to show that the Hamming distance (between vertices of
+the hypercube) satisfies the triangle inequality.
 
-Rewrite the triangle inequality for `edist` in `Q[n]` using
+Hint: rewrite the triangle inequality for `edist` in `Q[n]` using
 `edist_eq_hammingDist`, and cast the result back to `ℕ`.
 -/
 example {n : ℕ} (u v w : HypercubeVert n) :
@@ -196,9 +205,10 @@ example {n : ℕ} (u v w : HypercubeVert n) :
 
 /-!
 6. Show that every vertex of the cycle graph `C[n + 3]` has eccentricity
-`(n + 3) / 2`. Hint: in a vertex-transitive graph all the eccentricities are equal
-(`IsVertexTransitive.eccent_eq`), and the diameter is their supremum (`ediam`).
+`(n + 3) / 2`.
 
+Hint: in a vertex-transitive graph all the eccentricities are equal
+(`IsVertexTransitive.eccent_eq`), and the diameter is their supremum (`ediam`).
 Since all the eccentricities equal `C[n + 3].eccent v`, so does their supremum, the
 diameter, which we computed in `ediam_cycleGraph`.
 -/
@@ -235,47 +245,39 @@ example (s t : ℕ) : K[s + 2, t + 1].ediam = 2 := by
 
 /-!
 9. Show that if `G` has diameter at least `3` then its complement has diameter at
-most `3`. Hint: take two vertices `u` and `v` at distance more than `2` in `G`
+most `3`.
+
+Hint: take two vertices `u` and `v` at distance more than `2` in `G`
 (`two_lt_edist_iff`), and show that every vertex is adjacent to `u` or to `v` in
 `Gᶜ`, or equal to one of them.
-
-In the complement every vertex `x` is adjacent to `u` or to `v` (or equal to one of
-them), since otherwise `x` would be a common neighbour of `u` and `v` in `G`; and `u`
-is adjacent to `v`. So any two vertices are joined in `Gᶜ` by a walk of length at
-most `3` through `u` or `v`.
 -/
 example (h : 3 ≤ G.ediam) : Gᶜ.ediam ≤ 3 := by
   obtain ⟨u, v, huv⟩ : ∃ u v, 2 < G.edist u v := by
     by_contra! hc
     exact absurd (h.trans (ediam_le_of_edist_le hc)) (by decide)
   obtain ⟨hne, hnadj, hcn⟩ := two_lt_edist_iff.mp huv
-  have hnear : ∀ x, Gᶜ.edist x u ≤ 1 ∨ Gᶜ.edist x v ≤ 1 := by
+  -- in `Gᶜ`, every vertex is within distance `1` of `u` or `v`, and `u` and `v` are
+  -- within distance `1` of each other
+  have hnear : ∀ x, ∃ w ∈ ({u, v} : Set V), Gᶜ.edist x w ≤ 1 := by
     intro x
-    simp only [edist_le_one_iff_adj_or_eq, compl_adj]
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff, exists_eq_or_imp,
+      exists_eq_left, edist_le_one_iff_adj_or_eq, compl_adj]
     by_contra! hx
     have : x ∈ G.commonNeighbors u v := by
       simp only [mem_commonNeighbors]
       exact ⟨(hx.1.1 hx.1.2).symm, (hx.2.1 hx.2.2).symm⟩
     simp [hcn] at this
-  have huv1 : Gᶜ.edist u v ≤ 1 :=
-    edist_le_one_iff_adj_or_eq.mpr (Or.inl ⟨hne, hnadj⟩)
+  have huv1 : Gᶜ.edist u v ≤ 1 := edist_le_one_iff_adj_or_eq.mpr (.inl ⟨hne, hnadj⟩)
+  have hpair : ∀ a ∈ ({u, v} : Set V), ∀ b ∈ ({u, v} : Set V), Gᶜ.edist a b ≤ 1 := by
+    rintro a (rfl | rfl) b (rfl | rfl) <;>
+      first | simp | exact huv1 | exact edist_comm.trans_le huv1
   refine ediam_le_of_edist_le fun x y => ?_
-  rcases hnear x with hx | hx <;> rcases hnear y with hy | hy
-  · calc Gᶜ.edist x y ≤ Gᶜ.edist x u + Gᶜ.edist u y := Gᶜ.edist_triangle
-      _ ≤ 1 + 1 := add_le_add hx (by rwa [edist_comm])
-      _ ≤ 3 := by norm_num
-  · calc Gᶜ.edist x y ≤ Gᶜ.edist x u + Gᶜ.edist u v + Gᶜ.edist v y :=
-          Gᶜ.edist_triangle.trans (add_le_add_left Gᶜ.edist_triangle _)
-      _ ≤ 1 + 1 + 1 := add_le_add (add_le_add hx huv1) (by rwa [edist_comm])
-      _ = 3 := by norm_num
-  · calc Gᶜ.edist x y ≤ Gᶜ.edist x v + Gᶜ.edist v u + Gᶜ.edist u y :=
-          Gᶜ.edist_triangle.trans (add_le_add_left Gᶜ.edist_triangle _)
-      _ ≤ 1 + 1 + 1 :=
-          add_le_add (add_le_add hx (by rwa [edist_comm])) (by rwa [edist_comm])
-      _ = 3 := by norm_num
-  · calc Gᶜ.edist x y ≤ Gᶜ.edist x v + Gᶜ.edist v y := Gᶜ.edist_triangle
-      _ ≤ 1 + 1 := add_le_add hx (by rwa [edist_comm])
-      _ ≤ 3 := by norm_num
+  obtain ⟨a, ha, hxa⟩ := hnear x
+  obtain ⟨b, hb, hyb⟩ := hnear y
+  calc Gᶜ.edist x y ≤ Gᶜ.edist x a + Gᶜ.edist a b + Gᶜ.edist b y :=
+        Gᶜ.edist_triangle.trans (add_le_add_left Gᶜ.edist_triangle _)
+    _ ≤ 1 + 1 + 1 := by gcongr; exacts [hpair a ha b hb, edist_comm.trans_le hyb]
+    _ = 3 := by norm_num
 
 /-!
 10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ[G]` the two
@@ -291,7 +293,8 @@ example {u v : V} (h : G.Adj u v) : mμ[G].edist (v ₗ) (v ᵣ) = 2 := by
   simp [h.symm]
 
 /-!
-11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`.
+11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`. Hint: use
+`egirth_mycielskian_eq_four`.
 
 `C[5]` is triangle-free, and its vertex `0` has the two neighbours `1` and `4`, so
 `egirth_mycielskian_eq_four` applies. Both facts are finite checks.
@@ -301,8 +304,8 @@ example : grotzschGraph.egirth = 4 := by
   exact absurd (h 0 1 4 (by decide) (by decide)) (by decide)
 
 /-!
-12. Use the Moore bound to show that a cubic graph of diameter at most `2` has at
-most `10` vertices. (The Petersen graph shows that this is best possible.)
+12. Use the Moore bound to show that a `3`-regular graph of diameter at most `2` has
+at most `10` vertices. (The Petersen graph shows that this is best possible.)
 -/
 example [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (h : G.IsRegularOfDegree 3) (hd : G.ediam ≤ 2) : Fintype.card V ≤ 10 := by
@@ -315,8 +318,9 @@ at most `k` is finite, and has at most `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1)
 vertices. Hint: `finite_of_eccent_le` and `moore_bound`.
 -/
 /-!
-An empty graph is finite. Otherwise any vertex `r` has eccentricity at most the
-diameter, so `V` is finite by `finite_of_eccent_le`, and we can apply `moore_bound`.
+A graph with no vertices is finite. Otherwise any vertex `r` has eccentricity at most
+the diameter, so `V` is finite by `finite_of_eccent_le`, and we can apply
+`moore_bound`.
 -/
 example (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
     (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
@@ -333,7 +337,7 @@ is best possible.)
 -/
 example [Fintype V] [Nonempty V] (G : SimpleGraph V) [DecidableRel G.Adj]
     (h : ∀ v, 3 ≤ G.degree v) (hg : 5 ≤ G.egirth) : 10 ≤ Fintype.card V := by
-  simpa [Finset.sum_range_succ, Nat.card_eq_fintype_card] using
+  simpa [Finset.sum_range_succ, ENat.card_eq_coe_fintype_card] using
     cage_bound_odd G 2 2 (fun v => h v) hg
 
 /-! END SOLUTIONS -/

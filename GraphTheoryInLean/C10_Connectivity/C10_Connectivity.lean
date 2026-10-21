@@ -10,31 +10,25 @@ namespace SimpleGraph
 open Walk
 
 /-!
-A graph is *connected* if it has at least one vertex and there is a walk between
-every pair of vertices.
-
-In this chapter we study graph connectivity. Building on the reachability relation of
-[Reachability](https://jt496.github.io/GraphTheoryInLean/Walks/#section-reachability),
-we start with Mathlib's notions `Preconnected` and `Connected`, connected components
-and bridges, and show that the Mycielskian `mμ[G]` is connected iff `G` has no
-isolated vertices. We then look at trees, and show that the infinite path `pathNat₁`
-is one. We show that a graph is bipartite iff it has no cycle of odd length, and that
-in a graph of maximum degree at most `2` every cycle runs through its whole
-component. We prove *Euler's theorem*: a finite graph with at least one vertex has an
+In this chapter we study graph connectivity. Building on the reachability relation
+`Reachable`, we start with Mathlib's notions `Preconnected` and `Connected`,
+connected components and bridges, and show that the Mycielskian `mμ[G]` is connected
+iff `G` has no isolated vertices, and that in a graph of maximum degree at most `2`
+every cycle is its own connected component. We then look at trees, and show that the
+infinite path `pathNat₁` is one. We prove *Euler's theorem*: a finite graph has an
 Eulerian trail iff all its edges lie in one component and it has either no vertex of
-odd degree or exactly two. We then turn to Mathlib's edge connectivity
-(`IsEdgeConnected`), define vertex connectivity (`IsVertexConnected`), and prove that
-a `k`-vertex-connected graph is `k`-edge-connected and that the `n`-dimensional
-hypercube `Q[n]` is both. This gives the inequality `κ(G) ≤ λ(G)` between the vertex
-and edge connectivity numbers.
+odd degree or exactly two. Next we introduce Mathlib's edge connectivity
+(`IsEdgeConnected`), and give our own definition of vertex connectivity
+(`IsVertexConnected`). We show that `k`-vertex-connectivity implies
+`k`-edge-connectivity. We also define the edge and vertex connectivity of a graph as
+numbers in `ℕ∞` and prove Whitney's inequalities.
 
-The final two sections are more advanced. We prove *Brooks' theorem*: a finite graph
-of maximum degree at most `Δ` is `Δ`-colourable unless it contains a
+The final two sections are more advanced. We prove *Brooks' theorem*: a locally
+finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it contains a
 `(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle. Then we
 define the *blocks* of a graph as the classes of an equivalence relation on edges,
 building our own quotient type just as Mathlib builds `ConnectedComponent`, and prove
 that, for `n ≥ 1`, a finite graph is `n`-colourable if each of its blocks is.
-
 
 # Connectivity
 
@@ -48,17 +42,17 @@ that, for a single pair of vertices `u v : V`, `G.Reachable u v` means that ther
 a walk from `u` to `v`.
 -/
 #source Preconnected  -- def Preconnected : Prop := ∀ u v : V, G.Reachable u v
-#source Connected -- structure Connected : Prop where
-                  --   protected preconnected : G.Preconnected
-                  --   protected [nonempty : Nonempty V]
+#source Connected     -- structure Connected : Prop where
+                      --   protected preconnected : G.Preconnected
+                      --   protected [nonempty : Nonempty V]
 
 /-!
 ## Connected Graphs
 
 The two notions differ only for the graph on an empty vertex type. This graph is
 vacuously preconnected, but it is not connected. With this convention a graph is
-connected exactly when it has precisely one connected component; the empty graph has
-none.
+connected exactly when it has precisely one connected component; the graph with no
+vertices has none.
 -/
 example (h : G.Connected) {u v : V} : G.Reachable u v := h.preconnected u v
 
@@ -72,12 +66,12 @@ Notice that rather than having to write `h.preconnected u v` for `G.Reachable u 
 (where `h : G.Connected`) there is a `CoeFun` instance that lets us write the more
 succinct `h u v`:
 -/
-#check instCoeFunConnectedForallForallReachable
 example (h : G.Connected) {u v : V} : G.Reachable u v := h u v
 
 /-!
 The hypercube is connected: we can use the Hamming path to walk between any two
-vertices, and we already gave a `Nonempty` instance for its vertices.
+vertices, and we already gave a `Nonempty` instance for its vertices which Lean will
+find automatically.
 -/
 lemma hypercube_connected (n : ℕ) : Q[n].Connected where
   preconnected := fun u v => ⟨u.hammingPath v⟩
@@ -97,7 +91,7 @@ since a Hamiltonian cycle passes through every vertex
 #check IsHamiltonian.connected
 
 /-!
-A connected graph has a path between any two vertices
+A connected graph has a path between any two vertices.
 -/
 #check Connected.exists_isPath
 
@@ -108,17 +102,10 @@ reachable.
 #check connected_iff_exists_forall_reachable
 
 /-!
-A vertex is *isolated* if it has no neighbours.
--/
-#source IsIsolated
-
-/-!
 In the Mycielskian of a graph `G`, any vertex `u` that is not isolated in `G` has
 both its left and right copies in `mμ[G]` connected to `none`. Given the edge `u — v`
-in `G` we have the walks `u ᵣ — none` and `u ₗ — v ᵣ — none` in `mμ[G]`.
-
-Conversely if `u` is an isolated vertex in `G` then `u ₗ` is an isolated vertex in
-`mμ[G]`.
+in `G` we have the walks `u ᵣ — none` and `u ₗ — v ᵣ — none` in `mμ[G]`. Conversely
+if `u` is an isolated vertex in `G` then `u ₗ` is an isolated vertex in `mμ[G]`.
 
 Hence `mμ[G]` is connected iff `G` has no isolated vertices.
 -/
@@ -159,7 +146,7 @@ vertex `v`.
 scoped notation:max G "⟦" v "⟧" => SimpleGraph.connectedComponentMk G v
 
 /-!
-Two components are equal iff they are constructed from reachable vertices
+Two components are equal iff they are constructed from reachable vertices.
 -/
 #check ConnectedComponent.eq
 
@@ -184,41 +171,55 @@ so we can count the components. The empty graph `⊥` on `Fin 3` has three, whil
 #eval Fintype.card C[5].ConnectedComponent -- 1
 
 /-!
-A connected graph has exactly one component: Mathlib's
-`Preconnected.subsingleton_connectedComponent` says that there is at most one, and a
-connected graph is nonempty, so there is at least one.
+A connected graph has exactly one component. We state this with `Nat.card`, so it
+applies to infinite graphs too. Mathlib's
+`Preconnected.subsingleton_connectedComponent` says that there is at most one
+component, and a connected graph is nonempty, so there is at least one
+(`Nat.card_eq_one_iff_unique`).
 -/
-lemma Connected.card_connectedComponent [Fintype G.ConnectedComponent]
-    (h : G.Connected) : Fintype.card G.ConnectedComponent = 1 := by
-  have := h.preconnected.subsingleton_connectedComponent
-  have := h.nonempty.map G.connectedComponentMk
-  exact le_antisymm (Fintype.card_le_one_iff_subsingleton.2 ‹_›) Fintype.card_pos
+lemma Connected.card_connectedComponent (h : G.Connected) :
+    Nat.card G.ConnectedComponent = 1 :=
+  Nat.card_eq_one_iff_unique.mpr ⟨h.preconnected.subsingleton_connectedComponent,
+    h.nonempty.map G.connectedComponentMk⟩
 
 /-!
-In informal graph theory we often think of a connected component as a graph, subgraph
-or subset of the vertex set of the original graph. But in Lean a connected component
-`C : G.ConnectedComponent` is none of these: it is an element of the *quotient type*
-`G.ConnectedComponent` of `V` by the equivalence relation `Reachable`, that is, an
-equivalence class of vertices. However we can convert a connected component into all
-of these things.
+Conversely, a graph with exactly one component is connected: any two vertices lie in
+the same component, and the graph is nonempty since that component has a
+representative vertex (`ConnectedComponent.out`).
+-/
+lemma connected_iff_card_connectedComponent :
+    G.Connected ↔ Nat.card G.ConnectedComponent = 1 := by
+  refine ⟨Connected.card_connectedComponent, fun h => ?_⟩
+  obtain ⟨_, ⟨C⟩⟩ := Nat.card_eq_one_iff_unique.mp h
+  have : Nonempty V := ⟨C.out⟩
+  exact ⟨fun u v => ConnectedComponent.exact (Subsingleton.elim _ _)⟩
+
+/-!
+In informal graph theory we often think of a connected component as a graph, or
+subgraph, or subset of the vertex set of the original graph. But in Lean a connected
+component `C : G.ConnectedComponent` is none of these: it is an element of the
+*quotient type* `G.ConnectedComponent` of `V` by the equivalence relation
+`Reachable`, that is, an equivalence class of vertices. However we can convert a
+connected component into all of these things.
 
 The *support* of a component is the set of vertices in that component.
 -/
 #check ConnectedComponent.supp --  (C : G.ConnectedComponent) : Set V
 /-!
-The `SimpleGraph` and `Subgraph` given by a component are `c.toSimpleGraph` and
-`c.toSubgraph`.
+The `SimpleGraph` and `Subgraph` given by a component are `C.toSimpleGraph` and
+`C.toSubgraph`.
 -/
 #source ConnectedComponent.toSimpleGraph -- .. SimpleGraph C := G.induce C.supp
-#source ConnectedComponent.toSubgraph -- .. G.Subgraph := Subgraph.induce ⊤ C.supp
+#source ConnectedComponent.toSubgraph    -- .. G.Subgraph := Subgraph.induce ⊤ C.supp
 
 /-!
 Connectivity of a `G.Subgraph` is a separate notion, defined via the coercion of the
 subgraph to a `SimpleGraph` on its vertex set. This is one of the duplications
 discussed in
 [Duplication](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-duplication);
-we will use it in the proof of Brooks' theorem. The subgraph given by a component is
-connected.
+we will use it in the proof of Brooks' theorem.
+
+The subgraph of a connected component is connected.
 -/
 #source Subgraph.Connected
 #check ConnectedComponent.connected_toSubgraph
@@ -231,45 +232,57 @@ support of a component.
 
 /-!
 When proving, for example, that a graph is bipartite it is standard to say "we just
-need to 2-colour each component" since if we have 2-colourings for each component of
-a graph we can combine them into a 2-colouring of the whole graph. This is more
+need to `2`-colour each component" since if we have `2`-colourings for each component
+of a graph we can combine them into a `2`-colouring of the whole graph. This is more
 generally true for homomorphisms.
 -/
 #check homOfConnectedComponents
+
 /-!
-Recall our definition of a `sigma` graph from
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs):
-the disjoint union of an indexed family of graphs.
+Recall our definition of a `SimpleGraph.sigma` graph: the disjoint union of an
+indexed family of graphs.
 -/
 #check SimpleGraph.sigma
 /-!
 There is a natural isomorphism between a graph and the sigma graph of its connected
-components. Informally this is obvious, but in Lean there is a subtlety. A vertex of
-the sigma graph is a pair `⟨C, w⟩`, where the *type* of `w` (a vertex of
-`C.toSimpleGraph`, that is, an element of the subtype `C.supp`) depends on the
-component `C`. So two vertices `⟨C, v⟩` and `⟨D, w⟩` are adjacent when there is a
-proof `h : C = D` and `v` is adjacent to `w` transported back along `h` (written
-`h ▸ w`). In the proof below we generalize the component `D`, so that `rintro rfl`
-can substitute `h` away, after which the transport is the identity.
+components, sending a vertex `v` to the pair `⟨G⟦v⟧, v⟩`. Informally this is
+obvious, but in Lean we meet again the cast `h ▸ w` from the definition of `Σg`
+(`SimpleGraph.sigma`): the images of `v` and `w` are adjacent
+when there is a proof `h : G⟦v⟧ = G⟦w⟧` such that `v` is adjacent to `h ▸ w` in
+`G⟦v⟧.toSimpleGraph`. The cast is stuck until `h` is substituted away, and here
+we cannot do that: `subst` needs one side of the equation to be a variable, but
+`G⟦v⟧` and `G⟦w⟧` are terms.
+
+One solution is to prove the adjacency rule once, for indices that *are* variables. A
+component's graph `C.toSimpleGraph` is by definition the induced graph
+`G.induce C.supp`, so it is enough to describe adjacency in a sigma graph of induced
+graphs: `⟨i, u⟩` and `⟨j, v⟩` are adjacent iff `i = j` and `u` and `v` are adjacent
+in `G`. This statement involves no cast, and in its proof the pattern `rfl`
+substitutes `i = j` away, since `i` and `j` are variables.
 -/
-/-- The isomorphism between `G` and the sigma graph of its connected components -/
+lemma sigma_induce_adj {ι : Type*} {S : ι → Set V} {i j : ι} {u : S i} {v : S j} :
+    (Σg fun i => G.induce (S i)).Adj ⟨i, u⟩ ⟨j, v⟩ ↔ i = j ∧ G.Adj u v := by
+  constructor <;> rintro ⟨rfl, h⟩ <;> exact ⟨rfl, h⟩
+
+/-!
+In the isomorphism the condition `G⟦v⟧ = G⟦w⟧` is then automatic, since adjacent
+vertices lie in the same component
+(`ConnectedComponent.connectedComponentMk_eq_of_adj`). The proof of `right_inv` uses
+the same substitution idea: a vertex of the sigma graph is a component `C` together
+with a vertex `v` and a proof of `v ∈ C`, which by definition says `G⟦v⟧ = C`, and
+since `C` is a variable the pattern `rfl` substitutes it.
+-/
+/-- The isomorphism between `G` and the sigma graph of its connected components. -/
 def isoSigmaConnectedComponents :
     G ≃g Σg (fun C : G.ConnectedComponent => C.toSimpleGraph) where
   toFun v := ⟨G⟦v⟧, ⟨v, rfl⟩⟩
   invFun p := p.2
   left_inv v := rfl
   right_inv := by
-    -- matching the membership proof with `rfl` forces the component to be `G⟦v⟧`
     rintro ⟨_, ⟨v, rfl⟩⟩
     rfl
-  map_rel_iff' {v w} := by
-    have key : ∀ (D : G.ConnectedComponent) (h : G⟦v⟧ = D) (hw : w ∈ D),
-        G⟦v⟧.toSimpleGraph.Adj ⟨v, rfl⟩ (h ▸ ⟨w, hw⟩) ↔ G.Adj v w := by
-      rintro D rfl hw; exact ConnectedComponent.toSimpleGraph_adj _ rfl hw
-    -- adjacent vertices lie in the same component
-    have hc := @ConnectedComponent.connectedComponentMk_eq_of_adj _ G v w
-    exact ⟨fun ⟨h, hadj⟩ => (key _ h _).mp hadj,
-      fun h => ⟨hc h, (key _ (hc h) rfl).mpr h⟩⟩
+  map_rel_iff' := sigma_induce_adj.trans
+    ⟨And.right, fun h => ⟨ConnectedComponent.connectedComponentMk_eq_of_adj h, h⟩⟩
 
 /-!
 ## Bridges
@@ -288,21 +301,20 @@ An edge of the graph `G` is a bridge iff it is not contained in any cycle in `G`
 #check isBridge_iff_forall_cycle_notMem
 
 /-!
-Recall from
-[Walks in the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Walks/#section-walks-in-the-mycielskian)
-that any edge `u — v` in a graph gives rise to a 5-cycle in its Mycielskian.
+Recall from `isCycle_mycielskianClosed_of_adj` that any edge `u — v` in a graph
+gives rise to a `5`-cycle in its Mycielskian.
 -/
 #check isCycle_mycielskianClosed_of_adj
 
 /-!
-So every edge of `mμ[G]` that comes from an edge of `G` lies on a 5-cycle, and so
+So every edge of `mμ[G]` that comes from an edge of `G` lies on a `5`-cycle, and so
 does the edge `none — u ᵣ` whenever `u` has a neighbour `v` in `G`. None of these
 edges is a bridge. On the other hand, if `u` is isolated in `G` then `none` is the
 only neighbour of `u ᵣ`, so deleting the edge `none — u ᵣ` cuts `u ᵣ` off. Hence the
 bridges of `mμ[G]` are precisely the edges `none — u ᵣ` where `u` is an isolated
 vertex of `G`.
 
-[Figure: A graph and its Mycielskian with a unique bridge edge](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
+[Figure: Left: a graph $G$ with an isolated vertex $u$. Right: its Mycielskian, whose only bridge is the edge from the apex $\ast$ to $u_r$ (orange)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
 -/
 
 lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ[G].edgeSet) :
@@ -314,21 +326,106 @@ lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ[G].edgeSet) :
     induction e using Sym2.ind with
     | h x y =>
       have hxy : mμ[G].Adj x y := mμ[G].mem_edgeSet.mp he
+      -- split on the types of the endpoints; `simp only` discharges the four pairs
+      -- that are never edges: `none — none`, `none — v ₗ`, `u ₗ — none`, `u ᵣ — v ᵣ`
       rcases x with _ | (u | u) <;>
         rcases y with _ | (v | v) <;> simp only [mycielskian_adj] at hxy
-      · exact ⟨v, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
+      · -- `none — v ᵣ`: a neighbour `w` of `v` would put `e` on a `5`-cycle, so `v`
+        -- is isolated
+        exact ⟨v, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian]), rfl⟩
-      · exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
+      · -- `u ₗ — v ₗ`: impossible, it lies on the `5`-cycle of the edge `u — v`
+        exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
           (by simp [Walk.mycielskian])).elim
-      · exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
+      · -- `u ₗ — v ᵣ`: impossible, it lies on the `5`-cycle of the edge `u — v`
+        exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
           (by simp [Walk.mycielskian])).elim
-      · exact ⟨u, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
+      · -- `u ᵣ — none`: as in the first case, `u` is isolated
+        exact ⟨u, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian]), Sym2.eq_swap⟩
-      · exact (hncyc (isCycle_mycielskianClosed_of_adj hxy.symm)
+      · -- `u ᵣ — v ₗ`: impossible, it lies on the `5`-cycle of the edge `v — u`
+        exact (hncyc (isCycle_mycielskianClosed_of_adj hxy.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian])).elim
-  · rintro ⟨u, hiso, rfl⟩ h
-    obtain ⟨_ | @⟨_, w, _, hadj, _⟩⟩ := h.symm
-    rcases w with _ | (w | w) <;> simp_all [Sym2.eq_swap, IsIsolated]
+  · rintro ⟨u, hiso, rfl⟩
+    rw [isBridge_iff]
+    -- `u` is isolated in `G`, so `none` is the only neighbour of `u ᵣ`: once the
+    -- edge `none — u ᵣ` is deleted, `u ᵣ` has no neighbours at all
+    have hnb : ∀ w, ¬ (mμ[G].deleteEdges {s(none, u ᵣ)}).Adj (u ᵣ) w := by
+      rintro (_ | w | w) h <;> simp_all [Sym2.eq_swap, IsIsolated]
+    -- so a walk from `u ᵣ` to `none` has nowhere to take its first step
+    intro h
+    obtain ⟨p⟩ := h.symm
+    cases p with
+    | cons hadj _ => exact hnb _ hadj
+
+/-!
+## Cycles in Graphs of Maximum Degree Two
+
+In a graph in which every vertex has degree at most `2`, a cycle is an entire
+connected component. The key observation: at a vertex `x` of a cycle `c`, the cycle
+already uses every edge of `G` at `x`. Indeed, `x` has two neighbours on the cycle
+(`Walk.IsCycle.ncard_neighborSet_toSubgraph_eq_two`) and at most two in `G`, so the
+first set of neighbours, being contained in the second, is all of it
+(`Set.eq_of_subset_of_ncard_le`).
+-/
+lemma Walk.IsCycle.neighborSet_toSubgraph_eq_of_degree_le_two [G.LocallyFinite]
+    (hdeg : ∀ v, G.degree v ≤ 2) {u x : V} {c : G.Walk u u} (hc : c.IsCycle)
+    (hx : x ∈ c.support) : c.toSubgraph.neighborSet x = G.neighborSet x :=
+  Set.eq_of_subset_of_ncard_le (fun _ h => c.toSubgraph.adj_sub h)
+    (by grind [ncard_neighborSet, hc.ncard_neighborSet_toSubgraph_eq_two hx])
+
+/-!
+Hence a vertex lies on the cycle iff it is reachable from it, that is, a cycle passes
+through every vertex of its connected component. One direction holds for any walk
+(`Walk.takeUntil`). For the other, if some vertex reachable from the cycle `c` lay
+off it, then some edge `y — z` of a walk to it would leave the cycle, with
+`y ∈ c.support` and `z ∉ c.support` (`Walk.exists_boundary_dart`). But every
+neighbour of `y` in `G` is a neighbour of `y` on the cycle, so `z` would lie on the
+cycle after all.
+-/
+lemma Walk.IsCycle.mem_support_iff_reachable_of_degree_le_two [G.LocallyFinite]
+    (hdeg : ∀ v, G.degree v ≤ 2) {u v : V} {c : G.Walk u u} (hc : c.IsCycle) :
+    v ∈ c.support ↔ G.Reachable u v := by
+  refine ⟨fun hv => by classical exact ⟨c.takeUntil v hv⟩, fun huv => ?_⟩
+  by_contra hv
+  obtain ⟨d, -, hd₁, hd₂⟩ :=
+    huv.some.exists_boundary_dart {x | x ∈ c.support} c.start_mem_support hv
+  have : d.snd ∈ c.toSubgraph.neighborSet d.fst := by
+    rw [hc.neighborSet_toSubgraph_eq_of_degree_le_two hdeg hd₁]
+    exact d.adj
+  exact hd₂ (c.mem_support_of_adj_toSubgraph this.symm)
+
+/-!
+Together, these two lemmas say that the cycle *is* its connected component, as
+subgraphs of `G`.
+-/
+theorem Walk.IsCycle.toSubgraph_eq_of_degree_le_two [G.LocallyFinite]
+    (hdeg : ∀ v, G.degree v ≤ 2) {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
+    c.toSubgraph = G⟦u⟧.toSubgraph := by
+  have hmem (x : V) := hc.mem_support_iff_reachable_of_degree_le_two hdeg (v := x)
+  ext x y
+  · simp [hmem, ConnectedComponent.eq, reachable_comm]
+  · simp only [Subgraph.induce_adj, ConnectedComponent.mem_supp_iff,
+      ConnectedComponent.eq, Subgraph.top_adj, reachable_comm (v := u), ← hmem]
+    refine ⟨fun h => ⟨c.mem_support_of_adj_toSubgraph h,
+      c.mem_support_of_adj_toSubgraph h.symm, h.adj_sub⟩,
+      fun ⟨hx, _, hxy⟩ => ?_⟩
+    rw [← Subgraph.mem_neighborSet,
+      hc.neighborSet_toSubgraph_eq_of_degree_le_two hdeg hx]
+    exact hxy
+
+/-!
+In particular, every cycle in a connected graph of maximum degree at most `2` is a
+*Hamiltonian cycle* (`Walk.IsHamiltonianCycle`): the tail of a cycle is a path
+(`Walk.IsCycle.isPath_tail`), and a path through every vertex is Hamiltonian
+(`Walk.IsPath.isHamiltonian_of_mem`).
+-/
+lemma Walk.IsCycle.isHamiltonianCycle_of_degree_le_two [DecidableEq V]
+    [G.LocallyFinite] (hconn : G.Connected) (hdeg : ∀ v, G.degree v ≤ 2)
+    {u : V} {c : G.Walk u u} (hc : c.IsCycle) : c.IsHamiltonianCycle :=
+  ⟨hc, hc.isPath_tail.isHamiltonian_of_mem fun v => by
+    rw [support_tail_of_not_nil _ hc.not_nil, mem_support_tail_iff hc.not_nil]
+    exact (hc.mem_support_iff_reachable_of_degree_le_two hdeg).mpr (hconn u v)⟩
 
 /-!
 # Trees
@@ -380,16 +477,17 @@ a copy of any cycle graph of order at least 3.
 #check isAcyclic_iff_free_cycleGraph
 
 /-!
-## The Infinite Path Is a Tree
+## The Infinite Path is a Tree
 
 Our running example `pathNat₁` is a tree. It is connected, since every vertex `n` can
-be reached from `0` by walking up one step at a time.
+be reached from `0` along the walk `pathNat₁Walk 0 n`. This walk ends at `0 + n`,
+which is not definitionally `n`, so we use `Walk.copy`
+([Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy)) to change its
+endpoint.
 -/
-lemma pathNat₁_connected : pathNat₁.Connected := by
-  refine (connected_iff_exists_forall_reachable _).2 ⟨0, fun n => ?_⟩
-  induction n with
-  | zero => rfl
-  | succ n ih => exact ih.trans (by simp : pathNat₁.Adj n (n + 1)).reachable
+lemma pathNat₁_connected : pathNat₁.Connected :=
+  (connected_iff_exists_forall_reachable _).2
+    ⟨0, fun n => ⟨(pathNat₁Walk 0 n).copy rfl (by simp)⟩⟩
 
 /-!
 To see that `pathNat₁` is acyclic, consider the largest vertex `m` of a cycle. It has
@@ -398,24 +496,17 @@ its only neighbour that is not larger than `m` is `m - 1`.
 -/
 lemma pathNat₁_isAcyclic : pathNat₁.IsAcyclic := by
   intro v c hc
-  have hne : c.support.toFinset.Nonempty := ⟨v, by simp⟩
   -- let `m` be the largest vertex of the cycle `c`
-  obtain ⟨m, hm_mem, hm_max⟩ := c.support.toFinset.exists_max_image id hne
-  rw [List.mem_toFinset] at hm_mem
-  -- `m` has exactly two neighbours in the cycle,
-  --  considered as a subgraph of `pathNat₁`
-  have hcard := hc.ncard_neighborSet_toSubgraph_eq_two hm_mem
-  -- but its neighbours in the cycle are a subset of `{m - 1}`
-  -- since `m` is the largest vertex
-  have h_sub : c.toSubgraph.neighborSet m ⊆ ({m - 1} : Set ℕ) := by
-    intro w hw
-    rw [Subgraph.mem_neighborSet] at hw
-    have hadj : pathNat₁.Adj m w := c.toSubgraph.adj_sub hw
-    have hw_in : w ∈ c.support := Walk.mem_support_of_adj_toSubgraph hw.symm
-    have hw_le : w ≤ m := hm_max w (List.mem_toFinset.mpr hw_in)
+  obtain ⟨m, hm, hmax⟩ := c.support.toFinset.exists_max_image id ⟨v, by simp⟩
+  simp only [List.mem_toFinset, id] at hm hmax
+  -- its cycle neighbours are adjacent to `m` and at most `m`, so equal `m - 1`
+  have hsub : c.toSubgraph.neighborSet m ⊆ {m - 1} := fun w hw => by
+    have := c.toSubgraph.adj_sub hw
+    have := hmax w (c.mem_support_of_adj_toSubgraph hw.symm)
     grind
-  have hle := Set.ncard_le_ncard h_sub (Set.finite_singleton _)
-  rw [Set.ncard_singleton] at hle
+  -- but `m` has two neighbours on the cycle
+  have := Set.ncard_le_ncard hsub
+  rw [hc.ncard_neighborSet_toSubgraph_eq_two hm, Set.ncard_singleton] at this
   grind
 
 lemma pathNat₁_isTree : pathNat₁.IsTree := ⟨pathNat₁_connected, pathNat₁_isAcyclic⟩
@@ -423,23 +514,25 @@ lemma pathNat₁_isTree : pathNat₁.IsTree := ⟨pathNat₁_connected, pathNat�
 /-!
 ## The Edge Count Formula
 
-A fundamental fact about finite trees: a tree on `n` vertices has exactly `n - 1`
-edges. Mathlib states this as `#G.edgeFinset + 1 = Fintype.card V`, which avoids the
-truncated subtraction of `ℕ`: working with `n - 1` would need the side condition
-`1 ≤ n` at every step.
+A tree on `n` vertices has exactly `n - 1` edges. Mathlib states this as
+`#G.edgeFinset + 1 = Fintype.card V`, which avoids the truncated subtraction of `ℕ`:
+working with `n - 1` would need the side condition `1 ≤ n`.
 -/
 #check IsTree.card_edgeFinset -- #G.edgeFinset + 1 = Fintype.card V
+
 /-!
 Conversely, a finite connected graph with this many edges is a tree.
 -/
 #check isTree_iff_connected_and_card
+
 /-!
 More generally, a connected graph satisfies `|V| ≤ |E(G)| + 1`. This is stated with
 `Nat.card`, so it needs no finiteness assumption, but for an infinite graph it says
-nothing: `Nat.card` of an infinite type is the junk value `0`, so for `pathNat₁` it
-says `0 ≤ 0 + 1`.
+nothing useful: `Nat.card` of an infinite type is the junk value `0`, so for
+`pathNat₁` it says `0 ≤ 0 + 1`.
 -/
 #check Connected.card_vert_le_card_edgeSet_add_one
+
 /-!
 Any nontrivial finite tree has at least two leaves (vertices of degree one), and so
 its minimum degree is `1`. (Note `Nontrivial V` is the typeclass saying that `V`
@@ -447,11 +540,13 @@ contains at least two elements.)
 -/
 #check IsTree.exists_ne_and_degree_eq_one
 #check IsTree.minDegree_eq_one_of_nontrivial
+
 /-!
 Deleting a leaf from a connected graph leaves it connected. This is the basic tool
 for proving results about finite trees by induction on the number of vertices.
 -/
 #check Connected.induce_compl_singleton_of_degree_eq_one
+
 /-!
 ## Trees and Bridges
 
@@ -460,8 +555,8 @@ A graph is acyclic if and only if every edge is a bridge. For example, every edg
 -/
 #check isAcyclic_iff_forall_adj_isBridge
 
-example {m n : ℕ} (h : pathNat₁.Adj m n) : pathNat₁.IsBridge s(m, n) :=
-  isAcyclic_iff_forall_adj_isBridge.mp pathNat₁_isAcyclic h
+example {n : ℕ} : pathNat₁.IsBridge s(n, n + 1) :=
+  isAcyclic_iff_forall_adj_isBridge.mp pathNat₁_isAcyclic (by simp)
 
 /-!
 ## Spanning Trees
@@ -483,126 +578,6 @@ argument via Zorn's lemma.
 #check exists_isAcyclic_reachable_eq_le
 
 /-!
-# Odd Cycles and Bipartite Graphs
-
-Recall from
-[Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-bipartite-graphs)
-that `G.IsBipartite` is defined as `G.Colorable 2`, and that forests are bipartite
-(`IsAcyclic.colorable_two`): a forest has no cycles at all, let alone odd ones.
-Mathlib contains the following result saying that a graph is bipartite iff every
-closed walk has even length.
--/
-#check two_colorable_iff_forall_loop_even
-  -- G.Colorable 2 ↔ ∀ u (w : G.Walk u u), Even w.length
-/-!
-However we would like the stronger result about cycles rather than closed walks: a
-graph is bipartite iff it contains no odd cycle. One direction is immediate, since a
-cycle is a closed walk. For the other we need to show that a closed walk of odd
-length contains a cycle of odd length. This is not currently in Mathlib (it is listed
-as a TODO in Mathlib's file on bipartite graphs).
-
-A key step is `Walk.cons_isCycle_iff_length_ne_one` from
-[Circuits and Cycles](https://jt496.github.io/GraphTheoryInLean/Walks/#section-circuits-and-cycles):
-a path closed up by an edge is a cycle, unless the path is just that edge.
--/
-#check Walk.cons_isCycle_iff_length_ne_one
-
-/-!
-Next we show that any walk can be replaced by a path between the same endpoints whose
-length has the same parity, unless the graph has an odd cycle. The proof is by
-induction on the walk, in the style of Mathlib's `Walk.bypass`. Given a path `q`
-from `c` to `b` (with the same parity as the original walk) and an edge `a — c`,
-either `a` is not on `q` and `cons h q` is a path, or we split `q` at `a`. In the
-second case, if the closed walk `cons h (q.takeUntil a)` has odd length then it is
-an odd cycle; otherwise the rest of the path, `q.dropUntil a`, has the right parity.
--/
-lemma Walk.exists_isPath_or_odd_isCycle {a b : V} (p : G.Walk a b) :
-    (∃ q : G.Walk a b, q.IsPath ∧ (Even q.length ↔ Even p.length)) ∨
-      ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length := by
-  classical
-  induction p with
-  | nil => exact .inl ⟨nil, .nil, Iff.rfl⟩
-  | @cons a _ _ h p ih =>
-    rcases ih with ⟨q, hq, hpar⟩ | hodd
-    · by_cases ha : a ∈ q.support
-      · have hlen := congrArg length (q.take_spec ha)
-        rw [length_append] at hlen
-        rcases Nat.even_or_odd (q.takeUntil a ha).length with he | ho
-        · exact .inr ⟨a, cons h (q.takeUntil a ha),
-            (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq.takeUntil ha, by grind⟩,
-            by grind [length_cons]⟩
-        · exact .inl ⟨q.dropUntil a ha, hq.dropUntil ha, by grind [length_cons]⟩
-      · exact .inl ⟨cons h q, hq.cons ha, by grind [length_cons]⟩
-    · exact .inr hodd
-
-/-!
-Now an odd closed walk `cons h p` contains an odd cycle: either the previous lemma
-finds one directly, or it replaces `p` by a path `q` of even length, and then
-`cons h q` is an odd cycle.
--/
-theorem Walk.exists_odd_isCycle {u : V} (w : G.Walk u u) (hw : Odd w.length) :
-    ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length := by
-  cases w with
-  | nil => simp at hw
-  | cons h p =>
-    refine p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
-    have hqe : Even q.length := by grind [length_cons]
-    exact ⟨_, cons h q, (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq, by grind⟩,
-      by grind [length_cons]⟩
-
-/-!
-Hence a graph is bipartite iff it has no odd cycle.
--/
-theorem isBipartite_iff_forall_isCycle_even :
-    G.IsBipartite ↔ ∀ u (c : G.Walk u u), c.IsCycle → Even c.length := by
-  refine ⟨fun h u c _ => two_colorable_iff_forall_loop_even.mp h u c, fun h => ?_⟩
-  refine two_colorable_iff_forall_loop_even.mpr fun u w => ?_
-  by_contra hw
-  obtain ⟨v, c, hc, hodd⟩ := w.exists_odd_isCycle (Nat.not_even_iff_odd.mp hw)
-  exact Nat.not_even_iff_odd.mpr hodd (h v c hc)
-
-/-!
-## Cycles in Graphs of Maximum Degree Two
-
-In a graph in which every vertex has degree at most `2`, a cycle passes through
-every vertex of its connected component. Indeed, if some vertex reachable from the
-cycle `c` lay off it, then some edge `y — z` of a walk to it would leave the cycle,
-with `y ∈ c.support` and `z ∉ c.support` (`Walk.exists_boundary_dart`). But `y`
-already has two neighbours on the cycle
-(`Walk.IsCycle.ncard_neighborSet_toSubgraph_eq_two`), so together with `z` it would
-have degree at least `3`.
--/
-lemma Walk.IsCycle.mem_support_of_degree_le_two [G.LocallyFinite]
-    (hdeg : ∀ v, G.degree v ≤ 2) {u v : V} {c : G.Walk u u} (hc : c.IsCycle)
-    (huv : G.Reachable u v) : v ∈ c.support := by
-  by_contra hv
-  obtain ⟨d, -, hd₁, hd₂⟩ :=
-    huv.some.exists_boundary_dart {x | x ∈ c.support} c.start_mem_support hv
-  have hsub : insert d.snd (c.toSubgraph.neighborSet d.fst) ⊆ G.neighborSet d.fst :=
-    Set.insert_subset d.adj fun x hx => c.toSubgraph.adj_sub hx
-  have hnot : d.snd ∉ c.toSubgraph.neighborSet d.fst := fun h =>
-    hd₂ (c.mem_support_of_adj_toSubgraph h.symm)
-  have := Set.ncard_le_ncard hsub (Set.toFinite _)
-  rw [Set.ncard_insert_of_notMem hnot
-      ((Set.toFinite _).subset ((Set.subset_insert _ _).trans hsub)),
-    ncard_neighborSet_toSubgraph_eq_two hc hd₁, ncard_neighborSet] at this
-  grind
-
-/-!
-In particular, every cycle in a connected graph of maximum degree at most `2` is a
-*Hamiltonian cycle*
-([Hamiltonian Paths and Cycles](https://jt496.github.io/GraphTheoryInLean/Walks/#section-hamiltonian-paths-and-cycles)):
-the tail of a cycle is a path (`Walk.IsCycle.isPath_tail`), and a path through every
-vertex is Hamiltonian (`Walk.IsPath.isHamiltonian_of_mem`).
--/
-lemma Walk.IsCycle.isHamiltonianCycle_of_degree_le_two [DecidableEq V]
-    [G.LocallyFinite] (hconn : G.Connected) (hdeg : ∀ v, G.degree v ≤ 2)
-    {u : V} {c : G.Walk u u} (hc : c.IsCycle) : c.IsHamiltonianCycle :=
-  ⟨hc, hc.isPath_tail.isHamiltonian_of_mem fun v => by
-    rw [support_tail_of_not_nil _ hc.not_nil, mem_support_tail_iff hc.not_nil]
-    exact hc.mem_support_of_degree_le_two hdeg (hconn u v)⟩
-
-/-!
 # Eulerian Circuits and Trails
 
 Mathlib has the necessary conditions in Euler's theorem (see
@@ -610,32 +585,27 @@ Mathlib has the necessary conditions in Euler's theorem (see
 but not the existence direction: a connected graph with all degrees even has an
 Eulerian circuit, and a connected graph with exactly two vertices of odd degree has
 an Eulerian trail. We prove these here with a splicing argument in the style of
-*Hierholzer's algorithm*. Rather than running the algorithm, we take a longest trail
+*Hierholzer's algorithm*. Rather than running the algorithm we take a longest trail
 and show that, if it were not Eulerian, we could splice a circuit into it to make it
 longer.
 
 A standard proof might typically prove this for the all-even circuit case first and
 then argue that the open trail case reduces to the closed circuit case by adding a
-new vertex and two new edges from the odd degree vertices to the new vertex. This
+new vertex and two new edges from the odd-degree vertices to the new vertex. This
 would definitely be possible in Lean, but somehow more complicated than necessary.
 Instead we prove the open case directly, reusing code from the circuit case.
 
-[Figure: Hierholzer's splicing step on $K_5$: splice a new circuit $c$ (red) into the trail $p$ (blue) at vertex $w$ to obtain an Eulerian circuit](https://jt496.github.io/GraphTheoryInLean/figures/hierholzer.svg)
--/
-
-section EulerExistence
-
-/-!
 Euler's theorem is often stated for connected graphs, but, as we saw in
 [Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails),
 `IsEulerian` ignores isolated vertices. The analogous necessary condition is that all
 the edges of `G` lie in a single connected component. We make this a definition
-`EdgesInOneComponent`.
+`EdgesInOneComponent`. This is the weakest hypothesis under which the Eulerian
+existence theorems below hold, strictly weaker than `Connected`, which also forbids
+isolated vertices (when there are at least two vertices) and the graph with no
+vertices.
 -/
 /-- Every edge of `G` lies in a single connected component: any two non-isolated
-vertices are reachable from each other. This is the weakest hypothesis under which
-the Eulerian existence theorems below hold, strictly weaker than `Connected`,
-which also forbids isolated vertices and the empty graph. -/
+vertices are reachable from each other. -/
 def EdgesInOneComponent (G : SimpleGraph V) : Prop :=
   ∀ u ∈ G.support, ∀ v ∈ G.support, G.Reachable u v
 
@@ -646,6 +616,8 @@ weaker `EdgesInOneComponent` and recovered for `Connected` as corollaries.
 -/
 lemma Connected.edgesInOneComponent (h : G.Connected) : G.EdgesInOneComponent :=
   fun u _ v _ => h u v
+
+section EulerExistence
 
 /-!
 Conversely, `EdgesInOneComponent` is necessary: an Eulerian walk uses every edge, so
@@ -664,7 +636,7 @@ lemma Walk.IsEulerian.edgesInOneComponent [DecidableEq V] {u v} {p : G.Walk u v}
 Mathlib has the corresponding statement for `Connected`: if `G` has an Eulerian walk
 and no isolated vertices, then `G` is connected.
 -/
-#check IsEulerian.connected_of_forall_not_isIsolated
+#check Walk.IsEulerian.connected_of_forall_not_isIsolated
 
 /-!
 As we saw in
@@ -705,7 +677,7 @@ Instead we use the `attribute` command, which attaches an attribute to a declara
 that already exists: `attribute [simp] foo` has the same effect as writing `@[simp]`
 in front of the declaration of `foo`. The keyword `local` limits the effect to the
 current `section` or `namespace`. So after the line below, typeclass inference uses
-`locallyFiniteDeleteEdges` until `end EulerExistence`, and nowhere else.
+`locallyFiniteDeleteEdges` until the end of this section and nowhere else.
 -/
 attribute [local instance] locallyFiniteDeleteEdges
 
@@ -713,8 +685,8 @@ attribute [local instance] locallyFiniteDeleteEdges
 ## Extending Trails
 
 In an all-even-degree graph, a trail that has not returned to its start can be
-extended: its current endpoint `w ≠ v` is incident to an edge the trail has not used.
-(The number of edges in the trail that are incident with `w` is odd, while `degree w`
+extended: its current endpoint `w` is incident to an edge the trail has not used.
+(The number of edges in the trail that are incident to `w` is odd, while `degree w`
 is even, so some incident edge is still unused.)
 
 We first prove a simple lemma about the number of edges of a trail `p` incident to a
@@ -766,17 +738,15 @@ A trail repeats no edges, so its length is at most the number of edges in the gr
 /-!
 In an all-even-degree graph, any trail `p` starting at `v` can be extended to a
 closed trail from `v` of length at least `p.length`, by repeatedly applying
-`exists_unused_edge_of_even` until it returns to `v`.
+`exists_unused_edge_of_even` until it returns to `v`. The proof applies
+`exists_closed_isTrail_length_le` recursively to longer trails. It isn't obvious to
+Lean that this is well-founded so we need to give a termination argument.
 
-Note this proof applies `exists_closed_isTrail_length_le` recursively to longer
-trails. It isn't obvious to Lean that this is well-founded so we need to give a
-termination argument.
-
-We know that no trail is longer than the number of edges in the graph:
-`IsTrail.length_le_card_edgeFinset` and the trail we apply it to in the recursive
-call is strictly longer than the original trail `p`, so the measure
-`Nat.card G.edgeSet - p.length` strictly decreases with each recursive call. (This is
-what we are doing in the `termination_by` and `decreasing_by` section below.) The
+We know that no trail is longer than the number of edges in the graph
+(`IsTrail.length_le_card_edgeFinset`), and the trail in the recursive call is
+strictly longer than the original trail `p`, so the measure
+`Nat.card G.edgeSet - p.length` strictly decreases with each recursive call. This is
+what we are doing in the `termination_by` and `decreasing_by` section below. The
 lemma assumes `[Finite G.edgeSet]`: in a graph with infinitely many edges, such as
 the two-way infinite path, a trail can be extended forever.
 -/
@@ -817,7 +787,8 @@ variable [DecidableEq V]
 /-!
 Deleting the edges of a trail `p` changes the degree at each vertex `x` by the number
 of edges of `p` incident to `x`. Hence if this number has the same parity as
-`G.degree x` at every vertex, then every degree in the deleted graph is even.
+`G.degree x` at every vertex, then every degree in the graph formed by deleting the
+edges of `p` is even.
 -/
 lemma IsTrail.even_degree_deleteEdges {u v} {p : G.Walk u v} (hp : p.IsTrail)
     (hpar : ∀ x, Even (p.edges.countP (fun e => x ∈ e)) ↔ Even (G.degree x)) :
@@ -826,9 +797,7 @@ lemma IsTrail.even_degree_deleteEdges {u v} {p : G.Walk u v} (hp : p.IsTrail)
   have hinc : (G.deleteEdges {e | e ∈ p.edges}).incidenceFinset x
             = (G.incidenceFinset x).filter (· ∉ p.edges) := by
     ext e
-    simp only [mem_filter, mem_incidenceFinset, incidenceSet, edgeSet_deleteEdges,
-      Set.mem_ofPred_eq, Set.mem_sdiff]
-    grind
+    grind [mem_incidenceFinset, incidenceSet, edgeSet_deleteEdges]
   -- the deleted degree at `x` plus the number of edges of
   -- `p` at `x` is the original degree
   grind [card_filter_add_card_filter_not, card_incidenceFinset_eq_degree]
@@ -869,7 +838,7 @@ lemma IsTrail.exists_support_pos_deleted {u v} (hG : G.EdgesInOneComponent)
     by_contra! h; exact hne (hp.isEulerian_of_forall_mem h)
   induction e using Sym2.ind with | _ a b => ?_
   have hab : G.Adj a b := he
-  have hGab : Gp.Adj a b := by rw [deleteEdges_adj]; exact ⟨hab, hep⟩
+  have hGab : Gp.Adj a b := by grind [deleteEdges_adj]
   have hpos : ∀ {x y}, Gp.Adj x y → 0 < Gp.degree x :=
     fun {x y} hxy => (Gp.degree_pos_iff_exists_adj x).mpr ⟨y, hxy⟩
   by_cases ha : a ∈ p.support
@@ -879,7 +848,7 @@ lemma IsTrail.exists_support_pos_deleted {u v} (hG : G.EdgesInOneComponent)
       q.reverse.exists_boundary_dart {x | x ∈ p.support} p.start_mem_support ha
     have hcd_notin : s(c, d) ∉ p.edges :=
       fun hmem => hd (p.snd_mem_support_of_mem_edges hmem)
-    have hcdGp : Gp.Adj c d := by rw [deleteEdges_adj]; exact ⟨hcd, hcd_notin⟩
+    have hcdGp : Gp.Adj c d := by grind [deleteEdges_adj]
     exact ⟨c, hc, hpos hcdGp⟩
 
 /-!
@@ -888,6 +857,8 @@ To *splice* a closed walk `c` at `w` into a walk `p` through `w`, we split `p` a
 `(p.takeUntil w) ++ c ++ (p.dropUntil w)`. The result has length
 `p.length + c.length`, and if `p` and `c` are trails with no common edges then it is
 again a trail.
+
+[Figure: Hierholzer's splicing step on $K_5$: splice a new circuit $c$ (red, centre) at $w$ into the circuit $p$ (blue, left) starting at $v$, to obtain an Eulerian circuit starting at $w$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/hierholzer.svg)
 -/
 omit [G.LocallyFinite] in
 lemma IsTrail.takeUntil_append_append_dropUntil {a b w : V} {p : G.Walk a b}
@@ -919,12 +890,12 @@ even degree in the graph obtained by deleting the edges of `p`. Find a vertex `w
 `p` incident to an unused edge, build a circuit `c` at `w` in the
 deleted graph, transfer it back into `G`, and splice it into `p` at `w`.
 
-[Figure](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
+[Figure: Splicing a closed trail $c$ (red, centre) at $w$ into a trail $p$ (blue, left) from $a$ to $b$ gives a longer trail from $a$ to $b$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
 
 Notice that this lemma will allow us to handle both the closed case (`a = b`, the
 Eulerian *circuit*, where the parity hypothesis `hdel` comes from
-`even_degree_deleteEdges_closed`) and the open case (`a ≠ b`, the Eulerian *trail*,
-where it comes from `even_degree_deleteEdges_open`).
+`IsTrail.even_degree_deleteEdges_closed`) and the open case (`a ≠ b`, the Eulerian
+*trail*, where it comes from `IsTrail.even_degree_deleteEdges_open`).
 -/
 lemma IsTrail.exists_longer_of_not_isEulerian {a b} (hG : G.EdgesInOneComponent)
     (ha : a ∈ G.support) {p : G.Walk a b}
@@ -944,25 +915,23 @@ lemma IsTrail.exists_longer_of_not_isEulerian {a b} (hG : G.EdgesInOneComponent)
   have hc_notin : List.Disjoint (c.transfer G htr).edges p.edges := by
     intro e he hpe
     rw [edges_transfer] at he
-    have heg := c.edges_subset_edgeSet he
-    rw [edgeSet_deleteEdges] at heg
-    exact heg.2 hpe
+    grind [edgeSet_deleteEdges, c.edges_subset_edgeSet he]
   -- splice `c` into `p` at `w`: walk `a → w`, then around `c`, then `w → b`. This
   -- is a strictly longer trail from `a` to `b`.
   refine ⟨_, hp.takeUntil_append_append_dropUntil hw_supp (hc.isTrail.transfer htr)
     hc_notin, ?_⟩
   grind [length_takeUntil_append_append_dropUntil, length_transfer,
-    hc.three_le_length]
+         hc.three_le_length]
 
 /-!
 ## Euler's Theorem
 
-Both cases of Euler's theorem follow the same pattern. Let `q` be a longest trail
-from `a` to `b` (trails have length at most `#G.edgeFinset`, so one exists as soon
-as there is any trail `q₀` from `a` to `b`). If `q` were not Eulerian then
-`IsTrail.exists_longer_of_not_isEulerian` would give a longer trail, a
-contradiction. The two cases differ only in why deleting the edges of a trail leaves
-every degree even, so we take this as the hypothesis `hdel`.
+Both cases of Euler's theorem now follow. Let `q` be a longest trail from `a` to `b`
+(trails have length at most `#G.edgeFinset`, so one exists as soon as there is any
+trail `q₀` from `a` to `b`). If `q` were not Eulerian then
+`IsTrail.exists_longer_of_not_isEulerian` would give a longer trail, a contradiction.
+The two cases differ only in why deleting the edges of a trail leaves every degree
+even, so we take this as the hypothesis `hdel`.
 -/
 lemma exists_isEulerian_of_isTrail {a b} (hG : G.EdgesInOneComponent)
     (ha : a ∈ G.support) {q₀ : G.Walk a b} (hq₀ : q₀.IsTrail)
@@ -984,10 +953,10 @@ lemma exists_isEulerian_of_isTrail {a b} (hG : G.EdgesInOneComponent)
   grind
 
 /-!
-*Euler's theorem* (existence direction): a graph with finitely many edges, all in one
-component (`EdgesInOneComponent`), in which every vertex has even degree has an
-Eulerian circuit. `[Nonempty V]` is needed only so that we can name a start vertex in
-the edgeless case.
+*Euler's theorem* (existence direction, circuit): a graph with finitely many edges,
+all in one component (`EdgesInOneComponent`), in which every vertex has even degree
+has an Eulerian circuit. `[Nonempty V]` is needed only so that we can name a start
+vertex in the case that the graph has no edges.
 -/
 theorem exists_isEulerian_circuit [Nonempty V] (h : G.EdgesInOneComponent)
     (h2 : ∀ v, Even (G.degree v)) :
@@ -1003,8 +972,8 @@ theorem exists_isEulerian_circuit [Nonempty V] (h : G.EdgesInOneComponent)
       (isEulerian_nil_iff u).mpr (Set.not_nonempty_iff_eq_empty.mp hsupp)⟩
 
 /-!
-*Euler's theorem* (existence direction) for a **connected** graph: recovered from
-`exists_isEulerian_circuit` via `Connected.edgesInOneComponent`.
+*Euler's theorem* (existence direction, circuit) for a *connected* graph: recovered
+from `exists_isEulerian_circuit` via `Connected.edgesInOneComponent`.
 -/
 theorem _root_.SimpleGraph.Connected.exists_isEulerian_circuit (h : G.Connected)
     (h2 : ∀ v, Even (G.degree v)) :
@@ -1029,7 +998,7 @@ theorem exists_isEulerian_trail_of_two_odd {a b} (hG : G.EdgesInOneComponent)
     fun q hq => hq.even_degree_deleteEdges_open hab hpar
 
 /-!
-*Euler's theorem* (existence direction, open trail) for a **connected** graph:
+*Euler's theorem* (existence direction, open trail) for a *connected* graph:
 recovered from `exists_isEulerian_trail_of_two_odd` via
 `Connected.edgesInOneComponent`.
 -/
@@ -1040,16 +1009,15 @@ theorem _root_.SimpleGraph.Connected.exists_isEulerian_trail {a b} (h : G.Connec
 
 /-!
 *Euler's theorem*, full characterization: a finite graph with at least one vertex has
-an Eulerian trail **iff** all its edges lie in one component and it has either no
+an Eulerian trail *iff* all its edges lie in one component and it has either no
 odd-degree vertex or exactly two. The forward direction is
 `IsEulerian.edgesInOneComponent` with Mathlib's `IsEulerian.card_odd_degree`; the
 reverse direction is `exists_isEulerian_circuit` (no odd-degree vertex) or
 `exists_isEulerian_trail_of_two_odd` (exactly two). We only reason about the number
-of odd-degree vertices, so we count them with `Set.ncard` (see
-[Which One Should I Use?](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-which-one-should-i-use))
-and `[Finite V]` suffices; it implies the section's `[Finite G.edgeSet]` assumption,
-which we `omit`. Mathlib's `IsEulerian.card_odd_degree` counts with `Fintype.card`
-instead, so the forward direction converts between the two.
+of odd-degree vertices, so we count them with `Set.ncard` and `[Finite V]` suffices;
+it implies the section's `[Finite G.edgeSet]` assumption, which we `omit`. Mathlib's
+`IsEulerian.card_odd_degree` counts with `Fintype.card` instead, so the forward
+direction converts between the two.
 -/
 omit [Finite G.edgeSet] in
 theorem exists_isEulerian_iff [Finite V] [Nonempty V] :
@@ -1093,13 +1061,11 @@ only their endpoints. Menger's theorem is not currently in Mathlib.
 ## Edge Connectivity
 
 In Mathlib edge connectivity is defined via `G.IsEdgeReachable`, which says that two
-vertices `u v : V` are `k`-edge-reachable if after deleting less than `k` edges from
+vertices `u, v` are `k`-edge-reachable if after deleting less than `k` edges from
 `G` there is still a walk from `u` to `v`. Here the number of deleted edges is
 measured with `Set.encard`, which is `⊤` if the set is infinite and otherwise its
 cardinality as a natural number.
 -/
-#check Set.encard
-
 #source IsEdgeReachable
 
 /-!
@@ -1120,20 +1086,21 @@ graph with no vertices) is `k`-edge-connected for every `k`.
 #check IsEdgeConnected.preconnected
 
 /-!
-[Figure: A 3-edge-connected graph with a 3-edge cut](https://jt496.github.io/GraphTheoryInLean/figures/edge_connectivity.svg)
+[Figure: A 3-edge-connected graph with a 3-edge cut (red)](https://jt496.github.io/GraphTheoryInLean/figures/edge_connectivity.svg)
 
-An edge is a bridge iff its endpoints are not 2-edge-reachable. So a graph is
-2-edge-connected iff deleting any single edge leaves it preconnected, and a graph is
-a forest iff no two distinct vertices are 2-edge-reachable.
+An edge is a bridge iff its endpoints are not `2`-edge-reachable. So a graph is
+`2`-edge-connected iff deleting any single `e : Sym2 V` leaves it preconnected. Here
+`e` need not be an edge of `G`, and deleting a non-edge doesn't change `G`, so this
+includes `G` itself being preconnected.
 -/
 #check isBridge_iff_not_isEdgeReachable_two
 #check isEdgeConnected_two
+/-!
+A graph is acyclic (a forest) iff no two distinct vertices are `2`-edge-reachable.
+-/
 #check isAcyclic_iff_pairwise_not_isEdgeReachable_two
 
 /-!
-We will show later in this section that the hypercube `Q[n]` is
-`n`-edge-connected, by deriving this from the fact that it is `n`-vertex-connected.
-
 ## Vertex Connectivity
 
 A graph is `k`-vertex-connected if deleting less than `k` vertices always leaves the
@@ -1159,7 +1126,7 @@ def IsVertexConnected (G : SimpleGraph V) (k : ℕ) : Prop :=
 
 /-!
 The graph obtained by deleting `S` is `G.induce Sᶜ`, but its vertex type is the
-subtype `↥Sᶜ`, so its walks run between vertices `⟨u, hu⟩` that carry proofs that
+subtype `↑Sᶜ`, so its walks run between vertices `⟨u, hu⟩` that carry proofs that
 `u ∉ S`. Walks in `G` that avoid `S` are much easier to construct and combine.
 
 The two formulations agree. To see this we pass through Mathlib's `Subgraph` API
@@ -1216,17 +1183,25 @@ lemma IsVertexConnected.exists_notMem {k : ℕ} (hG : G.IsVertexConnected k)
 If a graph is `k`-vertex-connected then any vertex has at least `k` neighbours: if
 there were less than `k` neighbours `N` of `v`, then a walk from `v` to a vertex
 outside `N ∪ {v}` avoiding `N` would have nowhere to take its first step. We state
-this with `encard`, so that no finiteness assumption on the neighbourhood is needed.
+this first with `encard`, so that no finiteness assumption on the neighbourhood is
+needed.
 -/
 lemma IsVertexConnected.le_encard_neighborSet {k : ℕ} (hG : G.IsVertexConnected k)
     (v : V) : (k : ℕ∞) ≤ (G.neighborSet v).encard := by
   by_contra! hlt
   obtain ⟨u, hu⟩ : ∃ u, u ∉ insert v (G.neighborSet v) := by
     by_contra! h
-    have := (hG.1.trans_eq (Set.encard_univ V).symm).trans
-      ((Set.encard_le_encard fun x _ => h x).trans
-      ((Set.encard_insert_le _ _).trans (Order.add_one_le_of_lt hlt)))
-    norm_cast at this; grind
+    -- `h` says that every vertex is `v` or a neighbour of `v`, so `G` would have at
+    -- most `k` vertices
+    have hle : (k + 1 : ℕ∞) ≤ k :=
+      calc (k + 1 : ℕ∞) ≤ ENat.card V := hG.1
+        _ = (Set.univ : Set V).encard := (Set.encard_univ V).symm
+        _ ≤ (insert v (G.neighborSet v)).encard :=
+            Set.encard_le_encard fun x _ => h x
+        _ ≤ (G.neighborSet v).encard + 1 := Set.encard_insert_le _ _
+        _ ≤ k := Order.add_one_le_of_lt hlt
+    norm_cast at hle
+    grind
   rw [Set.mem_insert_iff, not_or] at hu
   obtain ⟨p, hp⟩ := hG.2 _ hlt v u (G.irrefl) hu.2
   cases p with
@@ -1240,157 +1215,39 @@ lemma IsVertexConnected.le_degree {k : ℕ} (hG : G.IsVertexConnected k) (v : V)
     card_neighborFinset_eq_degree, Nat.cast_le] at h
 
 /-!
-Taking the box product `G □ K₂` raises the vertex connectivity by at least one, so
-`Q[n]` is `n`-vertex-connected by induction on `n`.
+Taking the box product with `K₂` raises the vertex connectivity by at least one: if
+`G` is connected and `k`-vertex-connected then `G □ K₂` is
+`(k + 1)`-vertex-connected. Since `Q[n + 1]` is `Q[n] □ K₂`, induction on `n` then
+shows that the hypercube `Q[n]` is `n`-vertex-connected. Exercises 14–16 guide you
+through the proof, and Exercise 17 uses the next section to deduce that `Q[n]` is
+also `n`-edge-connected.
 
-Proof sketch for the box-product step: Let `S` be a set of at most `k` vertices of
-`G □ K₂` and let `(u, c)` and `(v, d)` be two vertices not in `S`. Write
-`S.fiberProj b` for the set of vertices `z` of `G` with `(z, b) ∈ S`. The sizes of
-`S.fiberProj true` and `S.fiberProj false` sum to `|S| ≤ k`, so for some fibre `b`
-less than `k` vertices of `S` lie in that fibre (`Finset.exists_fiberProj_card_lt`).
-We first walk from each endpoint into fibre `b` avoiding `S`
-(`walk_to_fiber_avoids`): either the endpoint is already there, or its copy in fibre
-`b` is not in `S` and we cross directly, or that copy lies in `S`, in which case some
-`G`-neighbour `w` has both of its copies outside `S` (`exists_good_neighbor`), and we
-step to `w` and cross there. Finally `k`-vertex-connectivity of `G` gives a walk in
-`G` between the two projected endpoints avoiding `S.fiberProj b`, and this lifts to a
-walk in fibre `b` avoiding `S` (`Walk.boxProdLeft`).
--/
-
-/-- The vertices `z` of `G` whose copy `(z, b)` in fibre `b` of `G □ K₂` lies in
-`S`. -/
-noncomputable def _root_.Finset.fiberProj (S : Finset (V × Bool)) (b : Bool) :
-    Finset V :=
-  S.preimage (·, b) (Prod.mk_left_injective b).injOn
-
-@[simp] lemma _root_.Finset.mem_fiberProj {S : Finset (V × Bool)} {b : Bool}
-    {z : V} :
-    z ∈ S.fiberProj b ↔ (z, b) ∈ S := Finset.mem_preimage
-
-/-!
-If `0 < k` and `|S| ≤ k` then some fibre contains less than `k` vertices of `S`.
--/
-lemma _root_.Finset.exists_fiberProj_card_lt {k : ℕ} {S : Finset (V × Bool)}
-    (hS : S.card ≤ k) (hk : 0 < k) : ∃ b, (S.fiberProj b).card < k := by
-  classical
-  have hc (b : Bool) : (S.fiberProj b).card = (S.filter (·.2 = b)).card := by
-    rw [Finset.fiberProj, Finset.card_preimage]; congr 1; ext ⟨x, c⟩; simp [eq_comm]
-  have h := Finset.card_filter_add_card_filter_not (s := S) (fun x => x.2 = false)
-  simp only [Bool.not_eq_false, ← hc] at h
-  grind
-
-/-!
-If `(z, b) ∈ S` and `|S| ≤ k` then some `G`-neighbour `w` of `z` has neither copy
-`(w, false)`, `(w, true)` in `S`: `z` has at least `k` neighbours, but at most
-`k - 1` first coordinates of `S` differ from `z`.
--/
-private lemma exists_good_neighbor {k : ℕ} (hG : G.IsVertexConnected k)
-    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {b : Bool} (hzb : (z, b) ∈ S) :
-    ∃ w, G.Adj z w ∧ ∀ c, (w, c) ∉ S := by
-  classical
-  by_contra! h
-  have hz : z ∈ S.image Prod.fst := Finset.mem_image_of_mem _ hzb
-  have hsub : G.neighborSet z ⊆ ↑((S.image Prod.fst).erase z) := fun w hw => by
-    obtain ⟨c, hc⟩ := h w hw
-    exact Finset.mem_erase.mpr ⟨hw.ne', Finset.mem_image_of_mem Prod.fst hc⟩
-  have hk := (hG.le_encard_neighborSet z).trans (Set.encard_le_encard hsub)
-  grind [Set.encard_coe_eq_coe_finsetCard, Nat.cast_le, Finset.card_erase_of_mem hz]
-
-/-!
-From a vertex `(z, c) ∉ S` there is a walk of length at most two into fibre `b`
-that avoids `S`.
--/
-private lemma walk_to_fiber_avoids {k : ℕ} (hG : G.IsVertexConnected k)
-    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {c : Bool} (hzc : (z, c) ∉ S)
-    (b : Bool) :
-    ∃ (z' : V) (p : (G.boxProd (⊤ : SimpleGraph Bool)).Walk (z, c) (z', b)),
-      ∀ x ∈ p.support, x ∉ S := by
-  by_cases hcb : c = b
-  · subst hcb
-    exact ⟨z, .nil, by simp [hzc]⟩
-  have hcross (w : V) : (G.boxProd ⊤).Adj (w, c) (w, b) := boxProd_adj_right.mpr hcb
-  by_cases hzb : (z, b) ∈ S
-  · obtain ⟨w, hzw, hw⟩ := exists_good_neighbor hG hS hzb
-    exact ⟨w, .cons (boxProd_adj_left.mpr hzw) (hcross w).toWalk, by simp [hzc, hw]⟩
-  · exact ⟨z, (hcross z).toWalk, by simp [hzc, hzb]⟩
-
-/-!
-Mathlib's `Walk.boxProdLeft` copies a walk of `G` into fibre `b` of `G □ H`. It
-is defined as a `Walk.map`, but its type records the endpoints as `(u, b)` and
-`(v, b)`, whereas the endpoints of the `Walk.map` walk only reduce to these after
-unfolding `boxProdLeft`.
--/
-@[simp] lemma Walk.support_boxProdLeft {β : Type*} (H : SimpleGraph β) (b : β)
-    {u v : V} (p : G.Walk u v) :
-    (p.boxProdLeft H b).support = p.support.map (·, b) :=
-  Walk.support_map _ _
-
-/-!
-If `G` is `k`-vertex-connected then `G □ K₂` is `(k + 1)`-vertex-connected.
--/
-lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
-    (hG_conn : G.Connected) :
-    (G.boxProd (⊤ : SimpleGraph Bool)).IsVertexConnected (k + 1) := by
-  refine .of_finset ?_ ?_
-  · -- `|V × Bool| = 2 |V|` and `k + 1 ≤ |V|`
-    have h := hG.1
-    rw [ENat.card_prod, ENat.card_eq_coe_fintype_card (α := Bool), Fintype.card_bool,
-      Nat.cast_ofNat]
-    calc ((k + 1 : ℕ) : ℕ∞) + 1 ≤ ((k : ℕ∞) + 1) * 2 := by norm_cast; grind
-      _ ≤ _ := by gcongr
-  intro S hS ⟨u, c⟩ ⟨v, d⟩ hu hv
-  rcases Nat.eq_zero_or_pos k with rfl | hk
-  · -- for `k = 0` the set `S` is empty and `G □ K₂` is connected
-    obtain ⟨p⟩ := (hG_conn.boxProd connected_top).preconnected (u, c) (v, d)
-    exact ⟨p, by simp [Finset.card_eq_zero.mp (Nat.lt_one_iff.mp hS)]⟩
-  have hS' : S.card ≤ k := Nat.le_of_lt_succ hS
-  obtain ⟨b, hb⟩ := S.exists_fiberProj_card_lt hS' hk
-  obtain ⟨u', pu, hpu⟩ := walk_to_fiber_avoids hG hS' hu b
-  obtain ⟨v', pv, hpv⟩ := walk_to_fiber_avoids hG hS' hv b
-  obtain ⟨q, hq⟩ := hG.exists_walk (S.fiberProj b) hb u' v'
-    (by simpa using hpu _ pu.end_mem_support)
-    (by simpa using hpv _ pv.end_mem_support)
-  refine ⟨pu.append ((q.boxProdLeft ⊤ b).append pv.reverse), fun x hx => ?_⟩
-  simp only [Walk.mem_support_append_iff, Walk.support_reverse, List.mem_reverse,
-    Walk.support_boxProdLeft, List.mem_map] at hx
-  grind [Finset.mem_fiberProj]
-
-/-!
-The `n`-dimensional hypercube `Q[n]` is `n`-vertex-connected.
--/
-lemma hypercube_isVertexConnected {n : ℕ} : Q[n].IsVertexConnected n := by
-  induction n with
-  | zero =>
-    refine ⟨?_, fun S hS => absurd hS (by simp)⟩
-    simp
-  | succ n ih =>
-    exact ih.boxProd_top_bool (hypercube_connected n)
-
-/-!
 ## Vertex Connectivity Implies Edge Connectivity
 
-A `k`-vertex-connected graph is `k`-edge-connected.
+Any `k`-vertex-connected graph is also `k`-edge-connected.
 
-Proof sketch: Given a set `s` of less than `k` edges and vertices `u` and `v`, we
-may discard the elements of `s` that are not edges of `G`. Then we pick from each
-edge of `s` other than `s(u, v)` an endpoint that is neither `u` nor `v`, and let `T`
-be the set of chosen endpoints (`exists_cover_avoiding`). A walk that avoids a set of
-vertices meeting every edge of `s` survives the deletion of `s`
-(`Walk.reachable_deleteEdges_of_avoids`). If `s(u, v)` is not one of the deleted
-edges then `T` meets every deleted edge, and a walk from `u` to `v` avoiding `T`
-exists by `k`-vertex-connectivity. Otherwise `T` has at most `k - 2` vertices, so
-there is a vertex `w` outside `T ∪ {u, v}`, and we walk from `u` to `w` avoiding
-`T ∪ {v}` and then from `w` to `v` avoiding `T ∪ {u}`; both of these sets meet every
-deleted edge, including `u — v`.
+Proof sketch: given a set `s` of less than `k` edges and vertices `u` and `v`, let
+`s₀ ⊆ s` be those that are edges of `G`, since deleting the other elements of `s`
+changes nothing. We then pick from each edge of `s₀` other than `s(u, v)` an endpoint
+that is neither `u` nor `v`, and let `T` be the set of chosen endpoints
+(`Finset.exists_cover_avoiding`). A walk that avoids a set of vertices meeting every
+edge of `s₀` survives the deletion of `s` (`Walk.reachable_deleteEdges_of_avoids`).
+If `s(u, v) ∉ s₀` then `T` meets every edge of `s₀`, and a walk from `u` to `v`
+avoiding `T` exists by `k`-vertex-connectivity. Otherwise `T` has at most `k - 2`
+vertices, so there is a vertex `w` outside `T ∪ {u, v}`, and we walk from `u` to `w`
+avoiding `T ∪ {v}` and then from `w` to `v` avoiding `T ∪ {u}`; both of these sets
+meet every edge of `s₀`, including `u — v`.
 
 Our first lemma says that given a finite set `s` of pairs `s(a, b)` with `a ≠ b`,
 there is a set `T` of vertices other than `u` and `v`, with at most one vertex for
 each element of `s` other than `s(u, v)`, that meets every element of `s` other than
-`s(u, v)`. -/
-private lemma exists_cover_avoiding [DecidableEq V] (u v : V) (s : Finset (Sym2 V))
-    (hs : ∀ e ∈ s, ¬ e.IsDiag) :
+`s(u, v)`.
+-/
+lemma _root_.Finset.exists_cover_avoiding [DecidableEq V] (u v : V)
+    (s : Finset (Sym2 V)) (hs : ∀ e ∈ s, ¬ e.IsDiag) :
     ∃ T : Finset V, T.card ≤ (s.erase s(u, v)).card ∧ u ∉ T ∧ v ∉ T ∧
       ∀ e ∈ s, e ≠ s(u, v) → ∃ x ∈ e, x ∈ T := by
+  -- We use `choose!` below which needs `V` to be nonempty.
   have : Nonempty V := ⟨u⟩
   have hpick : ∀ e ∈ s.erase s(u, v), ∃ x ∈ e, x ≠ u ∧ x ≠ v := by
     intro e he
@@ -1401,6 +1258,12 @@ private lemma exists_cover_avoiding [DecidableEq V] (u v : V) (s : Finset (Sym2 
       simp only [Sym2.mk_isDiag_iff] at this
       by_cases a = u <;> by_cases a = v <;>
         grind [Sym2.mem_mk_left, Sym2.mem_mk_right]
+  -- Plain `choose` would give `g : (e : Sym2 V) → e ∈ s.erase s(u, v) → V`, whose
+  -- second argument is a proof of membership, so `(s.erase s(u, v)).image g` would
+  -- not type-check.
+  -- Using `choose!` removes this proof argument, giving `g : Sym2 V → V`
+  -- and `hg : ∀ e ∈ s.erase s(u, v), g e ∈ e ∧ g e ≠ u ∧ g e ≠ v`. The values of `g`
+  -- outside `s.erase s(u, v)` are arbitrary, so `choose!` needs `Nonempty V`.
   choose! g hg using hpick
   refine ⟨(s.erase s(u, v)).image g, Finset.card_image_le, by grind, by grind, ?_⟩
   intro e hes hne
@@ -1437,9 +1300,9 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k)
   have hs₀ : s₀.card < k := by
     rw [hsfin.encard_eq_coe_toFinset_card] at hs
     exact (Finset.card_filter_le _ _).trans_lt (by exact_mod_cast hs)
-  obtain ⟨T, hTcard, hTu, hTv, hT⟩ := exists_cover_avoiding u v s₀
+  obtain ⟨T, hTcard, hTu, hTv, hT⟩ := s₀.exists_cover_avoiding u v
     fun e he => G.not_isDiag_of_mem_edgeSet (hmem.mp he).2
-  -- a set containing `T` meets every deleted edge, except possibly `s(u, v)`
+  -- a set containing `T` meets every edge of `s₀`, except possibly `s(u, v)`
   have hcover (A : Finset V) (hA : T ⊆ A) (huv : s(u, v) ∈ s₀ → u ∈ A ∨ v ∈ A) :
       ∀ e ∈ s, e ∈ G.edgeSet → ∃ x ∈ e, x ∈ A := by
     intro e hes heG
@@ -1450,7 +1313,8 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k)
     · obtain ⟨x, hx, hxT⟩ := hT e (hmem.mpr ⟨hes, heG⟩) he
       exact ⟨x, hx, hA hxT⟩
   by_cases huv : s(u, v) ∈ s₀
-  · -- the edge `u — v` is deleted, so `|T| ≤ k - 2`: route through a third vertex
+  · -- the edge `u — v` is deleted, so `#T ≤ k - 2`
+    -- we need to find another vertex `w` outside `T ∪ {u, v}`
     have hne : u ≠ v := (G.mem_edgeSet.mp (hmem.mp huv).2).ne
     have hTk : T.card + 2 ≤ k := by
       have := Finset.card_erase_add_one huv
@@ -1462,22 +1326,20 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k)
       grind)
     simp only [Finset.mem_insert, not_or] at hw
     obtain ⟨hwu, hwv, hwT⟩ := hw
+    -- we can walk from `u` to `w` avoiding `T ∪ {v}`
     obtain ⟨p₁, hp₁⟩ := hG.exists_walk (insert v T) (by have := hins v; grind) u w
       (by simp [hne, hTu]) (by simp [hwv, hwT])
+    -- we can walk from `w` to `v` avoiding `T ∪ {u}`
     obtain ⟨p₂, hp₂⟩ := hG.exists_walk (insert u T) (by have := hins u; grind) w v
       (by simp [hwu, hwT]) (by simp [hne.symm, hTv])
     exact (p₁.reachable_deleteEdges_of_avoids (hcover _ (Finset.subset_insert _ _)
         fun _ => .inr (Finset.mem_insert_self _ _)) hp₁).trans
       (p₂.reachable_deleteEdges_of_avoids (hcover _ (Finset.subset_insert _ _)
         fun _ => .inl (Finset.mem_insert_self _ _)) hp₂)
-  · -- otherwise `T` meets every deleted edge
+  · -- otherwise `T` meets every edge of `s₀`
     have := Finset.card_erase_le (s := s₀) (a := s(u, v))
     obtain ⟨p, hp⟩ := hG.exists_walk T (by grind) u v hTu hTv
     exact p.reachable_deleteEdges_of_avoids (hcover T subset_rfl (absurd · huv)) hp
-
-/-- The `n`-dimensional hypercube `Q[n]` is `n`-edge-connected. -/
-lemma hypercube_isEdgeConnected {n : ℕ} : Q[n].IsEdgeConnected n :=
-  hypercube_isVertexConnected.isEdgeConnected
 
 /-!
 ## Connectivity Numbers *
@@ -1500,10 +1362,7 @@ noncomputable def vertexConnectivity (G : SimpleGraph V) : ℕ∞ :=
 
 /-!
 We introduce the standard notation `λ(G)` for the edge connectivity and `κ(G)` for
-the vertex connectivity. Since `λ` is also Lean's keyword for `fun`, the notation
-has to include the opening parenthesis: `λ(` becomes a single token, so `λ(G)` is
-not read as the start of a `fun`. The price is that, wherever this notation is in
-scope, a `fun` can no longer be written `λ(x : α) => …` without a space after `λ`.
+the vertex connectivity.
 -/
 @[inherit_doc edgeConnectivity] scoped notation "λ(" G ")" =>
   SimpleGraph.edgeConnectivity G
@@ -1513,12 +1372,12 @@ scope, a `fun` can no longer be written `λ(x : α) => …` without a space afte
 /-!
 Both properties are closed under decreasing `k`, so the `k` for which `G` is
 `k`-edge-connected form an initial segment of `ℕ`, and `k ≤ λ(G)` holds exactly when
-`G` is `k`-edge-connected. The same holds for `κ(G)` if `V` is nonempty (the empty
-graph is not even `0`-vertex-connected, yet `0 ≤ κ(G)`). The general fact is about an
-`Antitone` property `P` of natural numbers, that is, one closed under decreasing `k`:
-the supremum `⨆ (j) (_ : P j), j` in `ℕ∞` exceeds `k` iff `P (k + 1)` holds. It says
-nothing about graphs, so we put it in the `ENat` namespace. Mathlib does not
-currently have it.
+`G` is `k`-edge-connected. The same holds for `κ(G)` if `V` is nonempty (the graph
+with no vertices is not even `0`-vertex-connected, yet `0 ≤ κ(G)`). The general fact
+is about an `Antitone` property `P` of natural numbers, that is, one closed under
+decreasing `k`: the supremum `⨆ (j) (_ : P j), j` in `ℕ∞` exceeds `k` iff `P (k + 1)`
+holds. It says nothing about graphs, so we put it in the `ENat` namespace. Mathlib
+does not currently seem to have it.
 -/
 lemma _root_.ENat.natCast_lt_biSup_iff {P : ℕ → Prop} (hP : Antitone P) {k : ℕ} :
     (k : ℕ∞) < ⨆ (j : ℕ) (_ : P j), (j : ℕ∞) ↔ P (k + 1) := by
@@ -1583,14 +1442,14 @@ lemma edgeConnectivity_le_degree [Nontrivial V] (v : V) [Fintype (G.neighborSet 
 /-!
 Together these give *Whitney's inequalities*: a finite graph `G` with at least two
 vertices satisfies `κ(G) ≤ λ(G) ≤ δ(G)`. The second inequality is
-`edgeConnectivity_le_degree` at a vertex of minimum degree (Exercise 16). Both
-inequalities can be strict. In the *bowtie*, two triangles sharing a vertex, deleting
-the shared vertex disconnects the graph, so `κ = 1`, while `λ = δ = 2` (Exercise 17
-asks you to show that `κ < λ`). Two copies of `K[4]` joined by a single edge have
+`edgeConnectivity_le_degree` at a vertex of minimum degree (Exercise 18). Both
+inequalities can be strict (Exercises 19 and 20). In the *bowtie*, two triangles
+sharing a vertex, deleting the shared vertex disconnects the graph, so `κ = 1`, while
+`λ = δ = 2`. Two copies of `K[4]` joined by a single edge (the *barbell*) have
 `λ = 1`, since that edge is a bridge, while `δ = 3`.
--/
 
-/-!
+[Figure: Left: the bowtie, with $\kappa = 1 < \lambda = 2$. Right: the barbell, with $\lambda = 1 < \delta = 3$](https://jt496.github.io/GraphTheoryInLean/figures/whitney_strict.svg)
+
 The two definitions disagree on graphs with at most one vertex. Mathlib's
 `IsEdgeConnected k` has no condition on the number of vertices, so such a graph is
 `k`-edge-connected for every `k`, whereas our `IsVertexConnected k` asks for more
@@ -1607,20 +1466,17 @@ lemma vertexConnectivity_of_subsingleton [Subsingleton V] : κ(G) = 0 := by
 /-!
 # Brooks' Theorem *
 
-The greedy bound of
-[Greedy Colouring*](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-greedy-colouring)
-says that a graph of maximum degree at most `Δ` is `(Δ + 1)`-colourable.
-*Brooks' theorem* says exactly when this can be improved to `Δ`: a finite connected
-graph of maximum degree `Δ` is `Δ`-colourable unless it is the complete graph
-`K[Δ + 1]` or (when `Δ = 2`) an odd cycle. Applying this to each component, a finite
-graph of maximum degree at most `Δ` is `Δ`-colourable unless it contains a
-`(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle. Odd cycles
-are only an obstruction when `Δ = 2`: for example the Petersen graph is cubic and
-contains `5`-cycles, but it is `3`-colourable.
+The greedy bound `colorable_of_degree_le` says that a graph of maximum degree at most
+`Δ` is `(Δ + 1)`-colourable. *Brooks' theorem* says exactly when this can be improved
+to `Δ`: a finite connected graph of maximum degree `Δ` is `Δ`-colourable unless it is
+the complete graph `K[Δ + 1]` or (when `Δ = 2`) an odd cycle. Applying this to each
+component, a finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it
+contains a `(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle.
+Odd cycles are only an obstruction when `Δ = 2`: for example the Petersen graph is
+`3`-regular and contains `5`-cycles, but it is `3`-colourable.
 
 The cases `Δ = 2` and `Δ ≥ 3` are very different. The case `Δ = 2` follows quickly
-from our characterization of bipartite graphs in
-[Odd Cycles and Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-odd-cycles-and-bipartite-graphs),
+from our characterization of bipartite graphs, `isBipartite_iff_forall_isCycle_even`,
 while the case `Δ ≥ 3` needs a real argument, for which we use the partial colourings
 of
 [Partial Colourings*](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-partial-colourings).
@@ -1628,30 +1484,28 @@ At the end we combine the cases into a single statement for every `Δ`.
 
 ## Maximum Degree Two
 
-The results of
-[Cycles in Graphs of Maximum Degree Two](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-cycles-in-graphs-of-maximum-degree-two)
-settle the case `Δ = 2`: a graph of maximum degree at most `2` is `2`-colourable
-unless one of its connected components is an odd cycle. Indeed, if it is not
-`2`-colourable then it has an odd cycle, and by
-`Walk.IsCycle.mem_support_of_degree_le_two` that cycle passes through every vertex of
-its component. (Since every vertex has degree at most `2`, the component then has no
-edges other than those of the cycle, so it *is* an odd cycle.)
-
-We could reduce the problem to connected graphs, since a graph is `n`-colourable iff
-each of its components is (`colorable_iff_forall_connectedComponent`, which glues
-together colourings of the components using `homOfConnectedComponents`). But
-`Walk.IsCycle.mem_support_of_degree_le_two` already works one component at a time, so
-no reduction is needed.
+The case `Δ = 2` combines two earlier results. A graph is `2`-colourable iff it has
+no odd cycle (`isBipartite_iff_forall_isCycle_even`), and in a graph of maximum
+degree at most `2` every cycle is a whole connected component
+(`Walk.IsCycle.toSubgraph_eq_of_degree_le_two`). So a graph of maximum
+degree at most `2` is `2`-colourable unless one of its connected components is an odd
+cycle. Indeed, if it is not `2`-colourable then it has an odd cycle `c`, based at `u`
+say, and by
+`Walk.IsCycle.toSubgraph_eq_of_degree_le_two` that cycle *is* its component:
+`c.toSubgraph = G⟦u⟧.toSubgraph`. This equation is how we state that a component is
+an odd cycle.
 -/
+/-- *Brooks' theorem (Δ = 2)*: a graph with all degrees at most `2` is `2`-colourable
+unless it has a component that is an odd cycle. -/
 theorem brooks_two [G.LocallyFinite] (hdeg : ∀ v, G.degree v ≤ 2)
     (hcyc : ¬ ∃ (u : V) (c : G.Walk u u),
-      c.IsCycle ∧ Odd c.length ∧ ∀ v, G.Reachable u v → v ∈ c.support) :
+      c.IsCycle ∧ Odd c.length ∧ c.toSubgraph = G⟦u⟧.toSubgraph) :
     G.Colorable 2 := by
   apply isBipartite_iff_forall_isCycle_even.mpr
   intro u c hc
   by_contra hodd
   exact hcyc ⟨u, c, hc, Nat.not_even_iff_odd.mp hodd,
-    fun v huv => hc.mem_support_of_degree_le_two hdeg huv⟩
+    hc.toSubgraph_eq_of_degree_le_two hdeg⟩
 
 /-!
 ## Maximum Degree at Least Three
@@ -1662,40 +1516,41 @@ cut vertex, which we study in the next section,
 [Cut Vertices and Blocks*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-cut-vertices-and-blocks).
 Instead, the proof we give is a variation of Lovász's approach that avoids blocks: it
 uses partial colourings and the idea behind greedy colouring, but replaces the need
-for 2-connected blocks with strong induction on vertex subsets and a gluing step
+for `2`-connected blocks with strong induction on vertex subsets and a gluing step
 across a pair of non-adjacent vertices.
 
 The basic idea is to colour vertices greedily but in an order chosen so that we never
 reach an uncoloured vertex with `Δ` distinctly coloured neighbours, hence the greedy
 colouring will never use more than `Δ` colours.
 
-*Sketch Proof*: we prove the stronger statement that *every* finite subset of the
-vertices `s : Finset V` satisfies `G.ColorableOn Δ ↑s`, by strong induction on `s`
-under `⊂`, so our induction hypothesis is:
+*Proof sketch*: we prove the stronger statement that *every* finite subset of the
+vertices `s : Finset V` satisfies `G.ColorableOn Δ ↑s` (`colorableOn_of_cliqueFree`),
+by strong induction on `s` under `⊂`, so our induction hypothesis is:
 
   `ih : ∀ t ⊂ s, G.ColorableOn Δ ↑t`.
 
 *Degeneracy reduction:* if some `a ∈ s` has less than `Δ` neighbours in `s`, then
 apply `ih` to `s.erase a` and extend the resulting colouring to `a` using a free
-colour (the neighbours of `a` use less than `Δ` colours).
+colour (the neighbours of `a` use less than `Δ` colours;
+`ColoringOn.exists_free_color_of_degIn`).
 
 So wlog every vertex of `s` has at least `Δ` neighbours in `s`. Since all degrees are
 at most `Δ`, every vertex of `s` must have *exactly* `Δ` neighbours, all of which lie
-in `s` (so `s` is closed under adjacency).
+in `s` (so `s` is *closed under adjacency*: every neighbour of a vertex of `s` lies
+in `s`).
 
-*Regular case:* write `K := s`, which is closed under adjacency and `Δ`-regular, and
-pick any `v₂ ∈ K`. We do not need `K` to be connected: the construction below works
-uniformly for any adjacency-closed `Δ`-regular `K`, using only colourings of *proper*
-subsets of `K`. (If `K` were disconnected we could instead colour the component of
-`v₂` and the rest separately, but this case split is unnecessary.)
+*Regular case* (`regular_case`, `closed_regular_case`): write `K := s`, which is
+closed under adjacency and `Δ`-regular, and pick any `v₂ ∈ K`.
 
-Since `G` has no `Δ + 1`-clique, the neighbourhood of `v₂` is not a clique, so `v₂`
-has two neighbours `v₁` and `v₃` that are not adjacent to each other. Write
-`W := K \ {v₁, v₃}` for the remaining vertices of `K`. Let `A` be the vertex set of
-the connected component of `v₂` in the subgraph induced by `W` (the vertices of `W`
-that can be reached from `v₂` by a walk inside `W`), and let `B := W \ A` be the
-rest, so there are no edges between `A` and `B`. (If the pair `{v₁, v₃}` does not
-*separate* `K` then `B` is empty, but we do not need to treat this case separately.)
+Since `G` has no `(Δ + 1)`-clique, the neighbourhood of `v₂` is not a clique, so `v₂`
+has two neighbours `v₁` and `v₃` that are not adjacent to each other
+(`CliqueFree.exists_ne_adj_not_adj_of_le_degree`). Write `W := K \ {v₁, v₃}` for the
+remaining vertices of `K`. Let `A` be the vertex set of the connected component of
+`v₂` in the subgraph induced by `W` (the vertices of `W` that can be reached from
+`v₂` by a walk inside `W`, `walkComponent`), and let `B := W \ A` be the rest, so
+there are no edges between `A` and `B` (`adj_mem_walkComponent`). (If the pair
+`{v₁, v₃}` does not *separate* `K` then `B` is empty, but we do not need to treat
+this case separately.)
 
 Now `D := A ∪ {v₁, v₃}` and `E := B ∪ {v₁, v₃}` together cover `K` and meet only in
 the non-adjacent pair `{v₁, v₃}`; moreover `A`, `B` and `E` are proper subsets of
@@ -1703,48 +1558,56 @@ the non-adjacent pair `{v₁, v₃}`; moreover `A`, `B` and `E` are proper subse
 colour `D` and `E` separately and then glue them together using our
 `ColoringOn.union` construction.
 
+[Figure: Left: the sets $A$, $B$, $D$ and $E$ when $\Delta = 3$. Right: Step 1 on $D$, with the colouring order numbered and the search from $v_2$ in blue](https://jt496.github.io/GraphTheoryInLean/figures/brooks_split.svg)
+
 1. *`D` has a colouring in which `v₁` and `v₃` have the same colour.*
+   (`exists_coloring_eq`)
 
    Colour `v₁` and `v₃` first, both with colour `0` (legal, since they are not
    adjacent). Then colour the vertices of `A` other than `v₂` greedily, in
    *reverse search order from `v₂`*. That is, start with `S = {v₂}` and repeatedly
-   add to `S` a vertex of `A` outside `S` that has a neighbour in `S`; we say such
-   a vertex has been *settled*. Since `A` is connected, every vertex of `A` is
-   eventually settled. Now colour the vertices in the reverse of the order in which
-   they were settled. Each vertex was settled because of an edge to an
-   already-settled neighbour, which is either `v₂` or a vertex coloured later; so
-   when a vertex is coloured it still has an uncoloured neighbour, hence at most
-   `Δ - 1` coloured neighbours, and a free colour exists.
+   add to `S` a vertex of `A` outside `S` that has a neighbour in `S`; we say such a
+   vertex has been *settled*. Since `A` is connected
+   (`induce_walkComponent_connected`), every vertex of `A` is eventually settled
+   (`exists_adj_sdiff_of_connected`). Now colour the vertices in the reverse of the
+   order in which they were settled (`exists_coloringOn_sdiff`). Each vertex was
+   settled because of an edge to an already-settled neighbour, which is either
+   `v₂` or a vertex coloured later; so when a vertex is coloured it still has an
+   uncoloured neighbour, hence at most `Δ - 1` coloured neighbours, and a free colour
+   exists.
 
    Finally colour `v₂`: among its `Δ` neighbours are `v₁` and `v₃`, which received
    the *same* colour, so its neighbours use at most `Δ - 1` colours and a free colour
-   remains.
+   remains (`exists_coloringOn_insert_of_eq`).
 
 2. *Gluing.* Since the only edges from `D` to `E \ D ⊆ B` leave from `{v₁, v₃}`
    (there are no `A`–`B` edges), two colourings of `D` and `E` can be glued together
    as long as they agree on `{v₁, v₃}`. Moreover they can be made to agree by
-   permuting the colours of one of them, provided that they agree on *whether* `v₁`
-   and `v₃` receive equal colours. So it suffices to find colourings of `D` and `E`
-   with the same *pattern* (equal or distinct) on `{v₁, v₃}`.
+   permuting the colours of one of them (`Equiv.exists_perm_of_eq_iff_eq`), provided
+   that they agree on *whether* `v₁` and `v₃` receive equal colours. So it suffices
+   (`ColoringOn.nonempty_union_of_eq_iff_eq`) to find colourings of `D` and `E` with
+   the same *pattern* (equal or distinct) on `{v₁, v₃}`
+   (`exists_colorings_pattern_iff`).
 
    By Step 1, `D` has a colouring with `v₁` and `v₃` *equal*. Also, for
    `v ∈ {v₁, v₃}` the `Δ` neighbours of `v` split between `A` and `B`, with at least
    one (namely `v₂`) in `A`.
 
-   *Case (a).* If `v₁` and `v₃` have at most `Δ - 1` neighbours in `B` *in total*
-   (as happens when `B` is empty), colour `B` by `ih` and extend to `E` giving
-   `v₁, v₃` a common free colour; pair this with the equal-pattern colouring of `D`.
+   *Case (a).* If `v₁` and `v₃` have at most `Δ - 1` neighbours in `B` *in total* (as
+   happens when `B` is empty), colour `B` by `ih` and extend to `E` giving `v₁, v₃` a
+   common free colour (`exists_two_eq`); pair this with the equal-pattern colouring
+   of `D`.
 
    *Case (b).* Otherwise one of `v₁, v₃`, say `v₁`, has at least `2` neighbours in
    `B` and hence at most `Δ - 2` in `A`. The other, `v₃`, has at most `Δ - 1`
    neighbours in `A`: since `v₂ ∈ A`, `v₁` has at most `Δ - 1` neighbours in `B`, so
    `v₃` has at least one there. So a colouring of `A` by `ih` extends to `D` giving
-   `v₁, v₃` *distinct* colours. So `D` has colourings of both patterns, and we pair
-   the `ih`-colouring of `E` with whichever one matches it.
+   `v₁, v₃` *distinct* colours (`exists_two_ne`). So `D` has colourings of both
+   patterns, and we pair the `ih`-colouring of `E` with whichever one matches it.
 -/
 section brooks
-variable {Δ : ℕ}
 open Finset
+variable {Δ : ℕ}
 
 /-!
 ### Free Colours and Neighbours in a Set
@@ -1762,7 +1625,7 @@ If the colours that `C` assigns to the neighbours of `a` lying in `s` number
 less than `Δ`, then some colour `c : Fin Δ` is avoided by every neighbour of `a` in
 `s`.
 -/
-lemma ColoringOn.exists_free_color [DecidableRel G.Adj] {s : Finset V}
+private lemma ColoringOn.exists_free_color [DecidableRel G.Adj] {s : Finset V}
     (C : G.ColoringOn (Fin Δ) ↑s) (a : V)
     (h : #({v ∈ s | G.Adj a v}.image fun v => C v) < Δ) :
     ∃ c : Fin Δ, ∀ v ∈ s, G.Adj a v → C v ≠ c := by
@@ -1771,13 +1634,12 @@ lemma ColoringOn.exists_free_color [DecidableRel G.Adj] {s : Finset V}
     hc (mem_image.mpr ⟨v, mem_filter.mpr ⟨hv, hadj⟩, heq⟩)⟩
 
 /-!
-We count the neighbours of `a` lying in a finite set `s` with `G.degIn s a`, from
-[Neighbours in a Set](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-neighbours-in-a-set).
-Combining `exists_free_color` with `card_image_le`: if `a` has less than `Δ`
-neighbours in `s`, then the number of colours used on those neighbours is less than
-`Δ`, so some colour is free for `a`.
+We count the neighbours of `a` lying in a finite set `s` with `G.degIn s a` (see
+`degIn`). Combining `exists_free_color` with `card_image_le`: if `a` has less than
+`Δ` neighbours in `s`, then the number of colours used on those neighbours is less
+than `Δ`, so some colour is free for `a`.
 -/
-private lemma ColoringOn.exists_free_color_of_degIn [DecidableRel G.Adj]
+lemma ColoringOn.exists_free_color_of_degIn [DecidableRel G.Adj]
     {s : Finset V} (C : G.ColoringOn (Fin Δ) ↑s) (a : V) (h : G.degIn s a < Δ) :
     ∃ c : Fin Δ, ∀ v ∈ s, G.Adj a v → C v ≠ c :=
   C.exists_free_color a (card_image_le.trans_lt h)
@@ -1826,7 +1688,7 @@ by a walk `p` with `p.toSubgraph ≤ (⊤ : G.Subgraph).induce A`. As we saw in
 for an induced subgraph this just says that every vertex of `p` lies in `A`
 (`Walk.toSubgraph_le_induce_top_iff`).
 
-If the subgraph induced by `W` is connected, and `S ⊆ W` is a set of settled
+If the subgraph induced by `W` is connected, and `S ⊂ W` is a set of settled
 vertices containing `v₂`, then some unsettled vertex has a settled neighbour: a walk
 inside `W` from `v₂` to an unsettled vertex must at some point leave `S`.
 -/
@@ -1864,12 +1726,16 @@ private lemma exists_coloringOn_sdiff [G.LocallyFinite] [DecidableEq V]
   intro n
   induction n with
   | zero =>
+    -- every vertex of `W` is settled: colour just `v₁` and `v₃`, both with
+    -- colour `0`
     intro S _ _ hcard
     have hWS : W \ S = ∅ := card_eq_zero.mp hcard
     exact ⟨(G.coloringOnOfNotAdj hnadj ⟨0, hΔ⟩).copy (by simp [hWS]), rfl⟩
   | succ n ih =>
     intro S hv hS hcard
     have hWS : (W \ S).Nonempty := card_pos.mp (by grind)
+    -- settle an unsettled vertex `z` with a settled neighbour `y`; colour the rest
+    -- by induction, then give `z` a free colour
     obtain ⟨z, hzWS, y, hyS, hadj⟩ := exists_adj_sdiff_of_connected hconn hv hS hWS
     obtain ⟨hzW, hzS⟩ := mem_sdiff.mp hzWS
     obtain ⟨C, hC⟩ := ih (insert z S) (mem_insert_of_mem hv) (insert_subset hzW hS)
@@ -1885,8 +1751,7 @@ private lemma exists_coloringOn_sdiff [G.LocallyFinite] [DecidableEq V]
     have hz : z ∉ ({v₁, v₃} : Finset V) := Finset.disjoint_left.mp hW hzW
     refine ⟨(C.insert z fun v hv hadj => hc v hv hadj).copy
       (by rw [← coe_insert, coe_inj]; grind), ?_⟩
-    simp only [ColoringOn.coe_copy, ColoringOn.insert_apply]
-    grind
+    grind [ColoringOn.copy_apply, ColoringOn.insert_apply]
 
 /-!
 The end of Step 1 of the sketch: all `Δ` neighbours of `v₂` lie in
@@ -1937,9 +1802,9 @@ private lemma exists_coloring_eq [DecidableEq V] [G.LocallyFinite] (K : Finset V
 /-!
 ### Step 2: Gluing Along the Pair
 
-Case (a) of Step 2. Extend a colouring of `B` by two new non-adjacent vertices
-`x, y` giving them the *same* colour, when their numbers of neighbours in `B` sum to
-less than `Δ`, so that together they see less than `Δ` colours.
+Case (a) of Step 2. Extend a colouring of `B` by two new non-adjacent vertices `x, y`
+giving them the *same* colour, when their numbers of neighbours in `B` sum to less
+than `Δ`, so that together they see less than `Δ` colours.
 -/
 private lemma exists_two_eq [DecidableRel G.Adj] [DecidableEq V] (B : Finset V)
     (C : G.ColoringOn (Fin Δ) ↑B) {x y : V} (hnxy : ¬ G.Adj x y)
@@ -1979,8 +1844,8 @@ private lemma exists_two_ne [DecidableRel G.Adj] [DecidableEq V] (A : Finset V)
     (C.insert y fun v hv hadj => hcy v hv hadj).copy (by simp)
   have hCy_y : Cy y = cy := by simp [Cy]
   have hCyA : ∀ v ∈ A, v ≠ y → Cy v = C v := fun v _ hv => by simp [Cy, hv]
-  -- `x` sees the same colours among `insert y A` as in `A`
-  -- (since it is not adjacent to `y`)
+  -- `x` is not adjacent to `y`, so it sees the same colours on `insert y A` as
+  -- on `A`
   have hximg : ({v ∈ insert y A | G.Adj x v}.image (fun v => Cy v)) =
       (({v ∈ A | G.Adj x v}.image (fun v => C v))) := by
     grind
@@ -1996,15 +1861,16 @@ private lemma exists_two_ne [DecidableRel G.Adj] [DecidableEq V] (A : Finset V)
   have hcx_cy : cx ≠ cy := fun heq =>
     hcx (mem_union_right _ (heq ▸ mem_singleton_self _))
   exact ⟨(Cy.insert x fun v hv hadj => hcx_nb v hv hadj).copy (by simp),
-    by simp [Cy, Ne.symm hxy, hcx_cy]⟩
+    by simp_all [Ne.symm]⟩
 
 
 /-!
-The sketch uses the set `A`: the vertices of `W := K \ {v₁, v₃}` reachable from
-`v₂` by a walk inside `W`, i.e. the vertex set of the component of `v₂` in the
-subgraph induced by `W`. We define this, as a `Finset`, for any finite set `W` and
-record what we need: it contains `v₂` (when `v₂ ∈ W`), it is closed under adjacency
-into `W`, and the subgraph it induces is connected.
+The sketch uses the set `A`: the vertices of `W := K \ {v₁, v₃}` reachable from `v₂`
+by a walk inside `W`, i.e. the vertex set of the component of `v₂` in the subgraph
+induced by `W`. We define this, as a `Finset`, for any finite set `W` and record what
+we need: it contains `v₂` (when `v₂ ∈ W`; `self_mem_walkComponent`), it is closed
+under adjacency into `W` (`adj_mem_walkComponent`), and the subgraph it induces is
+connected (`induce_walkComponent_connected`).
 -/
 /-- The set of vertices of `W` reachable from `v₂` by a walk lying inside `W`. -/
 noncomputable def walkComponent (G : SimpleGraph V) (v₂ : V) (W : Finset V) :
@@ -2024,8 +1890,8 @@ lemma self_mem_walkComponent {W : Finset V} {v₂ : V} (h : v₂ ∈ W) :
   mem_walkComponent.mpr ⟨h, Walk.nil, by simpa using h⟩
 
 /-!
-Extending the walk to `a` along an edge `a — b` into `W` shows that `walkComponent`
-is closed under adjacency into `W`.
+Extending a walk inside `W` from `v₂` to `a` by an edge `a — b` with `b ∈ W` shows
+that `walkComponent` is closed under adjacency into `W`.
 -/
 lemma adj_mem_walkComponent {W : Finset V} {v₂ a b : V}
     (ha : a ∈ G.walkComponent v₂ W) (hb : b ∈ W) (hab : G.Adj a b) :
@@ -2036,8 +1902,8 @@ lemma adj_mem_walkComponent {W : Finset V} {v₂ a b : V}
   grind
 
 /-!
-Truncating the walk to `a` at its first visit to `y` shows that every vertex on
-the walk lies in `walkComponent` too.
+Truncating a walk inside `W` from `v₂` to `a` at its first visit to a vertex `y` on
+it shows that `y` lies in `walkComponent` too, so the whole walk does.
 -/
 lemma exists_walk_mem_walkComponent {W : Finset V} {v₂ a : V}
     (ha : a ∈ G.walkComponent v₂ W) :
@@ -2080,7 +1946,7 @@ Combined with `ColoringOn.union`, this gives the gluing step. Suppose that `A` a
 `B` meet only in `{x, y}`, and that there are no edges between `A \ B` and `B \ A`.
 Then colourings `C` of `A` and `D` of `B` with the same pattern on `{x, y}` can be
 glued into a colouring of `A ∪ B`: permute the colours of `D` so that it agrees with
-`C` at `x` and `y`, and use `C` on `A` and the permuted `D` on `B \ A`.
+`C` on `{x, y}`, and use `C` on `A` and the permuted `D` on `B \ A`.
 -/
 lemma ColoringOn.nonempty_union_of_eq_iff_eq {α : Type*} {A B : Set V} {x y : V}
     (C : G.ColoringOn α A) (D : G.ColoringOn α B) (hmeet : A ∩ B ⊆ {x, y})
@@ -2096,14 +1962,15 @@ lemma ColoringOn.nonempty_union_of_eq_iff_eq {α : Type*} {A B : Set V} {x y : V
       exacts [hσx, hσy]
     rw [ColoringOn.map_apply, ← hσu]
     exact fun h => D.valid ⟨hu', hv.1, huv⟩ (σ.injective h)
-  · exact absurd huv (hcross u ⟨hu, hu'⟩ v hv)
+  · -- otherwise `u ∈ A \ B` and `v ∈ B \ A`, which are not adjacent
+    exact absurd huv (hcross u ⟨hu, hu'⟩ v hv)
 
 /-!
 Step 2 of the sketch: colourings of `D := A ∪ {v₁, v₃}` and `E := B ∪ {v₁, v₃}` with
 the same pattern (equal or distinct) on `{v₁, v₃}`. Here `A` is given abstractly,
 with the properties of the walk-component that we need as hypotheses, and
 `B := K \ (A ∪ {v₁, v₃})`. Cases (a) and (b) of Step 2 are the two branches of the
-`by_cases` split in this proof.
+`by_cases` on the number of neighbours of `v₁` and `v₃` in `B`.
 -/
 private lemma exists_colorings_pattern_iff [DecidableEq V] [G.LocallyFinite]
     (hΔ : 3 ≤ Δ) (K A : Finset V) {v₁ v₂ v₃ : V}
@@ -2126,30 +1993,29 @@ private lemma exists_colorings_pattern_iff [DecidableEq V] [G.LocallyFinite]
   have h13K : {v₁, v₃} ⊆ K := by grind
   have hAK : A ⊆ K := by grind
   have hv1A : v₁ ∉ A := by grind
-  -- `A` and `B` partition `K \ {v₁, v₃}`.
+  -- `A` and `B` partition `K \ {v₁, v₃}`
   have hABdisj : Disjoint A B := Finset.disjoint_left.mpr
     (fun z hzA hzB => (mem_sdiff.mp hzB).2 (mem_union_left _ hzA))
   have hABcov : A ∪ B = K \ {v₁, v₃} := by grind
-  -- The degree of `v₁` (resp. `v₃`) splits as its degIn `A` plus its degIn `B`
+  -- the `Δ` neighbours of `v₁` (resp. `v₃`) split between `A` and `B`,
+  -- with `v₂` in `A`
   have hNsub : ∀ v ∈ ({v₁, v₃} : Finset V), G.neighborFinset v ⊆ K \ {v₁, v₃} := by
     grind [mem_neighborFinset, adj_symm]
   have hNK : ∀ v ∈ ({v₁, v₃} : Finset V), G.degIn A v + G.degIn B v = Δ := by
     intro v hv
-    rw [← degIn_union A B v hABdisj, hABcov, degIn, filter_adj_eq_inter,
-      inter_eq_left.mpr (hNsub v hv),
-      card_neighborFinset_eq_degree, hregK v (h13K hv)]
+    rw [← degIn_union A B v hABdisj, hABcov, degIn_eq_degree (hNsub v hv),
+      hregK v (h13K hv)]
   have hAv1 := hNK v₁ (by grind)
   have hAv3 := hNK v₃ (by grind)
   have hA1pos : 1 ≤ G.degIn A v₁ :=
     card_pos.mpr ⟨v₂, mem_filter.mpr ⟨hv₂A, ha1.symm⟩⟩
   have hA3pos : 1 ≤ G.degIn A v₃ :=
     card_pos.mpr ⟨v₂, mem_filter.mpr ⟨hv₂A, ha3.symm⟩⟩
-  -- the neighbours of `v₂` are in `D` since `A` is adjacency-closed
+  -- the neighbours of `v₂` are in `D`, since `A` is closed
+  -- under adjacency into `K \ {v₁, v₃}`
   have hnbhdD : G.neighborFinset v₂ ⊆ (A ∪ {v₁, v₃}).erase v₂ := by
     intro w hw
-    have hwadj : G.Adj v₂ w := (mem_neighborFinset _ _ _).mp hw
-    rw [mem_erase]
-    exact ⟨hwadj.symm.ne, by grind⟩
+    grind [(mem_neighborFinset _ _ _).mp hw]
   have hMA : (A ∪ {v₁, v₃}) \ {v₁, v₃} = A := by grind
   -- `D` always has a colouring with `v₁, v₃` the same colour (Step 1 applied to `D`)
   obtain ⟨C_D_eq, hC_D_eq⟩ := exists_coloring_eq (A ∪ {v₁, v₃}) (by grind)
@@ -2157,35 +2023,35 @@ private lemma exists_colorings_pattern_iff [DecidableEq V] [G.LocallyFinite]
     (mem_union_right _ (by simp)) hne13 hnadj hd2 ha1 ha3
     (by grind) hnbhdD (by grind)
   have hAss : A ⊂ K := (ssubset_iff_of_subset hAK).mpr ⟨v₁, hv1K, hv1A⟩
-  -- `E = B ∪ {v₁,v₃}` is a proper subset (misses `v₂ ∈ A`).
+  -- `E = B ∪ {v₁, v₃}` is a proper subset of `K` (it misses `v₂ ∈ A`)
   have hv₂E : v₂ ∉ B ∪ {v₁, v₃} := by grind
   have hEss : B ∪ {v₁, v₃} ⊂ K := by grind
-  by_cases hsum : G.degIn B v₁ + G.degIn B v₃ ≤ Δ - 1
+  -- `by_cases!` runs `by_cases` and then `push Not` in the second (negated) subgoal
+  by_cases! hsum : G.degIn B v₁ + G.degIn B v₃ ≤ Δ - 1
   · -- Case (a): colour `B` by `ih` and give `v₁, v₃` a common free colour
     have hBss : B ⊂ K := (ssubset_iff_of_subset sdiff_subset).mpr
       ⟨v₂, hv₂K, fun h => hv₂E (mem_union_left _ h)⟩
     obtain ⟨C_B0⟩ := ih B hBss
     obtain ⟨C_E, hC_E⟩ := exists_two_eq B C_B0 hnadj (by grind)
-    exact ⟨C_D_eq, C_E.copy (by grind),
-      iff_of_true hC_D_eq hC_E⟩
+    exact ⟨C_D_eq, C_E.copy (by grind), iff_of_true hC_D_eq hC_E⟩
   · -- Case (b): colour `A` by `ih` and give `v₁, v₃` distinct colours
-    push Not at hsum
     obtain ⟨C_A⟩ := ih A hAss
     have hDdist : ∃ C : G.ColoringOn (Fin Δ) ↑(A ∪ {v₁, v₃}), C v₁ ≠ C v₃ := by
+      -- one of `v₁, v₃` has at least `2` neighbours in `B`
+      -- ("say `v₁`" in the sketch)
       by_cases h2 : 2 ≤ G.degIn B v₁
-      · obtain ⟨C', hC'⟩ := exists_two_ne A C_A hne13 hnadj
-          (by grind) (by grind)
+      · obtain ⟨C', hC'⟩ := exists_two_ne A C_A hne13 hnadj  (by grind) (by grind)
         exact ⟨C'.copy (by grind), hC'⟩
       · obtain ⟨C', hC'⟩ :=
           exists_two_ne A C_A (Ne.symm hne13) (fun h => hnadj h.symm)
             (by grind) (by grind)
-        exact ⟨C'.copy (by grind),
-          fun h => hC' h.symm⟩
+        exact ⟨C'.copy (by grind), fun h => hC' h.symm⟩
     obtain ⟨C_D_dist, hC_D_dist⟩ := hDdist
-    obtain ⟨C_B0⟩ := ih _ hEss
-    by_cases hBpat : C_B0 v₁ = C_B0 v₃
-    · exact ⟨C_D_eq, C_B0, iff_of_true hC_D_eq hBpat⟩
-    · exact ⟨C_D_dist, C_B0, iff_of_false hC_D_dist hBpat⟩
+    obtain ⟨C_E⟩ := ih _ hEss
+    -- pair the `ih`-colouring of `E` with the colouring of `D` of the same pattern
+    by_cases hEpat : C_E v₁ = C_E v₃
+    · exact ⟨C_D_eq, C_E, iff_of_true hC_D_eq hEpat⟩
+    · exact ⟨C_D_dist, C_E, iff_of_false hC_D_dist hEpat⟩
 
 /-!
 ### Completing the Proof
@@ -2225,7 +2091,7 @@ private lemma closed_regular_case [G.LocallyFinite] (hΔ : 3 ≤ Δ)
         (C_D v₁ = C_D v₃) ↔ (C_E₀ v₁ = C_E₀ v₃) :=
     exists_colorings_pattern_iff hΔ K A hclosed hregK ih hne13 hnadj ha1 ha3
       hAsub hv₂A (induce_walkComponent_connected hv₂W) hAclosed
-  -- `D ∪ E = K`.
+  -- `D ∪ E = K`
   have hDEK : (A ∪ {v₁, v₃}) ∪ (B ∪ {v₁, v₃}) = K := by grind
   -- `D` and `E` meet in `{v₁, v₃}`, and there are no edges between `A` and `B`, so
   -- the two colourings can be glued
@@ -2261,23 +2127,22 @@ theorem colorableOn_of_cliqueFree [G.LocallyFinite] (hΔ : 3 ≤ Δ)
   induction s using strongInduction with
   | _ s ih =>
   rcases s.eq_empty_or_nonempty with rfl | hne
-  · -- we can use the partial colouring of the empty set since `0 < Δ`.
+  · -- `s = ∅`: `coloringOnEmpty` needs a colour; `Fin Δ` is nonempty since `0 < Δ`
     exact ⟨(G.coloringOnEmpty ⟨0, by grind⟩).copy (by simp)⟩
-  by_cases hex : ∃ a ∈ s, G.degIn s a < Δ
-  · -- Degeneracy reduction: erase a low-degree vertex and extend greedily.
+  by_cases! hex : ∃ a ∈ s, G.degIn s a < Δ
+  · -- Degeneracy reduction: erase a low-degree vertex and extend greedily
     obtain ⟨a, ha, hlt⟩ := hex
     obtain ⟨C⟩ := ih _ (erase_ssubset ha)
     have hlt' : G.degIn (s.erase a) a < Δ :=
       (degIn_mono (erase_subset a s) a).trans_lt hlt
     obtain ⟨c, hc⟩ := C.exists_free_color_of_degIn a hlt'
     exact ⟨(C.insert a (fun v hv hadj => hc v hv hadj)).copy (by simp_all)⟩
-  · -- Regular case: every vertex of `s` has all `Δ` of its neighbours inside `s`.
-    push Not at hex
+  · -- Regular case: every vertex of `s` has all `Δ` of its neighbours inside `s`
     exact regular_case hΔ hcf hdeg s hne hex ih
 
 /-!
-*Brooks' theorem* (via greedy colouring on partial colourings). A finite graph
-that is `(Δ + 1)`-clique-free with maximum degree at most `Δ ≥ 3` is `Δ`-colourable.
+Brooks' theorem (for finite graphs with `Δ ≥ 3`): a finite graph that is
+`(Δ + 1)`-clique-free with maximum degree at most `Δ ≥ 3` is `Δ`-colourable.
 -/
 theorem brooks [G.LocallyFinite] [Finite V] (hΔ : 3 ≤ Δ)
     (hcf : G.CliqueFree (Δ + 1))
@@ -2288,10 +2153,10 @@ theorem brooks [G.LocallyFinite] [Finite V] (hΔ : 3 ≤ Δ)
 
 end brooks
 /-!
-By De Bruijn–Erdős, Brooks' theorem extends to infinite graphs: a locally finite
-graph that is `(Δ + 1)`-clique-free with maximum degree at most `Δ ≥ 3` is
-`Δ`-colourable.
+By De Bruijn–Erdős, Brooks' theorem extends to infinite graphs.
 -/
+/-- *Brooks' theorem (Δ ≥ 3)*: a locally finite graph that is `(Δ + 1)`-clique-free
+with maximum degree at most `Δ ≥ 3` is `Δ`-colourable. -/
 theorem colorable_of_cliqueFree_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     (hΔ : 3 ≤ Δ) (hcf : G.CliqueFree (Δ + 1)) (hdeg : ∀ v, G.degree v ≤ Δ) :
     G.Colorable Δ :=
@@ -2303,18 +2168,18 @@ theorem colorable_of_cliqueFree_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     exact (H.degree_le w).trans (hdeg w.val)
 
 /-!
-## Brooks' Theorem for Every Maximum Degree
+## Brooks' Theorem Full Version
 
 We can now put the cases together. When `Δ ≤ 1` there is nothing to prove: a graph
 with no `1`-clique has no vertices, and a graph with no `2`-clique has no edges
-(`cliqueFree_one` and `cliqueFree_two`). So a graph of maximum degree at most `Δ`
-with no `(Δ + 1)`-clique is `Δ`-colourable, unless `Δ = 2` and one of its components
-is an odd cycle.
+(`cliqueFree_one` and `cliqueFree_two`).
 -/
+/-- *Brooks' theorem*: a graph with all degrees at most `Δ` and no `(Δ + 1)`-clique
+is `Δ`-colourable, unless `Δ = 2` and one of its components is an odd cycle. -/
 theorem brooks_general [G.LocallyFinite] {Δ : ℕ}
     (hdeg : ∀ v, G.degree v ≤ Δ) (hcf : G.CliqueFree (Δ + 1))
     (hcyc : Δ = 2 → ¬ ∃ (u : V) (c : G.Walk u u),
-      c.IsCycle ∧ Odd c.length ∧ ∀ v, G.Reachable u v → v ∈ c.support) :
+      c.IsCycle ∧ Odd c.length ∧ c.toSubgraph = G⟦u⟧.toSubgraph) :
     G.Colorable Δ := by
   rcases (by grind : Δ = 0 ∨ Δ = 1 ∨ Δ = 2 ∨ 3 ≤ Δ) with rfl | rfl | rfl | hΔ
   · exact G.colorable_zero_iff.mpr (cliqueFree_one.mp hcf)
@@ -2329,19 +2194,21 @@ theorem brooks_general [G.LocallyFinite] {Δ : ℕ}
 A *cut vertex* is a vertex `x` whose removal splits the connected component
 containing `x` into two or more components. (For a finite graph this is the same as
 saying that removing `x` increases the number of components, but that formulation
-fails for graphs with infinitely many components.) A *block* of a graph `G` is a
-subgraph `B` that is connected and has no cut vertex of its own, and that is maximal
-among such subgraphs: no larger subgraph of `G` is both connected and free of cut
-vertices. So every block is of one of three kinds: a maximal 2-connected subgraph, a
-bridge (the subgraph consisting of just that edge and its two endpoints), or an
-isolated vertex. One reason for caring about blocks is that they can help in
-colouring a graph: for `n ≥ 1`, a graph is `n`-colourable iff each of its blocks is.
-In this section we prove this for finite graphs; the exercises extend it to all
-graphs.
+fails for graphs with infinitely many components.)
 
-A separate pedagogical motivation for this section is that it gives us a concrete
-example of a graph-theoretic construction built from first principles using an
-equivalence relation and Lean's `Quotient` type.
+A *block* of a graph `G` is a subgraph `B` that is connected and has no cut vertex of
+its own, and that is maximal among such subgraphs: no larger subgraph of `G` is both
+connected and free of cut vertices. So every block is of one of three kinds: a
+maximal `2`-connected subgraph, a bridge (the subgraph consisting of just that edge
+and its two endpoints), or an isolated vertex. One reason for caring about blocks is
+that they can help with colouring a graph: for `n ≥ 1`, a graph is `n`-colourable iff
+each of its blocks is. In this section we prove the harder direction for finite
+graphs (`colorable_of_forall_block`); the exercises give the converse and extend the
+result to all graphs (`colorable_iff_forall_block`).
+
+A separate pedagogical motivation for introducing blocks is that it gives us a good
+excuse to describe a graph-theoretic construction built from first principles using
+an equivalence relation and Lean's `Quotient` type.
 
 Mathlib does not define cut vertices. In Lean the natural definition talks about
 walks rather than components: `x` is a cut vertex if some two vertices other than `x`
@@ -2385,8 +2252,7 @@ lemma isVertexConnected_two_iff : G.IsVertexConnected 2 ↔
     · obtain ⟨p⟩ := hconn u v
       exact ⟨p, by simp⟩
     · by_contra! h
-      exact hcut x ⟨u, v, by simpa using hu, by simpa using hv, hconn u v,
-        fun p => by obtain ⟨y, hy, rfl⟩ := h p; exact hy⟩
+      exact hcut x ⟨u, v, by grind, by grind, hconn u v, fun p => by grind [h p]⟩
 
 /-!
 A cut vertex can lie in several blocks, so the blocks do not partition the vertices
@@ -2394,127 +2260,112 @@ of a graph, but they do partition its *edges*. So we define blocks in the same w
 connected components, via an equivalence relation, but on edges rather than vertices.
 The relation we use is *cycle-equivalence*: two edges are equivalent if they are the
 same edge or lie in a common cycle. The equivalence classes of this relation will be
-the blocks of the graph. A bridge lies on no cycle, so it forms a block on its own.
+the blocks of the graph. A bridge lies on no cycles, so it forms a block on its own.
 
-Apart from isolated vertices, these edge classes are exactly the blocks in the sense
-defined at the start of this section, though we will not prove this. An isolated
-vertex lies in no edge, so it belongs to no block; in particular a graph with no
-edges has no blocks at all. This is why our colouring results assume `n ≥ 1`: the
-graph `K[1]` has no blocks, so all its blocks are (vacuously) `0`-colourable, but
-`K[1]` is not `0`-colourable.
+Apart from isolated vertices, the blocks in the sense defined at the start of this
+section are exactly the subgraphs spanned by these equivalence classes, though we
+will not prove this. An isolated vertex lies in no edge, so it belongs to no block in
+our sense; in particular a graph with no edges has no blocks at all. (This is why our
+colouring results assume `n ≥ 1`: the graph `K[1]` has no blocks, so all its blocks
+are (vacuously) `0`-colourable, but `K[1]` is not `0`-colourable.)
+
+[Figure: A graph with four blocks, its edges coloured by block: the $4$-cycle $a, b, c, d$ with the chord $b d$ (blue), the triangle $c, e, f$ (green) and the bridges $c g$ (orange) and $f h$ (violet). The cut vertices $c$ and $f$ (red) lie in three and two blocks, and the isolated vertex $i$ lies in no block](https://jt496.github.io/GraphTheoryInLean/figures/blocks.svg)
+
+Like the deleted sets in `IsEdgeReachable`, cycle-equivalence is most conveniently
+defined on all of `Sym2 V`, not just on `G.edgeSet`. So until we restrict to
+`G.edgeSet` in
+[Blocks as a Quotient of Edges](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-blocks-as-a-quotient-of-edges),
+*edge* means any element `s(u, v)` of `Sym2 V`, and we say *edge of `G`* for an
+element of `G.edgeSet`. An edge that is not an edge of `G` lies on no cycles, so it
+is cycle-equivalent only to itself.
 -/
-/-- Two edges are *cycle-equivalent* if they are equal or lie on a common cycle. -/
-def CycleEquivalent (G : SimpleGraph V) (e₁ e₂ : Sym2 V) : Prop :=
-  e₁ = e₂ ∨ ∃ (u : V) (c : G.Walk u u), c.IsCycle ∧ e₁ ∈ c.edges ∧ e₂ ∈ c.edges
+/-- *Cycle-equivalence*, a relation on `Sym2 V`: two edges are related if they are
+equal or lie on a common cycle. -/
+def CycleEquivalent (G : SimpleGraph V) : Sym2 V → Sym2 V → Prop :=
+  fun e₁ e₂ => e₁ = e₂ ∨
+    ∃ (u : V) (c : G.Walk u u), c.IsCycle ∧ e₁ ∈ c.edges ∧ e₂ ∈ c.edges
 
 /-!
 ## Cycle-Equivalence
 
-`CycleEquivalent` is reflexive by definition. It is also symmetric, and an edge that
-is cycle-equivalent to an edge of `G` is itself an edge of `G`.
+`CycleEquivalent` is reflexive by definition. It is also symmetric, and preserves
+membership in the edge set: if `e ≠ f` are cycle-equivalent, both lie on a cycle of
+`G`, so both are edges of `G`.
 -/
-theorem CycleEquivalent.symm {e f : Sym2 V} (h : G.CycleEquivalent e f) :
-    G.CycleEquivalent f e :=
-  h.imp Eq.symm fun ⟨u, p, hp, he, hf⟩ => ⟨u, p, hp, hf, he⟩
+lemma CycleEquivalent.symm {e f : Sym2 V} (h : G.CycleEquivalent e f) :
+    G.CycleEquivalent f e := by
+  rcases h with (rfl | ⟨u, c, hc, h1, h2⟩)
+  · left; rfl
+  · right; exact ⟨u, c, hc, h2, h1⟩
 
-theorem CycleEquivalent.mem_edgeSet {e f : Sym2 V} (he : e ∈ G.edgeSet)
-    (h : G.CycleEquivalent e f) : f ∈ G.edgeSet := by
-  rcases h with rfl | ⟨_, p, _, _, hf⟩
-  · exact he
-  · exact p.edges_subset_edgeSet hf
+lemma CycleEquivalent.mem_edgeSet_iff {e f : Sym2 V} (h : G.CycleEquivalent e f) :
+    e ∈ G.edgeSet ↔ f ∈ G.edgeSet := by
+  rcases h with rfl | ⟨_, p, _, he, hf⟩
+  · rfl
+  · exact iff_of_true (p.edges_subset_edgeSet he) (p.edges_subset_edgeSet hf)
 
 /-!
-`CycleEquivalent` is in fact transitive: two cycles sharing an edge `f`, one through
-`e` and one through `g`, can be spliced into a single cycle through `e` and `g`.
-Proving this in Lean would be painful (but not impossible); however, we can avoid
-it. Mathlib allows us to form the equivalence relation *generated* by any relation.
+`CycleEquivalent` is in fact also transitive: two cycles sharing an edge `f`, one
+containing the edge `e` and the other containing the edge `g`, can be spliced into a
+single cycle through `e` and `g`. Proving this in Lean would be painful (but not
+impossible); however, we can avoid it. Mathlib allows us to form the equivalence
+relation *generated* by any relation.
 -/
-#check Relation.EqvGen
+#source Relation.EqvGen
+
 /-!
 Using this we can define *block-equivalence* of edges to be the equivalence relation
-*generated* by `CycleEquivalent`, which is an equivalence relation by construction.
+generated by `CycleEquivalent`, which is an equivalence relation by construction.
 -/
-
 /-- Two edges are *block-equivalent* if they are related by the equivalence relation
 generated by `CycleEquivalent`. -/
-def BlockEquivalent (G : SimpleGraph V) (e₁ e₂ : Sym2 V) : Prop :=
-  Relation.EqvGen G.CycleEquivalent e₁ e₂
+def BlockEquivalent (G : SimpleGraph V) : Sym2 V → Sym2 V → Prop :=
+  Relation.EqvGen G.CycleEquivalent
 
-/-! `BlockEquivalent` is an equivalence relation (by construction). -/
-theorem blockEquivalent_equivalence : Equivalence G.BlockEquivalent :=
+/-!
+`BlockEquivalent` is an equivalence relation (by construction).
+-/
+lemma blockEquivalent_equivalence : Equivalence G.BlockEquivalent :=
   Relation.EqvGen.is_equivalence _
 
-theorem BlockEquivalent.refl (e : Sym2 V) : G.BlockEquivalent e e :=
+lemma BlockEquivalent.refl (e : Sym2 V) : G.BlockEquivalent e e :=
   G.blockEquivalent_equivalence.refl e
 
-theorem BlockEquivalent.symm {e f : Sym2 V} (h : G.BlockEquivalent e f) :
+lemma BlockEquivalent.symm {e f : Sym2 V} (h : G.BlockEquivalent e f) :
     G.BlockEquivalent f e :=
   G.blockEquivalent_equivalence.symm h
 
-theorem BlockEquivalent.trans {e f g : Sym2 V} (h₁ : G.BlockEquivalent e f)
+lemma BlockEquivalent.trans {e f g : Sym2 V} (h₁ : G.BlockEquivalent e f)
     (h₂ : G.BlockEquivalent f g) : G.BlockEquivalent e g :=
   G.blockEquivalent_equivalence.trans h₁ h₂
 
 /-!
 Cycle-equivalent edges are block-equivalent.
 -/
-theorem CycleEquivalent.blockEquivalent {e f : Sym2 V} (h : G.CycleEquivalent e f) :
+lemma CycleEquivalent.blockEquivalent {e f : Sym2 V} (h : G.CycleEquivalent e f) :
     G.BlockEquivalent e f := Relation.EqvGen.rel _ _ h
 
 /-!
-Block-equivalence preserves membership in the edge set in both directions. (Notice
-that we use induction on `h : G.BlockEquivalent e f` in the proof.)
+So block-equivalence also preserves membership in the edge set. Notice that we use
+induction on `h : G.BlockEquivalent e f` in the proof.
 -/
-theorem BlockEquivalent.mem_edgeSet_iff {e f : Sym2 V} (h : G.BlockEquivalent e f) :
+lemma BlockEquivalent.mem_edgeSet_iff {e f : Sym2 V} (h : G.BlockEquivalent e f) :
     e ∈ G.edgeSet ↔ f ∈ G.edgeSet := by
   induction h with
-  | rel x y hxy =>
-      exact ⟨fun hx => CycleEquivalent.mem_edgeSet hx hxy,
-             fun hy => CycleEquivalent.mem_edgeSet hy hxy.symm⟩
+  | rel x y hxy => exact hxy.mem_edgeSet_iff
   | refl x => exact Iff.rfl
   | symm x y _ ih => exact ih.symm
   | trans x y z _ _ ih₁ ih₂ => exact ih₁.trans ih₂
-
-/-!
-The block containing an edge `e` is the graph formed by all the edges
-block-equivalent to `e`. We make it a graph of type `SimpleGraph V` on the whole
-vertex type, with the vertices outside the block isolated, whereas
-`ConnectedComponent.toSimpleGraph` is a graph on a subtype (see
-[Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph)).
-This lets us compare blocks with `G` and with subgraphs of `G` using `≤`, as in
-`blockOf_le` and `blockOf_mono` below.
--/
-/-- The block subgraph spanned by all edges block-equivalent to `e` (as a
-`SimpleGraph V`). -/
-def blockOf (G : SimpleGraph V) (e : Sym2 V) : SimpleGraph V :=
-  fromEdgeSet {f | G.BlockEquivalent e f}
-
-@[simp] theorem blockOf_adj {e : Sym2 V} {x y : V} :
-    (G.blockOf e).Adj x y ↔ G.BlockEquivalent e s(x, y) ∧ x ≠ y := by
-  simp [blockOf]
-
-/-!
-Every block of `G` is a subgraph of `G`.
--/
-theorem blockOf_le {e : Sym2 V} (he : e ∈ G.edgeSet) : G.blockOf e ≤ G :=
-  fun _ _ hab => (blockOf_adj.mp hab).1.mem_edgeSet_iff.mp he
-
-/-!
-Block-equivalent edges span the same block.
--/
-theorem blockOf_eq_of_blockEquivalent {e₁ e₂ : Sym2 V}
-    (h : G.BlockEquivalent e₁ e₂) : G.blockOf e₁ = G.blockOf e₂ :=
-  congrArg fromEdgeSet (Set.ext fun _ => ⟨h.symm.trans, h.trans⟩)
 
 /-!
 ## Blocks as a Quotient of Edges
 
 Just as `ConnectedComponent` is the quotient of `V` by `Reachable`, a *block* is an
 equivalence class of edges under `BlockEquivalent`, packaged as a quotient of
-`G.edgeSet`. (Mathlib writes `ConnectedComponent` as `Quot G.Reachable`; we build
-block-equivalence as a `Setoid` and use `Quotient`, but the two are interchangeable.)
-The underlying subgraph `B.toGraph` of a block `B` is the lift of `blockOf` along the
-quotient, which is well-defined because of `blockOf_eq_of_blockEquivalent`.
+`G.edgeSet`. (Mathlib defines `ConnectedComponent` as `Quot G.Reachable`: a setoid on
+`V` cannot be an instance, since `Setoid V` does not mention `G`. Our setoid lives on
+`G.edgeSet`, so it can be an instance, and we use `Quotient`. The two are
+interchangeable, since `Quotient s` is by definition `Quot s.r`.)
 
 The setoid is built in two steps. First, `Relation.EqvGen.setoid G.CycleEquivalent`
 bundles block-equivalence (the equivalence relation generated by `CycleEquivalent`)
@@ -2522,11 +2373,10 @@ as a setoid on all of `Sym2 V`. But `Sym2 V` also contains pairs that are not ed
 of `G`, and we only want classes of edges. So we pull the setoid back along the
 inclusion `Subtype.val : G.edgeSet → Sym2 V` using `Setoid.comap`, which relates two
 edges exactly when their underlying elements of `Sym2 V` are related. We make the
-result an instance, so that we can write `e ≈ f` for block-equivalent edges.
+result an instance, so that we can write `e ≈ f` for block-equivalent edges. From now
+on, *edge* means an edge of `G`.
 -/
-
-/--
-The setoid on edges given by block-equivalence (analogue of Mathlib's
+/-- The setoid on the edges of `G` given by block-equivalence (analogue of Mathlib's
 `G.reachableSetoid`). -/
 instance blockSetoid (G : SimpleGraph V) : Setoid G.edgeSet :=
   Setoid.comap Subtype.val (Relation.EqvGen.setoid G.CycleEquivalent)
@@ -2537,112 +2387,165 @@ are block-equivalent.
 -/
 example (e f : G.edgeSet) : e ≈ f ↔ G.BlockEquivalent e f := Iff.rfl
 
-/-- A *block* of `G` is a block-equivalence class of edges (analogue of
+/-- A *block* of `G` is a block-equivalence class of edges of `G` (analogue of
 `ConnectedComponent`). -/
 def Block (G : SimpleGraph V) := Quotient G.blockSetoid
 
-/-- The block containing a given edge. -/
+/-- The block containing a given edge of `G`. -/
 def blockMk (G : SimpleGraph V) (e : G.edgeSet) : G.Block := Quotient.mk'' e
 
-/-- The subgraph underlying a block: all edges block-equivalent to any
-representative. Well-defined by `blockOf_eq_of_blockEquivalent`. -/
-def Block.toGraph (B : G.Block) : SimpleGraph V :=
-  Quotient.liftOn' B (fun e => G.blockOf ↑e) fun _ _ h =>
-    G.blockOf_eq_of_blockEquivalent h
+/-!
+For an edge given by an adjacency proof `h : G.Adj u v` we write `h.block` for its
+block.
+-/
+/-- The block containing the edge `u — v`. -/
+abbrev Adj.block {u v : V} (h : G.Adj u v) : G.Block := G.blockMk ⟨s(u, v), h⟩
 
 /-!
-Our two definitions of a block as a `SimpleGraph V` agree.
+Reversing an edge does not change its block.
 -/
-@[simp] theorem blockMk_toGraph (e : G.edgeSet) :
-  (G.blockMk e).toGraph = G.blockOf ↑e := rfl
+lemma Adj.block_symm {u v : V} (h : G.Adj u v) : h.symm.block = h.block := by
+  simp only [Adj.block, Sym2.eq_swap]
 
 /-!
-Blocks behave well under taking supergraphs and, more generally, under injective
-homomorphisms: these map cycles to cycles, and hence cycle-equivalent edges to
-cycle-equivalent edges.
+Two edges lie in the same block exactly when they are block-equivalent.
 -/
-theorem CycleEquivalent.map {W : Type*} {G' : SimpleGraph W} (f : G →g G')
-    (hf : Function.Injective f) {a b : Sym2 V} (h : G.CycleEquivalent a b) :
-    G'.CycleEquivalent (a.map f) (b.map f) := by
+lemma blockMk_eq_blockMk_iff {e f : G.edgeSet} :
+    G.blockMk e = G.blockMk f ↔ e ≈ f :=
+  Quotient.eq''
+
+/-!
+Mathlib makes a connected component `C` into a subgraph by taking its vertices
+`C.supp` (the vertices whose class is `C`) and forming the induced subgraph
+`(⊤ : G.Subgraph).induce C.supp`. We could do the same here, inducing on the
+endpoints of the edges in a block `B`. For components this is fine, since any edge
+between two vertices of a component clearly lies in that component. For blocks the
+corresponding fact, that an edge of `G` joining two vertices of a block belongs to
+the block, is also true (adding such an edge to a `2`-connected subgraph keeps it
+`2`-connected), but proving it needs a cycle-splicing argument like the one we
+avoided above. Without it, the edges of the induced subgraph would not provably be
+the edges of `B`. So instead we define the subgraph underlying a block `B` via the
+edges of `G` whose class is `B`, together with their endpoints.
+-/
+/-- The subgraph of `G` underlying a block `B`: the edges of `G` whose block is `B`,
+and their endpoints (analogue of `ConnectedComponent.toSubgraph`). -/
+def Block.toSubgraph (B : G.Block) : G.Subgraph where
+  verts := {v | ∃ e : G.edgeSet, v ∈ (e : Sym2 V) ∧ G.blockMk e = B}
+  Adj v w := ∃ h : G.Adj v w, h.block = B
+  adj_sub := fun ⟨h, _⟩ => h
+  edge_vert := fun ⟨h, hB⟩ => ⟨⟨_, h⟩, Sym2.mem_mk_left _ _, hB⟩
+  symm := ⟨fun _ _ ⟨h, hB⟩ => ⟨h.symm, h.block_symm.trans hB⟩⟩
+
+@[simp] lemma Block.toSubgraph_adj {B : G.Block} {v w : V} :
+    B.toSubgraph.Adj v w ↔ ∃ h : G.Adj v w, h.block = B :=
+  Iff.rfl
+
+@[simp] lemma Block.mem_toSubgraph_verts {B : G.Block} {v : V} :
+    v ∈ B.toSubgraph.verts ↔ ∃ e : G.edgeSet, v ∈ (e : Sym2 V) ∧ G.blockMk e = B :=
+  Iff.rfl
+
+/-!
+In the block of an edge `e`, two vertices are adjacent exactly when they are joined
+by an edge of `G` that is block-equivalent to `e`.
+-/
+lemma blockMk_toSubgraph_adj {e : G.edgeSet} {v w : V} :
+    (G.blockMk e).toSubgraph.Adj v w ↔ G.Adj v w ∧ G.BlockEquivalent e s(v, w) :=
+  ⟨fun ⟨h, hB⟩ => ⟨h, (blockMk_eq_blockMk_iff.mp hB).symm⟩,
+    fun ⟨h, he⟩ => ⟨h, blockMk_eq_blockMk_iff.mpr he.symm⟩⟩
+
+/-!
+Blocks behave well under taking supergraphs and, more generally, under copies
+`f : Copy G H` (injective homomorphisms): these map cycles to cycles, and hence
+cycle-equivalent edges to cycle-equivalent edges.
+-/
+lemma CycleEquivalent.map {W : Type*} {H : SimpleGraph W} (f : Copy G H)
+    {a b : Sym2 V} (h : G.CycleEquivalent a b) :
+    H.CycleEquivalent (a.map f) (b.map f) := by
   rcases h with rfl | ⟨u, c, hc, ha, hb⟩
   · exact Or.inl rfl
-  · exact Or.inr ⟨f u, c.map f, (Walk.isCycle_map_iff_of_injective hf).mpr hc,
+  · exact Or.inr ⟨f u, c.map f.toHom,
+      (Walk.isCycle_map_iff_of_injective f.injective).mpr hc,
       by simpa using ⟨a, ha, rfl⟩, by simpa using ⟨b, hb, rfl⟩⟩
 
 /-!
-Block-equivalence is preserved by injective homomorphisms.
+Block-equivalence is preserved by copies.
 -/
-theorem BlockEquivalent.map {W : Type*} {G' : SimpleGraph W} (f : G →g G')
-    (hf : Function.Injective f) {a b : Sym2 V} (h : G.BlockEquivalent a b) :
-    G'.BlockEquivalent (a.map f) (b.map f) := by
+lemma BlockEquivalent.map {W : Type*} {H : SimpleGraph W} (f : Copy G H)
+    {a b : Sym2 V} (h : G.BlockEquivalent a b) :
+    H.BlockEquivalent (a.map f) (b.map f) := by
   induction h with
-  | rel x y hxy => exact (hxy.map f hf).blockEquivalent
+  | rel x y hxy => exact (hxy.map f).blockEquivalent
   | refl x => exact .refl _
   | symm x y _ ih => exact ih.symm
   | trans x y z _ _ ih₁ ih₂ => exact ih₁.trans ih₂
 
-/-- An injective homomorphism maps the block of `e` into the block of `e.map f`. -/
-def blockOfHom {W : Type*} {G' : SimpleGraph W} (f : G →g G')
-    (hf : Function.Injective f) (e : Sym2 V) :
-    G.blockOf e →g G'.blockOf (e.map f) where
-  toFun := f
-  map_rel' := by
-    intro x y hxy
-    rw [blockOf_adj] at hxy ⊢
-    exact ⟨by simpa using hxy.1.map f hf, hf.ne hxy.2⟩
+/-!
+So a copy `f : Copy G H` sends the block of an edge `e` to the block of `e.map f`,
+and by `BlockEquivalent.map` this does not depend on the choice of `e`. So `f`
+induces a map `Block.map f : G.Block → H.Block`, just as a homomorphism induces a
+map of connected components (`ConnectedComponent.map`).
+-/
+/-- The image of a block under a copy `f`: the block containing the images of its
+edges. -/
+def Block.map {W : Type*} {H : SimpleGraph W} (f : Copy G H) (B : G.Block) :
+    H.Block :=
+  Quotient.map' (fun e => ⟨e.1.map f, f.toHom.map_mem_edgeSet e.2⟩)
+    (fun _ _ => BlockEquivalent.map f) B
 
 /-!
-A block of a subgraph is contained in the corresponding block of the larger
-graph.
+Moreover, `f` maps each block `B` into the block `B.map f`: an edge `v — w` of `G`
+in `B` goes to the edge `f v — f w` of `H`, which lies in `B.map f` by the
+definition of `Block.map`.
 -/
-theorem blockOf_mono {G' : SimpleGraph V} (hsub : G' ≤ G) (e : Sym2 V) :
-    G'.blockOf e ≤ G.blockOf e := by
-  intro x y h
-  rw [blockOf_adj] at h ⊢
-  exact ⟨by simpa using h.1.map (Hom.ofLE hsub) Function.injective_id, h.2⟩
+lemma Block.map_toSubgraph_le {W : Type*} {H : SimpleGraph W} (f : Copy G H)
+    (B : G.Block) : B.toSubgraph.map f.toHom ≤ (B.map f).toSubgraph := by
+  constructor
+  · rintro _ ⟨v, ⟨e, hv, rfl⟩, rfl⟩
+    exact ⟨⟨_, f.toHom.map_mem_edgeSet e.2⟩, Sym2.mem_map.mpr ⟨v, hv, rfl⟩, rfl⟩
+  · rintro _ _ ⟨v, w, ⟨h, rfl⟩, rfl, rfl⟩
+    exact ⟨f.toHom.map_adj h, rfl⟩
 
 /-!
-`blockOfHom` and `blockOf_mono` work with representative edges, but we can also map
-blocks themselves. An injective homomorphism `f : G →g G'` sends the block of an edge
-`e` to the block of `e.map f`, and by `BlockEquivalent.map` this does not depend on
-the choice of `e`. So `f` induces a map `Block.map f hf : G.Block → G'.Block`, just
-as a homomorphism induces a map of connected components (`ConnectedComponent.map`).
+To pull back colourings of blocks of `H` to blocks of `G` with `Colorable.of_hom`,
+we turn such an inclusion into a homomorphism between the coerced graphs. Mathlib has
+the special case `Subgraph.inclusion` for `f = Hom.id`.
 -/
-/-- The image of a block under an injective homomorphism `f`: the block containing
-the images of its edges. -/
-def Block.map {W : Type*} {G' : SimpleGraph W} (f : G →g G')
-    (hf : Function.Injective f) (B : G.Block) : G'.Block :=
-  Quotient.map' (fun e => ⟨e.1.map f, f.map_mem_edgeSet e.2⟩)
-    (fun _ _ => BlockEquivalent.map f hf) B
+/-- A homomorphism `f : G →g H` restricts to a homomorphism from a subgraph `A` of
+`G` to any subgraph `B` of `H` containing `A.map f`. -/
+def _root_.SimpleGraph.Subgraph.homOfMapLE {W : Type*} {H : SimpleGraph W}
+    (f : G →g H) {A : G.Subgraph} {B : H.Subgraph} (h : A.map f ≤ B) :
+    A.coe →g B.coe where
+  toFun v := ⟨f v, h.1 ⟨v, v.2, rfl⟩⟩
+  map_rel' hvw := h.2 ⟨_, _, hvw, rfl, rfl⟩
 
 /-!
-Moreover, `f` itself is a homomorphism from each block `B` (as a `SimpleGraph V`) to
-the block `B.map f hf`. To prove this we may assume that `B` is the block of an edge
-`e` (`Quotient.inductionOn'`), and then it is exactly what `blockOfHom` says. With
-`Colorable.of_hom` this lets us pull back colourings of blocks of `G'` to blocks of
-`G` without choosing representatives.
+We also need to extend colourings in the other direction: if a subgraph `H` contains
+every edge of `G`, then for `n ≥ 1` a colouring of `H` extends to `G`, giving the
+vertices outside `H` colour `0`.
 -/
-/-- An injective homomorphism `f` maps each block `B` into the block `B.map f hf`. -/
-@[simps]
-def Block.mapHom {W : Type*} {G' : SimpleGraph W} (f : G →g G')
-    (hf : Function.Injective f) (B : G.Block) :
-    B.toGraph →g (B.map f hf).toGraph where
-  toFun := f
-  map_rel' := Quotient.inductionOn' B fun e => (blockOfHom f hf e).map_rel'
+lemma _root_.SimpleGraph.Subgraph.colorable_of_forall_adj {n : ℕ} (hn : 1 ≤ n)
+    (H : G.Subgraph) (hH : ∀ ⦃v w⦄, G.Adj v w → H.Adj v w) (hc : H.coe.Colorable n) :
+    G.Colorable n := by
+  classical
+  obtain ⟨C⟩ := hc
+  refine ⟨Coloring.mk (fun v => if h : v ∈ H.verts then C ⟨v, h⟩ else ⟨0, hn⟩)
+    fun {v w} hvw => ?_⟩
+  have h := hH hvw
+  simpa [H.edge_vert h, H.edge_vert h.symm] using
+    C.valid (by simpa : H.coe.Adj ⟨v, _⟩ ⟨w, _⟩)
 
 /-!
 ## Colouring a Graph from its Blocks
 
-The idea is to cut `G` into two pieces that share at most one vertex, colour each
-piece, and glue the colourings using `Colorable.sup_of_subsingleton_inter`.
+We now prove `colorable_of_forall_block`: for `n ≥ 1`, a finite graph is
+`n`-colourable if each of its blocks is. The idea is to cut `G` into two pieces that
+share at most one vertex, colour each piece, and glue the colourings using
+`Colorable.sup_of_subsingleton_inter`.
 -/
 #check Colorable.sup_of_subsingleton_inter
-/-!
-We say that `G` *splits at* `x` if it is the union of two proper subgraphs whose
-supports meet in at most `x`.
--/
-/-- `G` *splits at* `x` if it is the union of two proper subgraphs whose supports
-meet in at most `x`. -/
+
+/-- We say that `G` *splits at* `x` if it is the union of two proper subgraphs whose
+supports meet in at most `x`. -/
 def SplitsAt (G : SimpleGraph V) (x : V) : Prop :=
   ∃ G₁ G₂ : SimpleGraph V, G₁ < G ∧ G₂ < G ∧ G₁ ⊔ G₂ = G ∧
     G₁.support ∩ G₂.support ⊆ {x}
@@ -2650,25 +2553,25 @@ def SplitsAt (G : SimpleGraph V) (x : V) : Prop :=
 /-!
 Splitting at `x` is not the same as `x` being a cut vertex. A graph with a cut vertex
 `x` splits at `x`, but a graph whose edges lie in two different components splits at
-every vertex, whether or not it has a cut vertex: two disjoint edges have no cut
-vertex at all. Isolated vertices also play no role in `SplitsAt`. (For a connected
-graph the two notions do agree.) What `SplitsAt` captures is exactly what the
-colouring argument needs: `G` is glued together from two proper pieces sharing at
-most one vertex. It also makes the remaining case work: a graph that splits nowhere
-has all its edges in one block, whereas a graph with no cut vertex can have one block
-in each of its components.
+every vertex, whether or not it is a cut vertex. Isolated vertices also play no role
+in `SplitsAt`. (For a connected graph the two notions do agree.) `SplitsAt` is what
+our colouring argument needs. There are two cases: if `G` splits at some vertex, it
+is glued together from two proper pieces sharing at most one vertex, which we can
+colour separately; if `G` splits nowhere, all its edges lie in one block, so a
+colouring of that block colours `G`. The second case would fail for cut vertices,
+since a graph with no cut vertex can have one block in each of its components.
 
 We show that a graph with a cut vertex `x` splits at `x` (`IsCutVertex.splitsAt`),
 and so does a graph with edges in two different connected components, at any vertex
 (`splitsAt_of_not_reachable`). Both follow from a single lemma about walks. Fix a
-non-isolated vertex `u ≠ x`, and call a vertex *near* if `u` reaches it by a walk
-avoiding `x`. Let `G₁` consist of the edges of `G` with a near endpoint and `G₂` of
-the rest. A vertex `z ≠ x` adjacent to a near vertex is itself near, so the supports
-of `G₁` and `G₂` meet in at most `x`. The edges of `G` incident to `u` lie in `G₁`,
-so `G₂` is proper, and `G₁` is proper as long as some edge of `G` has no near
-endpoint.
+non-isolated vertex `u ≠ x`, and call a vertex *near* if there is a walk from `u` to
+it avoiding `x`. Let `G₁` consist of the edges of `G` with a near endpoint, and let
+`G₂ = G \ G₁` (both as `SimpleGraph V`). A vertex `z ≠ x` adjacent to a near vertex
+is itself near, so the supports of `G₁` and `G₂` meet in at most `x`. The edges of
+`G` incident to `u` lie in `G₁`, so `G₂` is proper, and `G₁` is proper as long as
+some edge of `G` has no near endpoint.
 -/
-theorem splitsAt_of_not_near {u x a b : V} (hux : u ≠ x) (hu : u ∈ G.support)
+lemma splitsAt_of_not_near {u x a b : V} (hux : u ≠ x) (hu : u ∈ G.support)
     (hab : G.Adj a b) (ha : ∀ p : G.Walk u a, x ∈ p.support)
     (hb : ∀ p : G.Walk u b, x ∈ p.support) : G.SplitsAt x := by
   -- `R z`: the vertex `z` is near.
@@ -2677,32 +2580,32 @@ theorem splitsAt_of_not_near {u x a b : V} (hux : u ≠ x) (hu : u ∈ G.support
     rintro y z ⟨p, hp⟩ hyz hzx
     exact ⟨p.concat hyz, by simp [Walk.support_concat, hp, hzx.symm]⟩
   let G₁ := G ⊓ fromRel fun y z => R y ∨ R z
-  let G₂ := G ⊓ fromRel fun y z => ¬ R y ∧ ¬ R z
+  let G₂ := G \ G₁
   obtain ⟨u', hu'⟩ := hu
   have hRu : R u := ⟨.nil, by simpa using hux.symm⟩
   have hRa : ¬ R a := fun ⟨p, hp⟩ => hp (ha p)
   have hRb : ¬ R b := fun ⟨p, hp⟩ => hp (hb p)
   refine ⟨G₁, G₂, lt_of_le_not_ge inf_le_left fun h => ?_,
-    lt_of_le_not_ge inf_le_left fun h => ?_, ?_, ?_⟩
+    lt_of_le_not_ge sdiff_le fun h => ?_, sup_sdiff_cancel_right inf_le_left, ?_⟩
   · simpa [G₁, hRa, hRb] using h hab
-  · simpa [G₂, hRu] using h hu'
-  · ext y z
-    refine ⟨by rintro (h | h) <;> exact h.1, fun h => ?_⟩
-    by_cases hy : R y <;> by_cases hz : R z <;> simp [G₁, G₂, h, h.ne, hy, hz]
+  · simpa [G₂, G₁, hRu, hu'.ne] using h hu'
   · rintro z ⟨⟨y, hy⟩, ⟨y', hy'⟩⟩
     by_contra hzx
-    simp only [inf_adj, fromRel_adj, Set.mem_ofPred_eq, G₁, G₂] at hy hy'
+    simp only [sdiff_adj, inf_adj, fromRel_adj, Set.mem_ofPred_eq, G₁, G₂] at hy hy'
     have hz : ¬ R z := by grind
     have : ¬ R y := fun hRy => hz (hR hRy hy.1.symm hzx)
     grind
 
 /-!
-If `x` is a cut vertex, separating `u` from `v`, then `u` and `v` are distinct, so
-both are non-isolated. Every walk from `u` to a neighbour `y` of `v` passes through
-`x`, since otherwise it would extend to a walk from `u` to `v` avoiding `x`. So the
-edge `v — y` has no near endpoint.
+If `x` is a cut vertex then `G` splits at `x`. Suppose `x` separates `u` from `v`; we
+apply `splitsAt_of_not_near` with near vertices taken relative to `u`. Then `u` and
+`v` are distinct, so both are non-isolated. Let `y` be a neighbour of `v`. Neither
+`v` nor `y` is near: every walk from `u` to `v` passes through `x`, and so does every
+walk from `u` to `y`, since otherwise it would extend to a walk from `u` to `v`
+avoiding `x`. So the edge `v — y` has no near endpoint, and `splitsAt_of_not_near`
+applies.
 -/
-theorem IsCutVertex.splitsAt {x : V} (h : G.IsCutVertex x) : G.SplitsAt x := by
+lemma IsCutVertex.splitsAt {x : V} (h : G.IsCutVertex x) : G.SplitsAt x := by
   obtain ⟨u, v, hux, hvx, ⟨p⟩, hp⟩ := h
   -- `u ≠ v`, since the trivial walk at `u` avoids `x`
   have huv : u ≠ v := by
@@ -2720,11 +2623,12 @@ theorem IsCutVertex.splitsAt {x : V} (h : G.IsCutVertex x) : G.SplitsAt x := by
   · simpa [support_concat, hvx.symm] using hp (q.concat hvy.symm)
 
 /-!
-If the edges `a — b` and `c — d` lie in different components, then neither endpoint
-of `c — d` is near (relative to `a`, provided `a ≠ x`), and if `a = x` then we swap
-the roles of the two edges.
+If `G` has edges in two different components then it splits at every vertex: if the
+edges `a — b` and `c — d` lie in different components, then neither endpoint of
+`c — d` is near (relative to `a`, provided `a ≠ x`), so `splitsAt_of_not_near`
+applies; if `a = x` we swap the roles of the two edges.
 -/
-theorem splitsAt_of_not_reachable {a b c d : V} (hab : G.Adj a b) (hcd : G.Adj c d)
+lemma splitsAt_of_not_reachable {a b c d : V} (hab : G.Adj a b) (hcd : G.Adj c d)
     (hac : ¬ G.Reachable a c) (x : V) : G.SplitsAt x := by
   by_cases hax : a = x
   · -- take `u := c`; no walk from `c` reaches the edge `a — b`
@@ -2737,19 +2641,19 @@ theorem splitsAt_of_not_reachable {a b c d : V} (hab : G.Adj a b) (hcd : G.Adj c
       (fun p => (hac ⟨p⟩).elim) (fun p => (hac ⟨p.concat hcd.symm⟩).elim)
 
 /-!
-Conversely, if `G` splits at no vertex then all its edges lie in a single block. We
-first show this for two edges `x — u` and `x — w` at a common vertex `x`. If some
-walk from `u` to `w` avoids `x`, then shortening it to a path and closing it up with
-the two edges gives a cycle through both. Otherwise every walk from `u` to `w` passes
-through `x`, while `u — x — w` joins them, so `x` is a cut vertex and `G` splits at
-`x`.
+For the second case of the colouring argument, we show that if `G` splits at no
+vertex then all its edges lie in a single block. We first show this for two edges
+`x — u` and `x — w` at a common vertex `x`. If some walk from `u` to `w` avoids `x`,
+then shortening it to a path and closing it up with the two edges gives a cycle
+through both. Otherwise every walk from `u` to `w` passes through `x`, while
+`u — x — w` joins them, so `x` is a cut vertex and `G` splits at `x`.
 -/
-theorem blockEquivalent_of_adj_of_adj (hG : ∀ x, ¬ G.SplitsAt x) {x u w : V}
+lemma blockEquivalent_of_adj_of_adj (hG : ∀ x, ¬ G.SplitsAt x) {x u w : V}
     (hu : G.Adj x u) (hw : G.Adj x w) : G.BlockEquivalent s(x, u) s(x, w) := by
   classical
   rcases eq_or_ne u w with rfl | huw
   · exact .refl _
-  by_cases h : ∃ p : G.Walk u w, x ∉ p.support
+  by_cases! h : ∃ p : G.Walk u w, x ∉ p.support
   · obtain ⟨p, hxp⟩ := h
     have hxP : x ∉ p.bypass.support :=
       fun h => hxp (p.support_bypass_subset_support h)
@@ -2757,10 +2661,8 @@ theorem blockEquivalent_of_adj_of_adj (hG : ∀ x, ¬ G.SplitsAt x) {x u w : V}
     have hcyc := (cons_isCycle_iff_length_ne_one _ hu).mpr
       ⟨p.bypass_isPath.concat hxP hw.symm,
         by simpa using fun h => huw (eq_of_length_eq_zero h)⟩
-    exact CycleEquivalent.blockEquivalent
-      (.inr ⟨x, _, hcyc, by simp, by simp [edges_concat, Sym2.eq_swap]⟩)
-  · push Not at h
-    exact (hG x (IsCutVertex.splitsAt
+    exact CycleEquivalent.blockEquivalent (.inr ⟨x, _, hcyc, by simp, by simp⟩)
+  · exact (hG x (IsCutVertex.splitsAt
       ⟨u, w, hu.ne.symm, hw.ne.symm, hu.symm.reachable.trans hw.reachable, h⟩)).elim
 
 /-!
@@ -2768,7 +2670,7 @@ For two arbitrary edges `a — b` and `c — d` we chain the previous result alo
 walk from `a` to `c`. Such a walk exists: otherwise the edges `a — b` and `c — d`
 lie in different components, so `G` would split at every vertex.
 -/
-theorem blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬ G.SplitsAt x) {a b c d : V}
+lemma blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬ G.SplitsAt x) {a b c d : V}
     (hab : G.Adj a b) (hcd : G.Adj c d) : G.BlockEquivalent s(a, b) s(c, d) := by
   have key : ∀ {y} (q : G.Walk y c) {z}, G.Adj y z →
       G.BlockEquivalent s(y, z) s(c, d) := by
@@ -2778,7 +2680,7 @@ theorem blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬ G.SplitsAt x) {a b c d :
     | @cons u v _ h q ih =>
       intro z hz
       refine (blockEquivalent_of_adj_of_adj hG hz h).trans ?_
-      rw [Sym2.eq_swap (a := u)]
+      rw [Sym2.eq_swap]
       exact ih hcd h.symm
   by_cases hac : G.Reachable a c
   · exact key hac.some hab
@@ -2786,40 +2688,39 @@ theorem blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬ G.SplitsAt x) {a b c d :
 
 /-!
 For finite graphs we can now argue by well-founded induction on `G`, with respect to
-`<`. This is allowed because a finite type carries only finitely many graphs (a graph
-is determined by its adjacency relation, `SimpleGraph.adj_injective`), and a strict
-order on a finite type is well-founded. If `G` splits at some vertex, then both
-pieces are proper subgraphs, whose blocks map into blocks of `G` along the inclusion
-`Hom.ofLE` (`Block.mapHom`), so we can colour them by induction and glue the
-colourings. Otherwise `G` is either edgeless or equal to the block of any of its
-edges.
+`<`. This is allowed because there are only finitely many graphs on a finite vertex
+type (a graph is determined by its adjacency relation, `SimpleGraph.adj_injective`),
+and a strict order on a finite type is well-founded. If `G` splits at some vertex,
+then both pieces are proper subgraphs, whose blocks map into blocks of `G` along the
+inclusion `Copy.ofLE` (`Block.map_toSubgraph_le`), so we can colour them by induction
+and glue the colourings together. Otherwise `G` is either edgeless or all its edges
+lie in the block of any one of them, and a colouring of that block extends to `G`
+(`Subgraph.colorable_of_forall_adj`).
 -/
 theorem colorable_of_forall_block [Finite V] {n : ℕ} (hn : 1 ≤ n)
-    (G : SimpleGraph V) (hcol : ∀ B : G.Block, B.toGraph.Colorable n) :
+    (G : SimpleGraph V) (hcol : ∀ B : G.Block, B.toSubgraph.coe.Colorable n) :
     G.Colorable n := by
   have : Finite (SimpleGraph V) := .of_injective _ SimpleGraph.adj_injective
   induction G using WellFoundedLT.induction with
   | _ G ih =>
     have hlt : ∀ H < G, H.Colorable n := fun H hH => ih H hH fun B =>
-      (hcol _).of_hom (B.mapHom (.ofLE hH.le) Function.injective_id)
-    by_cases hs : ∃ x, G.SplitsAt x
+      (hcol _).of_hom (Subgraph.homOfMapLE _
+        (B.map_toSubgraph_le (Copy.ofLE _ _ hH.le)))
+    by_cases! hs : ∃ x, G.SplitsAt x
     · obtain ⟨x, G₁, G₂, h₁, h₂, hG, hmeet⟩ := hs
       rw [← hG]
       exact Colorable.sup_of_subsingleton_inter hmeet (hlt _ h₁) (hlt _ h₂)
-    · push Not at hs
-      by_cases he : ∃ a b, G.Adj a b
+    · by_cases! he : ∃ a b, G.Adj a b
       · obtain ⟨a, b, hab⟩ := he
-        exact (hcol (G.blockMk ⟨s(a, b), hab⟩)).mono_left fun c d hcd =>
-          blockOf_adj.2 ⟨blockEquivalent_of_not_splitsAt hs hab hcd, hcd.ne⟩
-      · push Not at he
-        exact ⟨Coloring.mk (fun _ => (⟨0, hn⟩ : Fin n)) fun {a b} hab =>
-          (he a b hab).elim⟩
+        exact hab.block.toSubgraph.colorable_of_forall_adj hn
+          (fun c d hcd => blockMk_toSubgraph_adj.mpr
+            ⟨hcd, blockEquivalent_of_not_splitsAt hs hab hcd⟩) (hcol _)
+      · exact ⟨Coloring.mk (fun _ => (⟨0, hn⟩)) fun {a b} hab => (he a b hab).elim⟩
 
 /-!
-In the exercises we use the *De Bruijn–Erdős theorem* (see
-[De Bruijn–Erdős Theorem](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-de-bruijn-erd-s-theorem))
-to remove the finiteness assumption: for `n ≥ 1`, any graph is `n`-colourable iff
-each of its blocks is.
+In the exercises we use the *De Bruijn–Erdős theorem*
+(`colorable_of_forall_finite_subgraph_colorable`) to remove the finiteness
+assumption: for `n ≥ 1`, any graph is `n`-colourable iff each of its blocks is.
 -/
 
 end SimpleGraph
