@@ -318,7 +318,8 @@ The following custom definitions and abbreviations are introduced in this guide:
   two non-isolated vertices are reachable from each other).
 * `locallyFiniteDeleteEdges`: the graph `G.deleteEdges s` obtained by deleting
   edges from a locally finite graph is locally finite.
-* `IsVertexConnected`: predicate for a graph being `k`-vertex-connected.
+* `IsVertexConnected`: predicate for a graph being `k`-vertex-connected
+  (`k : ℕ∞`, as for Mathlib's `IsEdgeConnected`).
 * `edgeConnectivity` / `λ(G)`: the edge connectivity
   `λ(G) : ℕ∞`, the supremum of the `k` for which `G` is
   `k`-edge-connected.
@@ -678,8 +679,6 @@ its exercises:
 * `hypercube_isHamiltonian`: the hypercube `Q[n]` is Hamiltonian for `n ≠ 1`.
 * `Walk.IsHamiltonian.posaClosed_isHamiltonianCycle`: closing a Hamiltonian path via
   a Pósa rotation yields a Hamiltonian cycle.
-* `Walk.IsHamiltonianCycle.reverse`: the reverse of a Hamiltonian cycle is a
-  Hamiltonian cycle.
 * `Walk.IsMaximumPath.isMaximalPath`: a maximum-length path is in particular a
   maximal path, so the chapter's closing construction applies to it.
 * `Walk.isHamiltonian_of_isMaximumPath`: a maximum-length path in an Ore graph is
@@ -783,7 +782,6 @@ its exercises:
   its blocks is.
 
 ## Chapter 11: Distance (Results)
-* `Iso.edist_eq`: graph isomorphisms preserve the graph distance.
 * `edist_eq_hammingDist`: the graph distance between any two vertices in `Q[n]` is
   exactly equal to their Hamming distance.
 * `hypercube_adj_iff_hammingDist_eq_one`: adjacency in `Q[n]` is equivalent to

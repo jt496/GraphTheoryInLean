@@ -106,7 +106,7 @@ met graph homomorphisms.
 Given `f : V → W` and `G : SimpleGraph W`, `G.comap f` is the `SimpleGraph V` where
 two vertices are adjacent iff their images under `f` are adjacent in `G`.
 
-[Figure: Pulling $G$ (right) back along $f : V \to W$ (dashed arrows), where $f(a) = f(b) = x$. In `G.comap f` (left), $a$ and $b$ are non-adjacent and both adjacent to $c$ and $d$, just as $x$ is adjacent to $y$ and $z$. The orange edge is lost, since $w$ is not in the range of $f$](https://jt496.github.io/GraphTheoryInLean/figures/comap.svg)
+[Figure: $G$ (right) pulled back back along $f : V \to W$ (dashed arrows), to give `G.comap f` (left)](https://jt496.github.io/GraphTheoryInLean/figures/comap.svg)
 -/
 #source SimpleGraph.comap
 example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
@@ -143,11 +143,11 @@ that sends a vertex to its part.
 
 The `comap` gives a natural way to define induced subgraphs (`SimpleGraph.induce`).
 Given a set of vertices `s : Set V`, the embedding of `s` into `V` as a `Subtype` is
-given by `Function.Embedding.subtype s`.
+given by `Function.Embedding.subtype (· ∈ s)`.
 -/
 section induced
 variable {V : Type*} {s : Set V}
-#check Function.Embedding.subtype s -- (s : Set V) : Subtype s ↪ V
+#check Function.Embedding.subtype (· ∈ s) -- {x // x ∈ s} ↪ V
 /-!
 The induced subgraph of `G` on the vertex set `s` is then given by the `comap` of `G`
 by this embedding.
@@ -208,7 +208,7 @@ for the corresponding `Rel*` types in Mathlib. This means that occasionally when
 working with these maps we will use results that refer to `RelHom`, `RelEmbedding` or
 `RelIso`.
 
-[Figure: Left: a homomorphism from $C_4$ onto $K_2$, identifying opposite vertices. Centre: an embedding of a path, which sends its non-adjacent ends $a$ and $c$ to the non-adjacent $w$ and $y$. Right: an isomorphism between two drawings of $C_4$](https://jt496.github.io/GraphTheoryInLean/figures/homembed.svg)
+[Figure: Left: a homomorphism from $C_4$ onto $K_2$, identifying opposite vertices. Centre: an embedding of a path. Right: an isomorphism](https://jt496.github.io/GraphTheoryInLean/figures/homembed.svg)
 
 ## Graph Homomorphisms
 -/
@@ -520,7 +520,7 @@ vertices in `G`. The distinctness condition is needed because `f` need not be
 injective: if `f` sends two adjacent vertices to the same vertex then their edge
 would otherwise become a loop.
 
-[Figure: Pushing $G$ (left) forward along $f : V \to W$ (dashed arrows), where $f(a) = f(b) = x$. The edges $c a$ and $b d$ become $x y$ and $x z$ in `G.map f` (right), but the orange edge $a b$ would become a loop at $x$ (dashed), so it is dropped](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
+[Figure: $G$ (left) pushed forward along $f : V \to W$ (dashed arrows), to give `G.map f` (right)](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
 -/
 section maps
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
@@ -987,6 +987,8 @@ scoped infixl:70 " ⊗g " => SimpleGraph.tensorProd
 Adjacency in the tensor product is given by the adjacency relations of the two
 graphs. (As for Mathlib's `boxProd_adj`, we state this as an `↔` lemma, so that it
 can be used with `.1`/`.2` as well as with `rw` and `simp`.)
+
+[Figure: Tensor product $P_3\otimes K_3$](https://jt496.github.io/GraphTheoryInLean/figures/tensorprod.svg)
 -/
 @[simp]
 lemma tensorProd_adj {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}

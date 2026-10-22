@@ -7350,6 +7350,17 @@
         "Edge and Vertex Connectivity",
         "Connectivity Numbers*"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.isVertexConnected_vertexConnectivity":
+   [{"id": "SimpleGraph___isVertexConnected_vertexConnectivity",
+     "data":
+     {"/Connectivity/#SimpleGraph___isVertexConnected_vertexConnectivity":
+      {"display": "isVertexConnected_vertexConnectivity",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isVertexConnected_two_iff":
    [{"id": "SimpleGraph___isVertexConnected_two_iff",
      "data":
@@ -7357,6 +7368,17 @@
       {"display": "isVertexConnected_two_iff",
        "context":
        ["Graph Theory in Lean", "Connectivity", "Cut Vertices and Blocks*"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.isVertexConnected_top_iff_forall_nat":
+   [{"id": "SimpleGraph___isVertexConnected_top_iff_forall_nat",
+     "data":
+     {"/Connectivity/#SimpleGraph___isVertexConnected_top_iff_forall_nat":
+      {"display": "isVertexConnected_top_iff_forall_nat",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.isVertexConnected_iff_induce":
    [{"id": "SimpleGraph___isVertexConnected_iff_induce",
@@ -7485,6 +7507,17 @@
       {"display": "isEmpty_iso_completeGraph_two_of_isEmpty",
        "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.isEdgeConnected_edgeConnectivity":
+   [{"id": "SimpleGraph___isEdgeConnected_edgeConnectivity",
+     "data":
+     {"/Connectivity/#SimpleGraph___isEdgeConnected_edgeConnectivity":
+      {"display": "isEdgeConnected_edgeConnectivity",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isCycle_mycielskianClosed_of_adj":
    [{"id": "SimpleGraph___isCycle_mycielskianClosed_of_adj",
      "data":
@@ -12119,17 +12152,6 @@
         "Trails, Paths, Circuits and Cycles",
         "Trails and Paths"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.isHamiltonian_reverse":
-   [{"id": "SimpleGraph___Walk___isHamiltonian_reverse",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___isHamiltonian_reverse":
-      {"display": "Walk.isHamiltonian_reverse",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.isHamiltonian_of_isMaximumPath'":
    [{"id": "SimpleGraph___Walk___isHamiltonian_of_isMaximumPath___",
      "data":
@@ -12143,17 +12165,6 @@
      {"/Walks/#SimpleGraph___Walk___isHamiltonian_of_isMaximumPath":
       {"display": "Walk.isHamiltonian_of_isMaximumPath",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.isHamiltonian_copy":
-   [{"id": "SimpleGraph___Walk___isHamiltonian_copy",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___isHamiltonian_copy":
-      {"display": "Walk.isHamiltonian_copy",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Plumbing: Fixing Type Mismatches",
-        "Copy"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.isEulerian_nil_iff":
    [{"id": "SimpleGraph___Walk___isEulerian_nil_iff",
@@ -12834,20 +12845,6 @@
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Counting Bijections and a Crossing Pair"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonianCycle.reverse'":
-   [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___reverse___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___reverse___":
-      {"display": "Walk.IsHamiltonianCycle.reverse'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonianCycle.reverse":
-   [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___reverse",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___reverse":
-      {"display": "Walk.IsHamiltonianCycle.reverse",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonianCycle.mycielskianClosed":
    [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___mycielskianClosed",
      "data":
@@ -13363,17 +13360,6 @@
        "context":
        ["Graph Theory in Lean", "Maps", "Morphisms", "Graph Isomorphisms"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.Iso.edist_eq":
-   [{"id": "SimpleGraph___Iso___edist_eq",
-     "data":
-     {"/Distance/#SimpleGraph___Iso___edist_eq":
-      {"display": "Iso.edist_eq",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Graph Distance",
-        "Distance under Homomorphisms and Isomorphisms"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.Iso.ediam_eq":
    [{"id": "SimpleGraph___Iso___ediam_eq",
      "data":
@@ -13670,7 +13656,7 @@
        ["Graph Theory in Lean",
         "Connectivity",
         "Edge and Vertex Connectivity",
-        "Connectivity Numbers*"]}},
+        "Vertex Connectivity"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.IsVertexConnected":
    [{"id": "SimpleGraph___IsVertexConnected",
@@ -14641,17 +14627,6 @@
       {"display": "Hom.injOn_of_isClique",
        "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.Hom.edist_le":
-   [{"id": "SimpleGraph___Hom___edist_le",
-     "data":
-     {"/Distance/#SimpleGraph___Hom___edist_le":
-      {"display": "Hom.edist_le",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Graph Distance",
-        "Distance under Homomorphisms and Isomorphisms"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.Hom.cliqueNum_le":
    [{"id": "SimpleGraph___Hom___cliqueNum_le",
      "data":
@@ -15496,22 +15471,11 @@
         "Maximum Degree at Least Three",
         "Step 2: Gluing Along the Pair"]}},
      "address": "/Connectivity/"}],
-   "ENat.natCast_lt_biSup_iff":
-   [{"id": "ENat___natCast_lt_biSup_iff",
+   "ENat.le_biSup_iff":
+   [{"id": "ENat___le_biSup_iff",
      "data":
-     {"/Connectivity/#ENat___natCast_lt_biSup_iff":
-      {"display": "_root_.ENat.natCast_lt_biSup_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Edge and Vertex Connectivity",
-        "Connectivity Numbers*"]}},
-     "address": "/Connectivity/"}],
-   "ENat.natCast_le_biSup_iff":
-   [{"id": "ENat___natCast_le_biSup_iff",
-     "data":
-     {"/Connectivity/#ENat___natCast_le_biSup_iff":
-      {"display": "_root_.ENat.natCast_le_biSup_iff",
+     {"/Connectivity/#ENat___le_biSup_iff":
+      {"display": "_root_.ENat.le_biSup_iff",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",

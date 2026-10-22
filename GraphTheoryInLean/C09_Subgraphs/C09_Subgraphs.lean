@@ -89,7 +89,7 @@ the union of both.
 #check Subgraph.sup_adj
 
 /-!
-[Figure: Left: a graph $G$. Top: subgraphs $H_1$ (blue) and $H_2$ (red) of $G$, with the vertices they omit dashed. Bottom: their inf $H_1 \sqcap H_2$ and sup $H_1 \sqcup H_2$, with the edges in both subgraphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf_subgraph.svg)
+[Figure: Left: a graph $G$. Top: subgraphs $H_1$ and $H_2$ of $G$, with the vertices they omit dashed. Bottom: their inf $H_1 \sqcap H_2$ and sup $H_1 \sqcup H_2$, with the edges in both subgraphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf_subgraph.svg)
 
 If `G : SimpleGraph V` then the top subgraph `⊤` of `G` has the same vertex set and
 edge set as `G`, so mathematically `⊤ : G.Subgraph` *is* `G` (but with type
@@ -307,7 +307,7 @@ example {v w : V} (s : Set (Sym2 V)) {H : G.Subgraph} :
 #check Subgraph.deleteEdges_verts -- (G'.deleteEdges s).verts = G'.verts
 
 /-!
-[Figure: Left: a graph $G$. Centre: deleting the vertices $v_1$ and $v_3$, which also removes their edges. Right: deleting the edges $v_1 v_4$ and $v_2 v_5$. Removed vertices and edges are dashed](https://jt496.github.io/GraphTheoryInLean/figures/deletion.svg)
+[Figure: Left: a graph $G$. Centre: deleting the vertices $v_1$ and $v_3$, which also removes their edges. Right: deleting the edges $v_1 v_4$ and $v_2 v_5$](https://jt496.github.io/GraphTheoryInLean/figures/deletion.svg)
 -/
 /-!
 # Subgraphs as Simple Graphs

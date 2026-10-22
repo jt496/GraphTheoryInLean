@@ -119,9 +119,9 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian := by
 
 /-!
 13. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
-`IsVertexConnected.le_degree` and `le_minDegree_of_forall_le_degree`.
+`exists_minimal_degree_vertex` and `IsVertexConnected.le_degree`.
 -/
-lemma IsVertexConnected.le_minDegree' {k : ℕ} [Fintype V] [Nonempty V]
+lemma IsVertexConnected.le_minDegree' {k : ℕ∞} [Fintype V] [Nonempty V]
     [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ G.minDegree := by
   sorry
 
@@ -244,10 +244,10 @@ instance : DecidableRel bowtie.Adj := inferInstanceAs (DecidableRel (fromRel _).
 
 /-!
 Show that `κ(bowtie) < λ(bowtie)`, so the first of Whitney's inequalities can be
-strict. Hint: the bowtie is `2`-edge-connected by `isEdgeConnected_two` and
-`decide`. It is not `2`-vertex-connected, by `isVertexConnected_iff_induce` with
-`S = {0}` and `decide`. Finally use `le_edgeConnectivity_iff` and
-`le_vertexConnectivity_iff`.
+strict. Hint: the bowtie is `2`-edge-connected by
+`isEdgeConnected_two_iff_forall_preconnected` and `decide`. It is not
+`2`-vertex-connected, by `isVertexConnected_iff_induce` with `S = {0}` and `decide`.
+Finally use `le_edgeConnectivity_iff` and `le_vertexConnectivity_iff`.
 -/
 example : κ(bowtie) < λ(bowtie) := by
   sorry
@@ -266,9 +266,9 @@ instance : DecidableRel barbell.Adj := inferInstanceAs (DecidableRel (fromRel _)
 
 /-!
 Show that `λ(barbell) < δ(barbell)`, so the second of Whitney's inequalities can also
-be strict. Hint: the barbell is not `2`-edge-connected, by `isEdgeConnected_two` with
-`e = s(3, 4)` and `decide`. Every vertex has degree at least `3`, by
-`le_minDegree_of_forall_le_degree` and `decide`.
+be strict. Hint: the barbell is not `2`-edge-connected, by
+`isEdgeConnected_two_iff_forall_preconnected` with `e = s(3, 4)` and `decide`. Every
+vertex has degree at least `3`, by `le_minDegree_of_forall_le_degree` and `decide`.
 -/
 example : λ(barbell) < δ(barbell) := by
   sorry
@@ -434,7 +434,7 @@ The path graph is connected, and `Fin.val` is an injective homomorphism from
 `P[n + 1]` would map to a cycle in `pathNat₁`.
 -/
 example (n : ℕ) : P[n + 1].IsTree :=
-  ⟨pathGraph_connected n,
+  ⟨connected_pathGraph_add_one n,
     pathNat₁_isAcyclic.comap ⟨Fin.val, by grind [pathGraph_adj]⟩ Fin.val_injective⟩
 
 /-!
@@ -442,7 +442,7 @@ We can also prove that the path graph is a tree by showing that it has the corre
 number of edges (`isTree_iff_connected_and_card`).
 -/
 example (n : ℕ) : P[n + 1].IsTree := by
-  apply isTree_iff_connected_and_card.2 ⟨pathGraph_connected _,?_⟩
+  apply isTree_iff_connected_and_card.2 ⟨connected_pathGraph_add_one _,?_⟩
   simp only [Nat.card_eq_fintype_card, card_edgeSet, Fintype.card_fin,
             Nat.add_right_cancel_iff]
   -- show `(P[n + 1]).edgeFinset.card = n` by exhibiting a bijection from `Fin n`
@@ -555,11 +555,13 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian :=
 
 /-!
 13. Show that a `k`-vertex-connected graph has minimum degree at least `k`. Hint:
-`IsVertexConnected.le_degree` and `le_minDegree_of_forall_le_degree`.
+`exists_minimal_degree_vertex` and `IsVertexConnected.le_degree`.
 -/
-lemma IsVertexConnected.le_minDegree {k : ℕ} [Fintype V] [Nonempty V]
-    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ G.minDegree :=
-  G.le_minDegree_of_forall_le_degree k fun v => hG.le_degree v
+lemma IsVertexConnected.le_minDegree {k : ℕ∞} [Fintype V] [Nonempty V]
+    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ G.minDegree := by
+  obtain ⟨v, hv⟩ := G.exists_minimal_degree_vertex
+  rw [hv]
+  exact hG.le_degree v
 
 /-!
 14. Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre
@@ -650,9 +652,10 @@ lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
     have h := hG.1
     rw [ENat.card_prod, ENat.card_eq_coe_fintype_card (α := Bool), Fintype.card_bool,
       Nat.cast_ofNat]
-    calc ((k + 1 : ℕ) : ℕ∞) + 1 ≤ ((k : ℕ∞) + 1) * 2 := by norm_cast; grind
+    calc (k : ℕ∞) + 1 + 1 ≤ ((k : ℕ∞) + 1) * 2 := by norm_cast; grind
       _ ≤ _ := by gcongr
   intro S hS ⟨u, c⟩ ⟨v, d⟩ hu hv
+  replace hS : S.card < k + 1 := by exact_mod_cast hS
   rcases Nat.eq_zero_or_pos k with rfl | hk
   · -- for `k = 0` the set `S` is empty and `G □ K₂` is connected
     obtain ⟨p⟩ := (hG_conn.boxProd connected_top).preconnected (u, c) (v, d)
@@ -661,7 +664,7 @@ lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
   obtain ⟨b, hb⟩ := S.exists_fiberProj_card_lt hS' hk
   obtain ⟨u', pu, hpu⟩ := hG.exists_walk_to_fiber hS' hu b
   obtain ⟨v', pv, hpv⟩ := hG.exists_walk_to_fiber hS' hv b
-  obtain ⟨q, hq⟩ := hG.exists_walk (S.fiberProj b) hb u' v'
+  obtain ⟨q, hq⟩ := hG.exists_walk (S.fiberProj b) (Nat.cast_lt.mpr hb) u' v'
     (by simpa using hpu _ pu.end_mem_support)
     (by simpa using hpv _ pv.end_mem_support)
   refine ⟨pu.append ((q.boxProdLeft ⊤ b).append pv.reverse), fun x hx => ?_⟩
@@ -689,7 +692,7 @@ lemma hypercube_isEdgeConnected {n : ℕ} : Q[n].IsEdgeConnected n :=
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
     ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
   (isBridge_iff_not_isEdgeReachable_two h).mp hb
-    ((hypercube_isEdgeConnected (n := n + 2)).anti (by grind) u v)
+    ((hypercube_isEdgeConnected (n := n + 2)).anti (by simp) u v)
 
 /-!
 18. Show that the edge connectivity of a finite graph with at least two vertices is
@@ -705,35 +708,36 @@ lemma edgeConnectivity_le_minDegree [Fintype V] [Nontrivial V]
 
 /-!
 19. Show that `κ(bowtie) < λ(bowtie)`, so the first of Whitney's inequalities can be
-strict. Hint: the bowtie is `2`-edge-connected by `isEdgeConnected_two` and
-`decide`. It is not `2`-vertex-connected, by `isVertexConnected_iff_induce` with
-`S = {0}` and `decide`. Finally use `le_edgeConnectivity_iff` and
-`le_vertexConnectivity_iff`.
+strict. Hint: the bowtie is `2`-edge-connected by
+`isEdgeConnected_two_iff_forall_preconnected` and `decide`. It is not
+`2`-vertex-connected, by `isVertexConnected_iff_induce` with `S = {0}` and `decide`.
+Finally use `le_edgeConnectivity_iff` and `le_vertexConnectivity_iff`.
 
 In fact `κ(bowtie) = 1` and `λ(bowtie) = 2`, the minimum degree.
 -/
 example : κ(bowtie) < λ(bowtie) := by
   -- deleting any single edge leaves the bowtie preconnected
-  have h2e : bowtie.IsEdgeConnected 2 := isEdgeConnected_two.mpr (by decide)
+  have h2e : bowtie.IsEdgeConnected 2 :=
+    isEdgeConnected_two_iff_forall_preconnected.mpr (by decide)
   -- deleting the shared vertex `0` disconnects it
   have h2v : ¬ bowtie.IsVertexConnected 2 := fun h =>
     absurd ((isVertexConnected_iff_induce.mp h).2 {0} (by simp)) (by decide)
-  have hκ : κ(bowtie) < (2 : ℕ) := not_le.mp (mt le_vertexConnectivity_iff.mp h2v)
+  have hκ : κ(bowtie) < 2 := not_le.mp (mt le_vertexConnectivity_iff.mp h2v)
   exact hκ.trans_le (le_edgeConnectivity_iff.mpr h2e)
 
 /-!
 20. Show that `λ(barbell) < δ(barbell)`, so the second of Whitney's inequalities can
-also be strict. Hint: the barbell is not `2`-edge-connected, by `isEdgeConnected_two`
-with `e = s(3, 4)` and `decide`. Every vertex has degree at least `3`, by
-`le_minDegree_of_forall_le_degree` and `decide`.
+also be strict. Hint: the barbell is not `2`-edge-connected, by
+`isEdgeConnected_two_iff_forall_preconnected` with `e = s(3, 4)` and `decide`. Every
+vertex has degree at least `3`, by `le_minDegree_of_forall_le_degree` and `decide`.
 
 In fact `λ(barbell) = 1`, since `3 — 4` is a bridge, and `δ(barbell) = 3`.
 -/
 example : λ(barbell) < δ(barbell) := by
   -- deleting the bridge `3 — 4` disconnects the barbell
   have h2e : ¬ barbell.IsEdgeConnected 2 := fun h =>
-    absurd (isEdgeConnected_two.mp h s(3, 4)) (by decide)
-  have hl : λ(barbell) < (2 : ℕ) := not_le.mp (mt le_edgeConnectivity_iff.mp h2e)
+    absurd (isEdgeConnected_two_iff_forall_preconnected.mp h s(3, 4)) (by decide)
+  have hl : λ(barbell) < 2 := not_le.mp (mt le_edgeConnectivity_iff.mp h2e)
   -- every vertex has degree at least `3`
   have hδ : 3 ≤ δ(barbell) := barbell.le_minDegree_of_forall_le_degree 3 (by decide)
   exact hl.trans_le (by exact_mod_cast (by norm_num : 2 ≤ 3).trans hδ)

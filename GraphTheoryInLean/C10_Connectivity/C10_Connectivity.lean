@@ -314,7 +314,7 @@ only neighbour of `u ᵣ`, so deleting the edge `none — u ᵣ` cuts `u ᵣ` of
 bridges of `mμ[G]` are precisely the edges `none — u ᵣ` where `u` is an isolated
 vertex of `G`.
 
-[Figure: Left: a graph $G$ with an isolated vertex $u$. Right: its Mycielskian, whose only bridge is the edge from the apex $\ast$ to $u_r$ (orange)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
+[Figure: Left: a graph $G$ with an isolated vertex $u$. Right: its Mycielskian, with its unique bridge edge highlighted](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
 -/
 
 lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ[G].edgeSet) :
@@ -569,6 +569,7 @@ Every connected graph has a spanning tree. Since `T` and `G` are both of type
 [Figure: A spanning tree in the Grötzsch graph](https://jt496.github.io/GraphTheoryInLean/figures/spanning_tree.svg)
 -/
 #check Connected.exists_isTree_le
+
 /-!
 Every graph `G` has a spanning forest (an acyclic spanning subgraph `F` in which any
 pair of vertices is joined by a walk in `F` iff it is joined by a walk in `G`).
@@ -858,7 +859,7 @@ To *splice* a closed walk `c` at `w` into a walk `p` through `w`, we split `p` a
 `p.length + c.length`, and if `p` and `c` are trails with no common edges then it is
 again a trail.
 
-[Figure: Hierholzer's splicing step on $K_5$: splice a new circuit $c$ (red, centre) at $w$ into the circuit $p$ (blue, left) starting at $v$, to obtain an Eulerian circuit starting at $w$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/hierholzer.svg)
+[Figure: Splice a new circuit $c$ (red) at $w$ into the circuit $p$ (blue) starting at $v$, to obtain an Eulerian circuit starting at $w$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/hierholzer.svg)
 -/
 omit [G.LocallyFinite] in
 lemma IsTrail.takeUntil_append_append_dropUntil {a b w : V} {p : G.Walk a b}
@@ -890,7 +891,7 @@ even degree in the graph obtained by deleting the edges of `p`. Find a vertex `w
 `p` incident to an unused edge, build a circuit `c` at `w` in the
 deleted graph, transfer it back into `G`, and splice it into `p` at `w`.
 
-[Figure: Splicing a closed trail $c$ (red, centre) at $w$ into a trail $p$ (blue, left) from $a$ to $b$ gives a longer trail from $a$ to $b$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
+[Figure: Splicing a closed trail $c$ (red) at $w$ into a trail $p$ (blue) from $a$ to $b$ gives a longer trail from $a$ to $b$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
 
 Notice that this lemma will allow us to handle both the closed case (`a = b`, the
 Eulerian *circuit*, where the parity hypothesis `hdel` comes from
@@ -1064,9 +1065,13 @@ In Mathlib edge connectivity is defined via `G.IsEdgeReachable`, which says that
 vertices `u, v` are `k`-edge-reachable if after deleting less than `k` edges from
 `G` there is still a walk from `u` to `v`. Here the number of deleted edges is
 measured with `Set.encard`, which is `⊤` if the set is infinite and otherwise its
-cardinality as a natural number.
+cardinality as a natural number. The parameter `k` is also an element of `ℕ∞`, so it
+can be `⊤`. Two vertices are `⊤`-edge-reachable iff they remain reachable after
+deleting any finite set of edges.
 -/
 #source IsEdgeReachable
+
+#check isEdgeReachable_top_iff_forall_finite
 
 /-!
 Notice that the set `s` of deleted edges is an arbitrary `Set (Sym2 V)`, so it may
@@ -1094,7 +1099,7 @@ An edge is a bridge iff its endpoints are not `2`-edge-reachable. So a graph is
 includes `G` itself being preconnected.
 -/
 #check isBridge_iff_not_isEdgeReachable_two
-#check isEdgeConnected_two
+#check isEdgeConnected_two_iff_forall_preconnected
 /-!
 A graph is acyclic (a forest) iff no two distinct vertices are `2`-edge-reachable.
 -/
@@ -1109,9 +1114,11 @@ standard, when we say *`k`-connected* without qualification we mean
 `k`-vertex-connected.
 
 Since graphs with no vertices are not connected we insist that the vertex type has
-more than `k` vertices. We count the vertices with `ENat.card V` and, as for edge
-connectivity, measure sets of vertices with the `ℕ∞`-valued `encard`, so that
-infinite vertex types are handled correctly.
+more than `k` vertices. As for edge connectivity, `k` is an element of `ℕ∞`, and we
+measure sets of vertices with `encard` and count the vertices with `ENat.card V`, so
+that infinite vertex types are handled correctly. In particular, a graph is
+`⊤`-vertex-connected iff it has infinitely many vertices and deleting any finite set
+of vertices leaves it connected.
 
 Rather than giving a definition in terms of the graph formed by deleting vertices,
 we ask that for any set `S` of less than `k` vertices, and any pair of vertices not
@@ -1119,8 +1126,8 @@ in `S`, there is a walk in `G` between the pair which avoids `S`.
 -/
 /-- A graph is `k`-vertex-connected if deleting less than `k` vertices always leaves
 the graph connected. -/
-def IsVertexConnected (G : SimpleGraph V) (k : ℕ) : Prop :=
-  (k + 1 : ℕ∞) ≤ ENat.card V ∧
+def IsVertexConnected (G : SimpleGraph V) (k : ℕ∞) : Prop :=
+  k + 1 ≤ ENat.card V ∧
     ∀ (S : Set V), S.encard < k → ∀ (u v : V), u ∉ S → v ∉ S →
       ∃ p : G.Walk u v, ∀ x ∈ p.support, x ∉ S
 
@@ -1143,8 +1150,8 @@ lemma Walk.toSubgraph_le_induce_top_iff {W : Set V} {u v : V} (p : G.Walk u v) :
   exact p.toSubgraph_le_induce_support.trans
     (Subgraph.induce_mono_right fun y hy => h y hy)
 
-lemma isVertexConnected_iff_induce {k : ℕ} : G.IsVertexConnected k ↔
-    (k + 1 : ℕ∞) ≤ ENat.card V ∧
+lemma isVertexConnected_iff_induce {k : ℕ∞} : G.IsVertexConnected k ↔
+    k + 1 ≤ ENat.card V ∧
       ∀ S : Set V, S.encard < k → (G.induce Sᶜ).Preconnected := by
   refine and_congr_right fun _ => forall₂_congr fun S _ => ?_
   rw [preconnected_induce_iff, Subgraph.preconnected_iff_forall_exists_walk_subgraph]
@@ -1155,16 +1162,14 @@ lemma isVertexConnected_iff_induce {k : ℕ} : G.IsVertexConnected k ↔
 A set with less than `k` elements is finite, so it is enough to check the condition
 for finsets, and conversely we can apply it to finsets.
 -/
-lemma IsVertexConnected.of_finset {k : ℕ}
-    (hcard : (k + 1 : ℕ∞) ≤ ENat.card V)
+lemma IsVertexConnected.of_finset {k : ℕ∞} (hcard : k + 1 ≤ ENat.card V)
     (h : ∀ (S : Finset V), S.card < k → ∀ (u v : V), u ∉ S → v ∉ S →
       ∃ p : G.Walk u v, ∀ x ∈ p.support, x ∉ S) : G.IsVertexConnected k := by
   refine ⟨hcard, fun S hS u v hu hv => ?_⟩
-  lift S to Finset V using
-    Set.encard_lt_top_iff.mp (hS.trans (ENat.natCast_lt_top k))
+  lift S to Finset V using Set.encard_lt_top_iff.mp (hS.trans_le le_top)
   exact h S (by simpa using hS) u v hu hv
 
-lemma IsVertexConnected.exists_walk {k : ℕ} (hG : G.IsVertexConnected k)
+lemma IsVertexConnected.exists_walk {k : ℕ∞} (hG : G.IsVertexConnected k)
     (S : Finset V) (hS : S.card < k) (u v : V) (hu : u ∉ S) (hv : v ∉ S) :
     ∃ p : G.Walk u v, ∀ x ∈ p.support, x ∉ S :=
   hG.2 S (by simpa using hS) u v hu hv
@@ -1173,11 +1178,17 @@ lemma IsVertexConnected.exists_walk {k : ℕ} (hG : G.IsVertexConnected k)
 A `k`-vertex-connected graph has more than `k` vertices, so any finite set of at most
 `k` vertices misses some vertex.
 -/
-lemma IsVertexConnected.exists_notMem {k : ℕ} (hG : G.IsVertexConnected k)
-    (A : Finset V) (hA : A.card ≤ k) : ∃ x, x ∉ A := by
-  refine A.exists_not_mem_of_card_lt_enatCard
-    (lt_of_lt_of_le ?_ hG.1)
-  exact_mod_cast Nat.lt_succ_of_le hA
+lemma IsVertexConnected.exists_notMem {k : ℕ∞} (hG : G.IsVertexConnected k)
+    (A : Finset V) (hA : A.card ≤ k) : ∃ x, x ∉ A :=
+  A.exists_notMem_of_card_lt_enatCard
+    ((ENat.natCast_lt_add_one_iff.mpr hA).trans_le hG.1)
+
+/-!
+Being `k`-vertex-connected is closed under decreasing `k`.
+-/
+lemma IsVertexConnected.anti {k l : ℕ∞} (hkl : k ≤ l) (hG : G.IsVertexConnected l) :
+    G.IsVertexConnected k :=
+  ⟨le_trans (by gcongr) hG.1, fun S hS => hG.2 S (hS.trans_le hkl)⟩
 
 /-!
 If a graph is `k`-vertex-connected then any vertex has at least `k` neighbours: if
@@ -1186,33 +1197,32 @@ outside `N ∪ {v}` avoiding `N` would have nowhere to take its first step. We s
 this first with `encard`, so that no finiteness assumption on the neighbourhood is
 needed.
 -/
-lemma IsVertexConnected.le_encard_neighborSet {k : ℕ} (hG : G.IsVertexConnected k)
-    (v : V) : (k : ℕ∞) ≤ (G.neighborSet v).encard := by
+lemma IsVertexConnected.le_encard_neighborSet {k : ℕ∞} (hG : G.IsVertexConnected k)
+    (v : V) : k ≤ (G.neighborSet v).encard := by
   by_contra! hlt
   obtain ⟨u, hu⟩ : ∃ u, u ∉ insert v (G.neighborSet v) := by
     by_contra! h
-    -- `h` says that every vertex is `v` or a neighbour of `v`, so `G` would have at
-    -- most `k` vertices
-    have hle : (k + 1 : ℕ∞) ≤ k :=
-      calc (k + 1 : ℕ∞) ≤ ENat.card V := hG.1
+    -- `h` says that every vertex is `v` or a neighbour of `v`, so `G` would have
+    -- less than `k + 1` vertices
+    have hlt' : k + 1 < k + 1 :=
+      calc k + 1 ≤ ENat.card V := hG.1
         _ = (Set.univ : Set V).encard := (Set.encard_univ V).symm
         _ ≤ (insert v (G.neighborSet v)).encard :=
             Set.encard_le_encard fun x _ => h x
         _ ≤ (G.neighborSet v).encard + 1 := Set.encard_insert_le _ _
-        _ ≤ k := Order.add_one_le_of_lt hlt
-    norm_cast at hle
-    grind
+        _ < k + 1 := (ENat.add_lt_add_iff_right ENat.one_ne_top).mpr hlt
+    exact lt_irrefl _ hlt'
   rw [Set.mem_insert_iff, not_or] at hu
   obtain ⟨p, hp⟩ := hG.2 _ hlt v u (G.irrefl) hu.2
   cases p with
   | nil => exact hu.1 rfl
   | @cons _ w _ hadj p' => exact hp w (by simp) hadj
 
-lemma IsVertexConnected.le_degree {k : ℕ} (hG : G.IsVertexConnected k) (v : V)
+lemma IsVertexConnected.le_degree {k : ℕ∞} (hG : G.IsVertexConnected k) (v : V)
     [Fintype (G.neighborSet v)] : k ≤ G.degree v := by
   have h := hG.le_encard_neighborSet v
   rwa [← coe_neighborFinset, Set.encard_coe_eq_coe_finsetCard,
-    card_neighborFinset_eq_degree, Nat.cast_le] at h
+    card_neighborFinset_eq_degree] at h
 
 /-!
 Taking the box product with `K₂` raises the vertex connectivity by at least one: if
@@ -1286,12 +1296,20 @@ lemma Walk.reachable_deleteEdges_of_avoids {s : Set (Sym2 V)} {T : Finset V}
     exact hp z (p.mem_support_of_mem_edges he hze) hzT⟩
 
 /-!
-A `k`-vertex-connected graph is `k`-edge-connected.
+A `k`-vertex-connected graph is `k`-edge-connected. We first reduce to the case where
+`k` is a natural number: a `⊤`-vertex-connected graph is `n`-vertex-connected for
+every `n : ℕ`, and by Mathlib's `isEdgeConnected_top_iff_forall_nat` a graph that is
+`n`-edge-connected for every `n : ℕ` is `⊤`-edge-connected.
 -/
-theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k) :
+theorem IsVertexConnected.isEdgeConnected {k : ℕ∞} (hG : G.IsVertexConnected k) :
     G.IsEdgeConnected k := by
   classical
-  intro u v s hs
+  suffices h : ∀ n : ℕ, G.IsVertexConnected n → G.IsEdgeConnected n by
+    cases k with
+    | top =>
+      exact isEdgeConnected_top_iff_forall_nat.mpr fun n => h n (hG.anti le_top)
+    | coe k => exact h k hG
+  intro k hG u v s hs
   -- `s₀`: the finset of edges of `G` that lie in `s`, so `#s₀ < k`
   have hsfin : s.Finite :=
     Set.encard_lt_top_iff.mp (hs.trans (ENat.natCast_lt_top k))
@@ -1316,29 +1334,25 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k)
   · -- the edge `u — v` is deleted, so `#T ≤ k - 2`
     -- we need to find another vertex `w` outside `T ∪ {u, v}`
     have hne : u ≠ v := (G.mem_edgeSet.mp (hmem.mp huv).2).ne
-    have hTk : T.card + 2 ≤ k := by
-      have := Finset.card_erase_add_one huv
-      grind
+    have hTk : T.card + 2 ≤ k := by grind
     have hins (a : V) : (insert a T).card ≤ T.card + 1 := Finset.card_insert_le _ _
-    obtain ⟨w, hw⟩ := hG.exists_notMem (insert u (insert v T)) (by
-      have := hins v
-      have := Finset.card_insert_le u (insert v T)
-      grind)
+    obtain ⟨w, hw⟩ := hG.exists_notMem (insert u (insert v T))
+      (Nat.cast_le.mpr (by grind))
     simp only [Finset.mem_insert, not_or] at hw
     obtain ⟨hwu, hwv, hwT⟩ := hw
     -- we can walk from `u` to `w` avoiding `T ∪ {v}`
-    obtain ⟨p₁, hp₁⟩ := hG.exists_walk (insert v T) (by have := hins v; grind) u w
-      (by simp [hne, hTu]) (by simp [hwv, hwT])
+    obtain ⟨p₁, hp₁⟩ := hG.exists_walk (insert v T)
+      (Nat.cast_lt.mpr (by grind)) u w (by grind) (by grind)
     -- we can walk from `w` to `v` avoiding `T ∪ {u}`
-    obtain ⟨p₂, hp₂⟩ := hG.exists_walk (insert u T) (by have := hins u; grind) w v
-      (by simp [hwu, hwT]) (by simp [hne.symm, hTv])
+    obtain ⟨p₂, hp₂⟩ := hG.exists_walk (insert u T)
+      (Nat.cast_lt.mpr (by grind)) w v (by grind) (by grind)
     exact (p₁.reachable_deleteEdges_of_avoids (hcover _ (Finset.subset_insert _ _)
         fun _ => .inr (Finset.mem_insert_self _ _)) hp₁).trans
       (p₂.reachable_deleteEdges_of_avoids (hcover _ (Finset.subset_insert _ _)
         fun _ => .inl (Finset.mem_insert_self _ _)) hp₂)
   · -- otherwise `T` meets every edge of `s₀`
     have := Finset.card_erase_le (s := s₀) (a := s(u, v))
-    obtain ⟨p, hp⟩ := hG.exists_walk T (by grind) u v hTu hTv
+    obtain ⟨p, hp⟩ := hG.exists_walk T (Nat.cast_lt.mpr (by grind)) u v hTu hTv
     exact p.reachable_deleteEdges_of_avoids (hcover T subset_rfl (absurd · huv)) hp
 
 /-!
@@ -1347,18 +1361,18 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ} (hG : G.IsVertexConnected k)
 The *edge connectivity* `λ(G)` of a graph is the largest `k` for which `G` is
 `k`-edge-connected, and its *vertex connectivity* `κ(G)` is the largest `k` for which
 `G` is `k`-vertex-connected. Neither is currently in Mathlib. We define both as
-suprema in `ℕ∞`, which allows the value `⊤` when a graph is `k`-edge-connected (or
-`k`-vertex-connected) for every `k`.
+suprema over `k : ℕ∞`, which allows the value `⊤` when a graph is `k`-edge-connected
+(or `k`-vertex-connected) for every `k`.
 -/
 /-- The edge connectivity of `G`: the supremum of the `k` for which `G` is
 `k`-edge-connected. -/
 noncomputable def edgeConnectivity (G : SimpleGraph V) : ℕ∞ :=
-  ⨆ (k : ℕ) (_ : G.IsEdgeConnected k), (k : ℕ∞)
+  ⨆ (k : ℕ∞) (_ : G.IsEdgeConnected k), k
 
 /-- The vertex connectivity of `G`: the supremum of the `k` for which `G` is
 `k`-vertex-connected. -/
 noncomputable def vertexConnectivity (G : SimpleGraph V) : ℕ∞ :=
-  ⨆ (k : ℕ) (_ : G.IsVertexConnected k), (k : ℕ∞)
+  ⨆ (k : ℕ∞) (_ : G.IsVertexConnected k), k
 
 /-!
 We introduce the standard notation `λ(G)` for the edge connectivity and `κ(G)` for
@@ -1370,55 +1384,78 @@ the vertex connectivity.
   SimpleGraph.vertexConnectivity G
 
 /-!
-Both properties are closed under decreasing `k`, so the `k` for which `G` is
-`k`-edge-connected form an initial segment of `ℕ`, and `k ≤ λ(G)` holds exactly when
-`G` is `k`-edge-connected. The same holds for `κ(G)` if `V` is nonempty (the graph
-with no vertices is not even `0`-vertex-connected, yet `0 ≤ κ(G)`). The general fact
-is about an `Antitone` property `P` of natural numbers, that is, one closed under
-decreasing `k`: the supremum `⨆ (j) (_ : P j), j` in `ℕ∞` exceeds `k` iff `P (k + 1)`
-holds. It says nothing about graphs, so we put it in the `ENat` namespace. Mathlib
-does not currently seem to have it.
--/
-lemma _root_.ENat.natCast_lt_biSup_iff {P : ℕ → Prop} (hP : Antitone P) {k : ℕ} :
-    (k : ℕ∞) < ⨆ (j : ℕ) (_ : P j), (j : ℕ∞) ↔ P (k + 1) := by
-  simp only [lt_iSup_iff, Nat.cast_lt, exists_prop]
-  exact ⟨fun ⟨j, hj, hkj⟩ => hP hkj hj, fun h => ⟨k + 1, h, k.lt_succ_self⟩⟩
+Both properties are closed under decreasing `k` (`IsVertexConnected.anti`, and
+`IsEdgeConnected.anti` below), so the `k` for which `G` is `k`-edge-connected form an
+initial segment of `ℕ∞`. A graph that is `n`-edge-connected for every `n : ℕ` is
+`⊤`-edge-connected, so this initial segment contains its supremum: `k ≤ λ(G)` holds
+exactly when `G` is `k`-edge-connected. The same holds for `κ(G)` if `V` is nonempty
+(the graph with no vertices is not even `0`-vertex-connected, yet `0 ≤ κ(G)`).
 
-/-!
-The non-strict version needs `P 0` as well, since `0 ≤ ⨆ …` always holds.
+The general fact is about an `Antitone` property `P` of `ℕ∞`, that is, closed under
+decreasing `k`, which holds at `0`, and holds at `⊤` whenever it holds at every
+natural number. It says nothing about graphs, so we put it in the `ENat` namespace.
+Mathlib does not currently seem to have it.
 -/
-lemma _root_.ENat.natCast_le_biSup_iff {P : ℕ → Prop} (hP : Antitone P) (h0 : P 0)
-    {k : ℕ} : (k : ℕ∞) ≤ ⨆ (j : ℕ) (_ : P j), (j : ℕ∞) ↔ P k := by
-  cases k with
-  | zero => simpa using h0
-  | succ k =>
-    rw [Nat.cast_add_one, ENat.add_one_le_iff (ENat.natCast_ne_top k)]
-    exact ENat.natCast_lt_biSup_iff hP
+lemma _root_.ENat.le_biSup_iff {P : ℕ∞ → Prop} (hP : Antitone P) (h0 : P 0)
+    (htop : (∀ n : ℕ, P n) → P ⊤) {k : ℕ∞} :
+    k ≤ ⨆ (j : ℕ∞) (_ : P j), j ↔ P k := by
+  refine ⟨fun hk => ?_, fun h => le_iSup₂ (f := fun j _ => j) k h⟩
+  -- it is enough to show `P n` for every natural number `n ≤ k`
+  suffices h : ∀ n : ℕ, (n : ℕ∞) ≤ ⨆ (j : ℕ∞) (_ : P j), j → P n by
+    cases k with
+    | top => exact htop fun n => h n (le_top.trans hk)
+    | coe k => exact h k hk
+  intro n hn
+  cases n with
+  | zero => exact h0
+  | succ n =>
+    -- some `j` with `P j` exceeds `n`, so `n + 1 ≤ j` and `P (n + 1)` holds
+    rw [Nat.cast_add_one, ENat.add_one_le_iff (ENat.natCast_ne_top n)] at hn
+    obtain ⟨j, hj, hnj⟩ : ∃ j, P j ∧ (n : ℕ∞) < j := by simpa [lt_iSup_iff] using hn
+    rw [Nat.cast_add_one]
+    exact hP (Order.add_one_le_of_lt hnj) hj
 
-lemma IsEdgeConnected.anti {k l : ℕ} (hkl : k ≤ l) (hG : G.IsEdgeConnected l) :
+lemma IsEdgeConnected.anti {k l : ℕ∞} (hkl : k ≤ l) (hG : G.IsEdgeConnected l) :
     G.IsEdgeConnected k :=
   fun u v => (hG u v).anti hkl
 
-lemma IsVertexConnected.anti {k l : ℕ} (hkl : k ≤ l) (hG : G.IsVertexConnected l) :
-    G.IsVertexConnected k :=
-  ⟨le_trans (by exact_mod_cast Nat.add_le_add_right hkl 1) hG.1,
-    fun S hS => hG.2 S (hS.trans_le (by exact_mod_cast hkl))⟩
-
 /-!
 Every nonempty graph is `0`-vertex-connected, but the graph with no vertices is not.
+As for Mathlib's `isEdgeConnected_top_iff_forall_nat`, a graph is
+`⊤`-vertex-connected iff it is `n`-vertex-connected for every `n : ℕ`: it then has
+more than `n` vertices for every `n`, and a finite set `S` has less than
+`S.ncard + 1` elements.
 -/
 lemma isVertexConnected_zero [Nonempty V] : G.IsVertexConnected 0 :=
   ⟨by simp [Order.one_le_iff_pos], fun S hS => absurd hS (by simp)⟩
 
-lemma le_edgeConnectivity_iff {k : ℕ} :
-    (k : ℕ∞) ≤ λ(G) ↔ G.IsEdgeConnected k :=
-  ENat.natCast_le_biSup_iff (P := G.IsEdgeConnected) (fun _ _ hjl h => h.anti hjl)
-    .zero
+lemma isVertexConnected_top_iff_forall_nat :
+    G.IsVertexConnected ⊤ ↔ ∀ n : ℕ, G.IsVertexConnected n := by
+  refine ⟨fun h n => h.anti le_top, fun h => ⟨?_, fun S hS => ?_⟩⟩
+  · rw [ENat.eq_top_iff_forall_ge.mpr fun n => le_self_add.trans (h n).1]
+    exact le_top
+  · exact (h (S.ncard + 1)).2 S
+      (by simp [← (Set.encard_lt_top_iff.mp hS).cast_ncard_eq, -Nat.cast_add])
 
-lemma le_vertexConnectivity_iff [Nonempty V] {k : ℕ} :
-    (k : ℕ∞) ≤ κ(G) ↔ G.IsVertexConnected k :=
-  ENat.natCast_le_biSup_iff (P := G.IsVertexConnected) (fun _ _ hjl h => h.anti hjl)
-    isVertexConnected_zero
+lemma le_edgeConnectivity_iff {k : ℕ∞} : k ≤ λ(G) ↔ G.IsEdgeConnected k :=
+  ENat.le_biSup_iff (P := G.IsEdgeConnected) (fun _ _ hjl h => h.anti hjl) .zero
+    isEdgeConnected_top_iff_forall_nat.mpr
+
+lemma le_vertexConnectivity_iff [Nonempty V] {k : ℕ∞} :
+    k ≤ κ(G) ↔ G.IsVertexConnected k :=
+  ENat.le_biSup_iff (P := G.IsVertexConnected) (fun _ _ hjl h => h.anti hjl)
+    isVertexConnected_zero isVertexConnected_top_iff_forall_nat.mpr
+
+/-!
+In particular both suprema are attained: `G` is `λ(G)`-edge-connected, and (if `V` is
+nonempty) `κ(G)`-vertex-connected.
+-/
+lemma isEdgeConnected_edgeConnectivity : G.IsEdgeConnected λ(G) :=
+  le_edgeConnectivity_iff.mp le_rfl
+
+lemma isVertexConnected_vertexConnectivity [Nonempty V] :
+    G.IsVertexConnected κ(G) :=
+  le_vertexConnectivity_iff.mp le_rfl
 
 /-!
 Since `k`-vertex-connectivity implies `k`-edge-connectivity, `κ(G) ≤ λ(G)`.
@@ -1437,7 +1474,7 @@ lemma vertexConnectivity_le_encard_neighborSet (v : V) :
 
 lemma edgeConnectivity_le_degree [Nontrivial V] (v : V) [Fintype (G.neighborSet v)] :
     λ(G) ≤ G.degree v :=
-  iSup₂_le fun _ hk => by exact_mod_cast hk.le_degree (u := v)
+  iSup₂_le fun _ hk => hk.le_degree (u := v)
 
 /-!
 Together these give *Whitney's inequalities*: a finite graph `G` with at least two
@@ -1456,12 +1493,13 @@ The two definitions disagree on graphs with at most one vertex. Mathlib's
 than `k` vertices.
 -/
 lemma edgeConnectivity_of_subsingleton [Subsingleton V] : λ(G) = ⊤ :=
-  ENat.eq_top_iff_forall_ge.mpr fun _ => le_edgeConnectivity_iff.mpr .of_subsingleton
+  top_le_iff.mp (le_edgeConnectivity_iff.mpr .of_subsingleton)
 
 lemma vertexConnectivity_of_subsingleton [Subsingleton V] : κ(G) = 0 := by
   refine (iSup₂_le fun k hk => ?_).antisymm (by simp)
-  have := hk.1.trans ENat.card_le_one
-  norm_cast at this ⊢; grind
+  -- `k + 1 ≤ ENat.card V ≤ 1`, so `k < 1`
+  have := (ENat.add_one_le_iff' ENat.one_ne_top).mp (hk.1.trans ENat.card_le_one)
+  exact (Order.lt_one_iff.mp this).le
 
 /-!
 # Brooks' Theorem *
@@ -2230,7 +2268,7 @@ vertex.
 -/
 lemma isVertexConnected_two_iff : G.IsVertexConnected 2 ↔
     3 ≤ ENat.card V ∧ G.Connected ∧ ∀ x, ¬ G.IsCutVertex x := by
-  have h3 : ((2 : ℕ) : ℕ∞) + 1 = 3 := by norm_num
+  have h3 : (2 : ℕ∞) + 1 = 3 := by norm_num
   constructor
   · rintro ⟨hcard, h⟩
     rw [h3] at hcard
@@ -2269,7 +2307,7 @@ our sense; in particular a graph with no edges has no blocks at all. (This is wh
 colouring results assume `n ≥ 1`: the graph `K[1]` has no blocks, so all its blocks
 are (vacuously) `0`-colourable, but `K[1]` is not `0`-colourable.)
 
-[Figure: A graph with four blocks, its edges coloured by block: the $4$-cycle $a, b, c, d$ with the chord $b d$ (blue), the triangle $c, e, f$ (green) and the bridges $c g$ (orange) and $f h$ (violet). The cut vertices $c$ and $f$ (red) lie in three and two blocks, and the isolated vertex $i$ lies in no block](https://jt496.github.io/GraphTheoryInLean/figures/blocks.svg)
+[Figure: A graph with four blocks, its edges coloured by block. The cut vertices $c$ and $f$ lie in three and two blocks, and the isolated vertex $i$ lies in no block](https://jt496.github.io/GraphTheoryInLean/figures/blocks.svg)
 
 Like the deleted sets in `IsEdgeReachable`, cycle-equivalence is most conveniently
 defined on all of `Sym2 V`, not just on `G.edgeSet`. So until we restrict to

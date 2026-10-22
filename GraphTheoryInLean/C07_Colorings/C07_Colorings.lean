@@ -279,7 +279,7 @@ On a clique both colourings are injective, so `Equiv.Perm.exists_extending_pair`
 gives a permutation `σ` of the palette with `σ (c₂ x) = c₁ x` for every `x` in the
 overlap. Then `c₁` on `G₁` and the recoloured `c₂` elsewhere agree on the overlap.
 
-[Figure: Top left: $G_1$ coloured by $c_1$ and $G_2$ coloured by $c_2$; their supports meet in the triangle on $x$, $y$, $z$, and $c_1$ and $c_2$ disagree at $x$ and $y$. Bottom left: $G_1$ again, and $G_2$ recoloured by $\sigma \circ c_2$, where $\sigma$ swaps red and blue, so that it agrees with $c_1$ on the triangle. Right: the glued colouring of $G_1 \sqcup G_2$](https://jt496.github.io/GraphTheoryInLean/figures/clique_sum_colouring.svg)
+[Figure: Top left: $G_1$ coloured by $c_1$ and $G_2$ coloured by $c_2$; supports meet on $x$, $y$, $z$, and $c_1$ and $c_2$ disagree at $x$ and $y$. Bottom left: $G_1$ again, and $G_2$ recoloured by $\sigma \circ c_2$, where $\sigma$ swaps red and blue. Right: the glued colouring of $G_1 \sqcup G_2$](https://jt496.github.io/GraphTheoryInLean/figures/clique_sum_colouring.svg)
 -/
 theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
     (hs₁ : G₁.IsClique (G₁.support ∩ G₂.support))
@@ -937,7 +937,7 @@ lemma greedyChoice_congr {c₁ c₂ : ℕ → ℕ} {n : ℕ} (h : ∀ m < n, c�
     image_congr fun m hm => h m ((G.mem_neighborLTFinset n m).mp hm).1]
 
 /-!
-[Figure: Greedy Colouring](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
+[Figure: Left: a greedy colouring, with colours $0$, $1$, $2$ and $3$ drawn as red, blue, green and yellow. Right: for each vertex $n$, its earlier neighbours, the colours they forbid, and the least colour not forbidden](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
 
 We will use `greedyChoice` to define a function `greedy` that will give us the greedy
 colouring of `G` using *well-founded recursion* on `ℕ`: to colour a vertex `v` we
@@ -1077,7 +1077,7 @@ the *crown graph*, with its vertices ordered left, right, left, right, ...
 We will look at its countably infinite incarnation. We will show that the greedy
 colouring will use arbitrarily large colours, despite the graph being `2`-colourable.
 
-[Figure: Left: the greedy colouring of `crownGraph`, which gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
+[Figure: Left: the greedy colouring of `crownGraph`, gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
 -/
 
 /-- The *crown graph* is the complete bipartite graph on even and odd naturals,

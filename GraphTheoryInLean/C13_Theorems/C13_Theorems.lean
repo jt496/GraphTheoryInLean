@@ -547,7 +547,7 @@ same degree (`IsTuranMaximal.degree_eq_of_not_adj`). It follows that non-adjacen
 transitive (`IsTuranMaximal.not_adj_trans`), so the graph is complete multipartite
 (`IsCompleteMultipartite`).
 
-[Figure: Left: a graph with non-adjacent vertices $s$ and $t$, with the edges at $s$ in orange and those at $t$ in blue. Right: `G.replaceVertex s t`, in which the edges at $t$ are replaced by copies of the edges at $s$ (the removed edge is dashed), so $t$ has exactly the neighbours of $s$.](https://jt496.github.io/GraphTheoryInLean/figures/replace_vertex.svg)
+[Figure: Left: a graph with non-adjacent vertices $s$ and $t$. Right: `G.replaceVertex s t`.](https://jt496.github.io/GraphTheoryInLean/figures/replace_vertex.svg)
 -/
 #source replaceVertex
 
@@ -742,7 +742,7 @@ and the set `Vᵣ` of non-neighbours of `x` in `S`. We colour `Vᵣ` with the ne
 `r`. Each of the three sums over `S` then splits into four blocks, according to
 whether `v` and `w` lie in `N` or in `Vᵣ`.
 
-[Figure: The induction step. Top: the neighbours $N$ of $x$ in $S$, coloured recursively with colours less than $r$ (blue and green). Bottom: the non-neighbours $V_r$ of $x$, including $x$, all of colour $r$ (orange). The edges inside $V_r$ (dashed) join vertices of the same colour, and each vertex of $V_r$ has at most $\#N$ neighbours in $S$.](https://jt496.github.io/GraphTheoryInLean/figures/furedi.svg)
+[Figure: The inductive step, unfolded. Left: the non-neighbours $V_r$ of $x$ in $S$, all of colour $r$ (orange). The neighbours $N$ of $x$ are coloured recursively. A vertex $x'$ of maximum degree in $N$ and its non-neighbours get colour $r - 1$ (green), and the neighbours $N'$ of $x'$ in $N$ are coloured recursively again (right, blue). Dashed edges join vertices of the same colour](https://jt496.github.io/GraphTheoryInLean/figures/furedi.svg)
 -/
 lemma sum_card_filter_union [DecidableEq V] {s t : Finset V} (h : Disjoint s t)
     (p : V → V → Prop) [DecidableRel p] :
@@ -945,7 +945,7 @@ triangle-free graph with minimum degree greater than `2 * n / 5` is bipartite. T
 uniform blow-up `C[5][t]` shows that `2 * n / 5` cannot be lowered (see the
 exercises).
 
-[Figure: The $3$-uniform blow-up of $C_5$: a triangle-free graph on $n = 15$ vertices with minimum degree $6 = 2n/5$ that is not bipartite](https://jt496.github.io/GraphTheoryInLean/figures/blowup_c5.svg)
+[Figure: The $3$-uniform blow-up of $C_5$: a non-bipartite triangle-free graph with minimum degree $2n/5$](https://jt496.github.io/GraphTheoryInLean/figures/blowup_c5.svg)
 -/
 #check SimpleGraph.colorable_of_cliqueFree_lt_minDegree
 
@@ -1238,7 +1238,7 @@ calls this `IsPathGraph3Compl`, since `u`, `v` and `w` induce the complement of 
 path on three vertices, and a graph is complete multipartite exactly when it contains
 no such triple (`not_isCompleteMultipartite_iff_exists_isPathGraph3Compl`).
 
-[Figure: Left: the path $u\,v\,w$ on three vertices. Right: its complement, in which $u$ and $w$ are adjacent but $v$ is adjacent to neither. This is `IsPathGraph3Compl v u w`.](https://jt496.github.io/GraphTheoryInLean/figures/path3_compl.svg)
+[Figure: Left: $P_3$. Right: its complement.](https://jt496.github.io/GraphTheoryInLean/figures/path3_compl.svg)
 
 Symmetrizing twice, replacing `u` and `w` by copies of `v`, changes the number of
 `s`-cliques by `dₛ(v) - dₛ(u) + dₛ(v) - dₛ(w) + dₛ(u, w)`, where `dₛ(u, w)` counts
@@ -1477,7 +1477,7 @@ is the only vertex of `A` in this neighbourhood, `σ` sends vertices in differen
 parts to vertices in different parts, so it preserves adjacency there. It is also
 injective there, and never takes the value `w` or `a`.
 
-[Figure: Left: the map $\sigma$ when the part $A$ of $w$ has two more vertices than the part $B$ of $v$. It sends $w$ to $v$, maps $B$ injectively into $A \setminus \{w, a\}$, and fixes the other parts, such as $C$. Right: a triangle containing $w$ (blue), which the move destroys, and its image under $\sigma$ (orange), a triangle containing $v$ but neither $w$ nor $a$, which corresponds to a triangle that the move creates.](https://jt496.github.io/GraphTheoryInLean/figures/zykov_transfer.svg)
+[Figure: Left: the map $\sigma$ when the part $A$ of $w$ has two more vertices than the part $B$ of $v$. It sends $w$ to $v$, maps $B$ injectively into $A \setminus \{w, a\}$, and fixes every other vertex. Right: a triangle containing $w$ (blue), which the move destroys, and its image under $\sigma$ (orange), a triangle containing $v$ but neither $w$ nor $a$. Replacing $v$ by $w$ turns it into a triangle that the move creates. The triangle containing $v$ and $a$ (magenta) gives a created triangle with no destroyed partner, since no triangle maps to it.](https://jt496.github.io/GraphTheoryInLean/figures/zykov_transfer.svg)
 -/
 /--
 Let `G` be complete multipartite, let the part of `w` have at least two more
@@ -1758,7 +1758,7 @@ The *regularity lemma* says that every graph can be approximated by a structured
 one: its vertices can be partitioned into a bounded number of almost equal parts so
 that most pairs of parts are `ε`-uniform.
 
-[Figure: Vertices partitioned into equal-sized parts, with each pair of parts shaded by its edge density (darker is denser)](https://jt496.github.io/GraphTheoryInLean/figures/szemeredi.svg)
+[Figure: An $\varepsilon$-uniform partition; the band between two parts is shaded by their edge density](https://jt496.github.io/GraphTheoryInLean/figures/szemeredi.svg)
 
 In Mathlib's statement, `P.IsEquipartition` says the parts of `P` differ in size by
 at most `1`, and `P.IsUniform G ε` says that at most an `ε` fraction of the pairs of
@@ -1846,7 +1846,7 @@ example : paleyGraph₉.LocallyLinear := by decide +kernel
 #eval paleyGraph₉.cliqueFinset 3
 
 /-!
-[Figure: The Paley graph on $9$ vertices, with $a + bi$ drawn as the vertex $(a, b)$. Each of its $6$ triangles is drawn as the circle through its three vertices, whose three arcs are its edges.](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph9.svg)
+[Figure: The Paley graph on $9$ vertices. Its $6$ triangles drawn as the circles, whose three arcs are edges.](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph9.svg)
 
 Locally linear graphs are behind the proof of the corners theorem: a corner-free set
 `A` gives a locally linear graph with `#A` triangles, and the removal lemma shows

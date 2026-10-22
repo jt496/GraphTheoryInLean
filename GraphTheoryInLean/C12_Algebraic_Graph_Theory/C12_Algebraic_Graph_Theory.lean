@@ -488,7 +488,7 @@ check the resulting integer matrix, a finite computation. We then expand the
 determinant along its rows with `Matrix.det_succ_row_zero`, and finish the proof
 with `ring`.
 
-[Figure: Left: the star $K_{4,1}$. Right: the disjoint union of $C_4$ and $K_1$. The vertices are numbered by `finSumFinEquiv` as in the matrices below, so the red vertex $4$ is `.inr 0`. Both graphs have characteristic polynomial $x^5 -4x^3$ but only the right one has an isolated vertex](https://jt496.github.io/GraphTheoryInLean/figures/cospectral.svg)
+[Figure: Left: the star $K_{4,1}$. Right: the disjoint union of $C_4$ and $K_1$. Vertices are numbered by `finSumFinEquiv` as in the matrices below. Both graphs have characteristic polynomial $x^5 -4x^3$](https://jt496.github.io/GraphTheoryInLean/figures/cospectral.svg)
 -/
 open Polynomial in
 example : (K[4, 1].adjMatrix ℤ).charpoly = X ^ 5 - 4 * X ^ 3 := by
@@ -626,7 +626,7 @@ Since `mycielskianLift t x` takes the value `x v` at `v ᵣ`, it is nonzero when
 -/
 lemma mycielskianLift_ne_zero {R : Type*} [Zero R] [Mul R] (t : R) {x : V → R}
     (hx : x ≠ 0) : mycielskianLift t x ≠ 0 := by
-  contrapose! hx
+  contrapose hx
   ext v
   simpa using congrFun hx (v ᵣ)
 
@@ -697,7 +697,7 @@ entries form the `degreeMultiset`, and listing them in non-increasing order give
 The *Laplacian* (`lapMatrix`) is given by
 `G.lapMatrix R = G.degMatrix R - G.adjMatrix R`.
 
-[Figure: A graph $G$ together with $D$, $A$, and the Laplacian $L = D - A$](https://jt496.github.io/GraphTheoryInLean/figures/laplacian.svg)
+[Figure: A graph $G$ and its Laplacian $L = D - A$](https://jt496.github.io/GraphTheoryInLean/figures/laplacian.svg)
 -/
 #source degMatrix -- Matrix V V R := Matrix.diagonal (G.degree ·)
 #source lapMatrix -- Matrix V V R := G.degMatrix R - G.adjMatrix R
@@ -1794,7 +1794,7 @@ directions: the vertex `x` of `Q[k]` is sent to `b + extendEmb d x`, where
 `extendEmb d x` places the coordinates of `x` in the positions selected by `d`
 and is `false` elsewhere.
 
-[Figure: Left: $Q_2$. Right: the canonical copy `subcubeCopy b d` of $Q_2$ in $Q_4$, with base point $b = \mathtt{FTFF}$ and free directions `d 0 = 0` (orange) and `d 1 = 3` (green). Vertices are labelled by their coordinates, with $\mathtt{T}$ for `true`. The copy is the face $b$, $b + e_0$, $b + e_0 + e_3$, $b + e_3$](https://jt496.github.io/GraphTheoryInLean/figures/subcube.svg)
+[Figure: Left: $Q_2$. Right: the canonical copy `subcubeCopy b d` of $Q_2$ in $Q_4$, with base point $b = \mathtt{FTFF}$ and free directions `d 0 = 0` and `d 1 = 3`](https://jt496.github.io/GraphTheoryInLean/figures/subcube.svg)
 -/
 /-- Extend a `k`-vector to an `n`-vector along an embedding `d : Fin k ↪ Fin n`,
 placing `x i` in position `d i` and `false` elsewhere. -/

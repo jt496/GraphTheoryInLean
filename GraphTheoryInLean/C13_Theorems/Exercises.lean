@@ -627,7 +627,7 @@ square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
 example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
   have hadj (n : ℤ) : (hasse ℤ).Adj n (n + 1) :=
     hasse_adj.2 (.inl (Order.covBy_add_one n))
-  have hP : (hasse ℤ).Preconnected := hasse_preconnected_of_succ ℤ
+  have hP : (hasse ℤ).Preconnected := preconnected_hasse_of_succOrder ℤ
   rw [Nat.card_eq_one_iff_unique]
   refine ⟨subsingleton_end_of_common_vertex fun K => ?_, ?_⟩
   · obtain ⟨N, hN⟩ :=

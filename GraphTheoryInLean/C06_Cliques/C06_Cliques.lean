@@ -81,7 +81,7 @@ If `u ≠ v` then any set of vertices `s` is a clique in `G ⊔ edge u v` if and
 /-!
 # Finite Cliques
 
-[Figure: Examples of cliques](https://jt496.github.io/GraphTheoryInLean/figures/cliques.svg)
+[Figure: Examples of cliques in a graph](https://jt496.github.io/GraphTheoryInLean/figures/cliques.svg)
 
 If `s : Finset V` is a clique with `n` vertices then we call it an `n`-clique. This
 is `IsNClique` in Lean, which is a structure that bundles a proof that `s` is a

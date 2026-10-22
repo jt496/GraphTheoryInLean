@@ -97,23 +97,21 @@ the same way.
 ## Distance under Homomorphisms and Isomorphisms
 
 A graph homomorphism maps walks to walks of the same length, and so does not increase
-distances. Consequently a graph isomorphism preserves distances. Neither fact is in
-Mathlib, but both are easy, and we will use them repeatedly: to show that
-automorphisms preserve eccentricities, and in
+distances. Consequently a graph isomorphism preserves distances. Mathlib has both
+facts, as `Hom.edist_le` and `Iso.edist_eq`, and we will use them repeatedly: to show
+that automorphisms preserve eccentricities, and in
 [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-to transport the distance between two constructions of the hypercube.
+to transport the distance between two constructions of the hypercube. Both are easy
+to prove.
 -/
-lemma Hom.edist_le {W : Type*} {H : SimpleGraph W} (e : G →g H) (u v : V) :
-    H.edist (e u) (e v) ≤ G.edist u v :=
-  le_iInf fun p => (p.map e).edist_le.trans_eq (by simp)
+example {W : Type*} {H : SimpleGraph W} (e : G →g H) (u v : V) :
+    H.edist (e u) (e v) ≤ G.edist u v := e.edist_le ..
 
 /-!
 A graph isomorphism preserves the graph distance.
 -/
-lemma Iso.edist_eq {W : Type*} {H : SimpleGraph W} (e : G ≃g H) (u v : V) :
-    H.edist (e u) (e v) = G.edist u v := by
-  refine le_antisymm (e.toHom.edist_le u v) ?_
-  simpa using e.symm.toHom.edist_le (e u) (e v)
+example {W : Type*} {H : SimpleGraph W} (e : G ≃g H) (u v : V) :
+    H.edist (e u) (e v) = G.edist u v := e.edist_eq ..
 
 /-!
 ## Distance in Box Products
@@ -520,9 +518,9 @@ The cycle graph `C[n + 3]` contains the cycle `cycleGraph.cycle n` of length `n 
 so its girth is at most `n + 3`. For the reverse inequality we use the fact that in a
 connected graph in which every vertex has degree at most `2`, every cycle is a
 Hamiltonian cycle (`Walk.IsCycle.isHamiltonianCycle_of_degree_le_two`). The cycle
-graph is connected (`cycleGraph_connected`), and each vertex `v` has degree at most
-`2`, since Mathlib's `cycleGraph_degree_two_le` says that its neighbours are `v - 1`
-and `v + 1`. A Hamiltonian cycle has length equal to the number of vertices
+graph is connected (`connected_cycleGraph_add_one`), and each vertex `v` has degree
+at most `2`, since Mathlib's `cycleGraph_degree_two_le` says that its neighbours are
+`v - 1` and `v + 1`. A Hamiltonian cycle has length equal to the number of vertices
 (`Walk.IsHamiltonianCycle.length_eq`), so every cycle in `C[n + 3]` has length
 exactly `n + 3`.
 -/
@@ -536,9 +534,9 @@ lemma egirth_cycleGraph (n : ℕ) : (cycleGraph (n + 3)).egirth = n + 3 := by
       rw [cycleGraph_degree_two_le]
       exact (Finset.card_insert_le _ _).trans (by simp)
     -- so, as `C[n + 3]` is connected, the cycle `w` is Hamiltonian
-    have hham := hw.isHamiltonianCycle_of_degree_le_two cycleGraph_connected hdeg
-    rw [hham.length_eq]
-    simp [add_assoc]
+    have hham :=
+      hw.isHamiltonianCycle_of_degree_le_two connected_cycleGraph_add_one hdeg
+    simp [hham.length_eq, add_assoc]
 
 /-!
 The girth also determines the diameter of `C[n + 3]`. In any graph with a cycle the
@@ -569,7 +567,7 @@ lemma ediam_cycleGraph (n : ℕ) : (cycleGraph (n + 3)).ediam = ((n + 3) / 2 : �
       fun hG => hG _ cycleGraph.isCycle_cycle
     rw [egirth_cycleGraph] at h
     lift (cycleGraph (n + 3)).ediam to ℕ
-      using connected_iff_ediam_ne_top.mp cycleGraph_connected with m
+      using connected_iff_ediam_ne_top.mp connected_cycleGraph_add_one with m
     norm_cast at h ⊢
     grind
 

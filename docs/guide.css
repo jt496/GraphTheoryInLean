@@ -36,6 +36,21 @@
     margin-bottom: 0.85rem;
 }
 
+/* Toolchain versions on the title page (the root `authorshipNote`, written by
+   convert_lean_to_verso.py): a small faded line of its own below the authors,
+   rather than Verso's italic note inline after ", ". Opacity keeps it muted in
+   both themes. */
+main .authors .note {
+    display: block;
+    margin-top: 0.5em;
+    font-size: 0.75rem;
+    font-style: normal;
+    opacity: 0.6;
+}
+main .authors:has(.author) .note::before {
+    content: none;
+}
+
 /* Render `sorry` in red (as in VSCode). Verso tags each keyword occurrence
    with the syntax kind in `data-binding`, which lets us single out the term
    and tactic forms of `sorry` among ordinary keyword tokens. */

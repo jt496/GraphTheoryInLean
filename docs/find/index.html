@@ -1,14 +1,9 @@
-<!DOCTYPE html><html>
-  <head>
-    <script>
-      (function(){
+<!DOCTYPE html><html><head><script>(function(){
   const {protocol:proto, host:hostName, pathname:path, search:srch, hash:hsh} = window.location;
   if (!(path.endsWith("/") || path.endsWith(".html"))) {
     window.location.replace(`${proto}//${hostName}${path}/${srch}${hsh}`);
   }
-})()</script>
-    <script>
-      // Enable TypeScript checking.
+})()</script><script>// Enable TypeScript checking.
 // @ts-check
 
 // Applies a saved table-of-contents width before the first paint.
@@ -32,30 +27,7 @@
         // Leave the default width in place when local storage is unavailable.
     }
 })();
-</script>
-    <base href="./../"><meta charset="utf-8">
-    <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
-    <title>Cross-Reference Redirection</title><link rel="stylesheet" href="book.css">
-    <link rel="stylesheet" href="verso-vars.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script>
-    <script defer="defer" src="-verso-search/elasticlunr.min.js"></script>
-    <script defer="defer" src="-verso-search/fuzzysort.min.js"></script>
-    <script defer="defer" src="-verso-search/searchIndex.js"></script>
-    <script defer="defer" src="-verso-search/search-config.js"></script>
-    <script type="module" src="-verso-search/search-init.js"></script>
-    <link rel="stylesheet" href="-verso-search/search-box.css">
-    <link rel="stylesheet" href="-verso-search/search-page.css">
-    <link rel="stylesheet" href="-verso-search/search-highlight.css">
-    <link rel="stylesheet" href="-verso-search/domain-display.css">
-    <script src="-verso-search/search-highlight.js" defer="defer"></script>
-    <script src="toc-resize.js" defer="defer"></script>
-    <script src="-verso-data/katex/katex.js"></script>
-    <script src="-verso-data/katex/math.js"></script>
-    <script src="-verso-data/popper.min.js"></script>
-    <script src="-verso-data/tippy-bundle.umd.min.js"></script>
-    <link rel="stylesheet" href="-verso-data/tippy-border.css">
-    <link rel="stylesheet" href="-verso-data/katex/katex.css">
-    <style>
+</script><base href="./../"/><meta charset="utf-8"/><meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/><title>Cross-Reference Redirection</title><link rel="stylesheet" href="book.css"/><link rel="stylesheet" href="verso-vars.css"/><script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script><script defer="defer" src="-verso-search/elasticlunr.min.js"></script><script defer="defer" src="-verso-search/fuzzysort.min.js"></script><script defer="defer" src="-verso-search/searchIndex.js"></script><script defer="defer" src="-verso-search/search-config.js"></script><script type="module" src="-verso-search/search-init.js"></script><link rel="stylesheet" href="-verso-search/search-box.css"/><link rel="stylesheet" href="-verso-search/search-page.css"/><link rel="stylesheet" href="-verso-search/search-highlight.css"/><link rel="stylesheet" href="-verso-search/domain-display.css"/><script src="-verso-search/search-highlight.js" defer="defer"></script><script src="toc-resize.js" defer="defer"></script><script src="-verso-data/katex/katex.js"></script><script src="-verso-data/katex/math.js"></script><script src="-verso-data/popper.min.js"></script><script src="-verso-data/tippy-bundle.umd.min.js"></script><link rel="stylesheet" href="-verso-data/tippy-border.css"/><link rel="stylesheet" href="-verso-data/katex/katex.css"/><style>
 figure.stil-figure {
   text-align: center;
   margin: 1.5em auto;
@@ -66,100 +38,6 @@ figure.stil-figure img {
 }
 figure.stil-figure figcaption {
   margin-top: 1.3em;
-}
-</style><style>
-table.tabular {
-  margin: auto;
-  border-spacing: 1rem;
-}
-table.tabular.left-align {
-  margin-right: auto;
-  margin-left: 0;
-}
-table.tabular.center-align {
-  margin: auto;
-}
-table.tabular.right-align {
-  margin-left auto;
-  margin-right: 0;
-}
-table.tabular td, table.tabular th {
-  text-align: left;
-  vertical-align: top;
-}
-table.tabular td > p:first-child, table.tabular th > p:first-child {
-  margin-top: 0;
-}
-table.tabular td > p:last-child, table.tabular th > p:first-child {
-  margin-bottom: 0;
-}
-</style><style>
-details.solutions-spoiler {
-  border: 1px solid #4777ff;
-  border-radius: 4px;
-  padding: 0.5em 1em;
-  margin: 1em 0;
-  background-color: #f4f7ff;
-}
-details.solutions-spoiler > summary {
-  cursor: pointer;
-  font-family: var(--verso-structure-font-family);
-  font-size: 1.15em;
-  font-weight: 600;
-  color: #4777ff;
-  list-style: none;
-}
-details.solutions-spoiler > summary::before {
-  content: "▶ ";
-}
-details.solutions-spoiler[open] > summary::before {
-  content: "▼ ";
-}
-details.solutions-spoiler[open] > summary {
-  margin-bottom: 0.5em;
-}
-</style><style>
-span.stil-footnote {
-  position: relative;
-}
-span.stil-footnote-ref {
-  cursor: pointer;
-  font-size: 0.75em;
-  vertical-align: super;
-  font-weight: bold;
-  outline: none;
-}
-/* Bridges the gap between the superscript marker and the box below it. Without
-   this, moving the pointer down into the box crosses ~10px of dead space, the
-   footnote span loses `:hover`, the box closes, and the pointer lands on the
-   prose underneath — whose tooltip then appears instead of the one you aimed at. */
-span.stil-footnote-content::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -1em;
-  height: 1em;
-}
-span.stil-footnote-content {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: 1.5em;
-  z-index: 100;
-  min-width: 18em;
-  max-width: 32em;
-  background: #fffbe6;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0.5em 0.75em;
-  font-size: 0.9em;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
-}
-span.stil-footnote:hover span.stil-footnote-content,
-span.stil-footnote:focus-within span.stil-footnote-content,
-span.stil-footnote.stil-footnote-open span.stil-footnote-content {
-  display: block;
 }
 </style><style>
 
@@ -449,11 +327,11 @@ severity accent to distinguish them.
 }
 
 .warning .verso-message, .warning .verso-message .token, .warning .verso-message label {
-  color: var(--verso-message-warning-color, black);
+  color: var(--verso-message-warning-color, currentcolor);
 }
 
 .warning .verso-message .case-label:has(input[type="checkbox"])::before {
-  background-color: var(--verso-message-warning-color, black) !important;
+  background-color: var(--verso-message-warning-color, currentcolor) !important;
 }
 
 
@@ -477,11 +355,11 @@ severity accent to distinguish them.
 }
 
 .information .verso-message, .information .verso-message .token, .information .verso-message label {
-  color: var(--verso-message-info-color, black);
+  color: var(--verso-message-info-color, currentcolor);
 }
 
 .information .verso-message .case-label:has(input[type="checkbox"])::before {
-  background-color: var(--verso-message-info-color, black) !important;
+  background-color: var(--verso-message-info-color, currentcolor) !important;
 }
 
 .hl.lean div.docstring {
@@ -906,307 +784,101 @@ and its border extension paints the outline triangle with the box's border color
   white-space: pre-wrap;
 }
 
-</style><script>
-      
-window.onload = async () => {
-
-    // Don't show hovers inside of closed tactic states
-    function blockedByTactic(elem) {
-      let parent = elem.parentNode;
-      while (parent && "classList" in parent) {
-        if (parent.classList.contains("tactic")) {
-          const toggle = parent.querySelector(":scope > input.tactic-toggle");
-          if (toggle) {
-            return !toggle.checked;
-          }
-        }
-        parent = parent.parentNode;
-      }
-      return false;
-    }
-
-    // The innermost element under the pointer, used to show only the most specific hover
-    let hoverTarget = null;
-    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
-
-    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
-    const visibleTippies = new Set();
-    function blockedByTippy(elem) {
-      for (const ref of visibleTippies) {
-        if (!ref.contains(elem) && !elem.contains(ref)) return true;
-      }
-      return false;
-    }
-
-    // Whether the element's tooltip would have content to show. Content nested in a
-    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
-    // not a tippy instance is currently attached to it.
-    function showsContent(el) {
-      if (!el._tippy) return false;
-      if (el.classList.contains('tactic')) {
-        const toggle = el.querySelector(':scope > input.tactic-toggle');
-        return !!toggle && !toggle.checked;
-      }
-      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
-        !blockedByTactic(el);
-    }
-
-    // The nearest enclosing element whose tooltip has content
-    function innermostShowable(el) {
-      while (el && el.nodeType === Node.ELEMENT_NODE) {
-        if (showsContent(el)) return el;
-        el = el.parentElement;
-      }
-      return null;
-    }
-
-    // Binding highlights via event delegation with cached lookups
-    const bindingCache = new Map(); // context+binding -> [token elements]
-    let highlightedTokens = [];
-    function getBindingTokens(context, binding) {
-      const key = context + "\0" + binding;
-      let tokens = bindingCache.get(key);
-      if (!tokens) {
-        tokens = [];
-        for (const example of document.querySelectorAll(".hl.lean")) {
-          if (example.dataset.leanContext == context) {
-            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
-              tokens.push(tok);
-            }
-          }
-        }
-        bindingCache.set(key, tokens);
-      }
-      return tokens;
-    }
-    for (const container of document.querySelectorAll(".hl.lean")) {
-      container.addEventListener("mouseover", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
-        if (blockedByTactic(c)) return;
-        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
-        for (const tok of tokens) {
-          tok.classList.add("binding-hl");
-        }
-        highlightedTokens = tokens;
-      });
-      container.addEventListener("mouseout", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !container.contains(c)) return;
-        for (const tok of highlightedTokens) {
-          tok.classList.remove("binding-hl");
-        }
-        highlightedTokens = [];
-      });
-    }
-    /* Render docstrings */
-    if ('undefined' !== typeof marked) {
-        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement("div");
-            rendered.classList.add("docstring");
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-        }
-    }
-    // Add hovers
-    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
-
-    function hideParentTooltips(element) {
-      let parent = element.parentElement;
-      while (parent) {
-        const tippyInstance = parent._tippy;
-        if (tippyInstance) {
-          tippyInstance.hide();
-        }
-        parent = parent.parentElement;
-      }
-    }
-
-    function hideDescendantTooltips(element) {
-      for (const ref of visibleTippies) {
-        if (ref !== element && element.contains(ref)) {
-          ref._tippy.hide();
-        }
-      }
-    }
-
-    // Renders the documentation for a hover ID from the doc table
-    function docHoverContent(hoverId) {
-      const info = document.createElement('span');
-      info.className = 'hover-info';
-      info.style.display = 'block';
-      const data = versoDocData[hoverId];
-      if (data) {
-        info.innerHTML = data;
-        /* Render docstrings - TODO server-side */
-        if ('undefined' !== typeof marked) {
-          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement('div');
-            rendered.classList.add('docstring');
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-          }
-        }
-      } else {
-        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
-      }
-      return info;
-    }
-
-
-
-
-    const defaultTippyProps = {
-      /* DEBUG -- remove the space: * /
-      onHide(any) { return false; },
-      trigger: "click",
-      // */
-      /* theme: "lean", */
-      maxWidth: "none",
-      appendTo: () => document.body,
-      interactive: true,
-      delay: [100, null],
-      /* ignoreAttributes: true, */
-      followCursor: 'initial',
-      onShow(inst) {
-        const ref = inst.reference;
-        if (ref.className == 'tactic') {
-          const toggle = ref.querySelector(":scope > input.tactic-toggle");
-          if (toggle && toggle.checked) {
-            return false;
-          }
-        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
-          if (blockedByTactic(ref)) { return false };
-        } else { // Nothing to show here!
-          return false;
-        }
-        // Show only the most specific hover under the pointer
-        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
-          return false;
-        }
-        hideParentTooltips(ref);
-        hideDescendantTooltips(ref);
-        if (blockedByTippy(ref)) { return false; }
-      },
-      onShown(inst) { visibleTippies.add(inst.reference); },
-      onHidden(inst) { visibleTippies.delete(inst.reference); },
-      content (tgt) {
-        const content = document.createElement("span");
-        if (tgt.className == 'tactic') {
-          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
-          state.style.display = "block";
-          content.appendChild(state);
-          content.style.display = "block";
-          content.className = "hl lean popup";
-        } else {
-          content.className = "hl lean";
-          content.style.display = "block";
-          content.style.maxHeight = "300px";
-          content.style.overflowY = "auto";
-          content.style.overflowX = "hidden";
-          // Messages come from the inline hover-info; documentation comes from the doc
-          // table. An element with both (a message span sharing a documented token's
-          // extent) shows both in one tooltip.
-          const hoverId = tgt.dataset.versoHover;
-          const hoverInfo = tgt.querySelector(".hover-info");
-          if (hoverInfo) {
-            content.appendChild(hoverInfo.cloneNode(true));
-          }
-          if (hoverId) {
-            // TODO stop doing an implicit conversion from string to number here
-            content.appendChild(docHoverContent(hoverId));
-          }
-          if (hoverInfo && hoverId) {
-            content.classList.add('mixed');
-          }
-          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
-          if (extraLinks) {
-            try {
-              const extras = JSON.parse(extraLinks);
-              const links = document.createElement('ul');
-              links.className = 'extra-doc-links';
-              extras.forEach((l) => {
-                const li = document.createElement('li');
-                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
-                links.appendChild(li);
-              });
-              content.appendChild(links);
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        }
-        return content;
-      }
-    };
-
-
-    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'lean');
-    });
-    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'warning message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'info message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'error message');
-    });
-    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'tactic');
-    });
-    // Skip tokens inside closed tactics — they interfere with tactic tippys
-    const closedTactics = new Set();
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle && !toggle.checked) closedTactics.add(tactic);
-    });
-    function isInsideClosedTactic(el) {
-      const tactic = el.closest('.tactic');
-      return tactic && tactic !== el && closedTactics.has(tactic);
-    }
-
-    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
-    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
-
-    // Create/destroy token tippys when tactic checkbox toggles
-    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle) toggle.addEventListener('change', () => {
-        if (toggle.checked) {
-          closedTactics.delete(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (!el._tippy) {
-              tippy(el, defaultTippyProps);
-            }
-          });
-        } else {
-          closedTactics.add(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (el._tippy) el._tippy.destroy();
-          });
-        }
-        // The toggle changes which element's tooltip belongs to the pointer's position,
-        // but the pointer stays put, so no hover event announces the change. Show the
-        // right tooltip once the click that flipped the toggle has hidden the old one.
-        setTimeout(() => {
-          if (hoverTarget && hoverTarget.isConnected) {
-            const showable = innermostShowable(hoverTarget);
-            if (showable && showable._tippy) showable._tippy.show();
-          }
-        }, 0);
-      });
-  });
+</style><style>
+table.tabular {
+  margin: auto;
+  border-spacing: 1rem;
 }
-</script>
-    <script>
-      window.xref = {"Verso.Genre.Manual.section":
+table.tabular.left-align {
+  margin-right: auto;
+  margin-left: 0;
+}
+table.tabular.center-align {
+  margin: auto;
+}
+table.tabular.right-align {
+  margin-left auto;
+  margin-right: 0;
+}
+table.tabular td, table.tabular th {
+  text-align: left;
+  vertical-align: top;
+}
+table.tabular td > p:first-child, table.tabular th > p:first-child {
+  margin-top: 0;
+}
+table.tabular td > p:last-child, table.tabular th > p:first-child {
+  margin-bottom: 0;
+}
+</style><style>
+details.solutions-spoiler {
+  border: 1px solid #4777ff;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background-color: #f4f7ff;
+}
+details.solutions-spoiler > summary {
+  cursor: pointer;
+  font-family: var(--verso-structure-font-family);
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #4777ff;
+  list-style: none;
+}
+details.solutions-spoiler > summary::before {
+  content: "▶ ";
+}
+details.solutions-spoiler[open] > summary::before {
+  content: "▼ ";
+}
+details.solutions-spoiler[open] > summary {
+  margin-bottom: 0.5em;
+}
+</style><style>
+span.stil-footnote {
+  position: relative;
+}
+span.stil-footnote-ref {
+  cursor: pointer;
+  font-size: 0.75em;
+  vertical-align: super;
+  font-weight: bold;
+  outline: none;
+}
+/* Bridges the gap between the superscript marker and the box below it. Without
+   this, moving the pointer down into the box crosses ~10px of dead space, the
+   footnote span loses `:hover`, the box closes, and the pointer lands on the
+   prose underneath — whose tooltip then appears instead of the one you aimed at. */
+span.stil-footnote-content::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1em;
+  height: 1em;
+}
+span.stil-footnote-content {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 1.5em;
+  z-index: 100;
+  min-width: 18em;
+  max-width: 32em;
+  background: #fffbe6;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5em 0.75em;
+  font-size: 0.9em;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+}
+span.stil-footnote:hover span.stil-footnote-content,
+span.stil-footnote:focus-within span.stil-footnote-content,
+span.stil-footnote.stil-footnote-open span.stil-footnote-content {
+  display: block;
+}
+</style><script>window.xref = {"Verso.Genre.Manual.section":
  {"title": "Sections or chapters of the manual",
   "description": null,
   "contents":
@@ -8558,6 +8230,17 @@ window.onload = async () => {
         "Edge and Vertex Connectivity",
         "Connectivity Numbers*"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.isVertexConnected_vertexConnectivity":
+   [{"id": "SimpleGraph___isVertexConnected_vertexConnectivity",
+     "data":
+     {"/Connectivity/#SimpleGraph___isVertexConnected_vertexConnectivity":
+      {"display": "isVertexConnected_vertexConnectivity",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isVertexConnected_two_iff":
    [{"id": "SimpleGraph___isVertexConnected_two_iff",
      "data":
@@ -8565,6 +8248,17 @@ window.onload = async () => {
       {"display": "isVertexConnected_two_iff",
        "context":
        ["Graph Theory in Lean", "Connectivity", "Cut Vertices and Blocks*"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.isVertexConnected_top_iff_forall_nat":
+   [{"id": "SimpleGraph___isVertexConnected_top_iff_forall_nat",
+     "data":
+     {"/Connectivity/#SimpleGraph___isVertexConnected_top_iff_forall_nat":
+      {"display": "isVertexConnected_top_iff_forall_nat",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.isVertexConnected_iff_induce":
    [{"id": "SimpleGraph___isVertexConnected_iff_induce",
@@ -8693,6 +8387,17 @@ window.onload = async () => {
       {"display": "isEmpty_iso_completeGraph_two_of_isEmpty",
        "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.isEdgeConnected_edgeConnectivity":
+   [{"id": "SimpleGraph___isEdgeConnected_edgeConnectivity",
+     "data":
+     {"/Connectivity/#SimpleGraph___isEdgeConnected_edgeConnectivity":
+      {"display": "isEdgeConnected_edgeConnectivity",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Edge and Vertex Connectivity",
+        "Connectivity Numbers*"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isCycle_mycielskianClosed_of_adj":
    [{"id": "SimpleGraph___isCycle_mycielskianClosed_of_adj",
      "data":
@@ -13327,17 +13032,6 @@ window.onload = async () => {
         "Trails, Paths, Circuits and Cycles",
         "Trails and Paths"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.isHamiltonian_reverse":
-   [{"id": "SimpleGraph___Walk___isHamiltonian_reverse",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___isHamiltonian_reverse":
-      {"display": "Walk.isHamiltonian_reverse",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.isHamiltonian_of_isMaximumPath'":
    [{"id": "SimpleGraph___Walk___isHamiltonian_of_isMaximumPath___",
      "data":
@@ -13351,17 +13045,6 @@ window.onload = async () => {
      {"/Walks/#SimpleGraph___Walk___isHamiltonian_of_isMaximumPath":
       {"display": "Walk.isHamiltonian_of_isMaximumPath",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.isHamiltonian_copy":
-   [{"id": "SimpleGraph___Walk___isHamiltonian_copy",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___isHamiltonian_copy":
-      {"display": "Walk.isHamiltonian_copy",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Plumbing: Fixing Type Mismatches",
-        "Copy"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.isEulerian_nil_iff":
    [{"id": "SimpleGraph___Walk___isEulerian_nil_iff",
@@ -14042,20 +13725,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Counting Bijections and a Crossing Pair"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonianCycle.reverse'":
-   [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___reverse___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___reverse___":
-      {"display": "Walk.IsHamiltonianCycle.reverse'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonianCycle.reverse":
-   [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___reverse",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___reverse":
-      {"display": "Walk.IsHamiltonianCycle.reverse",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonianCycle.mycielskianClosed":
    [{"id": "SimpleGraph___Walk___IsHamiltonianCycle___mycielskianClosed",
      "data":
@@ -14571,17 +14240,6 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Maps", "Morphisms", "Graph Isomorphisms"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.Iso.edist_eq":
-   [{"id": "SimpleGraph___Iso___edist_eq",
-     "data":
-     {"/Distance/#SimpleGraph___Iso___edist_eq":
-      {"display": "Iso.edist_eq",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Graph Distance",
-        "Distance under Homomorphisms and Isomorphisms"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.Iso.ediam_eq":
    [{"id": "SimpleGraph___Iso___ediam_eq",
      "data":
@@ -14878,7 +14536,7 @@ window.onload = async () => {
        ["Graph Theory in Lean",
         "Connectivity",
         "Edge and Vertex Connectivity",
-        "Connectivity Numbers*"]}},
+        "Vertex Connectivity"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.IsVertexConnected":
    [{"id": "SimpleGraph___IsVertexConnected",
@@ -15849,17 +15507,6 @@ window.onload = async () => {
       {"display": "Hom.injOn_of_isClique",
        "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.Hom.edist_le":
-   [{"id": "SimpleGraph___Hom___edist_le",
-     "data":
-     {"/Distance/#SimpleGraph___Hom___edist_le":
-      {"display": "Hom.edist_le",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Graph Distance",
-        "Distance under Homomorphisms and Isomorphisms"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.Hom.cliqueNum_le":
    [{"id": "SimpleGraph___Hom___cliqueNum_le",
      "data":
@@ -16704,22 +16351,11 @@ window.onload = async () => {
         "Maximum Degree at Least Three",
         "Step 2: Gluing Along the Pair"]}},
      "address": "/Connectivity/"}],
-   "ENat.natCast_lt_biSup_iff":
-   [{"id": "ENat___natCast_lt_biSup_iff",
+   "ENat.le_biSup_iff":
+   [{"id": "ENat___le_biSup_iff",
      "data":
-     {"/Connectivity/#ENat___natCast_lt_biSup_iff":
-      {"display": "_root_.ENat.natCast_lt_biSup_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Edge and Vertex Connectivity",
-        "Connectivity Numbers*"]}},
-     "address": "/Connectivity/"}],
-   "ENat.natCast_le_biSup_iff":
-   [{"id": "ENat___natCast_le_biSup_iff",
-     "data":
-     {"/Connectivity/#ENat___natCast_le_biSup_iff":
-      {"display": "_root_.ENat.natCast_le_biSup_iff",
+     {"/Connectivity/#ENat___le_biSup_iff":
+      {"display": "_root_.ENat.le_biSup_iff",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
@@ -16954,9 +16590,304 @@ if (paramName) {
         }
     });
 }
-</script>
-    <script>
-      
+</script><script>
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script><script>
 window.addEventListener("DOMContentLoaded", function () {
   var refs = document.querySelectorAll("span.stil-footnote-ref");
   for (var i = 0; i < refs.length; i++) {
@@ -16998,48 +16929,4 @@ window.addEventListener("DOMContentLoaded", function () {
     if (e.key === "Escape") { closeAll(); }
   });
 });
-</script>
-    <link rel="stylesheet" href="guide.css">
-    <script src="guide.js"></script>
-    </head>
-  <body>
-    <header>
-      <div class="header-logo-wrapper"></div>
-      <div class="header-title-wrapper">
-        <a href="" class="header-title"><h1>
-            Cross-Reference Redirection</h1>
-          </a></div>
-      </header>
-    <label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc">
-      <div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div>
-      <nav id="toc">
-        <input type="checkbox" id="toggle-toc"><div class="first">
-          <a href="" class="toc-title"><h1>
-              Cross-Reference Redirection</h1>
-            </a><div class="split-tocs">
-            <div class="split-toc book">
-              <div class="title">
-                <label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"></label><span class="">Table of Contents</span></div>
-              <table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div>
-            </div>
-          </div>
-        <div class="last"></div>
-        </nav>
-      <div class="toc-resize-handle"></div>
-      <main><div class="content-wrapper">
-          <nav class="prev-next-buttons">
-            <div></div>
-            <div></div>
-            </nav>
-          <section>
-            <h1 id="title"></h1>
-            <div id="message"></div>
-            </section>
-          <nav class="prev-next-buttons">
-            <div></div>
-            <div></div>
-            </nav>
-          </div>
-        </main></div>
-    </body>
-  </html>
+</script><link rel="stylesheet" href="guide.css"/><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Cross-Reference Redirection</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Cross-Reference Redirection</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><div></div><div></div></nav><section><h1 id="title"></h1><div id="message"></div></section><nav class="prev-next-buttons"><div></div><div></div></nav></div></main></div></body></html>

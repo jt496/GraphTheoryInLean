@@ -1,5 +1,8 @@
 import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.Operations
+import Mathlib.Combinatorics.SimpleGraph.Hasse
+import Mathlib.Combinatorics.SimpleGraph.Prod
+import Mathlib.Combinatorics.SimpleGraph.Sum
 import Mathlib.Combinatorics.SimpleGraph.Circulant
 import Mathlib.Combinatorics.SimpleGraph.Cayley
 import Mathlib.GroupTheory.Perm.Cycle.Concrete

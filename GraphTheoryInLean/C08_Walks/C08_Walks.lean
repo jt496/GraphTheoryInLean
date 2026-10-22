@@ -657,7 +657,7 @@ case `Walk.bypass` would discard the closed walk `cons h (q.takeUntil a)` and ke
 `q.dropUntil a`. This preserves parity only if the closed walk has even length; if it
 has odd length then it is an odd cycle.
 
-[Figure: Splitting `q` at `a`; dashed parts are discarded. Left: the closed walk `cons h (q.takeUntil a)` has even length, so `q.dropUntil a` (orange) is a path from `a` to `b` with the same parity as `cons h q`. Right: the closed walk has odd length, so it is an odd cycle (red)](https://jt496.github.io/GraphTheoryInLean/figures/odd_cycle_bypass.svg)
+[Figure: Left: skipping an even detour leaves a path from $a$ to $b$ of the same parity. Right: an odd detour is an odd cycle](https://jt496.github.io/GraphTheoryInLean/figures/odd_cycle_bypass.svg)
 -/
 #source Walk.bypass
 
@@ -1105,17 +1105,6 @@ Notice that the four `copy` lemmas listed above are all simp lemmas with `p.copy
 the LHS so that simp will systematically remove `.copy` when possible by rewriting to
 the original walk.
 
-One such lemma that is currently missing is that `p.copy` is a Hamiltonian path iff
-`p` is. We give it here; the proof is the obvious one.
--/
-@[simp]
-lemma Walk.isHamiltonian_copy {u u' v v'} {p : G.Walk u v} [DecidableEq V]
-    (hu : u = u') (hv : v = v') :
-    (p.copy hu hv).IsHamiltonian ↔ p.IsHamiltonian := by
-  subst_vars
-  rfl
-
-/-!
 Another class of results involving `Walk.copy` are those that allow us to manipulate
 a copied walk. For example if we add an edge to a `copy` using `cons` then this is
 the same as taking a copy of the equivalent `cons` walk.
@@ -2093,7 +2082,7 @@ lemma Walk.mem_support_posaRotate_iff {u v : V} {i : ℕ} (p : G.Walk u v)
       ← cons_tail_support (p.drop i), List.mem_cons]
 
 /-!
-[Figure: Closing a Pósa rotation to get a cycle. Top: the rotated path with an edge from its endpoint $v_{i+1}$ back to $v_0$. Bottom: the resulting cycle](https://jt496.github.io/GraphTheoryInLean/figures/posa_cycle.svg)
+[Figure: Closing a Pósa rotation. Top: the rotated path with an edge from its endpoint $v_{i+1}$ back to $v_0$. Bottom: the resulting cycle](https://jt496.github.io/GraphTheoryInLean/figures/posa_cycle.svg)
 
 If `p` is a walk from `u` to `v` and `h₁ : G.Adj (p.getVert i) v` then we can form
 the Pósa rotation ending at `p.getVert (i + 1)`. If there is also an edge
@@ -2334,15 +2323,6 @@ ever needed one pair at a time: if `u` and `v` are distinct non-adjacent vertice
 with `deg u + deg v ≥ |V|`, then `G` is Hamiltonian iff `G ⊔ edge u v` is
 Hamiltonian. Repeatedly adding such edges yields the *closure* of `G`.
 
-We start with an easy lemma: reversal preserves being a Hamiltonian walk.
-(Reversal also preserves being a Hamiltonian *cycle*: see the exercises.)
--/
-@[simp]
-lemma Walk.isHamiltonian_reverse [DecidableEq V] {u v : V} {p : G.Walk u v} :
-    p.reverse.IsHamiltonian ↔ p.IsHamiltonian := by
-  simp only [Walk.IsHamiltonian, support_reverse, List.count_reverse]
-
-/-!
 The first step towards the Bondy–Chvátal theorem is a piece of cycle surgery. A
 Hamiltonian cycle of `G ⊔ edge u v` may use the new edge `u — v`, which is not
 available in `G`. Deleting `u — v` from such a cycle `c` should leave a
@@ -2644,7 +2624,7 @@ their degree sum is `4 < 5`. But the first round joins the eligible pairs `1, 3`
 too, and the closure is the complete graph with `10` edges. So the closure can be
 complete even when Ore's condition fails.
 
-[Figure: The closure of $C_5$ with the chords `0 — 2` and `0 — 3`, with the degree of each vertex written next to it. Left: the starting graph. Centre: the first round adds `1 — 3` and `2 — 4`. Right: the second round adds `1 — 4`, giving the complete graph $K_5$](https://jt496.github.io/GraphTheoryInLean/figures/closure_rounds.svg)
+[Figure: Taking the closure of $C_5$ with the chords `0 — 2` and `0 — 3`](https://jt496.github.io/GraphTheoryInLean/figures/closure_rounds.svg)
 -/
 #eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).edgeFinset             -- 7 edges
 #eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closureStep.edgeFinset -- 9 edges
