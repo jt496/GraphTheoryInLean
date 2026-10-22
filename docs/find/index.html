@@ -811,6 +811,18 @@ table.tabular td > p:last-child, table.tabular th > p:first-child {
   margin-bottom: 0;
 }
 </style><style>
+span.stil-cite-ref {
+  cursor: pointer;
+  outline: none;
+}
+span.stil-cite-ref:hover,
+span.stil-cite-ref:focus {
+  text-decoration: underline dotted;
+}
+span.stil-bib-label {
+  font-weight: bold;
+}
+</style><style>
 details.solutions-spoiler {
   border: 1px solid #4777ff;
   border-radius: 4px;
@@ -878,7 +890,304 @@ span.stil-footnote:focus-within span.stil-footnote-content,
 span.stil-footnote.stil-footnote-open span.stil-footnote-content {
   display: block;
 }
-</style><script>window.xref = {"Verso.Genre.Manual.section":
+</style><script>
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script><script>window.xref = {"Verso.Genre.Manual.section":
  {"title": "Sections or chapters of the manual",
   "description": null,
   "contents":
@@ -2160,12 +2469,12 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
      "data":
      {"title": "Results",
       "shortTitle": null,
-      "sectionNum": "14.3.",
+      "sectionNum": "14.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"}]},
+       {"title": "Results", "shortTitle": null, "number": "4"}]},
      "address": "/Appendix/"}],
    "section-restricting-and-copying-partial-colourings":
    [{"id": "section-restricting-and-copying-partial-colourings",
@@ -2211,6 +2520,18 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
        {"title": "Degrees", "shortTitle": null, "number": "3"},
        {"title": "Regular Graphs", "shortTitle": null, "number": "6"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "section-references":
+   [{"id": "section-references",
+     "data":
+     {"title": "References",
+      "shortTitle": null,
+      "sectionNum": "14.1.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Appendix", "shortTitle": null, "number": "14"},
+       {"title": "References", "shortTitle": null, "number": "1"}]},
+     "address": "/Appendix/"}],
    "section-reachability":
    [{"id": "section-reachability",
      "data":
@@ -2408,12 +2729,12 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
      "data":
      {"title": "Notation",
       "shortTitle": null,
-      "sectionNum": "14.1.",
+      "sectionNum": "14.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Notation", "shortTitle": null, "number": "1"}]},
+       {"title": "Notation", "shortTitle": null, "number": "2"}]},
      "address": "/Appendix/"}],
    "section-nil":
    [{"id": "section-nil",
@@ -4059,12 +4380,12 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
      "data":
      {"title": "Definitions",
       "shortTitle": null,
-      "sectionNum": "14.2.",
+      "sectionNum": "14.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"}]},
      "address": "/Appendix/"}],
    "section-definitional-and-propositional-equalities":
    [{"id": "section-definitional-and-propositional-equalities",
@@ -4999,329 +5320,331 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
      "data":
      {"title": "Chapter 9: Subgraphs (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.7.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 9: Subgraphs (Results)",
         "shortTitle": null,
-        "number": "7"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-9-subgraphs":
    [{"id": "section-chapter-9-subgraphs",
      "data":
      {"title": "Chapter 9: Subgraphs",
       "shortTitle": null,
-      "sectionNum": "14.2.8.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 9: Subgraphs", "shortTitle": null, "number": "8"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 9: Subgraphs", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-8-walks-results":
    [{"id": "section-chapter-8-walks-results",
      "data":
      {"title": "Chapter 8: Walks (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.6.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 8: Walks (Results)",
         "shortTitle": null,
-        "number": "6"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-8-walks":
    [{"id": "section-chapter-8-walks",
      "data":
      {"title": "Chapter 8: Walks",
       "shortTitle": null,
-      "sectionNum": "14.2.7.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 8: Walks", "shortTitle": null, "number": "7"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 8: Walks", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-7-colorings-results":
    [{"id": "section-chapter-7-colorings-results",
      "data":
      {"title": "Chapter 7: Colorings (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.5.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 7: Colorings (Results)",
         "shortTitle": null,
-        "number": "5"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-7-colorings":
    [{"id": "section-chapter-7-colorings",
      "data":
      {"title": "Chapter 7: Colorings",
       "shortTitle": null,
-      "sectionNum": "14.2.6.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 7: Colorings", "shortTitle": null, "number": "6"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 7: Colorings", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-6-cliques-results":
    [{"id": "section-chapter-6-cliques-results",
      "data":
      {"title": "Chapter 6: Cliques (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.4.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 6: Cliques (Results)",
         "shortTitle": null,
-        "number": "4"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-6-cliques":
    [{"id": "section-chapter-6-cliques",
      "data":
      {"title": "Chapter 6: Cliques",
       "shortTitle": null,
-      "sectionNum": "14.2.5.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 6: Cliques", "shortTitle": null, "number": "5"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 6: Cliques", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-5-maps-results":
    [{"id": "section-chapter-5-maps-results",
      "data":
      {"title": "Chapter 5: Maps (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.3.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 5: Maps (Results)",
         "shortTitle": null,
-        "number": "3"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-5-maps":
    [{"id": "section-chapter-5-maps",
      "data":
      {"title": "Chapter 5: Maps",
       "shortTitle": null,
-      "sectionNum": "14.2.4.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 5: Maps", "shortTitle": null, "number": "4"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 5: Maps", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-4-decidability-finiteness-and-degrees-results":
    [{"id": "section-chapter-4-decidability-finiteness-and-degrees-results",
      "data":
      {"title": "Chapter 4: Decidability, Finiteness and Degrees (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.2.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 4: Decidability, Finiteness and Degrees (Results)",
         "shortTitle": null,
-        "number": "2"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-4-decidability-finiteness-and-degrees":
    [{"id": "section-chapter-4-decidability-finiteness-and-degrees",
      "data":
      {"title": "Chapter 4: Decidability, Finiteness and Degrees",
       "shortTitle": null,
-      "sectionNum": "14.2.3.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
        {"title": "Chapter 4: Decidability, Finiteness and Degrees",
         "shortTitle": null,
-        "number": "3"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-3-constructions-results":
    [{"id": "section-chapter-3-constructions-results",
      "data":
      {"title": "Chapter 3: Constructions (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.1.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 3: Constructions (Results)",
         "shortTitle": null,
-        "number": "1"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-3-constructions":
    [{"id": "section-chapter-3-constructions",
      "data":
      {"title": "Chapter 3: Constructions",
       "shortTitle": null,
-      "sectionNum": "14.2.2.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
        {"title": "Chapter 3: Constructions",
         "shortTitle": null,
-        "number": "2"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-2-simplegraph":
    [{"id": "section-chapter-2-simplegraph",
      "data":
      {"title": "Chapter 2: SimpleGraph",
       "shortTitle": null,
-      "sectionNum": "14.2.1.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 2: SimpleGraph", "shortTitle": null, "number": "1"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 2: SimpleGraph",
+        "shortTitle": null,
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-13-theorems-results":
    [{"id": "section-chapter-13-theorems-results",
      "data":
      {"title": "Chapter 13: Theorems (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.11.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 13: Theorems (Results)",
         "shortTitle": null,
-        "number": "11"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-13-theorems":
    [{"id": "section-chapter-13-theorems",
      "data":
      {"title": "Chapter 13: Theorems",
       "shortTitle": null,
-      "sectionNum": "14.2.12.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 13: Theorems", "shortTitle": null, "number": "12"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 13: Theorems", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-12-algebraic-graph-theory-results":
    [{"id": "section-chapter-12-algebraic-graph-theory-results",
      "data":
      {"title": "Chapter 12: Algebraic Graph Theory (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.10.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 12: Algebraic Graph Theory (Results)",
         "shortTitle": null,
-        "number": "10"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-12-algebraic-graph-theory":
    [{"id": "section-chapter-12-algebraic-graph-theory",
      "data":
      {"title": "Chapter 12: Algebraic Graph Theory",
       "shortTitle": null,
-      "sectionNum": "14.2.11.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
        {"title": "Chapter 12: Algebraic Graph Theory",
         "shortTitle": null,
-        "number": "11"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-11-distance-results":
    [{"id": "section-chapter-11-distance-results",
      "data":
      {"title": "Chapter 11: Distance (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.9.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 11: Distance (Results)",
         "shortTitle": null,
-        "number": "9"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-11-distance":
    [{"id": "section-chapter-11-distance",
      "data":
      {"title": "Chapter 11: Distance",
       "shortTitle": null,
-      "sectionNum": "14.2.10.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
-       {"title": "Chapter 11: Distance", "shortTitle": null, "number": "10"}]},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Chapter 11: Distance", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-10-connectivity-results":
    [{"id": "section-chapter-10-connectivity-results",
      "data":
      {"title": "Chapter 10: Connectivity (Results)",
       "shortTitle": null,
-      "sectionNum": "14.3.8.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "3"},
+       {"title": "Results", "shortTitle": null, "number": "4"},
        {"title": "Chapter 10: Connectivity (Results)",
         "shortTitle": null,
-        "number": "8"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-10-connectivity":
    [{"id": "section-chapter-10-connectivity",
      "data":
      {"title": "Chapter 10: Connectivity",
       "shortTitle": null,
-      "sectionNum": "14.2.9.",
+      "sectionNum": null,
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "2"},
+       {"title": "Definitions", "shortTitle": null, "number": "3"},
        {"title": "Chapter 10: Connectivity",
         "shortTitle": null,
-        "number": "9"}]},
+        "number": null}]},
      "address": "/Appendix/"}],
    "section-cayley-graphs":
    [{"id": "section-cayley-graphs",
@@ -16517,7 +16840,116 @@ span.stil-footnote.stil-footnote-open span.stil-footnote-content {
  "Verso.Genre.Manual.doc":
  {"title": "Lean constant reference",
   "description": "Documentation for Lean constants",
-  "contents": {}}};
+  "contents": {}},
+ "STIL.bibliography":
+ {"title": "STIL.bibliography",
+  "description": null,
+  "contents":
+  {"zykov-1949":
+   [{"id": "bib-zykov-1949", "data": null, "address": "/Appendix/"}],
+   "zarankiewicz-1951":
+   [{"id": "bib-zarankiewicz-1951", "data": null, "address": "/Appendix/"}],
+   "whitney-1932":
+   [{"id": "bib-whitney-1932", "data": null, "address": "/Appendix/"}],
+   "vizing-1964":
+   [{"id": "bib-vizing-1964", "data": null, "address": "/Appendix/"}],
+   "tutte-1947":
+   [{"id": "bib-tutte-1947", "data": null, "address": "/Appendix/"}],
+   "turan-1941":
+   [{"id": "bib-turan-1941", "data": null, "address": "/Appendix/"}],
+   "szemeredi-1978":
+   [{"id": "bib-szemeredi-1978", "data": null, "address": "/Appendix/"}],
+   "ruzsa-szemeredi-1978":
+   [{"id": "bib-ruzsa-szemeredi-1978", "data": null, "address": "/Appendix/"}],
+   "roth-1953":
+   [{"id": "bib-roth-1953", "data": null, "address": "/Appendix/"}],
+   "ramsey-1930":
+   [{"id": "bib-ramsey-1930", "data": null, "address": "/Appendix/"}],
+   "posa-1976":
+   [{"id": "bib-posa-1976", "data": null, "address": "/Appendix/"}],
+   "petersen-1898":
+   [{"id": "bib-petersen-1898", "data": null, "address": "/Appendix/"}],
+   "paley-1933":
+   [{"id": "bib-paley-1933", "data": null, "address": "/Appendix/"}],
+   "ore-1960": [{"id": "bib-ore-1960", "data": null, "address": "/Appendix/"}],
+   "mycielski-1955":
+   [{"id": "bib-mycielski-1955", "data": null, "address": "/Appendix/"}],
+   "menger-1927":
+   [{"id": "bib-menger-1927", "data": null, "address": "/Appendix/"}],
+   "mantel-1907":
+   [{"id": "bib-mantel-1907", "data": null, "address": "/Appendix/"}],
+   "lovasz-1975":
+   [{"id": "bib-lovasz-1975", "data": null, "address": "/Appendix/"}],
+   "kovari-sos-turan-1954":
+   [{"id": "bib-kovari-sos-turan-1954", "data": null, "address": "/Appendix/"}],
+   "konig-1931":
+   [{"id": "bib-konig-1931", "data": null, "address": "/Appendix/"}],
+   "konig-1927":
+   [{"id": "bib-konig-1927", "data": null, "address": "/Appendix/"}],
+   "konig-1916":
+   [{"id": "bib-konig-1916", "data": null, "address": "/Appendix/"}],
+   "kneser-1955":
+   [{"id": "bib-kneser-1955", "data": null, "address": "/Appendix/"}],
+   "kirchhoff-1847":
+   [{"id": "bib-kirchhoff-1847", "data": null, "address": "/Appendix/"}],
+   "hoffman-singleton-1960":
+   [{"id": "bib-hoffman-singleton-1960",
+     "data": null,
+     "address": "/Appendix/"}],
+   "hierholzer-1873":
+   [{"id": "bib-hierholzer-1873", "data": null, "address": "/Appendix/"}],
+   "havel-1955":
+   [{"id": "bib-havel-1955", "data": null, "address": "/Appendix/"}],
+   "hamming-1950":
+   [{"id": "bib-hamming-1950", "data": null, "address": "/Appendix/"}],
+   "hall-1935":
+   [{"id": "bib-hall-1935", "data": null, "address": "/Appendix/"}],
+   "hakimi-1962":
+   [{"id": "bib-hakimi-1962", "data": null, "address": "/Appendix/"}],
+   "grotzsch-1959":
+   [{"id": "bib-grotzsch-1959", "data": null, "address": "/Appendix/"}],
+   "gray-1953":
+   [{"id": "bib-gray-1953", "data": null, "address": "/Appendix/"}],
+   "furedi-2015":
+   [{"id": "bib-furedi-2015", "data": null, "address": "/Appendix/"}],
+   "euler-1758":
+   [{"id": "bib-euler-1758", "data": null, "address": "/Appendix/"}],
+   "euler-1741":
+   [{"id": "bib-euler-1741", "data": null, "address": "/Appendix/"}],
+   "erdos-stone-1946":
+   [{"id": "bib-erdos-stone-1946", "data": null, "address": "/Appendix/"}],
+   "erdos-simonovits-1966":
+   [{"id": "bib-erdos-simonovits-1966", "data": null, "address": "/Appendix/"}],
+   "erdos-ko-rado-1961":
+   [{"id": "bib-erdos-ko-rado-1961", "data": null, "address": "/Appendix/"}],
+   "erdos-gallai-1960":
+   [{"id": "bib-erdos-gallai-1960", "data": null, "address": "/Appendix/"}],
+   "erdos-1970":
+   [{"id": "bib-erdos-1970", "data": null, "address": "/Appendix/"}],
+   "dirac-1952":
+   [{"id": "bib-dirac-1952", "data": null, "address": "/Appendix/"}],
+   "diestel-kuhn-2003":
+   [{"id": "bib-diestel-kuhn-2003", "data": null, "address": "/Appendix/"}],
+   "de-bruijn-erdos-1951":
+   [{"id": "bib-de-bruijn-erdos-1951", "data": null, "address": "/Appendix/"}],
+   "cayley-1889":
+   [{"id": "bib-cayley-1889", "data": null, "address": "/Appendix/"}],
+   "cayley-1878":
+   [{"id": "bib-cayley-1878", "data": null, "address": "/Appendix/"}],
+   "brooks-1941":
+   [{"id": "bib-brooks-1941", "data": null, "address": "/Appendix/"}],
+   "bondy-chvatal-1976":
+   [{"id": "bib-bondy-chvatal-1976", "data": null, "address": "/Appendix/"}],
+   "berge-1957":
+   [{"id": "bib-berge-1957", "data": null, "address": "/Appendix/"}],
+   "behrend-1946":
+   [{"id": "bib-behrend-1946", "data": null, "address": "/Appendix/"}],
+   "andrasfai-erdos-sos-1974":
+   [{"id": "bib-andrasfai-erdos-sos-1974",
+     "data": null,
+     "address": "/Appendix/"}],
+   "albertson-1998":
+   [{"id": "bib-albertson-1998", "data": null, "address": "/Appendix/"}]}}};
 /**
  * Copyright (c) 2024 Lean FRO LLC. All rights reserved.
  * Released under Apache 2.0 license as described in the file LICENSE.
@@ -16715,303 +17147,6 @@ if (paramName) {
     });
 }
 </script><script>
-window.onload = async () => {
-
-    // Don't show hovers inside of closed tactic states
-    function blockedByTactic(elem) {
-      let parent = elem.parentNode;
-      while (parent && "classList" in parent) {
-        if (parent.classList.contains("tactic")) {
-          const toggle = parent.querySelector(":scope > input.tactic-toggle");
-          if (toggle) {
-            return !toggle.checked;
-          }
-        }
-        parent = parent.parentNode;
-      }
-      return false;
-    }
-
-    // The innermost element under the pointer, used to show only the most specific hover
-    let hoverTarget = null;
-    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
-
-    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
-    const visibleTippies = new Set();
-    function blockedByTippy(elem) {
-      for (const ref of visibleTippies) {
-        if (!ref.contains(elem) && !elem.contains(ref)) return true;
-      }
-      return false;
-    }
-
-    // Whether the element's tooltip would have content to show. Content nested in a
-    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
-    // not a tippy instance is currently attached to it.
-    function showsContent(el) {
-      if (!el._tippy) return false;
-      if (el.classList.contains('tactic')) {
-        const toggle = el.querySelector(':scope > input.tactic-toggle');
-        return !!toggle && !toggle.checked;
-      }
-      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
-        !blockedByTactic(el);
-    }
-
-    // The nearest enclosing element whose tooltip has content
-    function innermostShowable(el) {
-      while (el && el.nodeType === Node.ELEMENT_NODE) {
-        if (showsContent(el)) return el;
-        el = el.parentElement;
-      }
-      return null;
-    }
-
-    // Binding highlights via event delegation with cached lookups
-    const bindingCache = new Map(); // context+binding -> [token elements]
-    let highlightedTokens = [];
-    function getBindingTokens(context, binding) {
-      const key = context + "\0" + binding;
-      let tokens = bindingCache.get(key);
-      if (!tokens) {
-        tokens = [];
-        for (const example of document.querySelectorAll(".hl.lean")) {
-          if (example.dataset.leanContext == context) {
-            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
-              tokens.push(tok);
-            }
-          }
-        }
-        bindingCache.set(key, tokens);
-      }
-      return tokens;
-    }
-    for (const container of document.querySelectorAll(".hl.lean")) {
-      container.addEventListener("mouseover", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
-        if (blockedByTactic(c)) return;
-        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
-        for (const tok of tokens) {
-          tok.classList.add("binding-hl");
-        }
-        highlightedTokens = tokens;
-      });
-      container.addEventListener("mouseout", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !container.contains(c)) return;
-        for (const tok of highlightedTokens) {
-          tok.classList.remove("binding-hl");
-        }
-        highlightedTokens = [];
-      });
-    }
-    /* Render docstrings */
-    if ('undefined' !== typeof marked) {
-        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement("div");
-            rendered.classList.add("docstring");
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-        }
-    }
-    // Add hovers
-    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
-
-    function hideParentTooltips(element) {
-      let parent = element.parentElement;
-      while (parent) {
-        const tippyInstance = parent._tippy;
-        if (tippyInstance) {
-          tippyInstance.hide();
-        }
-        parent = parent.parentElement;
-      }
-    }
-
-    function hideDescendantTooltips(element) {
-      for (const ref of visibleTippies) {
-        if (ref !== element && element.contains(ref)) {
-          ref._tippy.hide();
-        }
-      }
-    }
-
-    // Renders the documentation for a hover ID from the doc table
-    function docHoverContent(hoverId) {
-      const info = document.createElement('span');
-      info.className = 'hover-info';
-      info.style.display = 'block';
-      const data = versoDocData[hoverId];
-      if (data) {
-        info.innerHTML = data;
-        /* Render docstrings - TODO server-side */
-        if ('undefined' !== typeof marked) {
-          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement('div');
-            rendered.classList.add('docstring');
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-          }
-        }
-      } else {
-        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
-      }
-      return info;
-    }
-
-
-
-
-    const defaultTippyProps = {
-      /* DEBUG -- remove the space: * /
-      onHide(any) { return false; },
-      trigger: "click",
-      // */
-      /* theme: "lean", */
-      maxWidth: "none",
-      appendTo: () => document.body,
-      interactive: true,
-      delay: [100, null],
-      /* ignoreAttributes: true, */
-      followCursor: 'initial',
-      onShow(inst) {
-        const ref = inst.reference;
-        if (ref.className == 'tactic') {
-          const toggle = ref.querySelector(":scope > input.tactic-toggle");
-          if (toggle && toggle.checked) {
-            return false;
-          }
-        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
-          if (blockedByTactic(ref)) { return false };
-        } else { // Nothing to show here!
-          return false;
-        }
-        // Show only the most specific hover under the pointer
-        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
-          return false;
-        }
-        hideParentTooltips(ref);
-        hideDescendantTooltips(ref);
-        if (blockedByTippy(ref)) { return false; }
-      },
-      onShown(inst) { visibleTippies.add(inst.reference); },
-      onHidden(inst) { visibleTippies.delete(inst.reference); },
-      content (tgt) {
-        const content = document.createElement("span");
-        if (tgt.className == 'tactic') {
-          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
-          state.style.display = "block";
-          content.appendChild(state);
-          content.style.display = "block";
-          content.className = "hl lean popup";
-        } else {
-          content.className = "hl lean";
-          content.style.display = "block";
-          content.style.maxHeight = "300px";
-          content.style.overflowY = "auto";
-          content.style.overflowX = "hidden";
-          // Messages come from the inline hover-info; documentation comes from the doc
-          // table. An element with both (a message span sharing a documented token's
-          // extent) shows both in one tooltip.
-          const hoverId = tgt.dataset.versoHover;
-          const hoverInfo = tgt.querySelector(".hover-info");
-          if (hoverInfo) {
-            content.appendChild(hoverInfo.cloneNode(true));
-          }
-          if (hoverId) {
-            // TODO stop doing an implicit conversion from string to number here
-            content.appendChild(docHoverContent(hoverId));
-          }
-          if (hoverInfo && hoverId) {
-            content.classList.add('mixed');
-          }
-          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
-          if (extraLinks) {
-            try {
-              const extras = JSON.parse(extraLinks);
-              const links = document.createElement('ul');
-              links.className = 'extra-doc-links';
-              extras.forEach((l) => {
-                const li = document.createElement('li');
-                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
-                links.appendChild(li);
-              });
-              content.appendChild(links);
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        }
-        return content;
-      }
-    };
-
-
-    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'lean');
-    });
-    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'warning message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'info message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'error message');
-    });
-    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'tactic');
-    });
-    // Skip tokens inside closed tactics — they interfere with tactic tippys
-    const closedTactics = new Set();
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle && !toggle.checked) closedTactics.add(tactic);
-    });
-    function isInsideClosedTactic(el) {
-      const tactic = el.closest('.tactic');
-      return tactic && tactic !== el && closedTactics.has(tactic);
-    }
-
-    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
-    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
-
-    // Create/destroy token tippys when tactic checkbox toggles
-    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle) toggle.addEventListener('change', () => {
-        if (toggle.checked) {
-          closedTactics.delete(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (!el._tippy) {
-              tippy(el, defaultTippyProps);
-            }
-          });
-        } else {
-          closedTactics.add(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (el._tippy) el._tippy.destroy();
-          });
-        }
-        // The toggle changes which element's tooltip belongs to the pointer's position,
-        // but the pointer stays put, so no hover event announces the change. Show the
-        // right tooltip once the click that flipped the toggle has hidden the old one.
-        setTimeout(() => {
-          if (hoverTarget && hoverTarget.isConnected) {
-            const showable = innermostShowable(hoverTarget);
-            if (showable && showable._tippy) showable._tippy.show();
-          }
-        }, 0);
-      });
-  });
-}
-</script><script>
 window.addEventListener("DOMContentLoaded", function () {
   var refs = document.querySelectorAll("span.stil-footnote-ref");
   for (var i = 0; i < refs.length; i++) {
@@ -17019,7 +17154,7 @@ window.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-/* Clicking a marker pins its note open.
+/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
 
    Hovering alone is not enough: the Lean hover tooltips are appended to
    `document.body`, outside the footnote span, so as soon as the pointer touches
@@ -17036,7 +17171,7 @@ window.addEventListener("DOMContentLoaded", function () {
   }
   document.addEventListener("click", function (e) {
     if (!e.target || !e.target.closest) { return; }
-    var ref = e.target.closest("span.stil-footnote-ref");
+    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
     if (ref) {
       var note = ref.closest("span.stil-footnote");
       var wasOpen = note.classList.contains("stil-footnote-open");

@@ -2311,9 +2311,10 @@ theorem graphic_zero : Graphic 0 := graphic_zeros 0
 ## The Erdős–Gallai Theorem
 
 There are two major results in graph theory that characterize graphic sequences. One
-is the *Erdős–Gallai* theorem: given a non-increasing sequence `[d₁, d₂, …, dₙ]` this
-says that the sequence is graphic iff its sum is even and for each `1 ≤ k ≤ n` we
-have
+is the *Erdős–Gallai* theorem
+[Erdős–Gallai 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-gallai-1960):
+given a non-increasing sequence `[d₁, d₂, …, dₙ]` this says that the sequence is
+graphic iff its sum is even and for each `1 ≤ k ≤ n` we have
 `(d₁ + d₂ + … + dₖ) ≤ k * (k - 1) + (min(k, dₖ₊₁) + min(k, dₖ₊₂) + … + min(k, dₙ))`.
 
 The necessity of this is easy informally: suppose we have a graph with this degree
@@ -2356,8 +2357,11 @@ graph from a given graphic sequence.
 
 ## The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences
 
-The *Havel–Hakimi* theorem also characterizes graphic sequences and in the process
-provides a constructive method for producing a graph with a given degree sequence.
+The *Havel–Hakimi* theorem
+[Havel 1955](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-havel-1955)
+[Hakimi 1962](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hakimi-1962)
+also characterizes graphic sequences and in the process provides a constructive
+method for producing a graph with a given degree sequence.
 
 The Havel–Hakimi theorem says that a non-increasing sequence `[d₁, d₂, …, dₙ]` is
 graphic iff the sequence reduces to the empty sequence using the following recursive

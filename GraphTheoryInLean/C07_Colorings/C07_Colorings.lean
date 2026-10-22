@@ -787,13 +787,16 @@ theorem maxDegree_le_chromaticNumber_lineGraph [Fintype V] [DecidableRel G.Adj] 
 end mycielskian_and_edges
 
 /-!
-Vizing's theorem says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for
-every finite graph `G`, and Kőnig's line colouring theorem says that `χ'(G) = Δ(G)`
-for every finite bipartite graph `G`. Neither is in Mathlib yet. The greedy bound of
-the next section, applied to `L[G]`, whose vertices have degree at most
-`2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib is also
-missing many other standard topics of colouring theory such as chromatic polynomials
-and list colourings.)
+Vizing's theorem
+[Vizing 1964](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-vizing-1964)
+says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for every finite graph
+`G`, and Kőnig's line colouring theorem
+[Kőnig 1916](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-konig-1916) says
+that `χ'(G) = Δ(G)` for every finite bipartite graph `G`. Neither is in Mathlib yet.
+The greedy bound of the next section, applied to `L[G]`, whose vertices have degree
+at most `2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib is
+also missing many other standard topics of colouring theory such as chromatic
+polynomials and list colourings.)
 
 # Greedy Colouring *
 

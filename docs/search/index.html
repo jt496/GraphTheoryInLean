@@ -811,6 +811,18 @@ table.tabular td > p:last-child, table.tabular th > p:first-child {
   margin-bottom: 0;
 }
 </style><style>
+span.stil-cite-ref {
+  cursor: pointer;
+  outline: none;
+}
+span.stil-cite-ref:hover,
+span.stil-cite-ref:focus {
+  text-decoration: underline dotted;
+}
+span.stil-bib-label {
+  font-weight: bold;
+}
+</style><style>
 details.solutions-spoiler {
   border: 1px solid #4777ff;
   border-radius: 4px;
@@ -1183,7 +1195,7 @@ window.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-/* Clicking a marker pins its note open.
+/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
 
    Hovering alone is not enough: the Lean hover tooltips are appended to
    `document.body`, outside the footnote span, so as soon as the pointer touches
@@ -1200,7 +1212,7 @@ window.addEventListener("DOMContentLoaded", function () {
   }
   document.addEventListener("click", function (e) {
     if (!e.target || !e.target.closest) { return; }
-    var ref = e.target.closest("span.stil-footnote-ref");
+    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
     if (ref) {
       var note = ref.closest("span.stil-footnote");
       var wasOpen = note.classList.contains("stil-footnote-open");

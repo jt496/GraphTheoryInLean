@@ -508,8 +508,10 @@ of `G` induced by `s`. Since it is a `SimpleGraph V`, we can use the
 
 ## De Bruijn–Erdős Theorem
 
-The *De Bruijn–Erdős theorem* says that if every finite subgraph of a (possibly
-infinite) graph `G` is `n`-colourable then `G` itself is `n`-colourable.
+The *De Bruijn–Erdős theorem*
+[de Bruijn–Erdős 1951](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-de-bruijn-erdos-1951)
+says that if every finite subgraph of a (possibly infinite) graph `G` is
+`n`-colourable then `G` itself is `n`-colourable.
 
 Mathlib contains the following natural generalization of this theorem: if every
 finite subgraph of `G` has a homomorphism to a *finite* graph `F` then there is a

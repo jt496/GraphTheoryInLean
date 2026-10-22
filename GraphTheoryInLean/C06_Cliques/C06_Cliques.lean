@@ -570,10 +570,11 @@ lemma degree_le_indepNum_of_triangleFree [Finite V] [G.LocallyFinite]
 /-!
 So in a triangle-free graph with no large independent sets every vertex has small
 degree. Applying this to both a graph and its complement is the idea behind the
-simplest case of Ramsey's theorem. The *Ramsey number* `R(3, 3)` is the least `n`
-such that every graph on `n` vertices contains a triangle or an independent set of
-size `3`. Mathlib has no graph Ramsey numbers, but we can still prove the classical
-value `R(3, 3) = 6`.
+simplest case of Ramsey's theorem
+[Ramsey 1930](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-ramsey-1930).
+The *Ramsey number* `R(3, 3)` is the least `n` such that every graph on `n` vertices
+contains a triangle or an independent set of size `3`. Mathlib has no graph Ramsey
+numbers, but we can still prove the classical value `R(3, 3) = 6`.
 
 The `5`-cycle shows that `R(3, 3) > 5`: it is triangle-free and has no independent
 set of size `3`. As explained above, we rewrite `IndepSetFree` in terms of the
@@ -637,10 +638,11 @@ subsets are disjoint and distinct. When `β` is `Fin n`, we have the notation
 
 So an independent set in `Kn[n, k]` is a family of `k`-element subsets of `Fin n` in
 which no two members are disjoint: an *intersecting family*. The Erdős–Ko–Rado
-theorem says that if `2 * k ≤ n` then an intersecting family of `k`-element subsets
-of an `n`-element set has at most `(n - 1).choose (k - 1)` members. This is in
-Mathlib, and it is essentially the computation of the independence number of
-`Kn[n, k]`.
+theorem
+[Erdős–Ko–Rado 1961](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-ko-rado-1961)
+says that if `2 * k ≤ n` then an intersecting family of `k`-element subsets of an
+`n`-element set has at most `(n - 1).choose (k - 1)` members. This is in Mathlib, and
+it is essentially the computation of the independence number of `Kn[n, k]`.
 -/
 #check Finset.erdos_ko_rado
 /-!

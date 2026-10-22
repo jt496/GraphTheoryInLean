@@ -35,10 +35,16 @@ progressions as an application), and two results about infinite graphs, Kőnig's
 and the existence of ends.
 
 Many famous theorems are not (yet) in Mathlib. These include Ramsey's theorem for
-graphs, the Kővári–Sós–Turán theorem, Kirchhoff's matrix-tree theorem, Cayley's
-formula, Euler's circuit theorem, Euler's formula and planarity, Menger's theorem,
-Brooks' theorem, Vizing's theorem, Berge's theorem, Kőnig's theorem on bipartite
-matchings and the theorems of Dirac and Ore. (Some of these are proved in this guide:
+graphs, the Kővári–Sós–Turán theorem, Kirchhoff's matrix-tree theorem
+[Kirchhoff 1847](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-kirchhoff-1847),
+Cayley's formula
+[Cayley 1889](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-cayley-1889),
+Euler's circuit theorem, Euler's formula
+[Euler 1758](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-euler-1758) and
+planarity, Menger's theorem, Brooks' theorem, Vizing's theorem, Berge's theorem
+[Berge 1957](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-berge-1957),
+Kőnig's theorem on bipartite matchings and the theorems of Dirac and Ore. (Some of
+these are proved in this guide:
 [the simplest case](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-triangles-and-independent-sets)
 of Ramsey's theorem, `R(3, 3) = 6`,
 [Euler's theorem](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-euler-s-theorem)
@@ -83,9 +89,11 @@ The classical existence results for perfect matchings are Hall's marriage theore
 
 Let `G` be bipartite with parts `p₁` and `p₂` (in Lean `G.IsBipartiteWith p₁ p₂`).
 *Hall's condition* says that every finite set `s ⊆ p₁` has at least `|s|` neighbours.
-*Hall's theorem* says that this condition implies that `G` has a matching saturating
-`p₁`, that is, one whose vertices include all of `p₁`. (The converse is easy: the
-partners of the vertices in `s` are distinct neighbours of `s`.)
+*Hall's theorem*
+[Hall 1935](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hall-1935) says
+that this condition implies that `G` has a matching saturating `p₁`, that is, one
+whose vertices include all of `p₁`. (The converse is easy: the partners of the
+vertices in `s` are distinct neighbours of `s`.)
 
 [Figure: A bipartite graph with a subset $S$ and its open neighbourhood $N(S)$](https://jt496.github.io/GraphTheoryInLean/figures/hall.svg)
 -/
@@ -197,10 +205,11 @@ theorem exists_isMatching_of_forall_ncard_le' {p₁ p₂ : Set V}
 /-!
 ## Kőnig's Theorem
 
-In `matchingNum_le_vertexCoverNum` we proved weak duality `ν G ≤ τ G`: a vertex
-cover needs a vertex from each edge of a matching. *Kőnig's theorem* says that for
-bipartite graphs this is an equality. It is not in Mathlib, but we can deduce it from
-a *deficiency version* of Hall's theorem.
+In `matchingNum_le_vertexCoverNum` we proved weak duality `ν G ≤ τ G`: a vertex cover
+needs a vertex from each edge of a matching. *Kőnig's theorem*
+[Kőnig 1931](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-konig-1931) says
+that for bipartite graphs this is an equality. It is not in Mathlib, but we can
+deduce it from a *deficiency version* of Hall's theorem.
 
 Suppose that every finite `s ⊆ p₁` has at least `|s| - d` neighbours. We show that we
 can then match all but at most `d` vertices of `p₁`. Add `d` new vertices adjacent to
@@ -393,12 +402,14 @@ lemma starts from a cycle that we are given. The hard part is finding one.
 /-!
 ## Tutte's Theorem
 
-Tutte's theorem characterizes the graphs with a perfect matching, bipartite or not.
-If `G` has a perfect matching and we delete a set `U` of vertices, then each odd
-component of what remains (i.e. of `G - U`) must have a vertex matched into `U`, so
-there are at most `|U|` odd components. A set `U` whose deletion leaves more than
-`|U|` odd components is called a *Tutte violator*. Tutte's theorem says that `G` has
-a perfect matching iff there is no Tutte violator.
+Tutte's theorem
+[Tutte 1947](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-tutte-1947)
+characterizes the graphs with a perfect matching, bipartite or not. If `G` has a
+perfect matching and we delete a set `U` of vertices, then each odd component of what
+remains (i.e. of `G - U`) must have a vertex matched into `U`, so there are at most
+`|U|` odd components. A set `U` whose deletion leaves more than `|U|` odd components
+is called a *Tutte violator*. Tutte's theorem says that `G` has a perfect matching
+iff there is no Tutte violator.
 
 [Figure: A Tutte violator $U$ with three odd components of $G - U$](https://jt496.github.io/GraphTheoryInLean/figures/tutte.svg)
 -/
@@ -491,9 +502,10 @@ among the graphs on its vertex type with a given property.
 #source IsTuranMaximal
 
 /-!
-Turán's theorem says that for `0 < r` the Turán-maximal graphs are exactly the graphs
-isomorphic to the Turán graph. So the Turán graph is the unique extremal graph up to
-isomorphism.
+Turán's theorem
+[Turán 1941](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-turan-1941) says
+that for `0 < r` the Turán-maximal graphs are exactly the graphs isomorphic to the
+Turán graph. So the Turán graph is the unique extremal graph up to isomorphism.
 -/
 #check isTuranMaximal_iff_nonempty_iso_turanGraph
 
@@ -519,9 +531,10 @@ example [Fintype V] [DecidableRel G.Adj] {r : ℕ} (h : ω G ≤ r) :
 /-!
 ### Mantel's Theorem
 
-The case `r = 2` of Turán's theorem is *Mantel's theorem*: a triangle-free graph on
-`n` vertices has at most `⌊n² / 4⌋` edges. Equality holds for the balanced complete
-bipartite graph `T[n, 2]`.
+The case `r = 2` of Turán's theorem is *Mantel's theorem*
+[Mantel 1907](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-mantel-1907): a
+triangle-free graph on `n` vertices has at most `⌊n² / 4⌋` edges. Equality holds for
+the balanced complete bipartite graph `T[n, 2]`.
 -/
 #check turanNumber_two -- turanNumber n 2 = n ^ 2 / 4
 
@@ -694,8 +707,10 @@ Turán's theorem says that, up to isomorphism, the Turán graph is the only
 *stability theorem* says that any `(r + 1)`-clique-free graph with "almost" this many
 edges is "almost" the Turán graph, where the exact meaning of "almost" can vary.
 
-Füredi gave a short proof of a stability theorem in which being "almost" the Turán
-graph means becoming `r`-colourable after deleting a few edges. If `G` is
+Füredi
+[Füredi 2015](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-furedi-2015)
+gave a short proof of a stability theorem in which being "almost" the Turán graph
+means becoming `r`-colourable after deleting a few edges. If `G` is
 `(r + 1)`-clique-free and has `turanNumber n r - t` edges, then deleting at most `t`
 edges of `G` leaves an `r`-colourable graph. We prove this below in the following
 form: there is an `r`-colourable subgraph `H ≤ G` with
@@ -711,14 +726,15 @@ number of edges, so the balanced one, `T[n, r]`, maximizes the number of edges. 
 don't formalize this argument: the proof below simply applies
 `CliqueFree.card_edgeFinset_le` to the complete `r`-partite graph.)
 
-The proof idea goes back to Erdős. Pick a vertex `x` of maximum degree and put all of
-its non-neighbours (including `x` itself) into one part. Each of them has at most
-`deg x` neighbours, which is the number of vertices outside their part. Then continue
-inside the neighbourhood of `x`, which is `r`-clique-free since `x` is adjacent to
-all of it. Erdős used this to show that `G` has at most as many edges as the complete
-`r`-partite graph with these parts. Füredi's observation is that the same argument
-leaves enough room to also count the edges of `G` with both endpoints in the same
-part.
+The proof idea goes back to Erdős
+[Erdős 1970](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-1970).
+Pick a vertex `x` of maximum degree and put all of its non-neighbours (including `x`
+itself) into one part. Each of them has at most `deg x` neighbours, which is the
+number of vertices outside their part. Then continue inside the neighbourhood of `x`,
+which is `r`-clique-free since `x` is adjacent to all of it. Erdős used this to show
+that `G` has at most as many edges as the complete `r`-partite graph with these
+parts. Füredi's observation is that the same argument leaves enough room to also
+count the edges of `G` with both endpoints in the same part.
 
 To make the induction on `r` work we prove a statement about a set `S` of vertices
 that contains no `(r + 1)`-clique, and record the parts as the colour classes of a
@@ -938,8 +954,10 @@ Turán's theorem says that the densest `(r + 1)`-clique-free graphs are Turán g
 while Füredi's stability theorem tells us that graphs that are almost extremal, in
 terms of number of edges, are almost `r`-colourable.
 
-The Andrásfai–Erdős–Sós theorem gives a different type of stability result related to
-the minimum degree: any `(r + 1)`-clique-free graph with minimum degree greater than
+The Andrásfai–Erdős–Sós theorem
+[Andrásfai–Erdős–Sós 1974](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-andrasfai-erdos-sos-1974)
+gives a different type of stability result related to the minimum degree: any
+`(r + 1)`-clique-free graph with minimum degree greater than
 `(3 * r - 4) * n / (3 * r - 1)` must be `r`-colourable. For `r = 2` this says that a
 triangle-free graph with minimum degree greater than `2 * n / 5` is bipartite. The
 uniform blow-up `C[5][t]` shows that `2 * n / 5` cannot be lowered (see the
@@ -997,9 +1015,11 @@ complete graphs.
 
 /-!
 For bipartite forbidden graphs the extremal numbers are much smaller. The
-*Zarankiewicz number* (`zarankiewicz`) is the maximum number of edges in a
-`K[s, t]`-free bipartite graph with parts of sizes `m` and `n`. This is closely
-related to `extremalNumber n K[s, t]`.
+*Zarankiewicz number*
+[Zarankiewicz 1951](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-zarankiewicz-1951)
+(`zarankiewicz`) is the maximum number of edges in a `K[s, t]`-free bipartite graph
+with parts of sizes `m` and `n`. This is closely related to
+`extremalNumber n K[s, t]`.
 -/
 #source zarankiewicz
 #check zarankiewicz_le_extremalNumber
@@ -1007,7 +1027,9 @@ related to `extremalNumber n K[s, t]`.
 
 /-!
 The main upper bound for these numbers, the Kővári–Sós–Turán theorem
-`extremalNumber n K[s, t] = O(n ^ (2 - 1 / s))`, is not yet in Mathlib.
+[Kővári–Sós–Turán 1954](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-kovari-sos-turan-1954)
+says that `extremalNumber n K[s, t] = O(n ^ (2 - 1 / s))`. This is not yet in
+Mathlib.
 
 ## Turán Density and the Erdős–Stone Theorem
 
@@ -1038,9 +1060,11 @@ open Filter in
 #check eventually_isContained_of_card_edgeFinset
 
 /-!
-The *Erdős–Stone theorem* says that a large graph whose density is a little above
-`1 - 1 / r`, the Turán density of `K[r + 1]` (by Turán's theorem), contains not just
-`K[r + 1]` but a complete `(r + 1)`-partite graph with large parts:
+The *Erdős–Stone theorem*
+[Erdős–Stone 1946](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-stone-1946)
+says that a large graph whose density is a little above `1 - 1 / r`, the Turán
+density of `K[r + 1]` (by Turán's theorem), contains not just `K[r + 1]` but a
+complete `(r + 1)`-partite graph with large parts:
 `completeEquipartiteGraph (r + 1) t`.
 
 Mathlib has the minimum degree version of this theorem.
@@ -1048,16 +1072,19 @@ Mathlib has the minimum degree version of this theorem.
 #check eventually_completeEquipartiteGraph_isContained_of_minDegree
 
 /-!
-The Erdős–Stone–Simonovits formula `turanDensity H = 1 - 1 / (χ H - 1)` that follows
-from this is not yet in Mathlib.
+The Erdős–Stone–Simonovits formula
+[Erdős–Simonovits 1966](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-simonovits-1966)
+`turanDensity H = 1 - 1 / (χ H - 1)` that follows from this is not yet in Mathlib.
 
 # Zykov's Theorem *
 
 Turán's theorem bounds the number of edges of an `(r + 1)`-clique-free graph. An edge
-is just a `2`-clique, and Zykov proved the following generalization: any
-`(r + 1)`-clique-free graph on `n` vertices has at most as many `s`-cliques as the
-Turán graph `T[n, r]`. Moreover, except for the degenerate cases of `s < 2`, `s > r`
-or `s > n`, the Turán graph is (up to isomorphism) the unique maximizer.
+is just a `2`-clique, and Zykov
+[Zykov 1949](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-zykov-1949)
+proved the following generalization: any `(r + 1)`-clique-free graph on `n` vertices
+has at most as many `s`-cliques as the Turán graph `T[n, r]`. Moreover, except for
+the degenerate cases of `s < 2`, `s > r` or `s > n`, the Turán graph is (up to
+isomorphism) the unique maximizer.
 
 For example, the `T[7, 3]` is `4`-clique-free and its parts have sizes `3`, `2` and
 `2`, so it has `3 * 2 * 2 = 12` triangles. Zykov's theorem says that no
@@ -1754,9 +1781,11 @@ bipartite subgraph.
 /-!
 ## The Szemerédi Regularity Lemma
 
-The *regularity lemma* says that every graph can be approximated by a structured
-one: its vertices can be partitioned into a bounded number of almost equal parts so
-that most pairs of parts are `ε`-uniform.
+The *regularity lemma*
+[Szemerédi 1978](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-szemeredi-1978)
+says that every graph can be approximated by a structured one: its vertices can be
+partitioned into a bounded number of almost equal parts so that most pairs of parts
+are `ε`-uniform.
 
 [Figure: An $\varepsilon$-uniform partition; the band between two parts is shaded by their edge density](https://jt496.github.io/GraphTheoryInLean/figures/szemeredi.svg)
 
@@ -1778,10 +1807,12 @@ edges, one for each copy of `H` in `G` (see `copyCount`).
 #check le_card_edgeFinset_killCopies
 
 /-!
-The triangle removal lemma is a far stronger statement: if a graph on `n` vertices
-has few triangles, `o(n³)`, then it can be made triangle-free by deleting few edges,
-`o(n²)`. In Mathlib a graph is `ε`-*far from triangle-free* if at least `ε n²` edges
-must be deleted to make it triangle-free.
+The triangle removal lemma
+[Ruzsa–Szemerédi 1978](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-ruzsa-szemeredi-1978)
+is a far stronger statement: if a graph on `n` vertices has few triangles, `o(n³)`,
+then it can be made triangle-free by deleting few edges, `o(n²)`. In Mathlib a graph
+is `ε`-*far from triangle-free* if at least `ε n²` edges must be deleted to make it
+triangle-free.
 -/
 #source FarFromTriangleFree
 
@@ -1799,10 +1830,12 @@ three parts that are pairwise uniform and dense span many triangles.
 
 The triangle removal lemma has a striking application in additive number theory.
 
-*Roth's theorem* says that a set of integers with positive density contains a
-three-term arithmetic progression `a, a + d, a + 2 * d` with `d ≠ 0`. More precisely,
-for every `ε > 0` and all large enough `n`, every subset of `{0, …, n - 1}` with at
-least `ε * n` elements contains one. Mathlib phrases this as "is not `ThreeAPFree`".
+*Roth's theorem*
+[Roth 1953](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-roth-1953) says
+that a set of integers with positive density contains a three-term arithmetic
+progression `a, a + d, a + 2 * d` with `d ≠ 0`. More precisely, for every `ε > 0` and
+all large enough `n`, every subset of `{0, …, n - 1}` with at least `ε * n` elements
+contains one. Mathlib phrases this as "is not `ThreeAPFree`".
 -/
 #check roth_3ap_theorem_nat
 
@@ -1859,12 +1892,13 @@ Mathlib's `ruzsaSzemerediNumberNat n` is the largest number of triangles in such
 graph.
 
 In the other direction, sets without three-term arithmetic progressions give locally
-linear graphs with many triangles: a `ThreeAPFree` subset of `{0, …, n - 1}` with
-`m` elements gives a locally linear graph on `6 * n + 3` vertices with
-`(2 * n + 1) * m` triangles. Behrend's construction of large `ThreeAPFree` sets then
-shows that `ruzsaSzemerediNumberNat n` is at least a constant times
-`n² * exp (-4 * √(log n))`, which is larger than `n ^ (2 - c)` for every `c > 0` once
-`n` is large.
+linear graphs with many triangles: a `ThreeAPFree` subset of `{0, …, n - 1}` with `m`
+elements gives a locally linear graph on `6 * n + 3` vertices with `(2 * n + 1) * m`
+triangles. Behrend's construction
+[Behrend 1946](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-behrend-1946)
+of large `ThreeAPFree` sets then shows that `ruzsaSzemerediNumberNat n` is at least a
+constant times `n² * exp (-4 * √(log n))`, which is larger than `n ^ (2 - c)` for
+every `c > 0` once `n` is large.
 -/
 #check rothNumberNat_le_ruzsaSzemerediNumberNat
 #check ruzsaSzemerediNumberNat_asymptotic_lower_bound
@@ -1916,15 +1950,17 @@ theorem ruzsaSzemerediNumberNat_isLittleO :
   simpa using this.le
 
 /-!
-Ruzsa and Szemerédi stated their result as the *`(6, 3)` theorem*: a family of
-`3`-element subsets of an `n`-element set in which no `6` points contain `3` of the
-sets has `o(n²)` sets. This follows from the graph form above. If two sets share two
-points, then no other set meets them, so such sets come in pairs on `4` points each,
-and there are at most `n / 2` of them. Joining two points whenever one of the
-remaining sets contains both gives a graph whose triangles are exactly those sets.
-Every edge lies in one of these triangles and they are edge-disjoint, so the graph is
-locally linear, and by the Ruzsa–Szemerédi theorem there are `o(n²)` remaining sets.
-In total the family has at most `n / 2 + o(n²)` sets, which is still `o(n²)`.
+Ruzsa and Szemerédi
+[Ruzsa–Szemerédi 1978](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-ruzsa-szemeredi-1978)
+stated their result as the *`(6, 3)` theorem*: a family of `3`-element subsets of an
+`n`-element set in which no `6` points contain `3` of the sets has `o(n²)` sets. This
+follows from the graph form above. If two sets share two points, then no other set
+meets them, so such sets come in pairs on `4` points each, and there are at most
+`n / 2` of them. Joining two points whenever one of the remaining sets contains both
+gives a graph whose triangles are exactly those sets. Every edge lies in one of these
+triangles and they are edge-disjoint, so the graph is locally linear, and by the
+Ruzsa–Szemerédi theorem there are `o(n²)` remaining sets. In total the family has at
+most `n / 2 + o(n²)` sets, which is still `o(n²)`.
 
 # Infinite Graphs *
 
@@ -1933,7 +1969,9 @@ finite parts. We end with two results about the infinite structure of a graph.
 
 ## Kőnig's Lemma
 
-*Kőnig's lemma* (not to be confused with
+*Kőnig's lemma*
+[Kőnig 1927](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-konig-1927) (not
+to be confused with
 [Kőnig's theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)
 on matchings) says that an infinite, connected, locally finite graph contains an
 infinite path. Mathlib has the order-theoretic form of this result: in a (strongly
@@ -1975,6 +2013,8 @@ component does not depend on the choice of tail. So a ray chooses, for each fini
 component chosen for `L` lies inside the one chosen for `K`. Any consistent choice of
 components is called a *direction*.
 -/
+section ends
+open CategoryTheory Opposite
 #source ComponentCompl -- abbrev ComponentCompl := (G.induce Kᶜ).ConnectedComponent
 
 /-- A *direction* of `G` chooses, for every finite set `K` of vertices, a component
@@ -1984,10 +2024,12 @@ def IsDirection (f : (K : Finset V) → G.ComponentCompl K) : Prop :=
 
 /-!
 Two rays give the same direction exactly when they are equivalent, and Diestel and
-Kühn showed that every direction comes from a ray, so ends and directions are the
-same thing. Mathlib defines the ends of `G` as its directions, but phrased in the
-language of category theory. `G.componentComplFunctor` is the functor sending each
-finite set `K` to `G.ComponentCompl K`, and each inclusion `K ⊆ L` to the map
+Kühn
+[Diestel–Kühn 2003](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-diestel-kuhn-2003)
+showed that every direction comes from a ray, so ends and directions are the same
+thing. Mathlib defines the ends of `G` as its directions, but phrased in the language
+of category theory. `G.componentComplFunctor` is the functor sending each finite set
+`K` to `G.ComponentCompl K`, and each inclusion `K ⊆ L` to the map
 `ComponentCompl.hom` sending a component of `G - L` to the component of `G - K` that
 contains it. These maps run from `L` to `K` (the opposite direction to the inclusion
 `K ⊆ L`), so the functor is defined on the opposite category `(Finset V)ᵒᵖ`. A
@@ -1995,7 +2037,6 @@ direction is then a *section* of this functor: an element of each set, compatibl
 with all of the maps.
 -/
 
-open CategoryTheory Opposite
 #check componentComplFunctor -- (G : SimpleGraph V) : (Finset V)ᵒᵖ ⥤ Type u
 #check SimpleGraph.end -- Set ((j : (Finset V)ᵒᵖ) → G.componentComplFunctor.obj j)
 
@@ -2003,7 +2044,6 @@ open CategoryTheory Opposite
 Unwinding the definitions, the elements of `G.end` are exactly the directions. (Here
 `op K` is `K` regarded as an object of `(Finset V)ᵒᵖ`.)
 -/
-open CategoryTheory Opposite in
 /-- The ends of `G`, as defined in Mathlib, are exactly its directions. -/
 theorem mem_end_iff {f : (K : (Finset V)ᵒᵖ) → G.componentComplFunctor.obj K} :
     f ∈ G.end ↔ G.IsDirection fun K => f (op K) := by
@@ -2098,6 +2138,7 @@ example : Nat.card pathNat₁.end = 1 := by
   · have : Fact pathNat₁.Preconnected := ⟨pathNat₁_connected.preconnected⟩
     exact (nonempty_ends_of_infinite _).to_subtype
 
+end ends
 /-!
 A graph can have more than one end. The two-way infinite path `hasse ℤ` has two, one
 in each direction, and the infinite binary tree has uncountably many, one for each

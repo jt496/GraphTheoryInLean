@@ -580,14 +580,16 @@ argument via Zorn's lemma.
 /-!
 # Eulerian Circuits and Trails
 
-Mathlib has the necessary conditions in Euler's theorem (see
+Mathlib has the necessary conditions in Euler's theorem
+[Euler 1741](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-euler-1741) (see
 [Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails)),
 but not the existence direction: a connected graph with all degrees even has an
 Eulerian circuit, and a connected graph with exactly two vertices of odd degree has
 an Eulerian trail. We prove these here with a splicing argument in the style of
-*Hierholzer's algorithm*. Rather than running the algorithm we take a longest trail
-and show that, if it were not Eulerian, we could splice a circuit into it to make it
-longer.
+*Hierholzer's algorithm*
+[Hierholzer 1873](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hierholzer-1873).
+Rather than running the algorithm we take a longest trail and show that, if it were
+not Eulerian, we could splice a circuit into it to make it longer.
 
 A standard proof might typically prove this for the all-even circuit case first and
 then argue that the open trail case reduces to the closed circuit case by adding a
@@ -1052,11 +1054,12 @@ Informally, a graph is `k`-edge-connected if deleting less than `k` edges always
 leaves it connected, and `k`-vertex-connected if deleting less than `k` vertices
 always leaves it connected. Mathlib has the first notion, and we define the second.
 
-These are the *deletion* forms of the definitions. *Menger's theorem* gives the
-equivalent *path* forms: a graph is `k`-edge-connected iff any two distinct vertices
-are joined by `k` edge-disjoint paths, and a graph with more than `k` vertices is
-`k`-vertex-connected iff any two distinct vertices are joined by `k` paths that share
-only their endpoints. Menger's theorem is not currently in Mathlib.
+These are the *deletion* forms of the definitions. *Menger's theorem*
+[Menger 1927](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-menger-1927)
+gives the equivalent *path* forms: a graph is `k`-edge-connected iff any two distinct
+vertices are joined by `k` edge-disjoint paths, and a graph with more than `k`
+vertices is `k`-vertex-connected iff any two distinct vertices are joined by `k`
+paths that share only their endpoints. Menger's theorem is not currently in Mathlib.
 
 ## Edge Connectivity
 
@@ -1504,13 +1507,15 @@ lemma vertexConnectivity_of_subsingleton [Subsingleton V] : κ(G) = 0 := by
 # Brooks' Theorem *
 
 The greedy bound `colorable_of_degree_le` says that a graph of maximum degree at most
-`Δ` is `(Δ + 1)`-colourable. *Brooks' theorem* says exactly when this can be improved
-to `Δ`: a finite connected graph of maximum degree `Δ` is `Δ`-colourable unless it is
-the complete graph `K[Δ + 1]` or (when `Δ = 2`) an odd cycle. Applying this to each
-component, a finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it
-contains a `(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle.
-Odd cycles are only an obstruction when `Δ = 2`: for example the Petersen graph is
-`3`-regular and contains `5`-cycles, but it is `3`-colourable.
+`Δ` is `(Δ + 1)`-colourable. *Brooks' theorem*
+[Brooks 1941](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-brooks-1941)
+says exactly when this can be improved to `Δ`: a finite connected graph of maximum
+degree `Δ` is `Δ`-colourable unless it is the complete graph `K[Δ + 1]` or (when
+`Δ = 2`) an odd cycle. Applying this to each component, a finite graph of maximum
+degree at most `Δ` is `Δ`-colourable unless it contains a `(Δ + 1)`-clique or (when
+`Δ = 2`) one of its components is an odd cycle. Odd cycles are only an obstruction
+when `Δ = 2`: for example the Petersen graph is `3`-regular and contains `5`-cycles,
+but it is `3`-colourable.
 
 The cases `Δ = 2` and `Δ ≥ 3` are very different. The case `Δ = 2` follows quickly
 from our characterization of bipartite graphs, `isBipartite_iff_forall_isCycle_even`,
@@ -1548,8 +1553,10 @@ theorem brooks_two [G.LocallyFinite] (hdeg : ∀ v, G.degree v ≤ 2)
 ## Maximum Degree at Least Three
 
 From now on we assume that `Δ ≥ 3`. The classical greedy colouring proof due to
-Lovász (1975) uses the *blocks* of a graph, its maximal connected subgraphs without a
-cut vertex, which we study in the next section,
+Lovász
+[Lovász 1975](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-lovasz-1975)
+uses the *blocks* of a graph, its maximal connected subgraphs without a cut vertex,
+which we study in the next section,
 [Cut Vertices and Blocks*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-cut-vertices-and-blocks).
 Instead, the proof we give is a variation of Lovász's approach that avoids blocks: it
 uses partial colourings and the idea behind greedy colouring, but replaces the need

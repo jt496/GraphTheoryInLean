@@ -120,6 +120,17 @@ figure.stil-figure img {
     color: #4a2472;
 }
 
+/* Inline Lean in prose is set in a single colour: names, variables and keywords
+   take the inline-code colour above (no bold keywords, no italic variables), so a
+   resolved `{smart}` span looks the same as one that fell back to plain code.
+   Hovers and the dotted link underline still mark the resolved ones. Block code
+   keeps its token colours. Delete this rule to restore coloured inline tokens. */
+.content-wrapper :is(p, li, td, h1, h2, h3, h4) code.hl.lean:not(.block) * {
+    color: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+}
+
 /* Prose/inline-code size matching.
    Prose is set in Lato, whose x-height is smaller than the JetBrains Mono used
    for inline Lean ({smart}/{lean}/{name}) and code spans, so at an equal pixel
@@ -608,6 +619,9 @@ ol.section-toc > li.part-sep {
     }
     span.stil-footnote-content::before { content: " ["; }
     span.stil-footnote-content::after  { content: "]"; }
+    /* A citation's popup repeats its label with the full entry, which the
+       References appendix already lists, so print just the label. */
+    span.stil-cite span.stil-footnote-content { display: none !important; }
 
     /* Make links readable in print: show URL after link text.
        Only for genuine prose links — every identifier in a Lean code block is

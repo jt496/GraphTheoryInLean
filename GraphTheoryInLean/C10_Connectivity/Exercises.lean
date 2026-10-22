@@ -224,8 +224,10 @@ example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
 /-!
 18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
-this gives Whitney's inequalities `κ(G) ≤ λ(G) ≤ δ(G)`. Hint:
-`exists_minimal_degree_vertex` and `edgeConnectivity_le_degree`.
+this gives Whitney's inequalities
+[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-whitney-1932)
+`κ(G) ≤ λ(G) ≤ δ(G)`. Hint: `exists_minimal_degree_vertex` and
+`edgeConnectivity_le_degree`.
 -/
 lemma edgeConnectivity_le_minDegree' [Fintype V] [Nontrivial V]
     [DecidableRel G.Adj] : λ(G) ≤ G.minDegree := by
@@ -697,8 +699,10 @@ example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
 /-!
 18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
-this gives Whitney's inequalities `κ(G) ≤ λ(G) ≤ δ(G)`. Hint:
-`exists_minimal_degree_vertex` and `edgeConnectivity_le_degree`.
+this gives Whitney's inequalities
+[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-whitney-1932)
+`κ(G) ≤ λ(G) ≤ δ(G)`. Hint: `exists_minimal_degree_vertex` and
+`edgeConnectivity_le_degree`.
 -/
 lemma edgeConnectivity_le_minDegree [Fintype V] [Nontrivial V]
     [DecidableRel G.Adj] : λ(G) ≤ G.minDegree := by

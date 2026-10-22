@@ -1563,10 +1563,11 @@ we will see that the Hamming distance is the graph distance in `Q[n]`.
 /-!
 ### Gray Code
 
-The hypercube contains a canonical Hamiltonian path called the *Gray code* which we
-will now define. Its endpoints are marked `@[implicit_reducible]` (as `HypercubeVert`
-is) so that `grayStart (n + 1)` unfolds to `(grayStart n, false)` when Lean checks
-the endpoints of the `Walk.copy`s below.
+The hypercube contains a canonical Hamiltonian path called the *Gray code*
+[Gray 1953](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-gray-1953) which
+we will now define. Its endpoints are marked `@[implicit_reducible]` (as
+`HypercubeVert` is) so that `grayStart (n + 1)` unfolds to `(grayStart n, false)`
+when Lean checks the endpoints of the `Walk.copy`s below.
 -/
 /-- The first vertex of the Gray code walk is a nested tuple of `false`. -/
 @[simp, implicit_reducible]
@@ -1953,14 +1954,17 @@ end mycielskian
 # Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal *
 
 In this section we prove three classical sufficient conditions for a graph to be
-Hamiltonian. The oldest two are *Ore's theorem*, which says that a finite graph on
-at least 3 vertices is Hamiltonian if the sum of the degrees of every pair of
-non-adjacent vertices is at least the number of vertices in the graph, and its
-immediate (but earlier) corollary *Dirac's theorem* (minimum degree at least half
-the number of vertices suffices).
+Hamiltonian. The oldest two are *Ore's theorem*
+[Ore 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-ore-1960), which
+says that a finite graph on at least 3 vertices is Hamiltonian if the sum of the
+degrees of every pair of non-adjacent vertices is at least the number of vertices in
+the graph, and its immediate (but earlier) corollary *Dirac's theorem*
+[Dirac 1952](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-dirac-1952)
+(minimum degree at least half the number of vertices suffices).
 
-Rather than prove Ore's theorem directly we prove the Bondy–Chvátal theorem: a
-graph is Hamiltonian iff its *closure* is, where the closure is obtained by
+Rather than prove Ore's theorem directly we prove the Bondy–Chvátal theorem
+[Bondy–Chvátal 1976](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-bondy-chvatal-1976):
+a graph is Hamiltonian iff its *closure* is, where the closure is obtained by
 repeatedly joining non-adjacent vertices whose degree sum is at least the number of
 vertices. Ore's theorem falls out immediately, since the closure of an Ore graph is
 complete and complete graphs are Hamiltonian (`top_isHamiltonian`).
@@ -1987,9 +1991,11 @@ The proof has four steps.
 ## Pósa Rotations
 
 Before starting the proof of Bondy–Chvátal we first introduce the notion of a
-*Pósa rotation* of a walk. This is a key tool in the proof, but is also a more
-generally useful technique for working with paths and cycles that has found numerous
-applications in modern graph theory.
+*Pósa rotation*
+[Pósa 1976](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-posa-1976) of a
+walk. This is a key tool in the proof, but is also a more generally useful technique
+for working with paths and cycles that has found numerous applications in modern
+graph theory.
 
 Given a walk `P = v₀, v₁, ..., vₖ` and an edge `vᵢ — vₖ` in the graph, we form a new
 walk: `v₀, v₁, ..., vᵢ, vₖ, vₖ₋₁, ..., vᵢ₊₁`. This new "rotated" walk has the same

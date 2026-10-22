@@ -702,8 +702,10 @@ breadth-first search tree rooted at `r`, as in the figure of the Petersen graph 
 Comparing the sizes of consecutive layers gives two classical bounds relating the
 number of vertices of a graph to its degrees, its diameter and its girth.
 
-* The *Moore bound*: a graph with maximum degree at most `d + 1` and diameter at most
-  `k` has at most `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))` vertices.
+* The *Moore bound*
+  [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hoffman-singleton-1960):
+  a graph with maximum degree at most `d + 1` and diameter at most `k` has at most
+  `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))` vertices.
 * The *cage bound*: a graph with minimum degree at least `d + 1` and girth at least
   `2 * k + 1` has at least `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))` vertices.
 
@@ -1237,6 +1239,7 @@ lemma egirth_petersenGraph : petersenGraph.egirth = 5 := by
 Moore graphs are rare. Besides `C[5]` and the Petersen graph, the only known Moore
 graph of diameter `2` is the Hoffman–Singleton graph, which is `7`-regular with `50`
 vertices. The Hoffman–Singleton theorem
+[Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hoffman-singleton-1960)
 ([Strongly Regular Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-strongly-regular-graphs))
 shows that any other would be `57`-regular, and whether one exists is a famous open
 problem. For diameter at least `3`, it is known that the only Moore graphs are the
@@ -1376,12 +1379,13 @@ example (d : ℕ) :
 /-!
 # Albertson's Precolouring Extension Theorem *
 
-Albertson's precolouring extension theorem says that if `G` is `k`-colourable and `s`
-is a set of vertices that are pairwise at distance at least `4`, then any assignment
-`f : s → Fin (k + 1)` of colours to the vertices of `s` extends to a proper
-`(k + 1)`-colouring of `G`. (In general a *precolouring* must be a proper colouring
-of the subgraph induced by `s`, but here no two vertices of `s` are adjacent, so
-every assignment of colours is allowed.)
+Albertson's precolouring extension theorem
+[Albertson 1998](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-albertson-1998)
+says that if `G` is `k`-colourable and `s` is a set of vertices that are pairwise at
+distance at least `4`, then any assignment `f : s → Fin (k + 1)` of colours to the
+vertices of `s` extends to a proper `(k + 1)`-colouring of `G`. (In general a
+*precolouring* must be a proper colouring of the subgraph induced by `s`, but here no
+two vertices of `s` are adjacent, so every assignment of colours is allowed.)
 
 The hypothesis is stated with `edist`. Had we written `4 ≤ G.dist u w` instead, the
 junk value `0` for unreachable pairs would forbid precoloured vertices in different
