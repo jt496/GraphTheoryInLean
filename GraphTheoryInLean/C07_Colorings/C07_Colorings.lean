@@ -5,10 +5,6 @@ import Mathlib.Logic.Equiv.Fintype
 import Mathlib.Combinatorics.SimpleGraph.FiveWheelLike
 import Mathlib.Data.List.GetD
 namespace SimpleGraph
-open Finset
-section colorings
-variable {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
-
 /-!
 A *proper colouring* of a graph assigns a colour to each vertex so that adjacent
 vertices receive different colours, and the *chromatic number* is the least number of
@@ -39,6 +35,9 @@ In Mathlib, a `γ`-colouring of `G` is a *graph homomorphism* from `G` to the co
 graph `⊤` on `γ`. Since all distinct pairs of vertices are adjacent in `⊤`, this
 corresponds exactly to a proper `γ`-colouring.
 -/
+open Finset
+section colorings
+variable {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
 
 #source SimpleGraph.Coloring -- abbrev Coloring (α : Type v) := G →g completeGraph α
 
@@ -434,7 +433,6 @@ example {ι : Type*} (W : ι → Type*) :
 #check completeMultipartiteGraph.chromaticNumber
   -- [Fintype ι] (f : ∀ i, W i) : χ (completeMultipartiteGraph W) = Fintype.card ι
 
-section boxprod
 /-!
 ## Colouring Box Products
 
@@ -499,7 +497,7 @@ into colourability statements.
 theorem chromaticNumber_boxProd [Nonempty V] [Nonempty W] :
     χ (G □ H) = max (χ G) (χ H) := by
   refine eq_of_forall_ge_iff fun m => ?_
-  induction m using ENat.recTopCoe with
+  cases m with
   | top => simp
   | coe m => simp [chromaticNumber_le_iff_colorable, colorable_boxProd_iff]
 
@@ -508,8 +506,6 @@ Mathlib has the same result for the disjoint union `G ⊕g H`, where no nonempti
 assumption is needed.
 -/
 #check chromaticNumber_sum -- χ (G ⊕g H) = max (χ G) (χ H)
-
-end boxprod
 
 /-!
 ## Colouring Hypercubes
@@ -575,8 +571,7 @@ The `Bool`-colouring of `Q[4]` using `HypercubeVert.bool`.
 #eval (hypercube.bicoloring 4) -- {1111 ↦ false, 1110 ↦ true, ..., 0000 ↦ false}
 
 end colorings
-section mycielskian
-variable {V : Type*} {G : SimpleGraph V}
+
 /-!
 # Colouring Mycielskians
 
@@ -609,6 +604,9 @@ colour of `none` to `k` we use `recolorOfEquiv`, which recolours a colouring alo
 bijection of the colours, in this case the transposition swapping `k` with the colour
 of `none`: `Equiv.swap (Fin.last k) (c none)`.
 -/
+section mycielskian_and_edges
+variable {V : Type*} {G : SimpleGraph V}
+
 /-- Given any `(k + 1)`-colouring of `mμ[G]` this is the equivalent
 `(k + 1)`-colouring in which the vertex `none` receives colour `k`. -/
 def Coloring.mycielskianLast {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1))) :
@@ -667,7 +665,9 @@ def Coloring.mycielskian {k : ℕ} (c : G.Coloring (Fin k)) :
     rintro (_ | v | v) (_ | w | w) hab <;>
       simp_all [c.valid, (Fin.castSucc_ne_last _).symm]
 
-/-- `G` is `k`-colourable iff `mμ[G]` is `(k + 1)`-colourable. -/
+/-!
+`G` is `k`-colourable iff `mμ[G]` is `(k + 1)`-colourable.
+-/
 lemma colorable_mycielskian_succ_iff (k : ℕ) :
     mμ[G].Colorable (k + 1) ↔ G.Colorable k := by
   constructor <;> intro ⟨c⟩
@@ -684,7 +684,7 @@ a natural number we split further into the cases `m = 0` (neither side is at mos
 /-- The chromatic number of the Mycielskian of `G`. -/
 theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ[G] = χ G + 1 := by
   refine eq_of_forall_ge_iff fun m => ?_
-  induction m using ENat.recTopCoe with
+  cases m with
   | top => simp
   | coe m =>
     rcases m with _ | k
@@ -745,10 +745,6 @@ theorem mycielski (n : ℕ) : ω (mμ^n K[2]) = 2 ∧ χ (mμ^n K[2]) = n + 2 :=
   ⟨cliqueNum_iterMycielskian_completeGraph_two n,
     chromaticNumber_iterMycielskian_completeGraph_two n⟩
 
-end mycielskian
-
-section edgeColorings
-variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Edge Colourings
 
@@ -788,6 +784,8 @@ theorem maxDegree_le_chromaticNumber_lineGraph [Fintype V] [DecidableRel G.Adj] 
   · obtain ⟨v, hv⟩ := G.exists_maximal_degree_vertex
     exact hv ▸ G.degree_le_chromaticNumber_lineGraph v
 
+end mycielskian_and_edges
+
 /-!
 Vizing's theorem says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for
 every finite graph `G`, and Kőnig's line colouring theorem says that `χ'(G) = Δ(G)`
@@ -796,10 +794,7 @@ the next section, applied to `L[G]`, whose vertices have degree at most
 `2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib is also
 missing many other standard topics of colouring theory such as chromatic polynomials
 and list colourings.)
--/
-end edgeColorings
 
-/-!
 # Greedy Colouring *
 
 *Greedy colouring* means constructing a colouring one vertex at a time, choosing the
@@ -816,7 +811,6 @@ need some kind of ordering on the vertices. The simplest form this can take is a
 instance of `LT` on the vertex type.
 -/
 section degreeLT
-
 variable {V : Type*} (G : SimpleGraph V) [LT V]
 
 /-- The set of neighbours of `v` that are less than `v`. -/
@@ -868,10 +862,11 @@ also use `ℕ` as our set of colours. (Later we will show how to easily extend o
 greedy colourings to any constructively countable vertex type.)
 -/
 section greedy
-
 variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
-/-- Any `SimpleGraph ℕ` with decidable adjacency is `LocallyLTFinite`. -/
+/-!
+Any `SimpleGraph ℕ` with decidable adjacency is `LocallyLTFinite`.
+-/
 instance : G.LocallyLTFinite :=
   fun v => Fintype.ofFinset {u < v | G.Adj v u} (by simp [neighborLTSet])
 
@@ -1060,12 +1055,12 @@ Our greedy colouring construction allows us to colour graphs on `ℕ`, for examp
 #eval pathNat₁.greedyColoringNat 9 -- 1
 
 #eval (⊤ : SimpleGraph ℕ).greedyColoringNat 6 -- 6
+end greedy
 
 /-!
 The `#eval`s above are deliberately timid: colouring vertex `6` of `⊤` is fine, but
 vertex `10` would take several minutes. We will see why, and fix it, below.
 -/
-end greedy
 
 /-!
 ## Greedy Colouring vs. the Crown Graph
@@ -1508,6 +1503,8 @@ Suddenly `greedy` is much faster!
 -/
 #eval (⊤ : SimpleGraph ℕ).greedy 200 -- 200
 
+end evaluating
+
 /-!
 To be clear: `@[csimp]` rewrites `greedy` in code that is compiled *after* the
 attribute is registered. Code compiled before it keeps its old, super-exponential
@@ -1517,8 +1514,6 @@ implementation. For example `greedyColoringNat` and `greedyColoringFin`, whose
 directly in terms of our new, efficient version of `greedy`.)
 -/
 
-end evaluating
-
 /-!
 ## Computing Colourings of Encodable Graphs
 
@@ -1526,13 +1521,11 @@ With `greedy` now faster, the same construction as `greedyColoringFin` gives
 computable greedy colourings of graphs on any encodable vertex type with decidable
 adjacency.
 -/
-section encodableColorings
-variable {V : Type*} [Encodable V]
-
 /-- The natural greedy `ℕ`-colouring of a graph `G : SimpleGraph V` on an `Encodable`
 vertex type via its `Encodable` instance. -/
 @[simps]
-def greedyColoring (G : SimpleGraph V) [DecidableRel G.Adj] : G.Coloring ℕ where
+def greedyColoring {V : Type*} [Encodable V] (G : SimpleGraph V)
+    [DecidableRel G.Adj] : G.Coloring ℕ where
   toFun v := G.encode.greedy (Encodable.encode v)
   map_rel' h := ((Embedding.encode G).map_rel_iff.mpr h).greedy_ne
 
@@ -1548,13 +1541,12 @@ same pattern as the `DecidableEq` and `Fintype` instances for `HypercubeVert n` 
 instance (n : ℕ) : Encodable (ZMod n) := by
   cases n <;> unfold ZMod <;> infer_instance
 
-instance (n : ℕ) : Encodable (mμᵥ^n V) := by
+instance iterMycielskianEncodable {V : Type*} [Encodable V] (n : ℕ) :
+    Encodable (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
-instance (n : ℕ) : Encodable (HypercubeVert n) := by
+instance hypercubeEncodable (n : ℕ) : Encodable (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
-
-end encodableColorings
 
 /-!
 We can now compute greedy colourings of many concrete graphs:

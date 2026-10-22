@@ -5,9 +5,6 @@ import Mathlib.Combinatorics.SimpleGraph.Matching
 import Mathlib.Combinatorics.SimpleGraph.VertexCover
 import Mathlib.Combinatorics.SimpleGraph.Finsubgraph
 namespace SimpleGraph
-open Subgraph
-section basics
-variable {V : Type*} {G : SimpleGraph V} {H : G.Subgraph}
 /-!
 Informally, a *subgraph* of a graph `G` is a graph `H` with `V(H) ⊆ V(G)` and
 `E(H) ⊆ E(G)`. We have already seen the subgraph order `H ≤ G` on `SimpleGraph V`,
@@ -39,6 +36,10 @@ proof of *Brooks' theorem* in
 
 Given `G : SimpleGraph V`, `G.Subgraph` is the type of general subgraphs of `G`.
 -/
+open Subgraph
+section basics
+variable {V : Type*} {G : SimpleGraph V} {H : G.Subgraph}
+
 #source Subgraph
 
 /-!
@@ -733,6 +734,9 @@ Mathlib has the predicates `Subgraph.IsMatching` and `Subgraph.IsPerfectMatching
 which say that a `G.Subgraph` is a matching or a perfect matching, as well as
 `SimpleGraph.IsMatchingFree` which says that a graph has no perfect matching.
 -/
+section matchingnumber
+variable {V : Type*} {G : SimpleGraph V}
+
 #source Subgraph.IsMatching        -- ∀ ⦃v⦄, v ∈ M.verts → ∃! w, M.Adj v w
 #source Subgraph.IsPerfectMatching -- M.IsMatching ∧ M.IsSpanning
 #source SimpleGraph.IsMatchingFree --  ∀ M : Subgraph G, ¬ M.IsPerfectMatching
@@ -755,9 +759,6 @@ the definition below, the second binder `(_ : M.IsMatching)` ranges over proofs 
 `M` is a matching, so a subgraph that is not a matching contributes an empty
 supremum, `⊥ = 0`, and only matchings count.
 -/
-section matchingnumber
-variable {V : Type*} {G : SimpleGraph V}
-
 #check Set.encard
 #source vertexCoverNum
 
@@ -1000,10 +1001,6 @@ theorem matchingNum_le_vertexCoverNum (G : SimpleGraph V) :
   exact ENat.card_le_card_of_injective (f := f) fun e₁ e₂ h =>
     Subtype.ext (hM.eq_of_mem_edge e₁.2 e₂.2 (hf e₁) (h ▸ hf e₂))
 
-
-end matchingnumber
-section hypercubematching
-variable {V : Type*} {G : SimpleGraph V}
 /-!
 ## Matching Number of the Hypercube
 
@@ -1046,6 +1043,16 @@ lemma Subgraph.IsPerfectMatching.boxProdLeft {β : Type*} {M : G.Subgraph}
   exact Prod.ext (huniq c hadj) rfl
 
 /-!
+A graph, or rather its `top` subgraph, is a perfect matching iff every vertex has
+degree one.
+-/
+lemma Subgraph.isPerfectMatching_top_iff [G.LocallyFinite] :
+    (⊤ : G.Subgraph).IsPerfectMatching ↔ ∀ v : V, G.degree v = 1 := by
+  simp [isPerfectMatching_iff, SimpleGraph.degree_eq_one_iff_existsUnique_adj]
+
+end matchingnumber
+
+/-!
 The recursive perfect matching of the hypercube is now immediate.
 -/
 /-- A perfect matching of `Q[n + 1]` defined recursively: `⊤` on `Q[1]`, and on
@@ -1053,14 +1060,6 @@ The recursive perfect matching of the hypercube is now immediate.
 def hypercube.matching : (n : ℕ) → Q[n + 1].Subgraph
   | 0 => ⊤
   | n + 1 => (hypercube.matching n).boxProdLeft ⊤
-
-/-!
-A graph, or rather its `top` subgraph, is a perfect matching iff every vertex has
-degree one.
--/
-lemma Subgraph.isPerfectMatching_top_iff [G.LocallyFinite] :
-    (⊤ : G.Subgraph).IsPerfectMatching ↔ ∀ v : V, G.degree v = 1 := by
-  simp [isPerfectMatching_iff, SimpleGraph.degree_eq_one_iff_existsUnique_adj]
 
 /-!
 By induction `hypercube.matching n` is a perfect matching of `Q[n + 1]`.
@@ -1080,7 +1079,6 @@ lemma matchingNum_hypercube_succ (n : ℕ) : ν Q[n + 1] = 2 ^ n := by
     rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ]; grind
   exact_mod_cast h
 
-end hypercubematching
 /-!
 ## Matching Number of the Mycielskian
 
@@ -1091,6 +1089,7 @@ general).
 -/
 section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
+
 /-- Given a subgraph `M` of `G`, the `mycielskianDouble` of `M` is the subgraph of
 `mμ[G]` with edges given by `x ₗ — y ᵣ` and `x ᵣ — y ₗ` for each edge `x — y` in `M`.
 -/
@@ -1227,6 +1226,7 @@ to an existential over vertices of the subtype `↑s`, coming from `SimpleGraph.
 -/
 section partcol
 variable {V : Type*} {G : SimpleGraph V}
+
 example {s : Set V} :
     ((⊤ : G.Subgraph).induce s).spanningCoe = (G.induce s).spanningCoe :=
   spanningCoe_induce_top _

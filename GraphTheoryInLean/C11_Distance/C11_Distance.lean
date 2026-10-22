@@ -4,11 +4,7 @@ import GraphTheoryInLean.C09_Subgraphs.C09_Subgraphs
 import GraphTheoryInLean.C10_Connectivity.C10_Connectivity
 import Mathlib.Combinatorics.SimpleGraph.Girth
 import Mathlib.Combinatorics.SimpleGraph.Diam
-variable {V : Type*} {G : SimpleGraph V}
 namespace SimpleGraph
-
-open Walk
-
 /-!
 The *distance* between two vertices of a graph measures how far apart they are: it is
 the length of a shortest walk between them. In a connected graph it makes the vertex
@@ -40,6 +36,8 @@ distance `0`. In this chapter we will work almost entirely with `edist`, and pas
 
 [Figure: breadth-first search layers from a root vertex partition $V$ by graph distance](https://jt496.github.io/GraphTheoryInLean/figures/distance_bfs.svg)
 -/
+variable {V : Type*} {G : SimpleGraph V}
+open Walk
 
 #source SimpleGraph.edist -- def edist (u v : V) : ℕ∞ := ⨅ w : G.Walk u v, w.length
 #source SimpleGraph.dist  -- def dist (u v : V) : ℕ := (G.edist u v).toNat

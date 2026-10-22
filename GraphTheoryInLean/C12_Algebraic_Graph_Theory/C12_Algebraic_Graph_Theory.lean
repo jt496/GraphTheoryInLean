@@ -11,9 +11,7 @@ import Mathlib.Combinatorics.SimpleGraph.IncMatrix
 import Mathlib.Combinatorics.SimpleGraph.StronglyRegular
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
 import Mathlib.NumberTheory.Real.GoldenRatio
-variable {V : Type*} {G : SimpleGraph V}
 namespace SimpleGraph
-
 /-!
 *Algebraic graph theory* studies a graph via algebraic objects attached to it, above
 all its *automorphism group*, which measures how symmetric the graph is, and its
@@ -46,6 +44,7 @@ Mathlib provides a `Group` instance on the automorphisms `G ≃g G` of any graph
 multiplication given by composition: `(e * f) v = e (f v)`. (Recall that
 `SimpleGraph.Iso` is an abbrev for `RelIso`, which has a `Group` instance.)
 -/
+
 #synth Group (C[5] ≃g C[5]) -- RelIso.instGroup
 
 /-!
@@ -65,7 +64,7 @@ check that it is multiplicative. We follow Mathlib's naming for such maps (compa
 /-- Transport of the automorphism group of a graph along an isomorphism
 `e : G ≃g H`, by conjugation: `f ↦ e ∘ f ∘ e.symm`. -/
 @[simps!]
-def Iso.autCongr {W : Type*} {H : SimpleGraph W} (e : G ≃g H) :
+def Iso.autCongr {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} (e : G ≃g H) :
     (G ≃g G) ≃* (H ≃g H) :=
   { RelIso.relIsoCongr e e with
     map_mul' f g := by ext v; simp [RelIso.relIsoCongr_apply] }
@@ -311,6 +310,9 @@ notation for a matrix written row by row.)
 
 [Figure: A graph $G$ and its adjacency matrix $A(G)$](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
 -/
+section adjmatrix
+variable {V : Type*} {G : SimpleGraph V}
+
 #source adjMatrix
 #eval C[4].adjMatrix ℕ -- !![0, 1, 0, 1; 1, 0, 1, 0; 0, 1, 0, 1; 1, 0, 1, 0]
 
@@ -757,6 +759,9 @@ theorem IsRegularOfDegree.finrank_eigenspace_adjMatrix [Fintype V] [DecidableEq 
     ext i j
     simp [Matrix.toLin'_apply, Pi.single_apply, Matrix.natCast_apply, eq_comm]
   rw [this, LinearMap.ker_neg]
+
+
+end adjmatrix
 
 /-!
 For example, the hypercube `Q[n]` is `n`-regular and connected, so `n` is a simple
@@ -1416,7 +1421,7 @@ pass between copies of `A` in `B` and subgraphs of `B` isomorphic to `A`.
 -/
 section copies
 open Subgraph
-variable {W : Type*}
+variable {V W : Type*} {G : SimpleGraph V}
 
 #check Copy.toSubgraph     -- (f : Copy A B) : B.Subgraph
 #check Copy.isoToSubgraph  -- (f : Copy A B) : A ≃g f.toSubgraph.coe
@@ -1667,8 +1672,6 @@ theorem labelledCopyCount_eq_copyCount_mul_labelledCopyCount [Fintype V] [Fintyp
     Fintype.card_prod, copyCount, Fintype.card_subtype]
   rfl
 
-end copies
-
 /-!
 Isomorphisms `A ≃g A'` and `B ≃g B'` identify the copies of `A` in `B` with the
 copies of `A'` in `B'`, by composing on both sides. So isomorphic graphs have the
@@ -1677,7 +1680,7 @@ convenient.
 -/
 /-- Isomorphisms `A ≃g A'` and `B ≃g B'` identify the copies of `A` in `B` with the
 copies of `A'` in `B'`. -/
-def Iso.copyCongr {V' W W' : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
+def Iso.copyCongr {V' W' : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
     {B : SimpleGraph W} {B' : SimpleGraph W'} (eA : A ≃g A') (eB : B ≃g B') :
     Copy A B ≃ Copy A' B' where
   toFun f := (eB.toCopy.comp f).comp eA.symm.toCopy
@@ -1685,7 +1688,7 @@ def Iso.copyCongr {V' W W' : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
   left_inv f := by ext; simp
   right_inv f := by ext; simp
 
-lemma Iso.labelledCopyCount_eq {V' W W' : Type*} [Fintype V] [Fintype V'] [Fintype W]
+lemma Iso.labelledCopyCount_eq {V' W' : Type*} [Fintype V] [Fintype V'] [Fintype W]
     [Fintype W'] {A : SimpleGraph V} {A' : SimpleGraph V'} {B : SimpleGraph W}
     {B' : SimpleGraph W'} (eA : A ≃g A') (eB : B ≃g B') :
     B.labelledCopyCount A = B'.labelledCopyCount A' := by
@@ -1700,7 +1703,7 @@ the `Fintype` instance on `Copy A B` is built from the one on homomorphisms
 `A →g B`. This costs nothing: if `B` is finite and `A` is infinite then there are
 no copies at all.
 -/
-lemma Iso.copyCount_eq_left {V' W : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
+lemma Iso.copyCount_eq_left {V' : Type*} {A : SimpleGraph V} {A' : SimpleGraph V'}
     [Fintype W] (g : A ≃g A') (B : SimpleGraph W) :
     B.copyCount A = B.copyCount A' := by
   classical
@@ -1730,6 +1733,8 @@ theorem labelledCopyCount_cycleGraph [Fintype V] (G : SimpleGraph V) (n : ℕ) :
     ← DihedralGroup.card, Fintype.card_eq_nat_card, Fintype.card_eq_nat_card,
     Nat.card_congr ((copyEquivAut C[n + 3]).trans
       (autCycleGraphMulEquivDihedral n).toEquiv)]
+
+end copies
 
 /-!
 # Subcubes of the Hypercube *

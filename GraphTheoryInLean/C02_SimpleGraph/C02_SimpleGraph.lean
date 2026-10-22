@@ -1,8 +1,6 @@
 import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.DeleteEdges
 namespace SimpleGraph
-section basics
-variable {V : Type*} (G : SimpleGraph V)
 /-!
 In this chapter we introduce the basics of `SimpleGraph`, Mathlib's definition of a
 simple, loopless, undirected graph. We will explore how adjacency, edges, darts, and
@@ -27,6 +25,9 @@ parameter of the structure rather than one of its fields: graphs on different ve
 types have different types. (We can omit proofs of `symm` and `loopless` and
 Lean will try to fill them in using the automated `aesop_graph` tactic.)
 -/
+section basics
+variable {V : Type*} (G : SimpleGraph V)
+
 #source SimpleGraph -- structure SimpleGraph (V : Type u) where
                     --  Adj : V → V → Prop
                     --  symm : Std.Symm Adj := by aesop_graph
@@ -184,7 +185,6 @@ example {u : V} (w : G.neighborSet u) : G.Adj u w.val := by
 example {u : V} (w : G.neighborSet u) : G.Adj u w := by
   exact w.property
 
-section darts
 /-!
 # Darts
 
@@ -199,16 +199,16 @@ are adjacent in `G`. Since edges are unoriented, darts come in symmetric pairs: 
 `d : G.Dart` then `d.symm` is the opposite dart and `d.edge` is the edge
 corresponding to `d`.
 -/
-
+section darts
 #source Dart
 
 variable (d : G.Dart)
-
 #check d.fst  -- the first vertex of the dart
 #check d.snd  -- the second vertex of the dart
 #check d.adj  -- the adjacency proof of the dart
 #check d.edge -- the edge corresponding to the dart
 #check d.symm -- the opposite dart from `d.snd` to `d.fst`
+
 /-!
 Edges are unoriented so `d` and `d.symm` correspond to the same edge.
 -/
@@ -218,7 +218,7 @@ example : d.symm.edge = d.edge :=
 example : d.fst = d.symm.snd := rfl
 
 end darts
-section order
+
 /-!
 # Order
 
@@ -241,6 +241,8 @@ i.e. the union of its single-edge subgraphs. Mathlib registers this structure as
 instances in
 [Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).
 -/
+section order
+
 #synth CompleteAtomicBooleanAlgebra (SimpleGraph V)
 
 #source SimpleGraph.instLE -- le x y := ∀ ⦃v w : V⦄, x.Adj v w → y.Adj v w
@@ -325,14 +327,15 @@ If `G` is a proper subgraph of `H` then `G` is a proper subgraph of the complete
 graph.
 -/
 example {G H : SimpleGraph V} (h : G < H) : G < ⊤ := lt_top_of_lt h
+
+end order
+end basics
 /-!
 Notice that the last few proofs all made use of results about orders rather than
 anything specific to graphs. They all follow easily from Mathlib's instance of
 `CompleteAtomicBooleanAlgebra (SimpleGraph V)`, which we displayed with `#synth` at
 the start of this section.
 -/
-end order
-end basics
 /-!
 # Constructing a SimpleGraph
 

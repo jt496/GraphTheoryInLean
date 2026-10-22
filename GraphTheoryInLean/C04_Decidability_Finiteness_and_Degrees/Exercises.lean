@@ -1,5 +1,4 @@
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidability_Finiteness_and_Degrees
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 namespace SimpleGraph
 variable {V : Type*} {G : SimpleGraph V}

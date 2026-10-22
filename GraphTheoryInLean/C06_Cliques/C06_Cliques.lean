@@ -2,12 +2,7 @@ import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidabilit
 import GraphTheoryInLean.C05_Maps.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Clique
 import Mathlib.Combinatorics.SetFamily.KruskalKatona
-
 namespace SimpleGraph
-open scoped SimpleGraph
-section cliques
-variable {V : Type*} {G : SimpleGraph V}
-
 /-!
 Cliques (sets of pairwise adjacent vertices) and independent sets (sets of pairwise
 non-adjacent vertices) are among the most basic substructures of a graph, and the
@@ -33,6 +28,9 @@ give a formula for the independence number of the Mycielskian.
 A *clique* in a graph is a (not necessarily finite) set of vertices that are pairwise
 adjacent.
 -/
+section cliques
+variable {V : Type*} {G : SimpleGraph V}
+
 #source IsClique -- abbrev IsClique (s : Set α) : Prop := s.Pairwise G.Adj
 
 #source Set.Pairwise -- def Set.Pairwise (s : Set α) (r : α → α → Prop) :=
@@ -272,6 +270,9 @@ to provide such an instance.
 If `G` is a finite graph with a `Fintype V` instance then we can form the `Finset` of
 all `n`-cliques in `G`.
 -/
+section more_cliques
+variable {V : Type*} {G : SimpleGraph V}
+
 #source cliqueFinset -- def cliqueFinset (n : ℕ) : Finset (Finset α) :=
                      --                       {s | G.IsNClique n s}
 
@@ -281,8 +282,8 @@ Recall our discussion of
 The finset `G.cliqueFinset n` is `univ : Finset (Finset V)`, i.e. the powerset of
 `V`, filtered for those `Finset`s that are `n`-cliques in `G`.
 -/
-example {V : Type*} [Fintype V] (n : ℕ) {G : SimpleGraph V} [DecidableRel G.Adj]
-  [DecidableEq V] : G.cliqueFinset n =
+example [Fintype V] (n : ℕ) [DecidableRel G.Adj] [DecidableEq V] :
+  G.cliqueFinset n =
      (Finset.univ : Finset (Finset V)).filter (G.IsNClique n · ) := rfl
 
 /-!
@@ -301,16 +302,13 @@ is `n`-clique-free.
 Hence we can decide if a finite graph is `n`-clique-free by checking if
 `G.cliqueFinset n = ∅`.
 -/
-instance decidableCliqueFree {V : Type*} [Fintype V] (n : ℕ) {G : SimpleGraph V}
-    [DecidableRel G.Adj] [DecidableEq V] : Decidable (G.CliqueFree n) :=
+instance decidableCliqueFree [Fintype V] (n : ℕ) [DecidableRel G.Adj]
+    [DecidableEq V] : Decidable (G.CliqueFree n) :=
   decidable_of_iff _ cliqueFinset_eq_empty_iff
 
 #eval C[5].CliqueFree 3     -- true
 #eval mμ[C[5]].CliqueFree 3 -- true
 #eval K[4].CliqueFree 3     -- false
-
-section indset
-variable {V : Type*} {G : SimpleGraph V}
 
 /-!
 # Clique Number
@@ -467,12 +465,16 @@ graphs) says that a finset is a clique of size `ω G`.
 #check IsMaximumClique.isMaximalClique -- G.IsMaximumClique s → Maximal G.IsClique ↑s
 #check maximumClique_exists            -- ∃ s, G.IsMaximumClique s
 
+end more_cliques
+
 /-!
 # Independent Sets
 
 An *independent set* in a graph is a set of vertices that are pairwise non-adjacent.
 This is defined analogously to `IsClique`.
 -/
+section indset
+variable {V : Type*} {G : SimpleGraph V}
 #source IsIndepSet -- abbrev IsIndepSet (s : Set α) : Prop :=
                    --                    s.Pairwise (fun v w ↦ ¬G.Adj v w)
 /-!
@@ -622,6 +624,8 @@ lemma indepNum_pathNat₁ : ⍺ pathNat₁ = 0 := by
     simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Set.mem_image]
     grind
   exact N.not_succ_le_self (hN ⟨_, hs⟩)
+
+end indset
 
 /-!
 ## Independence Number of the Kneser Graph *
@@ -810,9 +814,6 @@ chapter, this shows that the Petersen graph is not `2`-colourable, since it has
 example : ⍺ Kn[5, 2] = 4 := by simp [indepNum_kneserGraph]
 
 end kneser
-end indset
-section mycielskian_cliquenum
-variable {V : Type*} {G : SimpleGraph V}
 
 /-!
 # Clique and Independence Number of the Mycielskian
@@ -832,6 +833,9 @@ We start with the promised proof that the Mycielskian of a triangle-free graph i
 triangle-free, before moving on to the more general result that the Mycielskian
 preserves the clique number (of any finite graph with at least one edge).
 -/
+section mycielskian_cliquenum
+variable {V : Type*} {G : SimpleGraph V}
+
 theorem CliqueFree.mycielskian (h : G.CliqueFree 3) : mμ[G].CliqueFree 3 := by
   intro t ht
   -- `classical` provides the `DecidableEq V` instance required in the proof
@@ -1019,15 +1023,14 @@ theorem cliqueNum_iterMycielskian_completeGraph_two (n : ℕ) :
   | zero => simp
   | succ n ih => rwa [iterMycielskian_succ, cliqueNum_mycielskian_of_ne_bot (hne n)]
 
+end mycielskian_cliquenum
+
 /-!
 In
 [Colouring Mycielskians](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-colouring-mycielskians)
 we show that `mμ^n K[2]` has chromatic number `n + 2`. So these graphs all have
 clique number `2` but have arbitrarily large chromatic number.
--/
 
-end mycielskian_cliquenum
-/-!
 ## Independence Number of the Mycielskian *
 
 We now derive a formula for the independence number of the Mycielskian of a finite
@@ -1089,11 +1092,16 @@ explicitly, so `N(s)` always refers to the current graph `G`.
 variable (G : SimpleGraph V)
 @[inherit_doc]
 local notation:max "N(" s ")" => openNeighborhoodFinset G s
-variable {G}
+
+
 /-!
 Membership of `N(s)` and its complement, and the coercion from `N(s)` to a `Set`,
-unfold as expected.
+unfold as expected. Here `variable {G}`, with no type, does not declare a new
+variable: it changes the existing section variable `G` from explicit to implicit, so
+the lemmas below infer `G` from their other arguments. (A `variable (G)` would change
+it back.)
 -/
+variable {G}
 @[simp]
 lemma mem_openNeighborhoodFinset [G.LocallyFinite] [DecidableEq V] {s : Finset V}
     {x : V} : x ∈ N(s) ↔ ∃ a ∈ s, G.Adj a x := by

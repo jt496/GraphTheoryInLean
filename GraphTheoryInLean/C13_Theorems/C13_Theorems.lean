@@ -15,9 +15,6 @@ import Mathlib.Combinatorics.Additive.Corner.Roth
 import Mathlib.Combinatorics.Extremal.RuzsaSzemeredi
 import Mathlib.Order.KonigLemma
 namespace SimpleGraph
-variable {V : Type*} {G : SimpleGraph V}
-open Finset
-
 /-!
 Mathlib formalizes quite a few classical theorems of graph theory. In this final
 chapter we survey some of them, building on the definitions of the earlier chapters:
@@ -58,6 +55,9 @@ every vertex of `M` has exactly one neighbour in `M`. It need not be spanning: i
 vertices are the matched vertices. A perfect matching is a spanning matching, so
 every vertex of `G` has exactly one `M`-neighbour.
 -/
+variable {V : Type*} {G : SimpleGraph V}
+open Finset
+
 example (M : G.Subgraph) : M.IsPerfectMatching ↔ ∀ v, ∃! w, M.Adj v w :=
   Subgraph.isPerfectMatching_iff
 

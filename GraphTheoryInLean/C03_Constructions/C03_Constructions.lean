@@ -639,7 +639,7 @@ lemma hypercube_succ (n : ℕ) : Q[n + 1] = Q[n].boxProd ⊤ := rfl
 lemma hypercube_succ_adj {n : ℕ} {u v : HypercubeVert (n + 1)} :
     Q[n + 1].Adj u v ↔ (Q[n].Adj u.1 v.1 ∧ u.2 = v.2) ∨ (u.2 ≠ v.2 ∧ u.1 = v.1) :=
   Iff.rfl
-#check boxProd_adj
+
 /-!
 Both `HypercubeVert` and `hypercube` are defined by recursion on `n`, so above we
 recorded their defining equations as the lemmas `hypercubeVert_zero`,
@@ -667,10 +667,7 @@ leaves the graph `Q[n + 1]` and its vertex type alone. Its right-hand side is wh
 Mathlib's `simp` lemmas `boxProd_adj` and `top_adj` would give if `simp` could see
 that `Q[n + 1]` is a box product. With it, `simp` can check adjacency between
 explicit vertices of `Q[n]` one coordinate at a time.
--/
-section mycielskian_section
-variable {V : Type*}
-/-!
+
 # Mycielskian
 
 The *Mycielskian* of a graph `G : SimpleGraph V` is constructed as follows. Its
@@ -698,6 +695,9 @@ of `G` together with a new vertex, we can use `Option (V ⊕ V)`. (We already sa
 `Sum` type `⊕` for `completeBipartiteGraph` and `Option` is the natural way to extend
 a type with a new element called `none`.)
 -/
+section mycielskian_section
+variable {V : Type*}
+
 #source Option
 
 /-- The *Mycielskian* of a graph `G`. -/

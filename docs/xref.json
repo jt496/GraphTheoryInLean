@@ -6294,6 +6294,17 @@
       {"display": "mycielskianVert_succ",
        "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
      "address": "/Constructions/"}],
+   "SimpleGraph.mycielskianRepr":
+   [{"id": "SimpleGraph___mycielskianRepr",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___mycielskianRepr":
+      {"display": "mycielskianRepr",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians",
+        "Mycielskian Degrees"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.mycielskianProj_right":
    [{"id": "SimpleGraph___mycielskianProj_right",
      "data":
@@ -6382,6 +6393,16 @@
         "Girth",
         "The Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.mycielskianDecidableRelAdj":
+   [{"id": "SimpleGraph___mycielskianDecidableRelAdj",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___mycielskianDecidableRelAdj":
+      {"display": "mycielskianDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.mycielskian.right_injective":
    [{"id": "SimpleGraph___mycielskian___right_injective",
      "data":
@@ -7206,6 +7227,58 @@
       {"display": "iterMycielskian_succ",
        "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
      "address": "/Constructions/"}],
+   "SimpleGraph.iterMycielskianRepr":
+   [{"id": "SimpleGraph___iterMycielskianRepr",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___iterMycielskianRepr":
+      {"display": "iterMycielskianRepr",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians",
+        "Mycielskian Degrees"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.iterMycielskianFintype":
+   [{"id": "SimpleGraph___iterMycielskianFintype",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___iterMycielskianFintype":
+      {"display": "iterMycielskianFintype",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.iterMycielskianEncodable":
+   [{"id": "SimpleGraph___iterMycielskianEncodable",
+     "data":
+     {"/Colorings/#SimpleGraph___iterMycielskianEncodable":
+      {"display": "iterMycielskianEncodable",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Computing Colourings of Encodable Graphs"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.iterMycielskianDecidableRelAdj":
+   [{"id": "SimpleGraph___iterMycielskianDecidableRelAdj",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___iterMycielskianDecidableRelAdj":
+      {"display": "iterMycielskianDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.iterMycielskianDecidableEq":
+   [{"id": "SimpleGraph___iterMycielskianDecidableEq",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___iterMycielskianDecidableEq":
+      {"display": "iterMycielskianDecidableEq",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Mycielskians"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.iterMycielskian":
    [{"id": "SimpleGraph___iterMycielskian",
      "data":
@@ -7880,6 +7953,16 @@
         "Graph Distance",
         "Distance in the Hypercube"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.hypercubeZeroSubsingleton":
+   [{"id": "SimpleGraph___hypercubeZeroSubsingleton",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeZeroSubsingleton":
+      {"display": "hypercubeZeroSubsingleton",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.hypercubeVert_zero":
    [{"id": "SimpleGraph___hypercubeVert_zero",
      "data":
@@ -7929,6 +8012,26 @@
         "Automorphisms",
         "Vertex-Transitivity of Hypercubes"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.hypercubeRepr":
+   [{"id": "SimpleGraph___hypercubeRepr",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeRepr":
+      {"display": "hypercubeRepr",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.hypercubeNonempty":
+   [{"id": "SimpleGraph___hypercubeNonempty",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeNonempty":
+      {"display": "hypercubeNonempty",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.hypercubeIsoHamming":
    [{"id": "SimpleGraph___hypercubeIsoHamming",
      "data":
@@ -8028,6 +8131,17 @@
         "Decidability, Finiteness and Degrees",
         "Computations with Hypercubes"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.hypercubeEncodable":
+   [{"id": "SimpleGraph___hypercubeEncodable",
+     "data":
+     {"/Colorings/#SimpleGraph___hypercubeEncodable":
+      {"display": "hypercubeEncodable",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Computing Colourings of Encodable Graphs"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.hypercubeEmbedding'":
    [{"id": "SimpleGraph___hypercubeEmbedding___",
      "data":
@@ -8047,6 +8161,16 @@
      "data":
      {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeDecidableRelAdj":
       {"display": "hypercubeDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.hypercubeDecidableEq":
+   [{"id": "SimpleGraph___hypercubeDecidableEq",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercubeDecidableEq":
+      {"display": "hypercubeDecidableEq",
        "context":
        ["Graph Theory in Lean",
         "Decidability, Finiteness and Degrees",

@@ -5,9 +5,6 @@ import Mathlib.Combinatorics.SimpleGraph.Hamiltonian
 import Mathlib.Combinatorics.SimpleGraph.Coloring.Constructions
 import Mathlib.Order.Closure
 namespace SimpleGraph
-open Walk
-section basics
-variable {V : Type*} {G : SimpleGraph V} {u v w : V}
 /-!
 Walks are a fundamental concept in graph theory. In this chapter we look at how they
 are defined in Mathlib. We will consider operations on walks such as concatenation
@@ -47,6 +44,10 @@ endpoints can be different, and we can compute with them. The proposition that t
 is *some* walk from `u` to `v` is `G.Reachable u v`, which we meet in
 [Reachability](https://jt496.github.io/GraphTheoryInLean/Walks/#section-reachability).
 -/
+open Walk
+section basics
+variable {V : Type*} {G : SimpleGraph V} {u v w : V}
+
 #source Walk  -- inductive Walk : V → V → Type u
               --   | nil {u : V} : Walk u u
               --   | cons {u v w : V} (h : G.Adj u v) (p : Walk v w) : Walk u w
@@ -1643,16 +1644,14 @@ lemma Walk.grayWalk_isHamiltonian (n : ℕ) : (grayWalk n).IsHamiltonian :=
   isHamiltonian_iff_isPath_and_length_eq.mpr
     ⟨grayWalk_isPath _, by rw [length_grayWalk, card_hypercubeVert]⟩
 
+end hypercube
+
 /-!
 From here it is a short step to getting a Hamiltonian cycle in `Q[n]` (for `n > 1`);
 see the
 [Exercises](https://jt496.github.io/GraphTheoryInLean/Walks/#section-exercises-walks)
 for details.
--/
-end hypercube
-section mycielskian
-variable {V : Type*} {G : SimpleGraph V}
-/-!
+
 ## Walks in the Mycielskian
 
 Recall `mμ[G]`, the `mycielskian` of a graph `G`. Given any non-nil walk in `G`,
@@ -1683,6 +1682,9 @@ then concatenating the edge `v ₗ — u ᵣ` to give
 
 [Figure: The two cases of the auxiliary zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianAux.svg)
 -/
+section mycielskian
+variable {V : Type*} {G : SimpleGraph V}
+
 /-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `u ₗ`
 to `u ᵣ` in `mμ[G]`. -/
 def Walk.mycielskianAux {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
@@ -1947,8 +1949,6 @@ theorem IsHamiltonian.mycielskian [DecidableEq V] [Fintype V]
   exact ⟨_, _, hc.mycielskianClosed⟩
 
 end mycielskian
-section ore
-variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal *
 
@@ -2006,6 +2006,8 @@ of the tail of `p.drop i`, which goes from `v` to `p.getVert (i + 1)`.
 
 [Figure: A Pósa rotation. Top: a path with a chord from $v_i$ to its endpoint $v_k$. Bottom: the rotated path, which ends at $v_{i+1}$](https://jt496.github.io/GraphTheoryInLean/figures/posa.svg)
 -/
+section bondy_chvatal
+variable {V : Type*} {G : SimpleGraph V}
 section posa
 variable {u v : V} {p : G.Walk u v} {i : ℕ}
 
@@ -2127,6 +2129,7 @@ lemma Walk.IsPath.posaClosed_isCycle (hp : p.IsPath) (h2 : 2 ≤ p.length)
     (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
     (p.posaClosed h₁ h₂).IsCycle :=
   (concat_isCycle_iff_length_ne_one ..).mpr ⟨hp.posaRotate h₁, by grind⟩
+end posa
 
 /-!
 The key idea in all of the Hamiltonicity theorems we prove below goes back to Dirac.
@@ -2143,14 +2146,9 @@ these indices `i` and `j` form two subsets of `{0, ..., k - 1}` of sizes `deg v�
 index `i`, and both edges `vᵢ₊₁ — v₀` and `vᵢ — vₖ` are present: a *crossing pair*.
 The Pósa rotation `v₀, ..., vᵢ, vₖ, vₖ₋₁, ..., vᵢ₊₁` followed by the edge `vᵢ₊₁ — v₀`
 is then the required cycle (this is the `Walk.posaClosed` we just defined).
--/
-end posa
-/-!
+
 ## Counting Bijections and a Crossing Pair
--/
-section finset
-open Finset
-/-!
+
 We now prove a general counting lemma to help with the informal argument we gave
 above. If `p` is a path containing every neighbour of a vertex `x`, and `f : ℕ → ℕ`
 maps `{i | i < p.length}` into `{i | i ≤ p.length}`, is injective on
@@ -2159,6 +2157,8 @@ then the indices `i < p.length` with `G.Adj (p.getVert (f i)) x` number exactly
 `G.degree x`. As we can see in its proof, the bijection is `i ↦ p.getVert (f i)` onto
 the neighbours of `x`.
 -/
+open Finset
+
 lemma Walk.IsPath.card_filter_adj_getVert_eq_degree [DecidableRel G.Adj] {u v x : V}
     [Fintype (G.neighborSet x)]
     {p : G.Walk u v} (hp : p.IsPath) (hall : ∀ w, G.Adj x w → w ∈ p.support)
@@ -2528,11 +2528,11 @@ eligible pairs. Since `closureStep` is an `abbrev`, Lean can see through it and 
 its `DecidableRel` instance automatically, from those for `⊔` and `fromRel`.
 -/
 /-- One round of the closure process: join all eligible pairs of `G`. -/
-abbrev closureStep [Fintype V] [DecidableEq V] (G : SimpleGraph V)
+abbrev closureStep [Fintype V] (G : SimpleGraph V)
     [DecidableRel G.Adj] : SimpleGraph V :=
   G ⊔ fromRel fun u v => Fintype.card V ≤ G.degree u + G.degree v
 
-lemma closureStep_adj [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {x y : V} :
+lemma closureStep_adj [Fintype V] [DecidableRel G.Adj] {x y : V} :
     G.closureStep.Adj x y ↔
       G.Adj x y ∨ x ≠ y ∧ Fintype.card V ≤ G.degree x + G.degree y := by
   simp [add_comm]
@@ -2560,7 +2560,7 @@ does not change whether the graph is Hamiltonian. Before proving it we record tw
 basic facts: the closure contains the original graph, and with enough fuel it really
 is closed. We start with the first of these.
 -/
-lemma le_closureStep [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
+lemma le_closureStep [Fintype V] [DecidableRel G.Adj] :
     G ≤ closureStep G := le_sup_left
 
 lemma le_closureAux [Fintype V] [DecidableEq V] :
@@ -2583,7 +2583,7 @@ lemma IsClosed.of_eq [Fintype V] {H : SimpleGraph V} [G.LocallyFinite]
   subst hGH
   convert hG
 
-lemma IsClosed.closureStep_eq [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
+lemma IsClosed.closureStep_eq [Fintype V] [DecidableRel G.Adj]
     (hG : G.IsClosed) : closureStep G = G :=
   le_antisymm (fun _ _ h => (closureStep_adj.1 h).elim id fun ⟨hne, hd⟩ => hG hne hd)
     le_closureStep
@@ -2635,7 +2635,7 @@ Conversely, a round leaves `G` unchanged only if `G` is closed, since it joins e
 eligible pair. So if `G` is not closed then a round adds at least one missing edge,
 and the number of missing edges strictly decreases.
 -/
-lemma isClosed_iff_closureStep_eq [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
+lemma isClosed_iff_closureStep_eq [Fintype V] [DecidableRel G.Adj] :
     G.IsClosed ↔ G.closureStep = G := by
   refine ⟨IsClosed.closureStep_eq, fun h x y hne hd => ?_⟩
   have : G.closureStep.Adj x y := closureStep_adj.2 (Or.inr ⟨hne, hd⟩)
@@ -2831,7 +2831,7 @@ every closed graph above `G`. So if two runs of the process stop at closed graph
 
 For our rounds the absorption argument is again an induction on fuel.
 -/
-lemma closureStep_le [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
+lemma closureStep_le [Fintype V] [DecidableRel G.Adj]
     {K : SimpleGraph V} [K.LocallyFinite] (hGK : G ≤ K) (hK : K.IsClosed) :
     closureStep G ≤ K := by
     intro v w h
@@ -2869,6 +2869,7 @@ theorem closure_closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     G.closure.closure = G.closure :=
   le_antisymm (closure_min le_rfl isClosed_closure) le_closure
 
+end bondy_chvatal
 /-!
 A monotone map on a partial order that is *inflationary* (`G ≤ G.closure`) and
 *idempotent* (`G.closure.closure = G.closure`) is what Mathlib calls a
@@ -2878,6 +2879,5 @@ A monotone map on a partial order that is *inflationary* (`G ≤ G.closure`) and
 come with.)
 -/
 #check ClosureOperator
-end finset
-end ore
+
 end SimpleGraph

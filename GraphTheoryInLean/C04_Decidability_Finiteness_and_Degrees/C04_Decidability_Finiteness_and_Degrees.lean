@@ -6,7 +6,6 @@ import Mathlib.Data.Finset.Sort
 import Mathlib.Combinatorics.SimpleGraph.DegreeSum
 import Mathlib.Combinatorics.Enumerative.DoubleCounting
 namespace SimpleGraph
-
 /-!
 This chapter is about *computing* with graphs in Lean, and about the typeclass
 machinery that makes computation possible. We begin with decidability: the contrast
@@ -425,8 +424,8 @@ Lean can't see through the `def` so fails to infer the required instance.
 If we change the `def` to an `abbrev` then it works!
 -/
 abbrev pathNat₂' : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
-#synth DecidableRel pathNat₂'.Adj -- fun a b ↦ instDecidableRelAdjFromRelOfDecidableEq
-                                  --             (fun x1 x2 ↦ x1 + 1 = x2) a b
+#synth DecidableRel pathNat₂'.Adj -- .. instDecidableRelAdjFromRelOfDecidableEq
+
 /-!
 Lean sees through the `abbrev` and finds
 `pathNat₂' := SimpleGraph.fromRel (· + 1 = ·)`. It then finds the instance
@@ -1187,7 +1186,7 @@ example {V : Type*} (G : SimpleGraph V) [Fintype G.edgeSet] :
 /-!
 ### Which One Should I Use?
 
-| To count …   | given …                 | use                             | computable? |
+| To count …   | given …                 | use                             | computable?[^1] |
 | ---          | ---                     | ---                             | --- |
 | a `Finset s` | (nothing)               | `#s` / `s.card`                 | yes |
 | a type `α`   | `[Fintype α]`           | `Fintype.card α`                | yes |
@@ -1196,9 +1195,9 @@ example {V : Type*} (G : SimpleGraph V) [Fintype G.edgeSet] :
 | a `Set s`    | `[Fintype ↑s]`          | `Fintype.card ↑s`               | yes |
 | a `Set s`    | (nothing)               | `s.ncard` / `s.encard`          | no  |
 
- (Here "yes" means that the counting function is computable; an actual `#eval`
+[^1]: Here "yes" means that the counting function is computable; an actual `#eval`
 also needs the `Finset` or `Fintype` instance to have been built computably (not via
-`Fintype.ofFinite`, `Set.Finite.toFinset` or `classical`).)
+`Fintype.ofFinite`, `Set.Finite.toFinset` or `classical`).
 
 As a rule of thumb: use `Finset.card` / `Fintype.card` when you want to *compute*
 (with `#eval`, `decide`), and `Nat.card` / `ENat.card` (or `Set.ncard` /
@@ -1641,7 +1640,7 @@ comes from Mathlib's double-counting library, so facts about `degIn` can be fed
 straight into Mathlib's double-counting lemmas. We prove a few simple lemmas about
 `degIn`, which we will use in
 [Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem),
-for the Moore and cage bounds in
+for the
 [Moore and Cage Bounds](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-and-cage-bounds),
 and in the proof of
 [Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem).
@@ -1650,36 +1649,45 @@ section degIn
 open Finset
 variable {V : Type*} {G : SimpleGraph V}
 
-
 /-- The number of neighbours of `v` lying in `s`. -/
 def degIn (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V) (v : V) : ℕ :=
     #(s.bipartiteAbove G.Adj v)
 
-/-- `G.degIn s v` counts the vertices `w ∈ s` adjacent to `v`. -/
+/-!
+`G.degIn s v` counts the vertices `w ∈ s` adjacent to `v`.
+-/
 lemma degIn_eq_card_filter [DecidableRel G.Adj] (s : Finset V) (v : V) :
     G.degIn s v = #{w ∈ s | G.Adj v w} := rfl
 
-/-- The set of neighbours of `x` lying in `s` is exactly `G.neighborFinset x ∩ s`. -/
+/-!
+The set of neighbours of `x` lying in `s` is exactly `G.neighborFinset x ∩ s`.
+-/
 lemma filter_adj_eq_inter [DecidableEq V] [DecidableRel G.Adj]
     [G.LocallyFinite] (s : Finset V) (x : V) :
     {v ∈ s | G.Adj x v} = G.neighborFinset x ∩ s := by
   ext v; simp [mem_filter, mem_inter, mem_neighborFinset, and_comm]
 
-/-- Since `G.Adj` is symmetric, `bipartiteBelow` and `bipartiteAbove` give the same
-set of neighbours of `v` in `s`. -/
+/-!
+Since `G.Adj` is symmetric, `bipartiteBelow` and `bipartiteAbove` give the same
+set of neighbours of `v` in `s`.
+-/
 lemma bipartiteBelow_adj (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V)
     (v : V) : s.bipartiteBelow G.Adj v = s.bipartiteAbove G.Adj v := by
   ext; simp [adj_comm]
 
-/-- The number of neighbours of `x` in `s` is at most its degree. -/
+/-!
+The number of neighbours of `x` in `s` is at most its degree.
+-/
 lemma degIn_le_degree [DecidableRel G.Adj] [G.LocallyFinite]
     (s : Finset V) (x : V) : G.degIn s x ≤ G.degree x := by
   classical
   rw [degIn_eq_card_filter, filter_adj_eq_inter, ← card_neighborFinset_eq_degree]
   exact card_le_card inter_subset_left
 
-/-- If `x` has at least as many neighbours in `s` as its degree, then every
-neighbour of `x` lies in `s`. -/
+/-!
+If `x` has at least as many neighbours in `s` as its degree, then every
+neighbour of `x` lies in `s`.
+-/
 lemma neighborFinset_subset_of_degree_le_degIn [DecidableRel G.Adj] [G.LocallyFinite]
     (s : Finset V) (x : V) (hle : G.degree x ≤ G.degIn s x) :
     G.neighborFinset x ⊆ s := by
@@ -1690,20 +1698,26 @@ lemma neighborFinset_subset_of_degree_le_degIn [DecidableRel G.Adj] [G.LocallyFi
   have heq := eq_of_subset_of_card_le inter_subset_left (le_of_eq this.symm)
   grind
 
-/-- If every neighbour of `x` lies in `s`, then `x` has `G.degree x` neighbours in
-`s`. -/
+/-!
+If every neighbour of `x` lies in `s`, then `x` has `G.degree x` neighbours in
+`s`.
+-/
 lemma degIn_eq_degree [DecidableRel G.Adj] [G.LocallyFinite] {s : Finset V} {x : V}
     (h : G.neighborFinset x ⊆ s) : G.degIn s x = G.degree x := by
   classical
   rw [degIn_eq_card_filter, filter_adj_eq_inter, inter_eq_left.mpr h,
     card_neighborFinset_eq_degree]
 
-/-- The `degIn` of a vertex is monotone in the set. -/
+/-!
+The `degIn` of a vertex is monotone in the set.
+-/
 lemma degIn_mono [DecidableRel G.Adj] {s t : Finset V} (h : s ⊆ t) (x : V) :
     G.degIn s x ≤ G.degIn t x :=
   card_le_card (filter_subset_filter _ h)
 
-/-- `degIn` is additive over a disjoint union of sets. -/
+/-!
+The `degIn` of a vertex is additive over a disjoint union of sets.
+-/
 lemma degIn_union [DecidableRel G.Adj] [DecidableEq V] (s t : Finset V)
     (x : V) (h : Disjoint s t) :
     G.degIn (s ∪ t) x = G.degIn s x + G.degIn t x := by
@@ -1711,8 +1725,10 @@ lemma degIn_union [DecidableRel G.Adj] [DecidableEq V] (s t : Finset V)
   rw [filter_union,
     card_union_of_disjoint (h.mono (filter_subset _ _) (filter_subset _ _))]
 
-/-- If some neighbour of `x` lies outside `s`, then `x` has strictly less than
-`G.degree x` neighbours in `s`. -/
+/-!
+If some neighbour of `x` lies outside `s`, then `x` has strictly less than
+`G.degree x` neighbours in `s`.
+-/
 lemma degIn_lt_degree_of_adj_notMem [DecidableRel G.Adj] [G.LocallyFinite]
      {x y : V} (s : Finset V) (hadj : G.Adj x y) (hy : y ∉ s) :
     G.degIn s x < G.degree x := by
@@ -1722,8 +1738,10 @@ lemma degIn_lt_degree_of_adj_notMem [DecidableRel G.Adj] [G.LocallyFinite]
   rw [ssubset_iff_of_subset inter_subset_left]
   exact ⟨y, (mem_neighborFinset _ _ _).mpr hadj, fun h => hy (mem_inter.mp h).2⟩
 
-/-- If every neighbour of `x` except possibly `w` lies in `B`, then `x` has at most
-one neighbour outside `B`. -/
+/-!
+If every neighbour of `x` except possibly `w` lies in `B`, then `x` has at most
+one neighbour outside `B`.
+-/
 lemma degree_le_degIn_add_one [DecidableRel G.Adj] [G.LocallyFinite] (B : Finset V)
     {x : V} (w : V) (h : ∀ y, G.Adj x y → y ≠ w → y ∈ B) :
     G.degree x ≤ G.degIn B x + 1 := by
@@ -1748,7 +1766,7 @@ vertices, decidable adjacency, and a `Fintype` instance for its vertices. As wit
 many proofs for the hypercube, each of these drops out easily by induction on `n`.
 -/
 /-- Vertices of the hypercube have decidable equality. -/
-instance (n : ℕ) : DecidableEq (HypercubeVert n) := by
+instance hypercubeDecidableEq (n : ℕ) : DecidableEq (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
 
 /-!
@@ -1788,13 +1806,14 @@ example : Fintype.card (HypercubeVert 3) = 8 := by simp
 We also give a `Nonempty` instance for `HypercubeVert n` since this will be useful in
 later chapters.
 -/
-instance {n : ℕ} : Nonempty (HypercubeVert n) := by
+instance hypercubeNonempty {n : ℕ} : Nonempty (HypercubeVert n) := by
   induction n <;> unfold HypercubeVert <;> infer_instance
 
 /-!
 There is only one vertex in `Q[0]`, so we can give a `Subsingleton` instance for it.
 -/
-instance : Subsingleton (HypercubeVert 0) := inferInstanceAs (Subsingleton (Unit))
+instance hypercubeZeroSubsingleton : Subsingleton (HypercubeVert 0) :=
+  inferInstanceAs (Subsingleton (Unit))
 
 /-!
 Before we try some more interesting computations with hypercubes, we give a
@@ -1810,7 +1829,7 @@ Lean has the `Repr` typeclass for types that can be pretty printed. We can now u
 `hypercubeVertToBin` to give a `Repr` instance for `HypercubeVert n`.
 -/
 /-- A `Repr` instance for hypercube vertices to allow pretty printing. -/
-instance {n : ℕ} : Repr (HypercubeVert n) where
+instance hypercubeRepr {n : ℕ} : Repr (HypercubeVert n) where
   reprPrec v _ := hypercubeVertToBin n v
 
 /-!
@@ -2042,7 +2061,7 @@ variable {V : Type*} {G : SimpleGraph V}
 
 /--
 The Mycielskian of a graph with decidable adjacency also has decidable adjacency. -/
-instance [DecidableRel G.Adj] : DecidableRel mμ[G].Adj :=
+instance mycielskianDecidableRelAdj [DecidableRel G.Adj] : DecidableRel mμ[G].Adj :=
   fun x y => by
     rcases x with _ | (_ | _) <;> rcases y with _ | (_ | _)
        <;> unfold mycielskian <;> infer_instance
@@ -2051,19 +2070,21 @@ instance [DecidableRel G.Adj] : DecidableRel mμ[G].Adj :=
 
 /-- The vertex type of the `n`-th iterated Mycielskian of a graph with decidable
 vertex equality also has decidable vertex equality. -/
-instance (n : ℕ) [DecidableEq V] : DecidableEq (mμᵥ^n V) := by
+instance iterMycielskianDecidableEq (n : ℕ) [DecidableEq V] :
+    DecidableEq (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
 /-- The vertex type of the `n`-th iterated Mycielskian of a graph with finitely many
 vertices also has finitely many vertices. -/
-instance (n : ℕ) [Fintype V] : Fintype (mμᵥ^n V) := by
+instance iterMycielskianFintype (n : ℕ) [Fintype V] : Fintype (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
 #source iterMycielskian -- notation: `mμ^n G`
 
 /-- If `G` has decidable adjacency then so does the `n`-th iterated Mycielskian of
 `G`. -/
-instance (n : ℕ) [DecidableRel G.Adj] : DecidableRel (mμ^n G).Adj := by
+instance iterMycielskianDecidableRelAdj (n : ℕ) [DecidableRel G.Adj] :
+    DecidableRel (mμ^n G).Adj := by
   induction n <;> unfold iterMycielskian <;> infer_instance
 
 /-!
@@ -2156,7 +2177,7 @@ Mycielskian. We make it a `scoped instance`: it is active inside
 print Mycielskian vertices this way, but other code using `Option (α ⊕ α)` is
 unaffected.
 -/
-scoped instance {V : Type*} [Repr V] :
+scoped instance mycielskianRepr {V : Type*} [Repr V] :
     Repr (Option (V ⊕ V)) where
   reprPrec x _ := match x with
     | none => "∗"
@@ -2168,7 +2189,7 @@ scoped instance {V : Type*} [Repr V] :
 /-!
 We can extend this to the vertices of the iterated Mycielskian.
 -/
-scoped instance {V : Type*} [Repr V] (n : ℕ) :
+scoped instance iterMycielskianRepr {V : Type*} [Repr V] (n : ℕ) :
     Repr (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 

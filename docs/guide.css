@@ -183,6 +183,19 @@ figure.stil-figure img {
     border-top: none;
     border-radius: 0 0 4px 4px;
 }
+/* Code before the docstring (such as a `section` line) sits above the strip, in the
+   same box. */
+.content-wrapper .stil-decl > code.hl.block:first-child {
+    margin-bottom: 0;
+    border-top: 1px solid #e6dfcf;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    break-after: avoid;
+}
+.content-wrapper .stil-decl > code.hl.block:first-child + .stil-doc {
+    border-top: 1px dashed #e6dfcf;
+    border-radius: 0;
+}
 
 /* ============================================================
    Sidebar TOC: emphasise the current chapter's sub-section list
@@ -728,6 +741,12 @@ html[data-theme="dark"] .content-wrapper .stil-decl > .stil-doc {
 }
 html[data-theme="dark"] .content-wrapper .stil-decl > code.hl.block {
     border-top: none;
+}
+html[data-theme="dark"] .content-wrapper .stil-decl > code.hl.block:first-child {
+    border-top: 1px solid #2f3347;
+}
+html[data-theme="dark"] .content-wrapper .stil-decl > code.hl.block:first-child + .stil-doc {
+    border-top: 1px dashed #2f3347;
 }
 
 /* Blockquotes */

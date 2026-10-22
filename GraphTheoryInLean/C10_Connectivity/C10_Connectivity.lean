@@ -4,11 +4,7 @@ import GraphTheoryInLean.C09_Subgraphs.C09_Subgraphs
 import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 import Mathlib.Combinatorics.SimpleGraph.Finsubgraph
 import GraphTheoryInLean.C08_Walks.Exercises
-variable {V : Type*} {G : SimpleGraph V}
 namespace SimpleGraph
-
-open Walk
-
 /-!
 In this chapter we study graph connectivity. Building on the reachability relation
 `Reachable`, we start with Mathlib's notions `Preconnected` and `Connected`,
@@ -41,6 +37,9 @@ Recall from
 that, for a single pair of vertices `u v : V`, `G.Reachable u v` means that there is
 a walk from `u` to `v`.
 -/
+open Walk
+variable {V : Type*} {G : SimpleGraph V}
+
 #source Preconnected  -- def Preconnected : Prop := ∀ u v : V, G.Reachable u v
 #source Connected     -- structure Connected : Prop where
                       --   protected preconnected : G.Preconnected
@@ -491,8 +490,8 @@ lemma pathNat₁_connected : pathNat₁.Connected :=
 
 /-!
 To see that `pathNat₁` is acyclic, consider the largest vertex `m` of a cycle. It has
-two neighbours on the cycle (`Walk.IsCycle.ncard_neighborSet_toSubgraph_eq_two`), but
-its only neighbour that is not larger than `m` is `m - 1`.
+two neighbours on the cycle (`IsCycle.ncard_neighborSet_toSubgraph_eq_two`), but its
+only neighbour that is not larger than `m` is `m - 1`.
 -/
 lemma pathNat₁_isAcyclic : pathNat₁.IsAcyclic := by
   intro v c hc
@@ -662,7 +661,7 @@ give these graphs a `LocallyFinite` instance of their own.
 -/
 /-- Neighbourhoods in `G.deleteEdges s` are finite whenever those in `G` are. -/
 @[instance_reducible]
-def locallyFiniteDeleteEdges [G.LocallyFinite] [DecidableEq V] (s : Set (Sym2 V))
+def locallyFiniteDeleteEdges [G.LocallyFinite] (s : Set (Sym2 V))
     [DecidablePred (· ∈ s)] : (G.deleteEdges s).LocallyFinite := fun v =>
   Fintype.ofFinset ((G.neighborFinset v).filter fun w => s(v, w) ∉ s) fun w => by
     simp

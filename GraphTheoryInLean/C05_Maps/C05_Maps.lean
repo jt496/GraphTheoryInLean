@@ -1,9 +1,6 @@
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Acyclic -- also supplies `IsAcyclic` to C07 and C10
 namespace SimpleGraph
-section functions
-variable {V W X : Type*}
-
 /-!
 Maps, in particular graph homomorphisms, are a fundamental concept in graph theory
 but they are often glossed over in informal treatments. In Lean they play a much more
@@ -37,6 +34,9 @@ proofs of the properties it is required to have.
 
 An *embedding* consists of a function together with a proof that it is injective.
 -/
+section functions
+variable {V W X : Type*}
+
 #source Function.Embedding
 
 example (f : V ↪ W) : Function.Injective f := f.injective
@@ -269,6 +269,7 @@ Composing with a homomorphism `G →g H` turns colourings of `H` into colourings
 -/
 example (γ : Type*) : G.Coloring γ = (G →g (⊤ : SimpleGraph γ)) := rfl
 #check Colorable.of_hom -- (f : G →g G') : G'.Colorable n → G.Colorable n
+
 end hom
 
 /-!
@@ -276,7 +277,7 @@ end hom
 -/
 section embed
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
-variable (f : G ↪g H) (g : H ↪g K)
+         (f : G ↪g H) (g : H ↪g K)
 /-!
 A `SimpleGraph.Embedding G H`, written `G ↪g H`, is an embedding `V ↪ W` (i.e. an
 injective map) such that `∀ u v, G.Adj u v ↔ H.Adj (f u) (f v)`. In other words, `f`
@@ -396,7 +397,7 @@ in
 -/
 section iso
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
-variable (f : G ≃g H) (g : H ≃g K)
+         (f : G ≃g H) (g : H ≃g K)
 /-!
 A `SimpleGraph.Iso G H`, written `G ≃g H`, is a graph isomorphism, i.e. it is an
 equivalence of vertex types that respects adjacency.
@@ -480,7 +481,7 @@ applied to an argument. The InfoView marks a coerced map with an arrow, `⇑f`.
 -/
 section coe
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
-variable (f : G →g H) (g : H →g K) (e : G ↪g H) (φ : G ≃g H)
+         (f : G →g H) (g : H →g K) (e : G ↪g H) (φ : G ≃g H)
 
 #check fun v => f v   -- fun v ↦ f v : V → W
 set_option pp.coercions false in
@@ -522,7 +523,6 @@ would otherwise become a loop.
 
 [Figure: $G$ (left) pushed forward along $f : V \to W$ (dashed arrows), to give `G.map f` (right)](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
 -/
-section maps
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
 
 #source SimpleGraph.map
@@ -618,8 +618,6 @@ has a fourth, `G.Subgraph`, in which the vertex set can vary inside `V`. We comp
 all four in
 [Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph).
 -/
-
-end maps
 
 /-!
 # Hypercubes and Mycielskians
