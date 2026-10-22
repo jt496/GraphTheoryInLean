@@ -12,8 +12,8 @@
 })();
 
 // Theme: set data-theme on <html> before first paint to avoid a flash of the
-// wrong theme. Precedence: explicit saved choice → system preference → dark.
-// "Default dark" means dark unless the OS explicitly asks for light.
+// wrong theme. Precedence: explicit saved choice → system preference → light.
+// The light fallback matches the no-JavaScript styling and the default figures.
 (function () {
     var KEY = 'stil-theme';
     var saved = localStorage.getItem(KEY);
@@ -21,10 +21,10 @@
     if (saved === 'dark' || saved === 'light') {
         theme = saved;
     } else if (window.matchMedia &&
-               window.matchMedia('(prefers-color-scheme: light)').matches) {
-        theme = 'light';
-    } else {
+               window.matchMedia('(prefers-color-scheme: dark)').matches) {
         theme = 'dark';
+    } else {
+        theme = 'light';
     }
     document.documentElement.setAttribute('data-theme', theme);
 })();
@@ -40,8 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Theme toggle button + dark/light figure swapping. The pre-paint IIFE above
 // has already set data-theme; here we add the floating button, align the figure
-// images with the current theme, and let the reader flip it (persisted), while
-// still following system changes until they make an explicit choice.
+// images with the current theme, and let the reader flip it. A flip away from
+// the system preference is persisted; flipping back to match it clears the
+// saved choice, so the page follows the system (and its later changes) again.
 document.addEventListener('DOMContentLoaded', function () {
     var KEY = 'stil-theme';
     var root = document.documentElement;
@@ -79,25 +80,32 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.setAttribute('aria-pressed', String(dark));
     }
 
-    function setTheme(theme, persist) {
+    function systemTheme() {
+        return window.matchMedia &&
+               window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function setTheme(theme) {
         root.setAttribute('data-theme', theme);
-        if (persist) localStorage.setItem(KEY, theme);
         swapFigures(theme);
         updateButton(theme);
     }
 
     document.body.appendChild(btn);
-    setTheme(curTheme(), false);   // align figures + button with pre-paint theme
+    setTheme(curTheme());   // align figures + button with pre-paint theme
 
     btn.addEventListener('click', function () {
-        setTheme(curTheme() === 'dark' ? 'light' : 'dark', true);
+        var theme = curTheme() === 'dark' ? 'light' : 'dark';
+        if (theme === systemTheme()) localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY, theme);
+        setTheme(theme);
     });
 
     // Follow OS changes only while the reader hasn't chosen explicitly.
     if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
             if (localStorage.getItem(KEY)) return;
-            setTheme(e.matches ? 'light' : 'dark', false);
+            setTheme(e.matches ? 'dark' : 'light');
         });
     }
 });

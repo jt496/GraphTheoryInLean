@@ -639,12 +639,16 @@ ol.section-toc > li.part-sep {
 
 /* ============================================================
    Reader theme toggle + DARK THEME
-   guide.js picks the theme (saved choice → system preference → default dark)
+   guide.js picks the theme (saved choice → system preference → light)
    and sets data-theme="dark|light" on <html> before first paint, and adds the
    floating .theme-toggle button. The LIGHT theme is the default styling above;
    the rules below apply only when data-theme="dark".
    Palette is Tokyo-Night-ish, pairing with the existing purple accent.
    ============================================================ */
+
+/* Tell the browser which scheme its own widgets (scrollbars, checkboxes,
+   caret) should use; without this they stay light on the dark page. */
+html { color-scheme: light; }
 
 /* Floating toggle button (present in both themes) */
 .theme-toggle {
@@ -670,6 +674,8 @@ ol.section-toc > li.part-sep {
 .theme-toggle:hover { box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4); }
 
 html[data-theme="dark"] {
+    color-scheme: dark;
+
     /* Core palette */
     --verso-text-color: #c0caf5;
     --verso-code-color: #c0caf5;
