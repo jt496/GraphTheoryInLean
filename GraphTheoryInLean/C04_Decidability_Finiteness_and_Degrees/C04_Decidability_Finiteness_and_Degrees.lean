@@ -875,7 +875,7 @@ failed to synthesize instance of type class
   Fintype ↑G.edgeSet
 -/
 #guard_msgs (substring := true) in
-theorem bad_card_edgeFinset {V : Type*} (G : SimpleGraph V) [Fintype V] :
+lemma bad_card_edgeFinset {V : Type*} (G : SimpleGraph V) [Fintype V] :
     ∃ n, G.edgeFinset.card = n := by
   sorry
 /-!
@@ -912,7 +912,7 @@ example {V : Type*} (G : SimpleGraph V) [Fintype V] [DecidableRel G.Adj] :
 /-!
 We can now complete the broken example from above.
 -/
-theorem bad_card_edgeFinset {V : Type*} (G : SimpleGraph V) [Fintype V]
+lemma bad_card_edgeFinset {V : Type*} (G : SimpleGraph V) [Fintype V]
     [DecidableRel G.Adj] : ∃ n, G.edgeFinset.card = n := by
   simp
 
@@ -1668,11 +1668,13 @@ lemma filter_adj_eq_inter [DecidableEq V] [DecidableRel G.Adj]
   ext v; simp [mem_filter, mem_inter, mem_neighborFinset, and_comm]
 
 /-!
-Since `G.Adj` is symmetric, `bipartiteBelow` and `bipartiteAbove` give the same
-set of neighbours of `v` in `s`.
+Since `G.Adj` is symmetric, `bipartiteBelow` also counts the neighbours of `v` in
+`s`.
 -/
-lemma bipartiteBelow_adj (G : SimpleGraph V) [DecidableRel G.Adj] (s : Finset V)
-    (v : V) : s.bipartiteBelow G.Adj v = s.bipartiteAbove G.Adj v := by
+lemma degIn_eq_card_bipartiteBelow [DecidableRel G.Adj] (s : Finset V) (v : V) :
+    G.degIn s v = #(s.bipartiteBelow G.Adj v) := by
+  rw [degIn_eq_card_filter]
+  congr 1
   ext; simp [adj_comm]
 
 /-!
@@ -1953,7 +1955,7 @@ are not displayed; hovering over `IsRegularOfDegree` in the goal shows that `ins
 has become `this`. Because the switch happens inside the proof, no caller ever needs
 a `convert`.
 -/
-lemma hypercube_isRegularOfDegree (n : ℕ) [Q[n].LocallyFinite] :
+lemma IsRegularOfDegree.hypercube (n : ℕ) [Q[n].LocallyFinite] :
     Q[n].IsRegularOfDegree n := by
   -- swap out the instance for the efficient one
   let : Q[n].LocallyFinite := fun v => hypercubeFintypeNeighborSet n v
@@ -1977,11 +1979,11 @@ used. In the first example below, that is the global instance
 local instances are tried first.
 -/
 example (n : ℕ) (v : HypercubeVert n) : Q[n].degree v = n :=
-  hypercube_isRegularOfDegree n v
+  IsRegularOfDegree.hypercube n v
 
 example (n : ℕ) [Q[n].LocallyFinite] (v : HypercubeVert n) :
     Q[n].degree v + 1 = n + 1 := by
-  rw [hypercube_isRegularOfDegree n v]
+  rw [IsRegularOfDegree.hypercube n v]
 
 /-!
 Note, however, that an instance argument is filled in by *inference*, which for
@@ -1992,12 +1994,12 @@ regular of degree `d` has minimum degree `d`, takes `[DecidableRel G.Adj]` like
 filtering instance, and the obvious proof fails.
 -/
 /-- error: Application type mismatch: The argument
-  hypercube_isRegularOfDegree n
+  IsRegularOfDegree.hypercube n
 has type
   @IsRegularOfDegree (HypercubeVert n) Q[n] (hypercubeFintypeNeighborSet n) n
 but is expected to have type -/
 #guard_msgs (substring := true) in
-example (n : ℕ) : δ(Q[n]) = n := (hypercube_isRegularOfDegree n).minDegree_eq
+example (n : ℕ) : δ(Q[n]) = n := (IsRegularOfDegree.hypercube n).minDegree_eq
 
 /-!
 Because our lemma takes its instance as an argument, putting the filtering instance
@@ -2008,17 +2010,17 @@ we need it whenever we combine the lemma with a result stated using `[Fintype V]
 -/
 example (n : ℕ) : δ(Q[n]) = n := by
   let : Q[n].LocallyFinite := fun v => Subtype.fintype _
-  exact (hypercube_isRegularOfDegree n).minDegree_eq
+  exact (IsRegularOfDegree.hypercube n).minDegree_eq
 
 /-!
 Our own `IsRegularOfDegree.card_edgeFinset`, by contrast, takes its instances as
-arguments, so it combines with `hypercube_isRegularOfDegree` directly, with no `let`
+arguments, so it combines with `IsRegularOfDegree.hypercube` directly, with no `let`
 required.
 -/
 /-- The `n`-dimensional hypercube has `n * 2 ^ (n - 1)` edges. -/
 lemma card_edgeFinset_hypercube (n : ℕ) [Fintype Q[n].edgeSet] :
     Q[n].edgeFinset.card = n * 2 ^ (n - 1) := by
-  rw [(hypercube_isRegularOfDegree n).card_edgeFinset, card_hypercubeVert]
+  rw [(IsRegularOfDegree.hypercube n).card_edgeFinset, card_hypercubeVert]
   cases n with
   | zero => rfl
   | succ n => rw [pow_succ, Nat.add_sub_cancel]; grind
@@ -2305,14 +2307,14 @@ theorem graphic_zeros (n : ℕ) : Graphic (Multiset.replicate n 0) :=
 In particular the empty multiset is graphic (notice that the empty multiset is
 denoted by `0`).
 -/
-theorem graphic_zero : Graphic 0 := graphic_zeros 0
+lemma graphic_zero : Graphic 0 := graphic_zeros 0
 
 /-!
 ## The Erdős–Gallai Theorem
 
 There are two major results in graph theory that characterize graphic sequences. One
 is the *Erdős–Gallai* theorem
-[Erdős–Gallai 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-gallai-1960):
+[Erdős–Gallai 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-erdos-gallai-1960):
 given a non-increasing sequence `[d₁, d₂, …, dₙ]` this says that the sequence is
 graphic iff its sum is even and for each `1 ≤ k ≤ n` we have
 `(d₁ + d₂ + … + dₖ) ≤ k * (k - 1) + (min(k, dₖ₊₁) + min(k, dₖ₊₂) + … + min(k, dₙ))`.
@@ -2336,9 +2338,9 @@ list (or returns the empty list if it has less than `k` elements).
 #check List.take
 #check List.drop
 
-/-- The predicate `erdosGallaiLE m k` is true if the `k`-th Erdős–Gallai inequality
+/-- The predicate `ErdosGallaiLE m k` is true if the `k`-th Erdős–Gallai inequality
 holds for `m : Multiset ℕ` and `k : ℕ`. -/
-abbrev erdosGallaiLE (m : Multiset ℕ) (k : ℕ) : Prop :=
+abbrev ErdosGallaiLE (m : Multiset ℕ) (k : ℕ) : Prop :=
     ((m.sort (· ≥ ·)).take k).sum ≤
         k * (k - 1) + (((m.sort (· ≥ ·)).drop k).map (min k)).sum
 
@@ -2346,7 +2348,7 @@ abbrev erdosGallaiLE (m : Multiset ℕ) (k : ℕ) : Prop :=
 Now the Erdős–Gallai theorem can be stated as follows.
 -/
 theorem erdos_gallai (m : Multiset ℕ) :
-    (Even m.sum ∧ ∀ (k : ℕ), k ≤ m.card → erdosGallaiLE m k) ↔ Graphic m := by
+    (Even m.sum ∧ ∀ (k : ℕ), k ≤ m.card → ErdosGallaiLE m k) ↔ Graphic m := by
   sorry
 
 /-!
@@ -2358,8 +2360,8 @@ graph from a given graphic sequence.
 ## The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences
 
 The *Havel–Hakimi* theorem
-[Havel 1955](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-havel-1955)
-[Hakimi 1962](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hakimi-1962)
+[Havel 1955](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-havel-1955)
+[Hakimi 1962](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hakimi-1962)
 also characterizes graphic sequences and in the process provides a constructive
 method for producing a graph with a given degree sequence.
 

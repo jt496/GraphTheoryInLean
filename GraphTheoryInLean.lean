@@ -24,5 +24,6 @@ import GraphTheoryInLean.C12_Algebraic_Graph_Theory.C12_Algebraic_Graph_Theory
 import GraphTheoryInLean.C12_Algebraic_Graph_Theory.Exercises
 import GraphTheoryInLean.C13_Theorems.C13_Theorems
 import GraphTheoryInLean.C13_Theorems.Exercises
+import GraphTheoryInLean.C98_Bibliography.C98_Bibliography
 import GraphTheoryInLean.C99_Appendix.C99_Appendix
 import GraphTheoryInLean.C99_Appendix.Exercises

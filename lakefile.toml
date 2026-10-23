@@ -2,6 +2,9 @@ name = "GraphTheoryInLean"
 version = "0.1.0"
 keywords = ["math"]
 defaultTargets = ["GraphTheoryInLean"]
+# The chapters are plain (non-`module`) Lean files: no warning for their
+# imports from Mathlib, which uses the module system.
+allowNonModules = true
 
 [leanOptions]
 pp.unicode.fun = true

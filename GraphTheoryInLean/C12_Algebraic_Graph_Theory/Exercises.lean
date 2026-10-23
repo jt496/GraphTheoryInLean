@@ -38,8 +38,9 @@ def autComplMulEquiv' (G : SimpleGraph V) : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) :=
 
 /-!
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
-has even degree. (Hint: such a graph is regular by `isRegular_of_isVertexTransitive`;
-now use the handshake lemma in the form `sum_degrees_eq_twice_card_edges'` of
+has even degree. (Hint: such a graph is regular by
+`IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
+form `sum_degrees_eq_twice_card_edges'` of
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).)
 -/
 lemma even_degree_of_isVertexTransitive' [Fintype V] [G.LocallyFinite]
@@ -82,7 +83,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 construction can be repeated. Show this, and deduce that the Grötzsch graph
 `grotzschGraph`, i.e. `mμ[C[5]]`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
 `grotzschGraph` is isomorphic to `mμ[mμ[K[2]]]`, by `Iso.mapMycielskian` applied to
-`isoMycielskianCompleteTwoCycleGraphFive`.)
+`mycielskianCompleteTwoIsoCycleFive`.)
 -/
 lemma sum_mycielskianLift' [Fintype V] {R : Type*} [CommRing R] (t : R)
     {x : V → R} (hsum : ∑ v, x v = 0) : ∑ w, mycielskianLift t x w = 0 := by
@@ -256,8 +257,9 @@ def autComplMulEquiv (G : SimpleGraph V) : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) wher
 
 /-!
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
-has even degree. (Hint: such a graph is regular by `isRegular_of_isVertexTransitive`;
-now use the handshake lemma in the form `sum_degrees_eq_twice_card_edges'` of
+has even degree. (Hint: such a graph is regular by
+`IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
+form `sum_degrees_eq_twice_card_edges'` of
 [The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).)
 
 If `G` is `d`-regular then the handshake lemma says that `|V| * d` is twice the
@@ -267,7 +269,7 @@ lemma even_degree_of_isVertexTransitive [Fintype V] [G.LocallyFinite]
     (h : G.IsVertexTransitive) (hodd : Odd (Fintype.card V)) (v : V) :
     Even (G.degree v) := by
   classical
-  obtain ⟨d, hd⟩ := isRegular_of_isVertexTransitive h
+  obtain ⟨d, hd⟩ := IsVertexTransitive.exists_isRegularOfDegree h
   have hsum := G.sum_degrees_eq_twice_card_edges'
   rw [Finset.sum_congr rfl fun v _ => hd v, Finset.sum_const, Finset.card_univ,
     smul_eq_mul] at hsum
@@ -336,7 +338,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 construction can be repeated. Show this, and deduce that the Grötzsch graph
 `grotzschGraph`, i.e. `mμ[C[5]]`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
 `grotzschGraph` is isomorphic to `mμ[mμ[K[2]]]`, by `Iso.mapMycielskian` applied to
-`isoMycielskianCompleteTwoCycleGraphFive`.)
+`mycielskianCompleteTwoIsoCycleFive`.)
 -/
 lemma sum_mycielskianLift [Fintype V] {R : Type*} [CommRing R] (t : R)
     {x : V → R} (hsum : ∑ v, x v = 0) : ∑ w, mycielskianLift t x w = 0 := by
@@ -363,7 +365,7 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
     mem_spectrum_adjMatrix_mycielskian (mycielskianLift_ne_zero s hx0)
       (adjMatrix_mycielskian_mulVec_mycielskianLift hs hK hsum)
       (sum_mycielskianLift s hsum)
-  rw [isoMycielskianCompleteTwoCycleGraphFive.symm.mapMycielskian.spectrum_adjMatrix]
+  rw [mycielskianCompleteTwoIsoCycleFive.symm.mapMycielskian.spectrum_adjMatrix]
   obtain ⟨h₁, h₂⟩ := h φ Real.goldenRatio_sq
   obtain ⟨h₃, h₄⟩ := h ψ Real.goldenConj_sq
   refine ⟨?_, ?_, ?_⟩
@@ -486,8 +488,9 @@ lemma exists_aut_hypercubeHamming_of_adj {n : ℕ} {x y u v : Fin n → Bool}
     ∃ g : hypercubeHamming n ≃g hypercubeHamming n, g x = u ∧ g y = v := by
   obtain ⟨i, rfl⟩ := hypercubeHamming_adj_iff_exists.1 h
   obtain ⟨j, rfl⟩ := hypercubeHamming_adj_iff_exists.1 h'
-  refine ⟨(hammingTranslate x).trans
-    ((hammingPermute (Equiv.swap i j)).trans (hammingTranslate u)), ?_, ?_⟩
+  refine ⟨(hypercubeHamming.translate x).trans
+    ((hypercubeHamming.permute (Equiv.swap i j)).trans
+      (hypercubeHamming.translate u)), ?_, ?_⟩
   · simp [BooleanRing.add_self]
   · have : (e i : Fin n → Bool) ∘ Equiv.swap i j = e j := by
       simpa using Pi.single_comp_equiv (Equiv.swap i j) i true

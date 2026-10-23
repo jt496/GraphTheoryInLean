@@ -186,7 +186,7 @@ lemma indepNum_add_matchingNum_le' [Finite V] :
 /-!
 18. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from the previous
 exercise and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is
-bipartite (`hypercube_isBipartite`), so `Colorable.natCard_le_mul_indepNum` applies.
+bipartite (`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
 -/
 example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
   sorry
@@ -605,7 +605,7 @@ lemma indepNum_add_matchingNum_le [Finite V] :
 /-!
 18. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from the previous
 exercise and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is
-bipartite (`hypercube_isBipartite`), so `Colorable.natCard_le_mul_indepNum` applies.
+bipartite (`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
 -/
 example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
   refine le_antisymm ?_ ?_
@@ -616,7 +616,7 @@ example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
     have h' : ⍺ Q[n + 1] + 2 ^ n ≤ 2 ^ n + 2 ^ n := by exact_mod_cast h
     grind
   · -- `Q[n + 1]` is `2`-colourable, so it has at most `2 * ⍺ Q[n + 1]` vertices.
-    have h := (hypercube_isBipartite (n + 1)).natCard_le_mul_indepNum
+    have h := (IsBipartite.hypercube (n + 1)).natCard_le_mul_indepNum
     rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ] at h
     grind
 

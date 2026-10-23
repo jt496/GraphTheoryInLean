@@ -44,7 +44,7 @@ receive the merged colour needs a pigeonhole argument which is in Mathlib as
 [Figure: The colouring below for the Petersen graph $\mathrm{Kn}(5,2)$, with $5 - 2 \cdot 2 + 2 = 3$ colours: a vertex is red if its least element is $0$, blue if its least element is $1$, and green (the merged colour) otherwise](https://jt496.github.io/GraphTheoryInLean/figures/kneser_colouring.svg)
 -/
 /-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
-def kneserColoring' (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
+def kneserGraph.coloring' (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     Kn[n, k].Coloring (Fin (n - 2 * k + 2)) where
   toFun s :=
     -- A vertex is `s : Finset (Fin n)` of size `k`. Since `0 < k`, `s` is
@@ -155,7 +155,7 @@ example (n : ℕ) : χ Q[n + 1] = 2 := by
   -- `Q[n + 1] ≠ ⊥` for which we need a vertex of `Q[n]` (each gives an edge in
   -- the next dimension)
   obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
-  refine chromaticNumber_eq_two_iff.2 ⟨hypercube_isBipartite _, ?_⟩
+  refine chromaticNumber_eq_two_iff.2 ⟨IsBipartite.hypercube _, ?_⟩
   exact ne_bot_iff_exists_adj.2 ⟨(v, false), (v, true), by simp⟩
 
 /-!
@@ -168,7 +168,7 @@ receive the merged colour needs a pigeonhole argument which is in Mathlib as
 `Finset.inter_nonempty_of_card_lt_card_add_card`.
 -/
 /-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
-def kneserColoring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
+def kneserGraph.coloring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     Kn[n, k].Coloring (Fin (n - 2 * k + 2)) where
   toFun s :=
     -- A vertex is `s : Finset (Fin n)` of size `k`. Since `0 < k`, `s` is
@@ -196,12 +196,12 @@ def kneserColoring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
       push Not at h1 h3
       -- both `u` and `v` lie in `{n - 2 * k + 1, ..., n - 1}`, which has only
       -- `2 * k - 1` elements, so they lie in an independent set of `Kn[n, k]`
-      -- (`kneserGraph_isIndepSet_of_card_lt` from the previous chapter)
+      -- (`isIndepSet_kneserGraph_of_card_lt` from the previous chapter)
       let a : Fin n := ⟨n - 2 * k, by grind⟩
       have hsub (s : Finset (Fin n)) (hne : s.Nonempty)
           (hs : n - 2 * k < ↑(s.min' hne)) : s ⊆ Ioi a :=
         fun x hx => mem_Ioi.2 (hs.trans_le (min'_le _ x hx))
-      have hind := kneserGraph_isIndepSet_of_card_lt (k := k) (s := Ioi a)
+      have hind := isIndepSet_kneserGraph_of_card_lt (k := k) (s := Ioi a)
         (by grind [Fin.card_Ioi])
       exact hind (hsub _ _ h1) (hsub _ _ h3) hadj.2 hadj
 
@@ -236,10 +236,10 @@ theorem le_mul_of_colorable_kneserGraph {n k m : ℕ} (hk : 0 < k) (hn : 2 * k �
 chromatic number `3`.
 -/
 example : χ Kn[5, 2] = 3 :=
-  -- `kneserColoring` uses `5 - 2 * 2 + 2 = 3` colours, and `2` colours would need
-  -- `5 ≤ 2 * 2`
+  -- `kneserGraph.coloring` uses `5 - 2 * 2 + 2 = 3` colours, and `2` colours would
+  -- need `5 ≤ 2 * 2`
   chromaticNumber_eq_iff_colorable_not_colorable.2
-    ⟨by simpa using (kneserColoring 5 2 (by norm_num) (by norm_num)).colorable,
+    ⟨by simpa using (kneserGraph.coloring 5 2 (by norm_num) (by norm_num)).colorable,
      fun h => by
        simpa using le_mul_of_colorable_kneserGraph (by norm_num) (by norm_num) h⟩
 

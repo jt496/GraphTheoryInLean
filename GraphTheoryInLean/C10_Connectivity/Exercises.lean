@@ -57,7 +57,7 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
 
 /-!
 7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `pathNat₁_isAcyclic` using `IsAcyclic.comap`.
+from `isAcyclic_pathNat₁` using `IsAcyclic.comap`.
 -/
 example (n : ℕ) : P[n + 1].IsTree := by
   sorry
@@ -205,7 +205,7 @@ lemma IsVertexConnected.boxProd_top_bool' {k : ℕ} (hG : G.IsVertexConnected k)
     (G □ (⊤ : SimpleGraph Bool)).IsVertexConnected (k + 1) := by
   sorry
 
-lemma hypercube_isVertexConnected' {n : ℕ} : Q[n].IsVertexConnected n := by
+lemma isVertexConnected_hypercube' {n : ℕ} : Q[n].IsVertexConnected n := by
   sorry
 
 /-!
@@ -214,7 +214,7 @@ no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
 `Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
 `isBridge_iff_not_isEdgeReachable_two`.
 -/
-lemma hypercube_isEdgeConnected' {n : ℕ} : Q[n].IsEdgeConnected n := by
+lemma isEdgeConnected_hypercube' {n : ℕ} : Q[n].IsEdgeConnected n := by
   sorry
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
@@ -225,7 +225,7 @@ example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
 18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
 this gives Whitney's inequalities
-[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-whitney-1932)
+[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-whitney-1932)
 `κ(G) ≤ λ(G) ≤ δ(G)`. Hint: `exists_minimal_degree_vertex` and
 `edgeConnectivity_le_degree`.
 -/
@@ -279,7 +279,7 @@ example : λ(barbell) < δ(barbell) := by
 21. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
 the lower bound is Exercise 16 (via `le_vertexConnectivity_iff`);
 for the upper bound use `vertexConnectivity_le_encard_neighborSet` at any vertex,
-together with `hypercube_isRegularOfDegree`.
+together with `IsRegularOfDegree.hypercube`.
 -/
 lemma vertexConnectivity_hypercube' (n : ℕ) : κ(Q[n]) = n := by
   sorry
@@ -429,7 +429,7 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
 
 /-!
 7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `pathNat₁_isAcyclic` using `IsAcyclic.comap`.
+from `isAcyclic_pathNat₁` using `IsAcyclic.comap`.
 
 The path graph is connected, and `Fin.val` is an injective homomorphism from
 `P[n + 1]` into the infinite path `pathNat₁`, which is acyclic. So any cycle in
@@ -437,7 +437,7 @@ The path graph is connected, and `Fin.val` is an injective homomorphism from
 -/
 example (n : ℕ) : P[n + 1].IsTree :=
   ⟨connected_pathGraph_add_one n,
-    pathNat₁_isAcyclic.comap ⟨Fin.val, by grind [pathGraph_adj]⟩ Fin.val_injective⟩
+    isAcyclic_pathNat₁.comap ⟨Fin.val, by grind [pathGraph_adj]⟩ Fin.val_injective⟩
 
 /-!
 We can also prove that the path graph is a tree by showing that it has the correct
@@ -551,8 +551,8 @@ example (n : ℕ) : ∃ u, ∃ p : K[2 * n + 3].Walk u u, p.IsEulerian := by
     exact ⟨n + 1, by grind⟩
 
 example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian :=
-  (hypercube_connected _).exists_isEulerian_circuit fun v => by
-    rw [hypercube_isRegularOfDegree]
+  (connected_hypercube _).exists_isEulerian_circuit fun v => by
+    rw [IsRegularOfDegree.hypercube]
     exact ⟨n + 1, by grind⟩
 
 /-!
@@ -674,13 +674,13 @@ lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
     Walk.support_boxProdLeft, List.mem_map] at hx
   grind [Finset.mem_fiberProj]
 
-lemma hypercube_isVertexConnected {n : ℕ} : Q[n].IsVertexConnected n := by
+lemma isVertexConnected_hypercube {n : ℕ} : Q[n].IsVertexConnected n := by
   induction n with
   | zero =>
     refine ⟨?_, fun S hS => absurd hS (by simp)⟩
     simp
   | succ n ih =>
-    exact ih.boxProd_top_bool (hypercube_connected n)
+    exact ih.boxProd_top_bool (connected_hypercube n)
 
 /-!
 17. Deduce that the hypercube `Q[n]` is `n`-edge-connected, and that `Q[n + 2]` has
@@ -688,19 +688,19 @@ no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
 `Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
 `isBridge_iff_not_isEdgeReachable_two`.
 -/
-lemma hypercube_isEdgeConnected {n : ℕ} : Q[n].IsEdgeConnected n :=
-  hypercube_isVertexConnected.isEdgeConnected
+lemma isEdgeConnected_hypercube {n : ℕ} : Q[n].IsEdgeConnected n :=
+  isVertexConnected_hypercube.isEdgeConnected
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
     ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
   (isBridge_iff_not_isEdgeReachable_two h).mp hb
-    ((hypercube_isEdgeConnected (n := n + 2)).anti (by simp) u v)
+    ((isEdgeConnected_hypercube (n := n + 2)).anti (by simp) u v)
 
 /-!
 18. Show that the edge connectivity of a finite graph with at least two vertices is
 at most its minimum degree. Together with `vertexConnectivity_le_edgeConnectivity`
 this gives Whitney's inequalities
-[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-whitney-1932)
+[Whitney 1932](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-whitney-1932)
 `κ(G) ≤ λ(G) ≤ δ(G)`. Hint: `exists_minimal_degree_vertex` and
 `edgeConnectivity_le_degree`.
 -/
@@ -750,7 +750,7 @@ example : λ(barbell) < δ(barbell) := by
 21. Show that the vertex connectivity of the hypercube `Q[n]` is exactly `n`. Hint:
 the lower bound is Exercise 16 (via `le_vertexConnectivity_iff`);
 for the upper bound use `vertexConnectivity_le_encard_neighborSet` at any vertex,
-together with `hypercube_isRegularOfDegree`.
+together with `IsRegularOfDegree.hypercube`.
 
 The lower bound is `n`-vertex-connectivity of `Q[n]`, and the upper bound is the
 degree `n` of any vertex.
@@ -758,9 +758,9 @@ degree `n` of any vertex.
 lemma vertexConnectivity_hypercube (n : ℕ) : κ(Q[n]) = n := by
   obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
   refine le_antisymm ((vertexConnectivity_le_encard_neighborSet v).trans_eq ?_)
-    (le_vertexConnectivity_iff.mpr hypercube_isVertexConnected)
+    (le_vertexConnectivity_iff.mpr isVertexConnected_hypercube)
   rw [← coe_neighborFinset, Set.encard_coe_eq_coe_finsetCard,
-    card_neighborFinset_eq_degree, hypercube_isRegularOfDegree n v]
+    card_neighborFinset_eq_degree, IsRegularOfDegree.hypercube n v]
 
 /-!
 22. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
@@ -780,7 +780,7 @@ lemma edgeConnectivity_hypercube_succ (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
     inferInstanceAs (Nontrivial (HypercubeVert n × Bool))
   obtain ⟨v⟩ : Nonempty (HypercubeVert (n + 1)) := inferInstance
   refine le_antisymm ((edgeConnectivity_le_degree v).trans_eq ?_) ?_
-  · rw [hypercube_isRegularOfDegree (n + 1) v]; rfl
+  · rw [IsRegularOfDegree.hypercube (n + 1) v]; rfl
   · exact_mod_cast (vertexConnectivity_hypercube (n + 1)).symm.le.trans
       vertexConnectivity_le_edgeConnectivity
 

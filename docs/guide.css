@@ -620,7 +620,7 @@ ol.section-toc > li.part-sep {
     span.stil-footnote-content::before { content: " ["; }
     span.stil-footnote-content::after  { content: "]"; }
     /* A citation's popup repeats its label with the full entry, which the
-       References appendix already lists, so print just the label. */
+       Bibliography chapter already lists, so print just the label. */
     span.stil-cite span.stil-footnote-content { display: none !important; }
 
     /* Make links readable in print: show URL after link text.

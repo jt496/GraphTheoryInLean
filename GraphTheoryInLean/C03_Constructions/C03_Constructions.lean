@@ -291,15 +291,16 @@ example : SimpleGraph (Fin 8) := circulantGraph ({1, 3} : Set (Fin 8))
 
 A special case of a circulant graph is the Paley graph. If `F` is a finite field, the
 *Paley graph*
-[Paley 1933](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-paley-1933) of
-`F` is the circulant graph on `F` whose differences are the nonzero squares in `F`.
-Usually one also requires `|F| ≡ 1 mod 4`: then `-1` is a square, so `u - v` is a
-square if and only if `v - u` is, and each vertex is adjacent to exactly half of the
-others. (For any other finite field the definition below gives the complete graph: if
-`|F| ≡ 3 mod 4` then exactly one of `d` and `-d` is a square for each `d ≠ 0`, while
-if `|F|` is even then every element of `F` is a square.) The `circulantGraph` calls
-the constructor `fromRel (· - · ∈ s)`, which automatically removes loops and
-symmetrizes the relation, so we can simply take all the squares, including `0`.
+[Paley 1933](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-paley-1933)
+of `F` is the circulant graph on `F` whose differences are the nonzero squares in
+`F`. Usually one also requires `|F| ≡ 1 mod 4`: then `-1` is a square, so `u - v` is
+a square if and only if `v - u` is, and each vertex is adjacent to exactly half of
+the others. (For any other finite field the definition below gives the complete
+graph: if `|F| ≡ 3 mod 4` then exactly one of `d` and `-d` is a square for each
+`d ≠ 0`, while if `|F|` is even then every element of `F` is a square.) The
+`circulantGraph` calls the constructor `fromRel (· - · ∈ s)`, which automatically
+removes loops and symmetrizes the relation, so we can simply take all the squares,
+including `0`.
 -/
 /-- The Paley graph of a field `F`: distinct elements are adjacent if their
 difference is a square. -/
@@ -325,7 +326,7 @@ example : SimpleGraph (ZMod 17) := paleyGraph (ZMod 17)
 ## Cayley Graphs
 
 Cayley graphs
-[Cayley 1878](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-cayley-1878)
+[Cayley 1878](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-cayley-1878)
 are also defined in Mathlib. They are defined for any vertex type with a
 multiplication or addition operation, not just for groups.
 
@@ -546,7 +547,7 @@ this is the `n`-*dimensional hypercube*, which can be constructed in many differ
 ways: as the Hasse diagram of the Boolean algebra of subsets of an `n`-element set;
 as the graph on `Fin n → Bool` with edges between vertices that differ in exactly one
 coordinate (i.e. at Hamming distance one
-[Hamming 1950](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hamming-1950));
+[Hamming 1950](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hamming-1950));
 or as the box product of `n` copies of `K₂`.
 
 The Hasse diagram construction is very easy to give, but then is a pain to work with.
@@ -684,7 +685,7 @@ between the vertices of which `a` and `b` are copies. Finally `none` is adjacent
 every vertex in `Vᵣ` but to no vertices in `Vₗ`.
 
 This construction is due to Jan Mycielski
-[Mycielski 1955](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-mycielski-1955),
+[Mycielski 1955](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-mycielski-1955),
 who showed that:
 
 1. if `G` is triangle-free, then `mμ[G]` is also triangle-free.
@@ -731,7 +732,7 @@ In particular we can start with `K[2]`. Its Mycielskian is isomorphic to the
 `5`-cycle `C[5]` (see
 [Vertex-Transitivity of Mycielskians](https://jt496.github.io/GraphTheoryInLean/Maps/#section-vertex-transitivity-of-mycielskians)),
 and the Mycielskian of `C[5]` is called the *Grötzsch graph*
-[Grötzsch 1959](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-grotzsch-1959).
+[Grötzsch 1959](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-grotzsch-1959).
 -/
 /-- The *Grötzsch graph* (i.e. the Mycielskian of `C[5]`). -/
 @[simps!]
@@ -1058,8 +1059,8 @@ example : ¬ C[4][3].Adj ⟨0, 0⟩ ⟨2, 1⟩ := by decide
 # Kneser Graphs *
 
 The `k`-th Kneser graph
-[Kneser 1955](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-kneser-1955) on
-a type `β` has as vertices the `k`-element subsets of `β`, with edges between any
+[Kneser 1955](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-kneser-1955)
+on a type `β` has as vertices the `k`-element subsets of `β`, with edges between any
 distinct disjoint subsets. Before we can define this as a `SimpleGraph` we need to
 decide what the vertex type should be. If we are happy to work with finite types
 (i.e. to assume `Fintype β`) then we could use
@@ -1119,7 +1120,7 @@ scoped notation "Kn[" n ", " k "]" => kneserGraph (Fin n) k
 
 /-!
 A special case of the Kneser graph is the *Petersen* graph
-[Petersen 1898](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-petersen-1898),
+[Petersen 1898](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-petersen-1898),
 which is `Kn[5, 2]`.
 -/
 /-- The *Petersen* graph which is the Kneser graph `Kn[5, 2]`. -/

@@ -29,7 +29,8 @@ The HTML is in `docs/`, served by GitHub Pages.
 11. [Distance](https://jt496.github.io/GraphTheoryInLean/Distance/)
 12. [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/)
 13. [Theorems](https://jt496.github.io/GraphTheoryInLean/Theorems/)
-14. [Appendix](https://jt496.github.io/GraphTheoryInLean/Appendix/)
+14. [Bibliography](https://jt496.github.io/GraphTheoryInLean/Bibliography/)
+15. [Appendix](https://jt496.github.io/GraphTheoryInLean/Appendix/)
 
 This repository is generated from the guide's sources; edit those rather than
 these files.

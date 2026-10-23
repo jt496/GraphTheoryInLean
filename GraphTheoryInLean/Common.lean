@@ -1,8 +1,10 @@
 import GraphTheoryInLean.Tactic.Source
+import GraphTheoryInLean.Tactic.DocHover
 import Mathlib.Data.Fintype.Basic
 /-
 Shared helpers for the chapters: `Repr` instances for finite functions and
-function-like maps, so that `#eval` can print them, and the `#source` command.
+function-like maps, so that `#eval` can print them, the `#source` command, and
+hovers for the names in doc comments (see `Tactic/DocHover.lean`).
 -/
 -- 1. Format a finite function as `{v ↦ f v, ...}`
 unsafe def formatFiniteFun {V W : Type*} [Fintype V] [Repr V] [Repr W] (f : V → W) :

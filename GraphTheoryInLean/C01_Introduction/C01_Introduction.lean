@@ -85,7 +85,9 @@ in it.
 # Finding Lemmas
 
 Much of the work of formalizing is finding the right lemma in Mathlib. Mathlib's
-naming conventions help, since a name should describe the statement (for example
+naming conventions (see
+[Naming Conventions](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-naming-conventions))
+help, since a name should describe the statement (for example
 `card_neighborFinset_eq_degree`), but they only get you so far: the degree of a
 vertex in a complete graph is `complete_graph_degree`, not `degree_top`. So it is
 worth knowing how to search.

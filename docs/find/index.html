@@ -1187,6 +1187,48 @@ window.onload = async () => {
       });
   });
 }
+</script><script>
+window.addEventListener("DOMContentLoaded", function () {
+  var refs = document.querySelectorAll("span.stil-footnote-ref");
+  for (var i = 0; i < refs.length; i++) {
+    refs[i].textContent = "[" + (i + 1) + "]";
+  }
+});
+
+/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
+
+   Hovering alone is not enough: the Lean hover tooltips are appended to
+   `document.body`, outside the footnote span, so as soon as the pointer touches
+   one the span loses `:hover` and the note closes — dropping the pointer onto the
+   prose underneath, whose tooltips then appear instead. A pinned note survives
+   that. Closes on a second click, on Escape, or on a click elsewhere; clicks
+   inside the note or inside a tooltip keep it open. */
+window.addEventListener("DOMContentLoaded", function () {
+  function closeAll() {
+    var open = document.querySelectorAll("span.stil-footnote.stil-footnote-open");
+    for (var i = 0; i < open.length; i++) {
+      open[i].classList.remove("stil-footnote-open");
+    }
+  }
+  document.addEventListener("click", function (e) {
+    if (!e.target || !e.target.closest) { return; }
+    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
+    if (ref) {
+      var note = ref.closest("span.stil-footnote");
+      var wasOpen = note.classList.contains("stil-footnote-open");
+      closeAll();
+      if (!wasOpen) { note.classList.add("stil-footnote-open"); }
+      e.preventDefault();
+      return;
+    }
+    if (e.target.closest("span.stil-footnote-content") ||
+        e.target.closest("[data-tippy-root]")) { return; }
+    closeAll();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeAll(); }
+  });
+});
 </script><script>window.xref = {"Verso.Genre.Manual.section":
  {"title": "Sections or chapters of the manual",
   "description": null,
@@ -1613,12 +1655,12 @@ window.onload = async () => {
      "data":
      {"title": "Top and Bottom",
       "shortTitle": null,
-      "sectionNum": "2.5.1.",
+      "sectionNum": "2.6.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
-       {"title": "Order", "shortTitle": null, "number": "5"},
+       {"title": "Order", "shortTitle": null, "number": "6"},
        {"title": "Top and Bottom", "shortTitle": null, "number": "1"}]},
      "address": "/SimpleGraph/"}],
    "section-the-unlabelled-count":
@@ -2469,12 +2511,12 @@ window.onload = async () => {
      "data":
      {"title": "Results",
       "shortTitle": null,
-      "sectionNum": "14.4.",
+      "sectionNum": "15.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"}]},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"}]},
      "address": "/Appendix/"}],
    "section-restricting-and-copying-partial-colourings":
    [{"id": "section-restricting-and-copying-partial-colourings",
@@ -2520,18 +2562,6 @@ window.onload = async () => {
        {"title": "Degrees", "shortTitle": null, "number": "3"},
        {"title": "Regular Graphs", "shortTitle": null, "number": "6"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "section-references":
-   [{"id": "section-references",
-     "data":
-     {"title": "References",
-      "shortTitle": null,
-      "sectionNum": "14.1.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "References", "shortTitle": null, "number": "1"}]},
-     "address": "/Appendix/"}],
    "section-reachability":
    [{"id": "section-reachability",
      "data":
@@ -2688,12 +2718,12 @@ window.onload = async () => {
      "data":
      {"title": "Order",
       "shortTitle": null,
-      "sectionNum": "2.5.",
+      "sectionNum": "2.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
-       {"title": "Order", "shortTitle": null, "number": "5"}]},
+       {"title": "Order", "shortTitle": null, "number": "6"}]},
      "address": "/SimpleGraph/"}],
    "section-operations-on-graphs":
    [{"id": "section-operations-on-graphs",
@@ -2729,12 +2759,12 @@ window.onload = async () => {
      "data":
      {"title": "Notation",
       "shortTitle": null,
-      "sectionNum": "14.2.",
+      "sectionNum": "15.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Notation", "shortTitle": null, "number": "2"}]},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Notation", "shortTitle": null, "number": "1"}]},
      "address": "/Appendix/"}],
    "section-nil":
    [{"id": "section-nil",
@@ -2790,6 +2820,18 @@ window.onload = async () => {
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
        {"title": "Vertices", "shortTitle": null, "number": "3"},
        {"title": "Neighbours", "shortTitle": null, "number": "2"}]},
+     "address": "/SimpleGraph/"}],
+   "section-naming-conventions":
+   [{"id": "section-naming-conventions",
+     "data":
+     {"title": "Naming Conventions",
+      "shortTitle": null,
+      "sectionNum": "2.5.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
+       {"title": "Naming Conventions", "shortTitle": null, "number": "5"}]},
      "address": "/SimpleGraph/"}],
    "section-mycielskian-degrees":
    [{"id": "section-mycielskian-degrees",
@@ -3765,12 +3807,12 @@ window.onload = async () => {
      "data":
      {"title": "Exercises",
       "shortTitle": null,
-      "sectionNum": "2.8.",
+      "sectionNum": "2.9.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
-       {"title": "Exercises", "shortTitle": null, "number": "8"}]},
+       {"title": "Exercises", "shortTitle": null, "number": "9"}]},
      "address": "/SimpleGraph/"}],
    "section-exercises-maps":
    [{"id": "section-exercises-maps",
@@ -4380,26 +4422,26 @@ window.onload = async () => {
      "data":
      {"title": "Definitions",
       "shortTitle": null,
-      "sectionNum": "14.3.",
+      "sectionNum": "15.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"}]},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"}]},
      "address": "/Appendix/"}],
    "section-definitional-and-propositional-equalities":
    [{"id": "section-definitional-and-propositional-equalities",
      "data":
      {"title": "Definitional and Propositional Equalities",
       "shortTitle": null,
-      "sectionNum": "2.6.1.",
+      "sectionNum": "2.7.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
        {"title": "Constructing a SimpleGraph",
         "shortTitle": null,
-        "number": "6"},
+        "number": "7"},
        {"title": "Definitional and Propositional Equalities",
         "shortTitle": null,
         "number": "1"}]},
@@ -4524,21 +4566,6 @@ window.onload = async () => {
         "shortTitle": null,
         "number": "4"}]},
      "address": "/Connectivity/"}],
-   "section-cycle-graphs-and-complete-graphs-are-hamiltonian":
-   [{"id": "section-cycle-graphs-and-complete-graphs-are-hamiltonian",
-     "data":
-     {"title": "Cycle Graphs and Complete Graphs are Hamiltonian",
-      "shortTitle": null,
-      "sectionNum": "8.6.1.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Mapping Walks", "shortTitle": null, "number": "6"},
-       {"title": "Cycle Graphs and Complete Graphs are Hamiltonian",
-        "shortTitle": null,
-        "number": "1"}]},
-     "address": "/Walks/"}],
    "section-cycle-graphs":
    [{"id": "section-cycle-graphs",
      "data":
@@ -4816,14 +4843,14 @@ window.onload = async () => {
      "data":
      {"title": "Constructing a SimpleGraph",
       "shortTitle": null,
-      "sectionNum": "2.6.",
+      "sectionNum": "2.7.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
        {"title": "Constructing a SimpleGraph",
         "shortTitle": null,
-        "number": "6"}]},
+        "number": "7"}]},
      "address": "/SimpleGraph/"}],
    "section-connectivity-numbers":
    [{"id": "section-connectivity-numbers",
@@ -4930,12 +4957,12 @@ window.onload = async () => {
      "data":
      {"title": "Computations",
       "shortTitle": null,
-      "sectionNum": "2.7.",
+      "sectionNum": "2.8.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "SimpleGraph", "shortTitle": null, "number": "2"},
-       {"title": "Computations", "shortTitle": null, "number": "7"}]},
+       {"title": "Computations", "shortTitle": null, "number": "8"}]},
      "address": "/SimpleGraph/"}],
    "section-completing-the-proof":
    [{"id": "section-completing-the-proof",
@@ -5324,8 +5351,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 9: Subgraphs (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5339,8 +5366,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 9: Subgraphs", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-8-walks-results":
@@ -5352,8 +5379,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 8: Walks (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5367,8 +5394,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 8: Walks", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-7-colorings-results":
@@ -5380,8 +5407,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 7: Colorings (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5395,8 +5422,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 7: Colorings", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-6-cliques-results":
@@ -5408,8 +5435,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 6: Cliques (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5423,8 +5450,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 6: Cliques", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-5-maps-results":
@@ -5436,8 +5463,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 5: Maps (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5451,8 +5478,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 5: Maps", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-4-decidability-finiteness-and-degrees-results":
@@ -5464,8 +5491,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 4: Decidability, Finiteness and Degrees (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5479,8 +5506,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 4: Decidability, Finiteness and Degrees",
         "shortTitle": null,
         "number": null}]},
@@ -5494,8 +5521,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 3: Constructions (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5509,8 +5536,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 3: Constructions",
         "shortTitle": null,
         "number": null}]},
@@ -5524,8 +5551,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 2: SimpleGraph",
         "shortTitle": null,
         "number": null}]},
@@ -5539,8 +5566,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 13: Theorems (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5554,8 +5581,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 13: Theorems", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-12-algebraic-graph-theory-results":
@@ -5567,8 +5594,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 12: Algebraic Graph Theory (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5582,8 +5609,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 12: Algebraic Graph Theory",
         "shortTitle": null,
         "number": null}]},
@@ -5597,8 +5624,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 11: Distance (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5612,8 +5639,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 11: Distance", "shortTitle": null, "number": null}]},
      "address": "/Appendix/"}],
    "section-chapter-10-connectivity-results":
@@ -5625,8 +5652,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Results", "shortTitle": null, "number": "4"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Results", "shortTitle": null, "number": "3"},
        {"title": "Chapter 10: Connectivity (Results)",
         "shortTitle": null,
         "number": null}]},
@@ -5640,8 +5667,8 @@ window.onload = async () => {
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"},
-       {"title": "Definitions", "shortTitle": null, "number": "3"},
+       {"title": "Appendix", "shortTitle": null, "number": "15"},
+       {"title": "Definitions", "shortTitle": null, "number": "2"},
        {"title": "Chapter 10: Connectivity",
         "shortTitle": null,
         "number": null}]},
@@ -6157,16 +6184,27 @@ window.onload = async () => {
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Cliques", "shortTitle": null, "number": "6"}]},
      "address": "/Cliques/"}],
-   "chapter-appendix":
-   [{"id": "chapter-appendix",
+   "chapter-bibliography":
+   [{"id": "chapter-bibliography",
      "data":
-     {"title": "Appendix",
+     {"title": "Bibliography",
       "shortTitle": null,
       "sectionNum": "14.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Appendix", "shortTitle": null, "number": "14"}]},
+       {"title": "Bibliography", "shortTitle": null, "number": "14"}]},
+     "address": "/Bibliography/"}],
+   "chapter-appendix":
+   [{"id": "chapter-appendix",
+     "data":
+     {"title": "Appendix",
+      "shortTitle": null,
+      "sectionNum": "15.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Appendix", "shortTitle": null, "number": "15"}]},
      "address": "/Appendix/"}],
    "chapter-algebraic-graph-theory":
    [{"id": "chapter-algebraic-graph-theory",
@@ -6195,18 +6233,7 @@ window.onload = async () => {
  {"title": "Verso.Genre.Manual.example",
   "description": null,
   "contents":
-  {"hyperoctahedralGroup":
-   [{"id": "hyperoctahedralGroup",
-     "data":
-     {"/Algebraic-Graph-Theory/#hyperoctahedralGroup":
-      {"display": "_root_.hyperoctahedralGroup",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "The Hyperoctahedral Group"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.regular_case":
+  {"_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.regular_case":
    [{"id":
      "_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___regular_case",
      "data":
@@ -6615,17 +6642,6 @@ window.onload = async () => {
         "Claw-Free Graphs*",
         "Triangles in Line Graphs"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.top_isHamiltonian":
-   [{"id": "SimpleGraph___top_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___top_isHamiltonian":
-      {"display": "top_isHamiltonian",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.tensorProd_adj":
    [{"id": "SimpleGraph___tensorProd_adj",
      "data":
@@ -6673,30 +6689,6 @@ window.onload = async () => {
       {"display": "tensorProd",
        "context": ["Graph Theory in Lean", "Maps", "Tensor Products*"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.sup_sup_edge_isHamiltonian_iff":
-   [{"id": "SimpleGraph___sup_sup_edge_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___sup_sup_edge_isHamiltonian_iff":
-      {"display": "sup_sup_edge_isHamiltonian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem",
-        "The Closure of a Graph"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.sup_edge_isHamiltonian_iff":
-   [{"id": "SimpleGraph___sup_edge_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___sup_edge_isHamiltonian_iff":
-      {"display": "sup_edge_isHamiltonian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem",
-        "Adding a Single Edge"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.sum_mycielskianLift'":
    [{"id": "SimpleGraph___sum_mycielskianLift___",
      "data":
@@ -6991,13 +6983,6 @@ window.onload = async () => {
         "Moore and Cage Bounds",
         "The Cage Bound for Even Girth*"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.piTensorProd_hom_iff_of_isEmpty":
-   [{"id": "SimpleGraph___piTensorProd_hom_iff_of_isEmpty",
-     "data":
-     {"/Maps/#SimpleGraph___piTensorProd_hom_iff_of_isEmpty":
-      {"display": "piTensorProd_hom_iff_of_isEmpty",
-       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
-     "address": "/Maps/"}],
    "SimpleGraph.piTensorProd_adj_of_nonempty":
    [{"id": "SimpleGraph___piTensorProd_adj_of_nonempty",
      "data":
@@ -7031,54 +7016,11 @@ window.onload = async () => {
         "Tensor Products*",
         "Indexed Tensor Products"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.petersenGraph_isSRGWith":
-   [{"id": "SimpleGraph___petersenGraph_isSRGWith",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___petersenGraph_isSRGWith":
-      {"display": "petersenGraph_isSRGWith",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Strongly Regular Graphs"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.petersenGraph_isRegularOfDegree":
-   [{"id": "SimpleGraph___petersenGraph_isRegularOfDegree",
-     "data":
-     {"/Distance/#SimpleGraph___petersenGraph_isRegularOfDegree":
-      {"display": "petersenGraph_isRegularOfDegree",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.petersenGraph_exists_adj_adj":
    [{"id": "SimpleGraph___petersenGraph_exists_adj_adj",
      "data":
      {"/Distance/#SimpleGraph___petersenGraph_exists_adj_adj":
       {"display": "petersenGraph_exists_adj_adj",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
-   "SimpleGraph.petersenGraph_cycleGraph_four_free":
-   [{"id": "SimpleGraph___petersenGraph_cycleGraph_four_free",
-     "data":
-     {"/Distance/#SimpleGraph___petersenGraph_cycleGraph_four_free":
-      {"display": "petersenGraph_cycleGraph_four_free",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
-   "SimpleGraph.petersenGraph_cliqueFree_three":
-   [{"id": "SimpleGraph___petersenGraph_cliqueFree_three",
-     "data":
-     {"/Distance/#SimpleGraph___petersenGraph_cliqueFree_three":
-      {"display": "petersenGraph_cliqueFree_three",
        "context":
        ["Graph Theory in Lean",
         "Distance",
@@ -7119,39 +7061,6 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathNat₁_isTree":
-   [{"id": "SimpleGraph___pathNat____isTree",
-     "data":
-     {"/Connectivity/#SimpleGraph___pathNat____isTree":
-      {"display": "pathNat₁_isTree",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Trees",
-        "The Infinite Path is a Tree"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.pathNat₁_isIndepSet_of_mod_two_eq":
-   [{"id": "SimpleGraph___pathNat____isIndepSet_of_mod_two_eq",
-     "data":
-     {"/Cliques/#SimpleGraph___pathNat____isIndepSet_of_mod_two_eq":
-      {"display": "pathNat₁_isIndepSet_of_mod_two_eq",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Independent Sets",
-        "Independence Number of the Infinite Path on ℕ"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.pathNat₁_isAcyclic":
-   [{"id": "SimpleGraph___pathNat____isAcyclic",
-     "data":
-     {"/Connectivity/#SimpleGraph___pathNat____isAcyclic":
-      {"display": "pathNat₁_isAcyclic",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Trees",
-        "The Infinite Path is a Tree"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.pathNat₁_eq_pathNat₃":
    [{"id": "SimpleGraph___pathNat____eq_pathNat___",
      "data":
@@ -7160,17 +7069,6 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathNat₁_connected":
-   [{"id": "SimpleGraph___pathNat____connected",
-     "data":
-     {"/Connectivity/#SimpleGraph___pathNat____connected":
-      {"display": "pathNat₁_connected",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Trees",
-        "The Infinite Path is a Tree"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.pathNat₁_adj_iff_pathNat₃":
    [{"id": "SimpleGraph___pathNat____adj_iff_pathNat___",
      "data":
@@ -7179,14 +7077,50 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathNat₁Translate":
-   [{"id": "SimpleGraph___pathNat___Translate",
+   "SimpleGraph.pathNat₁.translate":
+   [{"id": "SimpleGraph___pathNat______translate",
      "data":
-     {"/Maps/#SimpleGraph___pathNat___Translate":
-      {"display": "pathNat₁Translate",
+     {"/Maps/#SimpleGraph___pathNat______translate":
+      {"display": "pathNat₁.translate",
        "context":
        ["Graph Theory in Lean", "Maps", "Morphisms", "Graph Embeddings"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.pathNat₁.support_path":
+   [{"id": "SimpleGraph___pathNat______support_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathNat______support_path":
+      {"display": "pathNat₁.support_path",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Vertices and Edges of a Walk",
+        "Support and getVert"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathNat₁.path":
+   [{"id": "SimpleGraph___pathNat______path",
+     "data":
+     {"/Walks/#SimpleGraph___pathNat______path":
+      {"display": "pathNat₁.path",
+       "context": ["Graph Theory in Lean", "Walks", "Constructing Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathNat₁.length_path":
+   [{"id": "SimpleGraph___pathNat______length_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathNat______length_path":
+      {"display": "pathNat₁.length_path",
+       "context": ["Graph Theory in Lean", "Walks", "Constructing Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathNat₁.isPath_path":
+   [{"id": "SimpleGraph___pathNat______isPath_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathNat______isPath_path":
+      {"display": "pathNat₁.isPath_path",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Trails, Paths, Circuits and Cycles",
+        "Trails and Paths"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.pathNat₁":
    [{"id": "SimpleGraph___pathNat___",
      "data":
@@ -7195,13 +7129,6 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathGraphEmbedding":
-   [{"id": "SimpleGraph___pathGraphEmbedding",
-     "data":
-     {"/Maps/#SimpleGraph___pathGraphEmbedding":
-      {"display": "pathGraphEmbedding",
-       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
-     "address": "/Maps/"}],
    "SimpleGraph.pathGraphAdjDecidableRw":
    [{"id": "SimpleGraph___pathGraphAdjDecidableRw",
      "data":
@@ -7214,6 +7141,41 @@ window.onload = async () => {
         "Deciding Adjacency",
         "Decidability and Kernel Reduction*"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.pathGraph.path":
+   [{"id": "SimpleGraph___pathGraph___path",
+     "data":
+     {"/Walks/#SimpleGraph___pathGraph___path":
+      {"display": "pathGraph.path",
+       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathGraph.length_path":
+   [{"id": "SimpleGraph___pathGraph___length_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathGraph___length_path":
+      {"display": "pathGraph.length_path",
+       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathGraph.isPath_path":
+   [{"id": "SimpleGraph___pathGraph___isPath_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathGraph___isPath_path":
+      {"display": "pathGraph.isPath_path",
+       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathGraph.isHamiltonian_path":
+   [{"id": "SimpleGraph___pathGraph___isHamiltonian_path",
+     "data":
+     {"/Walks/#SimpleGraph___pathGraph___isHamiltonian_path":
+      {"display": "pathGraph.isHamiltonian_path",
+       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.pathGraph.embedding":
+   [{"id": "SimpleGraph___pathGraph___embedding",
+     "data":
+     {"/Maps/#SimpleGraph___pathGraph___embedding":
+      {"display": "pathGraph.embedding",
+       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.paleyGraph₉":
    [{"id": "SimpleGraph___paleyGraph___",
      "data":
@@ -7239,20 +7201,6 @@ window.onload = async () => {
       {"display": "paleyGraph₁₇_eq_circulant",
        "context": ["Graph Theory in Lean", "Constructions", "Exercises"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.paleyGraph_seventeen_cliqueFree_four'":
-   [{"id": "SimpleGraph___paleyGraph_seventeen_cliqueFree_four___",
-     "data":
-     {"/Cliques/#SimpleGraph___paleyGraph_seventeen_cliqueFree_four___":
-      {"display": "paleyGraph_seventeen_cliqueFree_four'",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.paleyGraph_seventeen_cliqueFree_four":
-   [{"id": "SimpleGraph___paleyGraph_seventeen_cliqueFree_four",
-     "data":
-     {"/Cliques/#SimpleGraph___paleyGraph_seventeen_cliqueFree_four":
-      {"display": "paleyGraph_seventeen_cliqueFree_four",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.paleyGraph":
    [{"id": "SimpleGraph___paleyGraph",
      "data":
@@ -7342,6 +7290,13 @@ window.onload = async () => {
         "Automorphisms",
         "Vertex-Transitivity of Mycielskians"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.nonempty_hom_piTensorProd_iff_of_isEmpty":
+   [{"id": "SimpleGraph___nonempty_hom_piTensorProd_iff_of_isEmpty",
+     "data":
+     {"/Maps/#SimpleGraph___nonempty_hom_piTensorProd_iff_of_isEmpty":
+      {"display": "nonempty_hom_piTensorProd_iff_of_isEmpty",
+       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.neighborSet_mycielskian_right":
    [{"id": "SimpleGraph___neighborSet_mycielskian_right",
      "data":
@@ -7373,6 +7328,28 @@ window.onload = async () => {
         "Colorings",
         "Greedy Colouring*",
         "Degree-less-than"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.neighborLTFinset_encode_subset":
+   [{"id": "SimpleGraph___neighborLTFinset_encode_subset",
+     "data":
+     {"/Colorings/#SimpleGraph___neighborLTFinset_encode_subset":
+      {"display": "neighborLTFinset_encode_subset",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Encodable Vertex Types"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.neighborLTFinset_crownGraph":
+   [{"id": "SimpleGraph___neighborLTFinset_crownGraph",
+     "data":
+     {"/Colorings/#SimpleGraph___neighborLTFinset_crownGraph":
+      {"display": "neighborLTFinset_crownGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Greedy Colouring vs. the Crown Graph"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.neighborLTFinset":
    [{"id": "SimpleGraph___neighborLTFinset",
@@ -7574,17 +7551,6 @@ window.onload = async () => {
         "The Adjacency Matrix",
         "Eigenvalues of Mycielskians"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.mycielskianFourCycle_isCycle":
-   [{"id": "SimpleGraph___mycielskianFourCycle_isCycle",
-     "data":
-     {"/Distance/#SimpleGraph___mycielskianFourCycle_isCycle":
-      {"display": "mycielskianFourCycle_isCycle",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Girth",
-        "The Girth of the Mycielskian"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.mycielskianFourCycle":
    [{"id": "SimpleGraph___mycielskianFourCycle",
      "data":
@@ -7606,6 +7572,17 @@ window.onload = async () => {
         "Decidability, Finiteness and Degrees",
         "Computations with Mycielskians"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.mycielskianCompleteTwoIsoCycleFive":
+   [{"id": "SimpleGraph___mycielskianCompleteTwoIsoCycleFive",
+     "data":
+     {"/Maps/#SimpleGraph___mycielskianCompleteTwoIsoCycleFive":
+      {"display": "mycielskianCompleteTwoIsoCycleFive",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Automorphisms",
+        "Vertex-Transitivity of Mycielskians"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.mycielskian.right_injective":
    [{"id": "SimpleGraph___mycielskian___right_injective",
      "data":
@@ -8351,28 +8328,6 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.kneserGraph_isIndepSet_of_mem":
-   [{"id": "SimpleGraph___kneserGraph_isIndepSet_of_mem",
-     "data":
-     {"/Cliques/#SimpleGraph___kneserGraph_isIndepSet_of_mem":
-      {"display": "kneserGraph_isIndepSet_of_mem",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Independent Sets",
-        "Independence Number of the Kneser Graph*"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.kneserGraph_isIndepSet_of_card_lt":
-   [{"id": "SimpleGraph___kneserGraph_isIndepSet_of_card_lt",
-     "data":
-     {"/Cliques/#SimpleGraph___kneserGraph_isIndepSet_of_card_lt":
-      {"display": "kneserGraph_isIndepSet_of_card_lt",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Independent Sets",
-        "Independence Number of the Kneser Graph*"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.kneserGraph_isIndepSet_image_intersecting":
    [{"id": "SimpleGraph___kneserGraph_isIndepSet_image_intersecting",
      "data":
@@ -8395,6 +8350,20 @@ window.onload = async () => {
         "Independent Sets",
         "Independence Number of the Kneser Graph*"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.kneserGraph.coloring'":
+   [{"id": "SimpleGraph___kneserGraph___coloring___",
+     "data":
+     {"/Colorings/#SimpleGraph___kneserGraph___coloring___":
+      {"display": "kneserGraph.coloring'",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.kneserGraph.coloring":
+   [{"id": "SimpleGraph___kneserGraph___coloring",
+     "data":
+     {"/Colorings/#SimpleGraph___kneserGraph___coloring":
+      {"display": "kneserGraph.coloring",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.kneserGraph":
    [{"id": "SimpleGraph___kneserGraph",
      "data":
@@ -8402,20 +8371,6 @@ window.onload = async () => {
       {"display": "kneserGraph",
        "context": ["Graph Theory in Lean", "Constructions", "Kneser Graphs*"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.kneserColoring'":
-   [{"id": "SimpleGraph___kneserColoring___",
-     "data":
-     {"/Colorings/#SimpleGraph___kneserColoring___":
-      {"display": "kneserColoring'",
-       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.kneserColoring":
-   [{"id": "SimpleGraph___kneserColoring",
-     "data":
-     {"/Colorings/#SimpleGraph___kneserColoring":
-      {"display": "kneserColoring",
-       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.iterMycielskian_zero":
    [{"id": "SimpleGraph___iterMycielskian_zero",
      "data":
@@ -8500,17 +8455,6 @@ window.onload = async () => {
         "Connectivity",
         "Connected Components"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.isoMycielskianCompleteTwoCycleGraphFive":
-   [{"id": "SimpleGraph___isoMycielskianCompleteTwoCycleGraphFive",
-     "data":
-     {"/Maps/#SimpleGraph___isoMycielskianCompleteTwoCycleGraphFive":
-      {"display": "isoMycielskianCompleteTwoCycleGraphFive",
-       "context":
-       ["Graph Theory in Lean",
-        "Maps",
-        "Automorphisms",
-        "Vertex-Transitivity of Mycielskians"]}},
-     "address": "/Maps/"}],
    "SimpleGraph.isVertexTransitive_top":
    [{"id": "SimpleGraph___isVertexTransitive_top",
      "data":
@@ -8667,17 +8611,31 @@ window.onload = async () => {
         "Edge and Vertex Connectivity",
         "Vertex Connectivity"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.isRegular_of_isVertexTransitive":
-   [{"id": "SimpleGraph___isRegular_of_isVertexTransitive",
+   "SimpleGraph.isVertexConnected_hypercube'":
+   [{"id": "SimpleGraph___isVertexConnected_hypercube___",
      "data":
-     {"/Maps/#SimpleGraph___isRegular_of_isVertexTransitive":
-      {"display": "isRegular_of_isVertexTransitive",
+     {"/Connectivity/#SimpleGraph___isVertexConnected_hypercube___":
+      {"display": "isVertexConnected_hypercube'",
+       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.isVertexConnected_hypercube":
+   [{"id": "SimpleGraph___isVertexConnected_hypercube",
+     "data":
+     {"/Connectivity/#SimpleGraph___isVertexConnected_hypercube":
+      {"display": "isVertexConnected_hypercube",
+       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.isTree_pathNat₁":
+   [{"id": "SimpleGraph___isTree_pathNat___",
+     "data":
+     {"/Connectivity/#SimpleGraph___isTree_pathNat___":
+      {"display": "isTree_pathNat₁",
        "context":
        ["Graph Theory in Lean",
-        "Maps",
-        "Automorphisms",
-        "Vertex-Transitivity"]}},
-     "address": "/Maps/"}],
+        "Connectivity",
+        "Trees",
+        "The Infinite Path is a Tree"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isRegularOfDegree_card_sub_one_iff_eq_top":
    [{"id": "SimpleGraph___isRegularOfDegree_card_sub_one_iff_eq_top",
      "data":
@@ -8740,6 +8698,39 @@ window.onload = async () => {
         "Clique and Independence Number of the Mycielskian",
         "Independence Number of the Mycielskian*"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.isIndepSet_pathNat₁_of_mod_two_eq":
+   [{"id": "SimpleGraph___isIndepSet_pathNat____of_mod_two_eq",
+     "data":
+     {"/Cliques/#SimpleGraph___isIndepSet_pathNat____of_mod_two_eq":
+      {"display": "isIndepSet_pathNat₁_of_mod_two_eq",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Independent Sets",
+        "Independence Number of the Infinite Path on ℕ"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.isIndepSet_kneserGraph_of_mem":
+   [{"id": "SimpleGraph___isIndepSet_kneserGraph_of_mem",
+     "data":
+     {"/Cliques/#SimpleGraph___isIndepSet_kneserGraph_of_mem":
+      {"display": "isIndepSet_kneserGraph_of_mem",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Independent Sets",
+        "Independence Number of the Kneser Graph*"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.isIndepSet_kneserGraph_of_card_lt":
+   [{"id": "SimpleGraph___isIndepSet_kneserGraph_of_card_lt",
+     "data":
+     {"/Cliques/#SimpleGraph___isIndepSet_kneserGraph_of_card_lt":
+      {"display": "isIndepSet_kneserGraph_of_card_lt",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Independent Sets",
+        "Independence Number of the Kneser Graph*"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.isIndepSet_iff_forall_not_adj":
    [{"id": "SimpleGraph___isIndepSet_iff_forall_not_adj",
      "data":
@@ -8747,6 +8738,46 @@ window.onload = async () => {
       {"display": "isIndepSet_iff_forall_not_adj",
        "context": ["Graph Theory in Lean", "Cliques", "Independent Sets"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.isIndepSet_completeBipartiteGraph_of_subset_range_inr'":
+   [{"id":
+     "SimpleGraph___isIndepSet_completeBipartiteGraph_of_subset_range_inr___",
+     "data":
+     {"/Cliques/#SimpleGraph___isIndepSet_completeBipartiteGraph_of_subset_range_inr___":
+      {"display": "isIndepSet_completeBipartiteGraph_of_subset_range_inr'",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.isIndepSet_completeBipartiteGraph_of_subset_range_inr":
+   [{"id":
+     "SimpleGraph___isIndepSet_completeBipartiteGraph_of_subset_range_inr",
+     "data":
+     {"/Cliques/#SimpleGraph___isIndepSet_completeBipartiteGraph_of_subset_range_inr":
+      {"display": "isIndepSet_completeBipartiteGraph_of_subset_range_inr",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.isHamiltonian_sup_sup_edge_iff":
+   [{"id": "SimpleGraph___isHamiltonian_sup_sup_edge_iff",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_sup_sup_edge_iff":
+      {"display": "isHamiltonian_sup_sup_edge_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_sup_edge_iff":
+   [{"id": "SimpleGraph___isHamiltonian_sup_edge_iff",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_sup_edge_iff":
+      {"display": "isHamiltonian_sup_edge_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "Adding a Single Edge"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.isHamiltonian_of_closure_eq_top":
    [{"id": "SimpleGraph___isHamiltonian_of_closure_eq_top",
      "data":
@@ -8769,6 +8800,56 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Ore's Theorem and Dirac's Theorem"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_hypercube'":
+   [{"id": "SimpleGraph___isHamiltonian_hypercube___",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_hypercube___":
+      {"display": "isHamiltonian_hypercube'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_hypercube":
+   [{"id": "SimpleGraph___isHamiltonian_hypercube",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_hypercube":
+      {"display": "isHamiltonian_hypercube",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_closure_iff":
+   [{"id": "SimpleGraph___isHamiltonian_closure_iff",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_closure_iff":
+      {"display": "isHamiltonian_closure_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_closureStep_iff":
+   [{"id": "SimpleGraph___isHamiltonian_closureStep_iff",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_closureStep_iff":
+      {"display": "isHamiltonian_closureStep_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.isHamiltonian_closureAux_iff":
+   [{"id": "SimpleGraph___isHamiltonian_closureAux_iff",
+     "data":
+     {"/Walks/#SimpleGraph___isHamiltonian_closureAux_iff":
+      {"display": "isHamiltonian_closureAux_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "The Bondy–Chvátal Theorem",
+        "The Closure of a Graph"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.isEmpty_iso_completeGraph_two_of_isEmpty'":
    [{"id": "SimpleGraph___isEmpty_iso_completeGraph_two_of_isEmpty___",
      "data":
@@ -8783,6 +8864,20 @@ window.onload = async () => {
       {"display": "isEmpty_iso_completeGraph_two_of_isEmpty",
        "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.isEdgeConnected_hypercube'":
+   [{"id": "SimpleGraph___isEdgeConnected_hypercube___",
+     "data":
+     {"/Connectivity/#SimpleGraph___isEdgeConnected_hypercube___":
+      {"display": "isEdgeConnected_hypercube'",
+       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.isEdgeConnected_hypercube":
+   [{"id": "SimpleGraph___isEdgeConnected_hypercube",
+     "data":
+     {"/Connectivity/#SimpleGraph___isEdgeConnected_hypercube":
+      {"display": "isEdgeConnected_hypercube",
+       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.isEdgeConnected_edgeConnectivity":
    [{"id": "SimpleGraph___isEdgeConnected_edgeConnectivity",
      "data":
@@ -8794,6 +8889,17 @@ window.onload = async () => {
         "Edge and Vertex Connectivity",
         "Connectivity Numbers*"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.isCycle_mycielskianFourCycle":
+   [{"id": "SimpleGraph___isCycle_mycielskianFourCycle",
+     "data":
+     {"/Distance/#SimpleGraph___isCycle_mycielskianFourCycle":
+      {"display": "isCycle_mycielskianFourCycle",
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Girth",
+        "The Girth of the Mycielskian"]}},
+     "address": "/Distance/"}],
    "SimpleGraph.isCycle_mycielskianClosed_of_adj":
    [{"id": "SimpleGraph___isCycle_mycielskianClosed_of_adj",
      "data":
@@ -8882,6 +8988,17 @@ window.onload = async () => {
         "Trails, Paths, Circuits and Cycles",
         "Odd Cycles and Bipartite Graphs"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.isAcyclic_pathNat₁":
+   [{"id": "SimpleGraph___isAcyclic_pathNat___",
+     "data":
+     {"/Connectivity/#SimpleGraph___isAcyclic_pathNat___":
+      {"display": "isAcyclic_pathNat₁",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Trees",
+        "The Infinite Path is a Tree"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.is2Clique_pair_iff":
    [{"id": "SimpleGraph___is2Clique_pair_iff",
      "data":
@@ -8889,18 +9006,6 @@ window.onload = async () => {
       {"display": "is2Clique_pair_iff",
        "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.induce_walkComponent_connected":
-   [{"id": "SimpleGraph___induce_walkComponent_connected",
-     "data":
-     {"/Connectivity/#SimpleGraph___induce_walkComponent_connected":
-      {"display": "induce_walkComponent_connected",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Brooks' Theorem*",
-        "Maximum Degree at Least Three",
-        "Step 2: Gluing Along the Pair"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.indepNum_pathNat₁":
    [{"id": "SimpleGraph___indepNum_pathNat___",
      "data":
@@ -9038,6 +9143,17 @@ window.onload = async () => {
         "The Automorphism Group of the Hypercube*",
         "Characterization"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hyperoctahedralAction":
+   [{"id": "SimpleGraph___hyperoctahedralAction",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hyperoctahedralAction":
+      {"display": "hyperoctahedralAction",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "The Hyperoctahedral Group"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.hypercube_zero":
    [{"id": "SimpleGraph___hypercube_zero",
      "data":
@@ -9059,92 +9175,6 @@ window.onload = async () => {
       {"display": "hypercube_succ",
        "context": ["Graph Theory in Lean", "Constructions", "Hypercube"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.hypercube_isVertexConnected'":
-   [{"id": "SimpleGraph___hypercube_isVertexConnected___",
-     "data":
-     {"/Connectivity/#SimpleGraph___hypercube_isVertexConnected___":
-      {"display": "hypercube_isVertexConnected'",
-       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.hypercube_isVertexConnected":
-   [{"id": "SimpleGraph___hypercube_isVertexConnected",
-     "data":
-     {"/Connectivity/#SimpleGraph___hypercube_isVertexConnected":
-      {"display": "hypercube_isVertexConnected",
-       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.hypercube_isRegularOfDegree":
-   [{"id": "SimpleGraph___hypercube_isRegularOfDegree",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hypercube_isRegularOfDegree":
-      {"display": "hypercube_isRegularOfDegree",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Computations with Hypercubes",
-        "Stating Results Across a Diamond*"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hypercube_isHamiltonian'":
-   [{"id": "SimpleGraph___hypercube_isHamiltonian___",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube_isHamiltonian___":
-      {"display": "hypercube_isHamiltonian'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube_isHamiltonian":
-   [{"id": "SimpleGraph___hypercube_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube_isHamiltonian":
-      {"display": "hypercube_isHamiltonian",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube_isEdgeConnected'":
-   [{"id": "SimpleGraph___hypercube_isEdgeConnected___",
-     "data":
-     {"/Connectivity/#SimpleGraph___hypercube_isEdgeConnected___":
-      {"display": "hypercube_isEdgeConnected'",
-       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.hypercube_isEdgeConnected":
-   [{"id": "SimpleGraph___hypercube_isEdgeConnected",
-     "data":
-     {"/Connectivity/#SimpleGraph___hypercube_isEdgeConnected":
-      {"display": "hypercube_isEdgeConnected",
-       "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.hypercube_isBipartite":
-   [{"id": "SimpleGraph___hypercube_isBipartite",
-     "data":
-     {"/Colorings/#SimpleGraph___hypercube_isBipartite":
-      {"display": "hypercube_isBipartite",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Hypercubes"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.hypercube_connected":
-   [{"id": "SimpleGraph___hypercube_connected",
-     "data":
-     {"/Connectivity/#SimpleGraph___hypercube_connected":
-      {"display": "hypercube_connected",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Connectivity",
-        "Connected Graphs"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.hypercube_cliqueFree_three":
-   [{"id": "SimpleGraph___hypercube_cliqueFree_three",
-     "data":
-     {"/Colorings/#SimpleGraph___hypercube_cliqueFree_three":
-      {"display": "hypercube_cliqueFree_three",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Hypercubes"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.hypercube_adj_iff_hammingDist_eq_one":
    [{"id": "SimpleGraph___hypercube_adj_iff_hammingDist_eq_one",
      "data":
@@ -9203,17 +9233,6 @@ window.onload = async () => {
      {"/Maps/#SimpleGraph___hypercubeTwoIsoCycleFour":
       {"display": "hypercubeTwoIsoCycleFour",
        "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
-     "address": "/Maps/"}],
-   "SimpleGraph.hypercubeTranslate":
-   [{"id": "SimpleGraph___hypercubeTranslate",
-     "data":
-     {"/Maps/#SimpleGraph___hypercubeTranslate":
-      {"display": "hypercubeTranslate",
-       "context":
-       ["Graph Theory in Lean",
-        "Maps",
-        "Automorphisms",
-        "Vertex-Transitivity of Hypercubes"]}},
      "address": "/Maps/"}],
    "SimpleGraph.hypercubeRepr":
    [{"id": "SimpleGraph___hypercubeRepr",
@@ -9307,6 +9326,94 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.translate_inv_apply":
+   [{"id": "SimpleGraph___hypercubeHamming___translate_inv_apply",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___translate_inv_apply":
+      {"display": "hypercubeHamming.translate_inv_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.translate_apply":
+   [{"id": "SimpleGraph___hypercubeHamming___translate_apply",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___translate_apply":
+      {"display": "hypercubeHamming.translate_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.translateHom":
+   [{"id": "SimpleGraph___hypercubeHamming___translateHom",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___translateHom":
+      {"display": "hypercubeHamming.translateHom",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "The Hyperoctahedral Group"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.translate":
+   [{"id": "SimpleGraph___hypercubeHamming___translate",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___translate":
+      {"display": "hypercubeHamming.translate",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.permute_inv_apply":
+   [{"id": "SimpleGraph___hypercubeHamming___permute_inv_apply",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___permute_inv_apply":
+      {"display": "hypercubeHamming.permute_inv_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.permute_apply":
+   [{"id": "SimpleGraph___hypercubeHamming___permute_apply",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___permute_apply":
+      {"display": "hypercubeHamming.permute_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.permuteHom":
+   [{"id": "SimpleGraph___hypercubeHamming___permuteHom",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___permuteHom":
+      {"display": "hypercubeHamming.permuteHom",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "The Hyperoctahedral Group"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.permute":
+   [{"id": "SimpleGraph___hypercubeHamming___permute",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___permute":
+      {"display": "hypercubeHamming.permute",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.hypercubeHamming":
    [{"id": "SimpleGraph___hypercubeHamming",
      "data":
@@ -9345,20 +9452,6 @@ window.onload = async () => {
         "Greedy Colouring*",
         "Computing Colourings of Encodable Graphs"]}},
      "address": "/Colorings/"}],
-   "SimpleGraph.hypercubeEmbedding'":
-   [{"id": "SimpleGraph___hypercubeEmbedding___",
-     "data":
-     {"/Maps/#SimpleGraph___hypercubeEmbedding___":
-      {"display": "hypercubeEmbedding'",
-       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
-     "address": "/Maps/"}],
-   "SimpleGraph.hypercubeEmbedding":
-   [{"id": "SimpleGraph___hypercubeEmbedding",
-     "data":
-     {"/Maps/#SimpleGraph___hypercubeEmbedding":
-      {"display": "hypercubeEmbedding",
-       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
-     "address": "/Maps/"}],
    "SimpleGraph.hypercubeDecidableRelAdj":
    [{"id": "SimpleGraph___hypercubeDecidableRelAdj",
      "data":
@@ -9379,17 +9472,17 @@ window.onload = async () => {
         "Decidability, Finiteness and Degrees",
         "Computations with Hypercubes"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hypercube.matching_isPerfectMatching":
-   [{"id": "SimpleGraph___hypercube___matching_isPerfectMatching",
+   "SimpleGraph.hypercube.translate":
+   [{"id": "SimpleGraph___hypercube___translate",
      "data":
-     {"/Subgraphs/#SimpleGraph___hypercube___matching_isPerfectMatching":
-      {"display": "hypercube.matching_isPerfectMatching",
+     {"/Maps/#SimpleGraph___hypercube___translate":
+      {"display": "hypercube.translate",
        "context":
        ["Graph Theory in Lean",
-        "Subgraphs",
-        "Matching Number",
-        "Matching Number of the Hypercube"]}},
-     "address": "/Subgraphs/"}],
+        "Maps",
+        "Automorphisms",
+        "Vertex-Transitivity of Hypercubes"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.hypercube.matching":
    [{"id": "SimpleGraph___hypercube___matching",
      "data":
@@ -9401,6 +9494,128 @@ window.onload = async () => {
         "Matching Number",
         "Matching Number of the Hypercube"]}},
      "address": "/Subgraphs/"}],
+   "SimpleGraph.hypercube.length_grayPath":
+   [{"id": "SimpleGraph___hypercube___length_grayPath",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___length_grayPath":
+      {"display": "hypercube.length_grayPath",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in Hypercube and Mycielskian Graphs",
+        "Walks in Hypercubes",
+        "Gray Code"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isPerfectMatching_matching":
+   [{"id": "SimpleGraph___hypercube___isPerfectMatching_matching",
+     "data":
+     {"/Subgraphs/#SimpleGraph___hypercube___isPerfectMatching_matching":
+      {"display": "hypercube.isPerfectMatching_matching",
+       "context":
+       ["Graph Theory in Lean",
+        "Subgraphs",
+        "Matching Number",
+        "Matching Number of the Hypercube"]}},
+     "address": "/Subgraphs/"}],
+   "SimpleGraph.hypercube.isPath_grayPath":
+   [{"id": "SimpleGraph___hypercube___isPath_grayPath",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isPath_grayPath":
+      {"display": "hypercube.isPath_grayPath",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in Hypercube and Mycielskian Graphs",
+        "Walks in Hypercubes",
+        "Gray Code"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isHamiltonian_grayPath":
+   [{"id": "SimpleGraph___hypercube___isHamiltonian_grayPath",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isHamiltonian_grayPath":
+      {"display": "hypercube.isHamiltonian_grayPath",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in Hypercube and Mycielskian Graphs",
+        "Walks in Hypercubes",
+        "Gray Code"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isHamiltonianCycle_grayCycle'":
+   [{"id": "SimpleGraph___hypercube___isHamiltonianCycle_grayCycle___",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isHamiltonianCycle_grayCycle___":
+      {"display": "hypercube.isHamiltonianCycle_grayCycle'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isHamiltonianCycle_grayCycle":
+   [{"id": "SimpleGraph___hypercube___isHamiltonianCycle_grayCycle",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isHamiltonianCycle_grayCycle":
+      {"display": "hypercube.isHamiltonianCycle_grayCycle",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isCycle_grayCycle'":
+   [{"id": "SimpleGraph___hypercube___isCycle_grayCycle___",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isCycle_grayCycle___":
+      {"display": "hypercube.isCycle_grayCycle'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.isCycle_grayCycle":
+   [{"id": "SimpleGraph___hypercube___isCycle_grayCycle",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___isCycle_grayCycle":
+      {"display": "hypercube.isCycle_grayCycle",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.grayPath_snd_false'":
+   [{"id": "SimpleGraph___hypercube___grayPath_snd_false___",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___grayPath_snd_false___":
+      {"display": "hypercube.grayPath_snd_false'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.grayPath_snd_false":
+   [{"id": "SimpleGraph___hypercube___grayPath_snd_false",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___grayPath_snd_false":
+      {"display": "hypercube.grayPath_snd_false",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.grayPath":
+   [{"id": "SimpleGraph___hypercube___grayPath",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___grayPath":
+      {"display": "hypercube.grayPath",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in Hypercube and Mycielskian Graphs",
+        "Walks in Hypercubes",
+        "Gray Code"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.grayCycle":
+   [{"id": "SimpleGraph___hypercube___grayCycle",
+     "data":
+     {"/Walks/#SimpleGraph___hypercube___grayCycle":
+      {"display": "hypercube.grayCycle",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.hypercube.embedding'":
+   [{"id": "SimpleGraph___hypercube___embedding___",
+     "data":
+     {"/Maps/#SimpleGraph___hypercube___embedding___":
+      {"display": "hypercube.embedding'",
+       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
+     "address": "/Maps/"}],
+   "SimpleGraph.hypercube.embedding":
+   [{"id": "SimpleGraph___hypercube___embedding",
+     "data":
+     {"/Maps/#SimpleGraph___hypercube___embedding":
+      {"display": "hypercube.embedding",
+       "context": ["Graph Theory in Lean", "Maps", "Exercises"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.hypercube.embedTrue":
    [{"id": "SimpleGraph___hypercube___embedTrue",
      "data":
@@ -9506,105 +9721,6 @@ window.onload = async () => {
         "Decidability, Finiteness and Degrees",
         "Exercises"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hammingTranslate_inv_apply":
-   [{"id": "SimpleGraph___hammingTranslate_inv_apply",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingTranslate_inv_apply":
-      {"display": "hammingTranslate_inv_apply",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingTranslate_apply":
-   [{"id": "SimpleGraph___hammingTranslate_apply",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingTranslate_apply":
-      {"display": "hammingTranslate_apply",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingTranslateHom":
-   [{"id": "SimpleGraph___hammingTranslateHom",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingTranslateHom":
-      {"display": "hammingTranslateHom",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "The Hyperoctahedral Group"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingTranslate":
-   [{"id": "SimpleGraph___hammingTranslate",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingTranslate":
-      {"display": "hammingTranslate",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingPhi":
-   [{"id": "SimpleGraph___hammingPhi",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingPhi":
-      {"display": "hammingPhi",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "The Hyperoctahedral Group"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingPermute_inv_apply":
-   [{"id": "SimpleGraph___hammingPermute_inv_apply",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingPermute_inv_apply":
-      {"display": "hammingPermute_inv_apply",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingPermute_apply":
-   [{"id": "SimpleGraph___hammingPermute_apply",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingPermute_apply":
-      {"display": "hammingPermute_apply",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingPermuteHom":
-   [{"id": "SimpleGraph___hammingPermuteHom",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingPermuteHom":
-      {"display": "hammingPermuteHom",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "The Hyperoctahedral Group"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingPermute":
-   [{"id": "SimpleGraph___hammingPermute",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingPermute":
-      {"display": "hammingPermute",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.hammingNorm_single":
    [{"id": "SimpleGraph___hammingNorm_single",
      "data":
@@ -10086,11 +10202,11 @@ window.onload = async () => {
       {"display": "four_le_egirth_of_cliqueFree_three",
        "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.five_le_egirth":
-   [{"id": "SimpleGraph___five_le_egirth",
+   "SimpleGraph.five_le_egirth_of_cliqueFree_three_of_free":
+   [{"id": "SimpleGraph___five_le_egirth_of_cliqueFree_three_of_free",
      "data":
-     {"/Distance/#SimpleGraph___five_le_egirth":
-      {"display": "five_le_egirth",
+     {"/Distance/#SimpleGraph___five_le_egirth_of_cliqueFree_three_of_free":
+      {"display": "five_le_egirth_of_cliqueFree_three_of_free",
        "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.finite_setOf_edist_le":
@@ -10339,6 +10455,17 @@ window.onload = async () => {
         "Eulerian Circuits and Trails",
         "Extending Trails"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.exists_eq_subcubeCopy":
+   [{"id": "SimpleGraph___exists_eq_subcubeCopy",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_eq_subcubeCopy":
+      {"display": "exists_eq_subcubeCopy",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.exists_aut_hypercubeHamming_of_adj'":
    [{"id": "SimpleGraph___exists_aut_hypercubeHamming_of_adj___",
      "data":
@@ -10354,6 +10481,28 @@ window.onload = async () => {
       {"display": "exists_aut_hypercubeHamming_of_adj",
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.exists_apply_single_eq_add_single":
+   [{"id": "SimpleGraph___exists_apply_single_eq_add_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_apply_single_eq_add_single":
+      {"display": "exists_apply_single_eq_add_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.exists_apply_eq_add_extendEmb":
+   [{"id": "SimpleGraph___exists_apply_eq_add_extendEmb",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_apply_eq_add_extendEmb":
+      {"display": "exists_apply_eq_add_extendEmb",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
      "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.exists_adj_notMem_of_matchingNum_eq_top'":
    [{"id": "SimpleGraph___exists_adj_notMem_of_matchingNum_eq_top___",
@@ -10407,50 +10556,17 @@ window.onload = async () => {
         "Degree Sequences*",
         "The Erdős–Gallai Theorem"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.erdosGallaiLE":
-   [{"id": "SimpleGraph___erdosGallaiLE",
+   "SimpleGraph.eq_of_adj_of_adj_of_lt_egirth":
+   [{"id": "SimpleGraph___eq_of_adj_of_adj_of_lt_egirth",
      "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___erdosGallaiLE":
-      {"display": "erdosGallaiLE",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degree Sequences*",
-        "The Erdős–Gallai Theorem"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.eq_of_adj_of_adj":
-   [{"id": "SimpleGraph___eq_of_adj_of_adj",
-     "data":
-     {"/Distance/#SimpleGraph___eq_of_adj_of_adj":
-      {"display": "eq_of_adj_of_adj",
+     {"/Distance/#SimpleGraph___eq_of_adj_of_adj_of_lt_egirth":
+      {"display": "eq_of_adj_of_adj_of_lt_egirth",
        "context":
        ["Graph Theory in Lean",
         "Distance",
         "Moore and Cage Bounds",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.encode_neighborLTFinset_subset":
-   [{"id": "SimpleGraph___encode_neighborLTFinset_subset",
-     "data":
-     {"/Colorings/#SimpleGraph___encode_neighborLTFinset_subset":
-      {"display": "encode_neighborLTFinset_subset",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Encodable Vertex Types"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.encode_degreeLT_le":
-   [{"id": "SimpleGraph___encode_degreeLT_le",
-     "data":
-     {"/Colorings/#SimpleGraph___encode_degreeLT_le":
-      {"display": "encode_degreeLT_le",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Encodable Vertex Types"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.encodeMap":
    [{"id": "SimpleGraph___encodeMap",
      "data":
@@ -11076,6 +11192,17 @@ window.onload = async () => {
       {"display": "degreeLT_le_self",
        "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
      "address": "/Colorings/"}],
+   "SimpleGraph.degreeLT_encode_le":
+   [{"id": "SimpleGraph___degreeLT_encode_le",
+     "data":
+     {"/Colorings/#SimpleGraph___degreeLT_encode_le":
+      {"display": "degreeLT_encode_le",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Encodable Vertex Types"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.degreeLT":
    [{"id": "SimpleGraph___degreeLT",
      "data":
@@ -11153,6 +11280,17 @@ window.onload = async () => {
         "Degrees",
         "Neighbours in a Set"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.degIn_eq_card_bipartiteBelow":
+   [{"id": "SimpleGraph___degIn_eq_card_bipartiteBelow",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___degIn_eq_card_bipartiteBelow":
+      {"display": "degIn_eq_card_bipartiteBelow",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Degrees",
+        "Neighbours in a Set"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.degIn":
    [{"id": "SimpleGraph___degIn",
      "data":
@@ -11184,31 +11322,17 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Cliques", "The Finset of n-Cliques"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.cycleGraph_isHamiltonian_iff'":
-   [{"id": "SimpleGraph___cycleGraph_isHamiltonian_iff___",
+   "SimpleGraph.cycleGraph_four_free_petersenGraph":
+   [{"id": "SimpleGraph___cycleGraph_four_free_petersenGraph",
      "data":
-     {"/Walks/#SimpleGraph___cycleGraph_isHamiltonian_iff___":
-      {"display": "cycleGraph_isHamiltonian_iff'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.cycleGraph_isHamiltonian_iff":
-   [{"id": "SimpleGraph___cycleGraph_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___cycleGraph_isHamiltonian_iff":
-      {"display": "cycleGraph_isHamiltonian_iff",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.cycleGraph_isHamiltonian":
-   [{"id": "SimpleGraph___cycleGraph_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___cycleGraph_isHamiltonian":
-      {"display": "cycleGraph_isHamiltonian",
+     {"/Distance/#SimpleGraph___cycleGraph_four_free_petersenGraph":
+      {"display": "cycleGraph_four_free_petersenGraph",
        "context":
        ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
-     "address": "/Walks/"}],
+        "Distance",
+        "Moore and Cage Bounds",
+        "Moore Graphs"]}},
+     "address": "/Distance/"}],
    "SimpleGraph.cycleGraph_four_free_mycielskian":
    [{"id": "SimpleGraph___cycleGraph_four_free_mycielskian",
      "data":
@@ -11227,44 +11351,33 @@ window.onload = async () => {
       {"display": "cycleGraph_four_free_iff_common_neighbor_unique",
        "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.cycleGraphRotate":
-   [{"id": "SimpleGraph___cycleGraphRotate",
+   "SimpleGraph.cycleGraph.rotate":
+   [{"id": "SimpleGraph___cycleGraph___rotate",
      "data":
-     {"/Maps/#SimpleGraph___cycleGraphRotate":
-      {"display": "cycleGraphRotate",
+     {"/Maps/#SimpleGraph___cycleGraph___rotate":
+      {"display": "cycleGraph.rotate",
        "context":
        ["Graph Theory in Lean",
         "Maps",
         "Automorphisms",
         "Vertex-Transitivity"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.cycleGraphReflect":
-   [{"id": "SimpleGraph___cycleGraphReflect",
+   "SimpleGraph.cycleGraph.reflect":
+   [{"id": "SimpleGraph___cycleGraph___reflect",
      "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___cycleGraphReflect":
-      {"display": "cycleGraphReflect",
+     {"/Algebraic-Graph-Theory/#SimpleGraph___cycleGraph___reflect":
+      {"display": "cycleGraph.reflect",
        "context":
        ["Graph Theory in Lean",
         "Algebraic Graph Theory",
         "Automorphism Groups",
         "Automorphisms of Cycle Graphs"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.crownGraph_neighborLTFinset":
-   [{"id": "SimpleGraph___crownGraph_neighborLTFinset",
+   "SimpleGraph.crownGraph.bicoloring":
+   [{"id": "SimpleGraph___crownGraph___bicoloring",
      "data":
-     {"/Colorings/#SimpleGraph___crownGraph_neighborLTFinset":
-      {"display": "crownGraph_neighborLTFinset",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Greedy Colouring vs. the Crown Graph"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.crownGraph.twoColoring":
-   [{"id": "SimpleGraph___crownGraph___twoColoring",
-     "data":
-     {"/Colorings/#SimpleGraph___crownGraph___twoColoring":
-      {"display": "crownGraph.twoColoring",
+     {"/Colorings/#SimpleGraph___crownGraph___bicoloring":
+      {"display": "crownGraph.bicoloring",
        "context":
        ["Graph Theory in Lean",
         "Colorings",
@@ -11303,39 +11416,6 @@ window.onload = async () => {
         "Algebraic Graph Theory",
         "Subcubes of the Hypercube*",
         "Every Copy is Induced"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.copy_exists_extendEmb":
-   [{"id": "SimpleGraph___copy_exists_extendEmb",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_exists_extendEmb":
-      {"display": "copy_exists_extendEmb",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.copy_exists_direction_embedding":
-   [{"id": "SimpleGraph___copy_exists_direction_embedding",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_exists_direction_embedding":
-      {"display": "copy_exists_direction_embedding",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.copy_eq_subcubeCopy":
-   [{"id": "SimpleGraph___copy_eq_subcubeCopy",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_eq_subcubeCopy":
-      {"display": "copy_eq_subcubeCopy",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
      "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.copy_apply_eq_add_extendEmb_of_single":
    [{"id": "SimpleGraph___copy_apply_eq_add_extendEmb_of_single",
@@ -11495,6 +11575,17 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.connected_pathNat₁":
+   [{"id": "SimpleGraph___connected_pathNat___",
+     "data":
+     {"/Connectivity/#SimpleGraph___connected_pathNat___":
+      {"display": "connected_pathNat₁",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Trees",
+        "The Infinite Path is a Tree"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.connected_mycielskian_iff":
    [{"id": "SimpleGraph___connected_mycielskian_iff",
      "data":
@@ -11506,6 +11597,18 @@ window.onload = async () => {
         "Connectivity",
         "Connected Graphs"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.connected_induce_walkComponent":
+   [{"id": "SimpleGraph___connected_induce_walkComponent",
+     "data":
+     {"/Connectivity/#SimpleGraph___connected_induce_walkComponent":
+      {"display": "connected_induce_walkComponent",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Brooks' Theorem*",
+        "Maximum Degree at Least Three",
+        "Step 2: Gluing Along the Pair"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.connected_iff_card_connectedComponent":
    [{"id": "SimpleGraph___connected_iff_card_connectedComponent",
      "data":
@@ -11516,6 +11619,17 @@ window.onload = async () => {
         "Connectivity",
         "Connectivity",
         "Connected Components"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.connected_hypercube":
+   [{"id": "SimpleGraph___connected_hypercube",
+     "data":
+     {"/Connectivity/#SimpleGraph___connected_hypercube":
+      {"display": "connected_hypercube",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Connectivity",
+        "Connected Graphs"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.coneGraph":
    [{"id": "SimpleGraph___coneGraph",
@@ -11539,57 +11653,32 @@ window.onload = async () => {
         "Complete Multipartite Graphs and Blow-ups*",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.completeGraph_isHamiltonian_iff'":
-   [{"id": "SimpleGraph___completeGraph_isHamiltonian_iff___",
+   "SimpleGraph.completeBipartiteGraph_not_adj_inr_iff'":
+   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inr_iff___",
      "data":
-     {"/Walks/#SimpleGraph___completeGraph_isHamiltonian_iff___":
-      {"display": "completeGraph_isHamiltonian_iff'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.completeGraph_isHamiltonian_iff":
-   [{"id": "SimpleGraph___completeGraph_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___completeGraph_isHamiltonian_iff":
-      {"display": "completeGraph_isHamiltonian_iff",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.completeGraph_isHamiltonian":
-   [{"id": "SimpleGraph___completeGraph_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___completeGraph_isHamiltonian":
-      {"display": "completeGraph_isHamiltonian",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.completeBipartiteGraph_not_adj_inr'":
-   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inr___",
-     "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inr___":
-      {"display": "completeBipartiteGraph_not_adj_inr'",
+     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inr_iff___":
+      {"display": "completeBipartiteGraph_not_adj_inr_iff'",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.completeBipartiteGraph_not_adj_inr":
-   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inr",
+   "SimpleGraph.completeBipartiteGraph_not_adj_inr_iff":
+   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inr_iff",
      "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inr":
-      {"display": "completeBipartiteGraph_not_adj_inr",
+     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inr_iff":
+      {"display": "completeBipartiteGraph_not_adj_inr_iff",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.completeBipartiteGraph_not_adj_inl'":
-   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inl___",
+   "SimpleGraph.completeBipartiteGraph_not_adj_inl_iff'":
+   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inl_iff___",
      "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inl___":
-      {"display": "completeBipartiteGraph_not_adj_inl'",
+     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inl_iff___":
+      {"display": "completeBipartiteGraph_not_adj_inl_iff'",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.completeBipartiteGraph_not_adj_inl":
-   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inl",
+   "SimpleGraph.completeBipartiteGraph_not_adj_inl_iff":
+   [{"id": "SimpleGraph___completeBipartiteGraph_not_adj_inl_iff",
      "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inl":
-      {"display": "completeBipartiteGraph_not_adj_inl",
+     {"/Cliques/#SimpleGraph___completeBipartiteGraph_not_adj_inl_iff":
+      {"display": "completeBipartiteGraph_not_adj_inl_iff",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
    "SimpleGraph.completeBipartiteGraph_isIndepSet_subset_left_or_right'":
@@ -11606,22 +11695,6 @@ window.onload = async () => {
      "data":
      {"/Cliques/#SimpleGraph___completeBipartiteGraph_isIndepSet_subset_left_or_right":
       {"display": "completeBipartiteGraph_isIndepSet_subset_left_or_right",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.completeBipartiteGraph_isIndepSet_of_subset_range_inr'":
-   [{"id":
-     "SimpleGraph___completeBipartiteGraph_isIndepSet_of_subset_range_inr___",
-     "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_isIndepSet_of_subset_range_inr___":
-      {"display": "completeBipartiteGraph_isIndepSet_of_subset_range_inr'",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.completeBipartiteGraph_isIndepSet_of_subset_range_inr":
-   [{"id":
-     "SimpleGraph___completeBipartiteGraph_isIndepSet_of_subset_range_inr",
-     "data":
-     {"/Cliques/#SimpleGraph___completeBipartiteGraph_isIndepSet_of_subset_range_inr":
-      {"display": "completeBipartiteGraph_isIndepSet_of_subset_range_inr",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
    "SimpleGraph.completeBipartiteGraph_isIndepSet_card_add_le'":
@@ -11656,39 +11729,6 @@ window.onload = async () => {
         "Clique and Independence Number of the Mycielskian",
         "Independence Number of the Mycielskian*"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.coloringOnOfSingleton":
-   [{"id": "SimpleGraph___coloringOnOfSingleton",
-     "data":
-     {"/Subgraphs/#SimpleGraph___coloringOnOfSingleton":
-      {"display": "coloringOnOfSingleton",
-       "context":
-       ["Graph Theory in Lean",
-        "Subgraphs",
-        "Partial Colourings*",
-        "Building Partial Colourings"]}},
-     "address": "/Subgraphs/"}],
-   "SimpleGraph.coloringOnOfNotAdj":
-   [{"id": "SimpleGraph___coloringOnOfNotAdj",
-     "data":
-     {"/Subgraphs/#SimpleGraph___coloringOnOfNotAdj":
-      {"display": "coloringOnOfNotAdj",
-       "context":
-       ["Graph Theory in Lean",
-        "Subgraphs",
-        "Partial Colourings*",
-        "Building Partial Colourings"]}},
-     "address": "/Subgraphs/"}],
-   "SimpleGraph.coloringOnEmpty":
-   [{"id": "SimpleGraph___coloringOnEmpty",
-     "data":
-     {"/Subgraphs/#SimpleGraph___coloringOnEmpty":
-      {"display": "coloringOnEmpty",
-       "context":
-       ["Graph Theory in Lean",
-        "Subgraphs",
-        "Partial Colourings*",
-        "Building Partial Colourings"]}},
-     "address": "/Subgraphs/"}],
    "SimpleGraph.colorable_of_forall_finite_subgraph_colorable":
    [{"id": "SimpleGraph___colorable_of_forall_finite_subgraph_colorable",
      "data":
@@ -11803,6 +11843,17 @@ window.onload = async () => {
         "Colouring Concrete Graphs",
         "Colouring Box Products"]}},
      "address": "/Colorings/"}],
+   "SimpleGraph.colorable_blowUpGraph_iff":
+   [{"id": "SimpleGraph___colorable_blowUpGraph_iff",
+     "data":
+     {"/Colorings/#SimpleGraph___colorable_blowUpGraph_iff":
+      {"display": "colorable_blowUpGraph_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Blow-ups"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.colorableOn_univ_iff_colorable":
    [{"id": "SimpleGraph___colorableOn_univ_iff_colorable",
      "data":
@@ -11873,18 +11924,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Closure is the Least Closed Supergraph"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.closure_isHamiltonian_iff":
-   [{"id": "SimpleGraph___closure_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___closure_isHamiltonian_iff":
-      {"display": "closure_isHamiltonian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem",
-        "The Closure of a Graph"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.closure_closure":
    [{"id": "SimpleGraph___closure_closure",
      "data":
@@ -11906,18 +11945,6 @@ window.onload = async () => {
         "Walks",
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Closure is the Least Closed Supergraph"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.closureStep_isHamiltonian_iff":
-   [{"id": "SimpleGraph___closureStep_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___closureStep_isHamiltonian_iff":
-      {"display": "closureStep_isHamiltonian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem",
-        "The Closure of a Graph"]}},
      "address": "/Walks/"}],
    "SimpleGraph.closureStep_adj":
    [{"id": "SimpleGraph___closureStep_adj",
@@ -11953,18 +11980,6 @@ window.onload = async () => {
         "Walks",
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Closure is the Least Closed Supergraph"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.closureAux_isHamiltonian_iff":
-   [{"id": "SimpleGraph___closureAux_isHamiltonian_iff",
-     "data":
-     {"/Walks/#SimpleGraph___closureAux_isHamiltonian_iff":
-      {"display": "closureAux_isHamiltonian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem",
-        "The Closure of a Graph"]}},
      "address": "/Walks/"}],
    "SimpleGraph.closureAux_eq_self":
    [{"id": "SimpleGraph___closureAux_eq_self",
@@ -12102,6 +12117,20 @@ window.onload = async () => {
       {"display": "cliqueNum_mono",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.cliqueNum_le_cliqueNum_boxProd_left'":
+   [{"id": "SimpleGraph___cliqueNum_le_cliqueNum_boxProd_left___",
+     "data":
+     {"/Cliques/#SimpleGraph___cliqueNum_le_cliqueNum_boxProd_left___":
+      {"display": "cliqueNum_le_cliqueNum_boxProd_left'",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.cliqueNum_le_cliqueNum_boxProd_left":
+   [{"id": "SimpleGraph___cliqueNum_le_cliqueNum_boxProd_left",
+     "data":
+     {"/Cliques/#SimpleGraph___cliqueNum_le_cliqueNum_boxProd_left":
+      {"display": "cliqueNum_le_cliqueNum_boxProd_left",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.cliqueNum_iterMycielskian_completeGraph_two":
    [{"id": "SimpleGraph___cliqueNum_iterMycielskian_completeGraph_two",
      "data":
@@ -12125,20 +12154,6 @@ window.onload = async () => {
      "data":
      {"/Cliques/#SimpleGraph___cliqueNum_hypercube":
       {"display": "cliqueNum_hypercube",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.cliqueNum_boxProd_le_left'":
-   [{"id": "SimpleGraph___cliqueNum_boxProd_le_left___",
-     "data":
-     {"/Cliques/#SimpleGraph___cliqueNum_boxProd_le_left___":
-      {"display": "cliqueNum_boxProd_le_left'",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.cliqueNum_boxProd_le_left":
-   [{"id": "SimpleGraph___cliqueNum_boxProd_le_left",
-     "data":
-     {"/Cliques/#SimpleGraph___cliqueNum_boxProd_le_left":
-      {"display": "cliqueNum_boxProd_le_left",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
    "SimpleGraph.cliqueNum_boxProd'":
@@ -12187,6 +12202,49 @@ window.onload = async () => {
       {"display": "cliqueFree_three_iff_free_cycleGraph",
        "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.cliqueFree_petersenGraph_three":
+   [{"id": "SimpleGraph___cliqueFree_petersenGraph_three",
+     "data":
+     {"/Distance/#SimpleGraph___cliqueFree_petersenGraph_three":
+      {"display": "cliqueFree_petersenGraph_three",
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Moore and Cage Bounds",
+        "Moore Graphs"]}},
+     "address": "/Distance/"}],
+   "SimpleGraph.cliqueFree_paleyGraph_seventeen_four'":
+   [{"id": "SimpleGraph___cliqueFree_paleyGraph_seventeen_four___",
+     "data":
+     {"/Cliques/#SimpleGraph___cliqueFree_paleyGraph_seventeen_four___":
+      {"display": "cliqueFree_paleyGraph_seventeen_four'",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.cliqueFree_paleyGraph_seventeen_four":
+   [{"id": "SimpleGraph___cliqueFree_paleyGraph_seventeen_four",
+     "data":
+     {"/Cliques/#SimpleGraph___cliqueFree_paleyGraph_seventeen_four":
+      {"display": "cliqueFree_paleyGraph_seventeen_four",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.cliqueFree_hypercube_three":
+   [{"id": "SimpleGraph___cliqueFree_hypercube_three",
+     "data":
+     {"/Colorings/#SimpleGraph___cliqueFree_hypercube_three":
+      {"display": "cliqueFree_hypercube_three",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Hypercubes"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.cliqueFree_blowUpGraph_iff":
+   [{"id": "SimpleGraph___cliqueFree_blowUpGraph_iff",
+     "data":
+     {"/Cliques/#SimpleGraph___cliqueFree_blowUpGraph_iff":
+      {"display": "cliqueFree_blowUpGraph_iff",
+       "context": ["Graph Theory in Lean", "Cliques", "Clique-Free"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.cliqueFinset_eq_of_le_one":
    [{"id": "SimpleGraph___cliqueFinset_eq_of_le_one",
      "data":
@@ -12674,20 +12732,6 @@ window.onload = async () => {
         "Maximum Degree at Least Three",
         "Completing the Proof"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.boxProd_card_le_left'":
-   [{"id": "SimpleGraph___boxProd_card_le_left___",
-     "data":
-     {"/Cliques/#SimpleGraph___boxProd_card_le_left___":
-      {"display": "boxProd_card_le_left'",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.boxProd_card_le_left":
-   [{"id": "SimpleGraph___boxProd_card_le_left",
-     "data":
-     {"/Cliques/#SimpleGraph___boxProd_card_le_left":
-      {"display": "boxProd_card_le_left",
-       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.boxProdDecidableRelAdj":
    [{"id": "SimpleGraph___boxProdDecidableRelAdj",
      "data":
@@ -12700,39 +12744,6 @@ window.onload = async () => {
         "Deciding Adjacency",
         "Decidability and Kernel Reduction*"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.boxProdColoringRight":
-   [{"id": "SimpleGraph___boxProdColoringRight",
-     "data":
-     {"/Colorings/#SimpleGraph___boxProdColoringRight":
-      {"display": "boxProdColoringRight",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Box Products"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.boxProdColoringLeft":
-   [{"id": "SimpleGraph___boxProdColoringLeft",
-     "data":
-     {"/Colorings/#SimpleGraph___boxProdColoringLeft":
-      {"display": "boxProdColoringLeft",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Box Products"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.boxProdColoring":
-   [{"id": "SimpleGraph___boxProdColoring",
-     "data":
-     {"/Colorings/#SimpleGraph___boxProdColoring":
-      {"display": "boxProdColoring",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Box Products"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.bowtie":
    [{"id": "SimpleGraph___bowtie",
      "data":
@@ -12791,24 +12802,6 @@ window.onload = async () => {
         "Complete Multipartite Graphs and Blow-ups*",
         "Blow-ups"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.blowUpGraph_colorable_iff":
-   [{"id": "SimpleGraph___blowUpGraph_colorable_iff",
-     "data":
-     {"/Colorings/#SimpleGraph___blowUpGraph_colorable_iff":
-      {"display": "blowUpGraph_colorable_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Blow-ups"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.blowUpGraph_cliqueFree_iff":
-   [{"id": "SimpleGraph___blowUpGraph_cliqueFree_iff",
-     "data":
-     {"/Cliques/#SimpleGraph___blowUpGraph_cliqueFree_iff":
-      {"display": "blowUpGraph_cliqueFree_iff",
-       "context": ["Graph Theory in Lean", "Cliques", "Clique-Free"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.blowUpGraph":
    [{"id": "SimpleGraph___blowUpGraph",
      "data":
@@ -12897,17 +12890,6 @@ window.onload = async () => {
         "Cut Vertices and Blocks*",
         "Cycle-Equivalence"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.bipartiteBelow_adj":
-   [{"id": "SimpleGraph___bipartiteBelow_adj",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___bipartiteBelow_adj":
-      {"display": "bipartiteBelow_adj",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degrees",
-        "Neighbours in a Set"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.barbell":
    [{"id": "SimpleGraph___barbell",
      "data":
@@ -13140,17 +13122,6 @@ window.onload = async () => {
         "Edge and Vertex Connectivity",
         "Vertex Connectivity"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Walk.support_pathNat₁Walk":
-   [{"id": "SimpleGraph___Walk___support_pathNat___Walk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___support_pathNat___Walk":
-      {"display": "Walk.support_pathNat₁Walk",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Vertices and Edges of a Walk",
-        "Support and getVert"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.support_boxProdLeft":
    [{"id": "SimpleGraph___Walk___support_boxProdLeft",
      "data":
@@ -13202,34 +13173,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Pósa Rotations"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.pathNat₁Walk":
-   [{"id": "SimpleGraph___Walk___pathNat___Walk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___pathNat___Walk":
-      {"display": "Walk.pathNat₁Walk",
-       "context": ["Graph Theory in Lean", "Walks", "Constructing Walks"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.pathGraphWalk_isPath":
-   [{"id": "SimpleGraph___Walk___pathGraphWalk_isPath",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___pathGraphWalk_isPath":
-      {"display": "Walk.pathGraphWalk_isPath",
-       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.pathGraphWalk_isHamiltonian":
-   [{"id": "SimpleGraph___Walk___pathGraphWalk_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___pathGraphWalk_isHamiltonian":
-      {"display": "Walk.pathGraphWalk_isHamiltonian",
-       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.pathGraphWalk":
-   [{"id": "SimpleGraph___Walk___pathGraphWalk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___pathGraphWalk":
-      {"display": "Walk.pathGraphWalk",
-       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.none_notMem_support_mycielskianAux":
    [{"id": "SimpleGraph___Walk___none_notMem_support_mycielskianAux",
      "data":
@@ -13246,17 +13189,6 @@ window.onload = async () => {
      "data":
      {"/Walks/#SimpleGraph___Walk___mycielskianClosed_nil":
       {"display": "Walk.mycielskianClosed_nil",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.mycielskianClosed_isCycle":
-   [{"id": "SimpleGraph___Walk___mycielskianClosed_isCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___mycielskianClosed_isCycle":
-      {"display": "Walk.mycielskianClosed_isCycle",
        "context":
        ["Graph Theory in Lean",
         "Walks",
@@ -13409,20 +13341,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Pósa Rotations"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.length_pathNat₁Walk":
-   [{"id": "SimpleGraph___Walk___length_pathNat___Walk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___length_pathNat___Walk":
-      {"display": "Walk.length_pathNat₁Walk",
-       "context": ["Graph Theory in Lean", "Walks", "Constructing Walks"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.length_pathGraphWalk":
-   [{"id": "SimpleGraph___Walk___length_pathGraphWalk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___length_pathGraphWalk":
-      {"display": "Walk.length_pathGraphWalk",
-       "context": ["Graph Theory in Lean", "Walks", "Mapping Walks"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.length_mycielskianClosed":
    [{"id": "SimpleGraph___Walk___length_mycielskianClosed",
      "data":
@@ -13456,29 +13374,6 @@ window.onload = async () => {
         "Walks in Hypercube and Mycielskian Graphs",
         "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.length_grayWalk":
-   [{"id": "SimpleGraph___Walk___length_grayWalk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___length_grayWalk":
-      {"display": "Walk.length_grayWalk",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
-        "Gray Code"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.isPath_pathNat₁Walk":
-   [{"id": "SimpleGraph___Walk___isPath_pathNat___Walk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___isPath_pathNat___Walk":
-      {"display": "Walk.isPath_pathNat₁Walk",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Trails, Paths, Circuits and Cycles",
-        "Trails and Paths"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.isHamiltonian_of_isMaximumPath'":
    [{"id": "SimpleGraph___Walk___isHamiltonian_of_isMaximumPath___",
      "data":
@@ -13504,104 +13399,16 @@ window.onload = async () => {
         "Trails, Paths, Circuits and Cycles",
         "Eulerian Trails"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayWalk_snd_false'":
-   [{"id": "SimpleGraph___Walk___grayWalk_snd_false___",
+   "SimpleGraph.Walk.isCycle_mycielskianClosed":
+   [{"id": "SimpleGraph___Walk___isCycle_mycielskianClosed",
      "data":
-     {"/Walks/#SimpleGraph___Walk___grayWalk_snd_false___":
-      {"display": "Walk.grayWalk_snd_false'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayWalk_snd_false":
-   [{"id": "SimpleGraph___Walk___grayWalk_snd_false",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayWalk_snd_false":
-      {"display": "Walk.grayWalk_snd_false",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayWalk_isPath":
-   [{"id": "SimpleGraph___Walk___grayWalk_isPath",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayWalk_isPath":
-      {"display": "Walk.grayWalk_isPath",
+     {"/Walks/#SimpleGraph___Walk___isCycle_mycielskianClosed":
+      {"display": "Walk.isCycle_mycielskianClosed",
        "context":
        ["Graph Theory in Lean",
         "Walks",
         "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
-        "Gray Code"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayWalk_isHamiltonian":
-   [{"id": "SimpleGraph___Walk___grayWalk_isHamiltonian",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayWalk_isHamiltonian":
-      {"display": "Walk.grayWalk_isHamiltonian",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
-        "Gray Code"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayWalk":
-   [{"id": "SimpleGraph___Walk___grayWalk",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayWalk":
-      {"display": "Walk.grayWalk",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
-        "Gray Code"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayCycle_isHamiltonianCycle":
-   [{"id": "SimpleGraph___Walk___grayCycle_isHamiltonianCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayCycle_isHamiltonianCycle":
-      {"display": "Walk.grayCycle_isHamiltonianCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayCycle_isHamiltonian'":
-   [{"id": "SimpleGraph___Walk___grayCycle_isHamiltonian___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayCycle_isHamiltonian___":
-      {"display": "Walk.grayCycle_isHamiltonian'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayCycle_isCycle'":
-   [{"id": "SimpleGraph___Walk___grayCycle_isCycle___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayCycle_isCycle___":
-      {"display": "Walk.grayCycle_isCycle'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayCycle_isCycle":
-   [{"id": "SimpleGraph___Walk___grayCycle_isCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayCycle_isCycle":
-      {"display": "Walk.grayCycle_isCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.grayCycle":
-   [{"id": "SimpleGraph___Walk___grayCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___grayCycle":
-      {"display": "Walk.grayCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.exists_path_of_two_le_degree'":
-   [{"id": "SimpleGraph___Walk___exists_path_of_two_le_degree___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___exists_path_of_two_le_degree___":
-      {"display": "Walk.exists_path_of_two_le_degree'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.exists_path_of_two_le_degree":
-   [{"id": "SimpleGraph___Walk___exists_path_of_two_le_degree",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___exists_path_of_two_le_degree":
-      {"display": "Walk.exists_path_of_two_le_degree",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+        "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.exists_of_mem_support_mycielskianAux":
    [{"id": "SimpleGraph___Walk___exists_of_mem_support_mycielskianAux",
@@ -13677,6 +13484,20 @@ window.onload = async () => {
         "Walks",
         "Trails, Paths, Circuits and Cycles",
         "Odd Cycles and Bipartite Graphs"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.exists_isPath_of_two_le_degree'":
+   [{"id": "SimpleGraph___Walk___exists_isPath_of_two_le_degree___",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___exists_isPath_of_two_le_degree___":
+      {"display": "Walk.exists_isPath_of_two_le_degree'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.exists_isPath_of_two_le_degree":
+   [{"id": "SimpleGraph___Walk___exists_isPath_of_two_le_degree",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___exists_isPath_of_two_le_degree":
+      {"display": "Walk.exists_isPath_of_two_le_degree",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.exists_isMaximumPath'":
    [{"id": "SimpleGraph___Walk___exists_isMaximumPath___",
@@ -13772,39 +13593,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Bondy–Chvátal Theorem",
         "Adding a Single Edge"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.cycleGraphCycle_isHamiltonianCycle":
-   [{"id": "SimpleGraph___Walk___cycleGraphCycle_isHamiltonianCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___cycleGraphCycle_isHamiltonianCycle":
-      {"display": "Walk.cycleGraphCycle_isHamiltonianCycle",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.cycleGraphCycle_isCycle":
-   [{"id": "SimpleGraph___Walk___cycleGraphCycle_isCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___cycleGraphCycle_isCycle":
-      {"display": "Walk.cycleGraphCycle_isCycle",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.cycleGraphCycle":
-   [{"id": "SimpleGraph___Walk___cycleGraphCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___cycleGraphCycle":
-      {"display": "Walk.cycleGraphCycle",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Mapping Walks",
-        "Cycle Graphs and Complete Graphs are Hamiltonian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.cons_isHamiltonianCycle_iff'":
    [{"id": "SimpleGraph___Walk___cons_isHamiltonianCycle_iff___",
@@ -13977,17 +13765,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Pósa Rotations"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsPath.posaClosed_isCycle":
-   [{"id": "SimpleGraph___Walk___IsPath___posaClosed_isCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsPath___posaClosed_isCycle":
-      {"display": "Walk.IsPath.posaClosed_isCycle",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "Pósa Rotations"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsPath.mycielskianAux":
    [{"id": "SimpleGraph___Walk___IsPath___mycielskianAux",
      "data":
@@ -14009,6 +13786,17 @@ window.onload = async () => {
         "Walks",
         "Walks in Hypercube and Mycielskian Graphs",
         "Walks in the Mycielskian"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsPath.isCycle_posaClosed":
+   [{"id": "SimpleGraph___Walk___IsPath___isCycle_posaClosed",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___IsPath___isCycle_posaClosed":
+      {"display": "Walk.IsPath.isCycle_posaClosed",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
+        "Pósa Rotations"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsPath.copy":
    [{"id": "SimpleGraph___Walk___IsPath___copy",
@@ -14196,21 +13984,6 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Bondy–Chvátal Theorem"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonian.posaClosed_isHamiltonianCycle'":
-   [{"id":
-     "SimpleGraph___Walk___IsHamiltonian___posaClosed_isHamiltonianCycle___",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonian___posaClosed_isHamiltonianCycle___":
-      {"display": "Walk.IsHamiltonian.posaClosed_isHamiltonianCycle'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsHamiltonian.posaClosed_isHamiltonianCycle":
-   [{"id": "SimpleGraph___Walk___IsHamiltonian___posaClosed_isHamiltonianCycle",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsHamiltonian___posaClosed_isHamiltonianCycle":
-      {"display": "Walk.IsHamiltonian.posaClosed_isHamiltonianCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonian.mycielskian":
    [{"id": "SimpleGraph___Walk___IsHamiltonian___mycielskian",
      "data":
@@ -14221,6 +13994,21 @@ window.onload = async () => {
         "Walks",
         "Walks in Hypercube and Mycielskian Graphs",
         "Walks in the Mycielskian"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsHamiltonian.isHamiltonianCycle_posaClosed'":
+   [{"id":
+     "SimpleGraph___Walk___IsHamiltonian___isHamiltonianCycle_posaClosed___",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___IsHamiltonian___isHamiltonianCycle_posaClosed___":
+      {"display": "Walk.IsHamiltonian.isHamiltonianCycle_posaClosed'",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.Walk.IsHamiltonian.isHamiltonianCycle_posaClosed":
+   [{"id": "SimpleGraph___Walk___IsHamiltonian___isHamiltonianCycle_posaClosed",
+     "data":
+     {"/Walks/#SimpleGraph___Walk___IsHamiltonian___isHamiltonianCycle_posaClosed":
+      {"display": "Walk.IsHamiltonian.isHamiltonianCycle_posaClosed",
+       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair":
    [{"id":
@@ -14351,12 +14139,13 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "The Bondy–Chvátal Theorem"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Subgraph.two_mul_edgeSet_encard_le_mycielskianDouble":
+   "SimpleGraph.Subgraph.two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble":
    [{"id":
-     "SimpleGraph___Subgraph___two_mul_edgeSet_encard_le_mycielskianDouble",
+     "SimpleGraph___Subgraph___two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble",
      "data":
-     {"/Subgraphs/#SimpleGraph___Subgraph___two_mul_edgeSet_encard_le_mycielskianDouble":
-      {"display": "Subgraph.two_mul_edgeSet_encard_le_mycielskianDouble",
+     {"/Subgraphs/#SimpleGraph___Subgraph___two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble":
+      {"display":
+       "Subgraph.two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble",
        "context":
        ["Graph Theory in Lean",
         "Subgraphs",
@@ -14370,22 +14159,22 @@ window.onload = async () => {
       {"display": "Subgraph.ncard_edgeSet_coe",
        "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
      "address": "/Subgraphs/"}],
-   "SimpleGraph.Subgraph.mycielskianSubgraph_le_iff":
-   [{"id": "SimpleGraph___Subgraph___mycielskianSubgraph_le_iff",
+   "SimpleGraph.Subgraph.mycielskianLeft_le_mycielskianLeft_iff":
+   [{"id": "SimpleGraph___Subgraph___mycielskianLeft_le_mycielskianLeft_iff",
      "data":
-     {"/Subgraphs/#SimpleGraph___Subgraph___mycielskianSubgraph_le_iff":
-      {"display": "Subgraph.mycielskianSubgraph_le_iff",
+     {"/Subgraphs/#SimpleGraph___Subgraph___mycielskianLeft_le_mycielskianLeft_iff":
+      {"display": "Subgraph.mycielskianLeft_le_mycielskianLeft_iff",
        "context":
        ["Graph Theory in Lean",
         "Subgraphs",
         "Maps and Comaps",
         "Subgraphs of Mycielskians"]}},
      "address": "/Subgraphs/"}],
-   "SimpleGraph.Subgraph.mycielskianSubgraph":
-   [{"id": "SimpleGraph___Subgraph___mycielskianSubgraph",
+   "SimpleGraph.Subgraph.mycielskianLeft":
+   [{"id": "SimpleGraph___Subgraph___mycielskianLeft",
      "data":
-     {"/Subgraphs/#SimpleGraph___Subgraph___mycielskianSubgraph":
-      {"display": "Subgraph.mycielskianSubgraph",
+     {"/Subgraphs/#SimpleGraph___Subgraph___mycielskianLeft":
+      {"display": "Subgraph.mycielskianLeft",
        "context":
        ["Graph Theory in Lean",
         "Subgraphs",
@@ -14457,11 +14246,11 @@ window.onload = async () => {
         "Cut Vertices and Blocks*",
         "Blocks as a Quotient of Edges"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Subgraph.comap_mycielskianSubgraph":
-   [{"id": "SimpleGraph___Subgraph___comap_mycielskianSubgraph",
+   "SimpleGraph.Subgraph.comap_mycielskianLeft":
+   [{"id": "SimpleGraph___Subgraph___comap_mycielskianLeft",
      "data":
-     {"/Subgraphs/#SimpleGraph___Subgraph___comap_mycielskianSubgraph":
-      {"display": "Subgraph.comap_mycielskianSubgraph",
+     {"/Subgraphs/#SimpleGraph___Subgraph___comap_mycielskianLeft":
+      {"display": "Subgraph.comap_mycielskianLeft",
        "context":
        ["Graph Theory in Lean",
         "Subgraphs",
@@ -14792,6 +14581,17 @@ window.onload = async () => {
         "Eccentricity, Diameter and Radius",
         "Distance Invariants under Isomorphism"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.IsVertexTransitive.exists_isRegularOfDegree":
+   [{"id": "SimpleGraph___IsVertexTransitive___exists_isRegularOfDegree",
+     "data":
+     {"/Maps/#SimpleGraph___IsVertexTransitive___exists_isRegularOfDegree":
+      {"display": "IsVertexTransitive.exists_isRegularOfDegree",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Automorphisms",
+        "Vertex-Transitivity"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.IsVertexTransitive.eccent_eq":
    [{"id": "SimpleGraph___IsVertexTransitive___eccent_eq",
      "data":
@@ -15010,6 +14810,16 @@ window.onload = async () => {
       {"display": "IsTree.degree_le_card_leaves",
        "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.IsSRGWith.petersenGraph":
+   [{"id": "SimpleGraph___IsSRGWith___petersenGraph",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___IsSRGWith___petersenGraph":
+      {"display": "IsSRGWith.petersenGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.IsRegularOfDegree.two_mul_card_edgeFinset":
    [{"id": "SimpleGraph___IsRegularOfDegree___two_mul_card_edgeFinset",
      "data":
@@ -15020,6 +14830,28 @@ window.onload = async () => {
         "Decidability, Finiteness and Degrees",
         "Degrees",
         "Regular Graphs"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.IsRegularOfDegree.petersenGraph":
+   [{"id": "SimpleGraph___IsRegularOfDegree___petersenGraph",
+     "data":
+     {"/Distance/#SimpleGraph___IsRegularOfDegree___petersenGraph":
+      {"display": "IsRegularOfDegree.petersenGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Moore and Cage Bounds",
+        "Moore Graphs"]}},
+     "address": "/Distance/"}],
+   "SimpleGraph.IsRegularOfDegree.hypercube":
+   [{"id": "SimpleGraph___IsRegularOfDegree___hypercube",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___IsRegularOfDegree___hypercube":
+      {"display": "IsRegularOfDegree.hypercube",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes",
+        "Stating Results Across a Diamond*"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.IsRegularOfDegree.finrank_eigenspace_adjMatrix":
    [{"id": "SimpleGraph___IsRegularOfDegree___finrank_eigenspace_adjMatrix",
@@ -15176,18 +15008,18 @@ window.onload = async () => {
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Ore's Theorem and Dirac's Theorem"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.IsOreGraph.adj_or_exists'":
-   [{"id": "SimpleGraph___IsOreGraph___adj_or_exists___",
+   "SimpleGraph.IsOreGraph.adj_or_exists_adj_adj'":
+   [{"id": "SimpleGraph___IsOreGraph___adj_or_exists_adj_adj___",
      "data":
-     {"/Walks/#SimpleGraph___IsOreGraph___adj_or_exists___":
-      {"display": "IsOreGraph.adj_or_exists'",
+     {"/Walks/#SimpleGraph___IsOreGraph___adj_or_exists_adj_adj___":
+      {"display": "IsOreGraph.adj_or_exists_adj_adj'",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.IsOreGraph.adj_or_exists":
-   [{"id": "SimpleGraph___IsOreGraph___adj_or_exists",
+   "SimpleGraph.IsOreGraph.adj_or_exists_adj_adj":
+   [{"id": "SimpleGraph___IsOreGraph___adj_or_exists_adj_adj",
      "data":
-     {"/Walks/#SimpleGraph___IsOreGraph___adj_or_exists":
-      {"display": "IsOreGraph.adj_or_exists",
+     {"/Walks/#SimpleGraph___IsOreGraph___adj_or_exists_adj_adj":
+      {"display": "IsOreGraph.adj_or_exists_adj_adj",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
    "SimpleGraph.IsOreGraph":
@@ -15311,13 +15143,6 @@ window.onload = async () => {
         "Clique and Independence Number of the Mycielskian",
         "Clique Number of the Mycielskian"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.IsNClique.mapHom":
-   [{"id": "SimpleGraph___IsNClique___mapHom",
-     "data":
-     {"/Cliques/#SimpleGraph___IsNClique___mapHom":
-      {"display": "IsNClique.mapHom",
-       "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.IsNClique.le_cliqueNum":
    [{"id": "SimpleGraph___IsNClique___le_cliqueNum",
      "data":
@@ -15332,12 +15157,33 @@ window.onload = async () => {
       {"display": "IsNClique.image_of_adj",
        "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.IsNClique.image":
+   [{"id": "SimpleGraph___IsNClique___image",
+     "data":
+     {"/Cliques/#SimpleGraph___IsNClique___image":
+      {"display": "IsNClique.image",
+       "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.IsNClique.cliqueNum_eq_of_cliqueFree":
    [{"id": "SimpleGraph___IsNClique___cliqueNum_eq_of_cliqueFree",
      "data":
      {"/Cliques/#SimpleGraph___IsNClique___cliqueNum_eq_of_cliqueFree":
       {"display": "IsNClique.cliqueNum_eq_of_cliqueFree",
        "context": ["Graph Theory in Lean", "Cliques", "Clique Number"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.IsNClique.boxProd_le_cliqueNum_left'":
+   [{"id": "SimpleGraph___IsNClique___boxProd_le_cliqueNum_left___",
+     "data":
+     {"/Cliques/#SimpleGraph___IsNClique___boxProd_le_cliqueNum_left___":
+      {"display": "IsNClique.boxProd_le_cliqueNum_left'",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.IsNClique.boxProd_le_cliqueNum_left":
+   [{"id": "SimpleGraph___IsNClique___boxProd_le_cliqueNum_left",
+     "data":
+     {"/Cliques/#SimpleGraph___IsNClique___boxProd_le_cliqueNum_left":
+      {"display": "IsNClique.boxProd_le_cliqueNum_left",
+       "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
    "SimpleGraph.IsNClique.boxProd_image_fst'":
    [{"id": "SimpleGraph___IsNClique___boxProd_image_fst___",
@@ -15633,6 +15479,17 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Theorems", "Matchings", "Kőnig's Theorem"]}},
      "address": "/Theorems/"}],
+   "SimpleGraph.IsBipartite.hypercube":
+   [{"id": "SimpleGraph___IsBipartite___hypercube",
+     "data":
+     {"/Colorings/#SimpleGraph___IsBipartite___hypercube":
+      {"display": "IsBipartite.hypercube",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Hypercubes"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.IsAcyclic.toSubgraph_blockMk'":
    [{"id": "SimpleGraph___IsAcyclic___toSubgraph_blockMk___",
      "data":
@@ -15743,11 +15600,11 @@ window.onload = async () => {
         "Walks in Hypercubes",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.HypercubeVert.hammingPath_isPath":
-   [{"id": "SimpleGraph___HypercubeVert___hammingPath_isPath",
+   "SimpleGraph.HypercubeVert.isPath_hammingPath":
+   [{"id": "SimpleGraph___HypercubeVert___isPath_hammingPath",
      "data":
-     {"/Walks/#SimpleGraph___HypercubeVert___hammingPath_isPath":
-      {"display": "HypercubeVert.hammingPath_isPath",
+     {"/Walks/#SimpleGraph___HypercubeVert___isPath_hammingPath":
+      {"display": "HypercubeVert.isPath_hammingPath",
        "context":
        ["Graph Theory in Lean",
         "Walks",
@@ -15871,11 +15728,11 @@ window.onload = async () => {
         "Algebraic Graph Theory",
         "The Hypercube and the Hamming Cube"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.HypercubeVert.bool_valid":
-   [{"id": "SimpleGraph___HypercubeVert___bool_valid",
+   "SimpleGraph.HypercubeVert.bool_ne_of_adj":
+   [{"id": "SimpleGraph___HypercubeVert___bool_ne_of_adj",
      "data":
-     {"/Colorings/#SimpleGraph___HypercubeVert___bool_valid":
-      {"display": "HypercubeVert.bool_valid",
+     {"/Colorings/#SimpleGraph___HypercubeVert___bool_ne_of_adj":
+      {"display": "HypercubeVert.bool_ne_of_adj",
        "context":
        ["Graph Theory in Lean",
         "Colorings",
@@ -16016,6 +15873,17 @@ window.onload = async () => {
         "Decidability, Finiteness and Degrees",
         "Degree Sequences*",
         "Graphic Sequences"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.ErdosGallaiLE":
+   [{"id": "SimpleGraph___ErdosGallaiLE",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___ErdosGallaiLE":
+      {"display": "ErdosGallaiLE",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Degree Sequences*",
+        "The Erdős–Gallai Theorem"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.Embedding.mycielskianLeft":
    [{"id": "SimpleGraph___Embedding___mycielskianLeft",
@@ -16229,6 +16097,17 @@ window.onload = async () => {
         "Partial Colourings*",
         "Building Partial Colourings"]}},
      "address": "/Subgraphs/"}],
+   "SimpleGraph.ColoringOn.singleton":
+   [{"id": "SimpleGraph___ColoringOn___singleton",
+     "data":
+     {"/Subgraphs/#SimpleGraph___ColoringOn___singleton":
+      {"display": "ColoringOn.singleton",
+       "context":
+       ["Graph Theory in Lean",
+        "Subgraphs",
+        "Partial Colourings*",
+        "Building Partial Colourings"]}},
+     "address": "/Subgraphs/"}],
    "SimpleGraph.ColoringOn.restrict":
    [{"id": "SimpleGraph___ColoringOn___restrict",
      "data":
@@ -16239,6 +16118,17 @@ window.onload = async () => {
         "Subgraphs",
         "Partial Colourings*",
         "Restricting and Copying Partial Colourings"]}},
+     "address": "/Subgraphs/"}],
+   "SimpleGraph.ColoringOn.ofNotAdj":
+   [{"id": "SimpleGraph___ColoringOn___ofNotAdj",
+     "data":
+     {"/Subgraphs/#SimpleGraph___ColoringOn___ofNotAdj":
+      {"display": "ColoringOn.ofNotAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Subgraphs",
+        "Partial Colourings*",
+        "Building Partial Colourings"]}},
      "address": "/Subgraphs/"}],
    "SimpleGraph.ColoringOn.nonempty_union_of_eq_iff_eq":
    [{"id": "SimpleGraph___ColoringOn___nonempty_union_of_eq_iff_eq",
@@ -16286,6 +16176,17 @@ window.onload = async () => {
         "Maximum Degree at Least Three",
         "Free Colours and Neighbours in a Set"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.ColoringOn.empty":
+   [{"id": "SimpleGraph___ColoringOn___empty",
+     "data":
+     {"/Subgraphs/#SimpleGraph___ColoringOn___empty":
+      {"display": "ColoringOn.empty",
+       "context":
+       ["Graph Theory in Lean",
+        "Subgraphs",
+        "Partial Colourings*",
+        "Building Partial Colourings"]}},
+     "address": "/Subgraphs/"}],
    "SimpleGraph.ColoringOn.copy":
    [{"id": "SimpleGraph___ColoringOn___copy",
      "data":
@@ -16324,6 +16225,28 @@ window.onload = async () => {
        "context":
        ["Graph Theory in Lean", "Colorings", "Colouring Mycielskians"]}},
      "address": "/Colorings/"}],
+   "SimpleGraph.Coloring.ofBoxProdRight":
+   [{"id": "SimpleGraph___Coloring___ofBoxProdRight",
+     "data":
+     {"/Colorings/#SimpleGraph___Coloring___ofBoxProdRight":
+      {"display": "Coloring.ofBoxProdRight",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Box Products"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.Coloring.ofBoxProdLeft":
+   [{"id": "SimpleGraph___Coloring___ofBoxProdLeft",
+     "data":
+     {"/Colorings/#SimpleGraph___Coloring___ofBoxProdLeft":
+      {"display": "Coloring.ofBoxProdLeft",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Box Products"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.Coloring.mycielskianLast_ne_last":
    [{"id": "SimpleGraph___Coloring___mycielskianLast_ne_last",
      "data":
@@ -16347,6 +16270,17 @@ window.onload = async () => {
       {"display": "Coloring.mycielskian",
        "context":
        ["Graph Theory in Lean", "Colorings", "Colouring Mycielskians"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.Coloring.boxProd":
+   [{"id": "SimpleGraph___Coloring___boxProd",
+     "data":
+     {"/Colorings/#SimpleGraph___Coloring___boxProd":
+      {"display": "Coloring.boxProd",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Box Products"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.ColorableOn":
    [{"id": "SimpleGraph___ColorableOn",
@@ -16735,6 +16669,17 @@ window.onload = async () => {
       {"display": "_root_.Multiset.exists_le_map_eq",
        "context": ["Graph Theory in Lean", "Theorems", "Exercises"]}},
      "address": "/Theorems/"}],
+   "HyperoctahedralGroup":
+   [{"id": "HyperoctahedralGroup",
+     "data":
+     {"/Algebraic-Graph-Theory/#HyperoctahedralGroup":
+      {"display": "_root_.HyperoctahedralGroup",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "The Hyperoctahedral Group"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "Finset.mem_fiberProj":
    [{"id": "Finset___mem_fiberProj",
      "data":
@@ -16846,110 +16791,123 @@ window.onload = async () => {
   "description": null,
   "contents":
   {"zykov-1949":
-   [{"id": "bib-zykov-1949", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-zykov-1949", "data": null, "address": "/Bibliography/"}],
    "zarankiewicz-1951":
-   [{"id": "bib-zarankiewicz-1951", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-zarankiewicz-1951", "data": null, "address": "/Bibliography/"}],
    "whitney-1932":
-   [{"id": "bib-whitney-1932", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-whitney-1932", "data": null, "address": "/Bibliography/"}],
    "vizing-1964":
-   [{"id": "bib-vizing-1964", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-vizing-1964", "data": null, "address": "/Bibliography/"}],
    "tutte-1947":
-   [{"id": "bib-tutte-1947", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-tutte-1947", "data": null, "address": "/Bibliography/"}],
    "turan-1941":
-   [{"id": "bib-turan-1941", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-turan-1941", "data": null, "address": "/Bibliography/"}],
    "szemeredi-1978":
-   [{"id": "bib-szemeredi-1978", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-szemeredi-1978", "data": null, "address": "/Bibliography/"}],
    "ruzsa-szemeredi-1978":
-   [{"id": "bib-ruzsa-szemeredi-1978", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-ruzsa-szemeredi-1978",
+     "data": null,
+     "address": "/Bibliography/"}],
    "roth-1953":
-   [{"id": "bib-roth-1953", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-roth-1953", "data": null, "address": "/Bibliography/"}],
    "ramsey-1930":
-   [{"id": "bib-ramsey-1930", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-ramsey-1930", "data": null, "address": "/Bibliography/"}],
    "posa-1976":
-   [{"id": "bib-posa-1976", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-posa-1976", "data": null, "address": "/Bibliography/"}],
    "petersen-1898":
-   [{"id": "bib-petersen-1898", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-petersen-1898", "data": null, "address": "/Bibliography/"}],
    "paley-1933":
-   [{"id": "bib-paley-1933", "data": null, "address": "/Appendix/"}],
-   "ore-1960": [{"id": "bib-ore-1960", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-paley-1933", "data": null, "address": "/Bibliography/"}],
+   "ore-1960":
+   [{"id": "bib-ore-1960", "data": null, "address": "/Bibliography/"}],
    "mycielski-1955":
-   [{"id": "bib-mycielski-1955", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-mycielski-1955", "data": null, "address": "/Bibliography/"}],
    "menger-1927":
-   [{"id": "bib-menger-1927", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-menger-1927", "data": null, "address": "/Bibliography/"}],
    "mantel-1907":
-   [{"id": "bib-mantel-1907", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-mantel-1907", "data": null, "address": "/Bibliography/"}],
    "lovasz-1975":
-   [{"id": "bib-lovasz-1975", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-lovasz-1975", "data": null, "address": "/Bibliography/"}],
    "kovari-sos-turan-1954":
-   [{"id": "bib-kovari-sos-turan-1954", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-kovari-sos-turan-1954",
+     "data": null,
+     "address": "/Bibliography/"}],
    "konig-1931":
-   [{"id": "bib-konig-1931", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-konig-1931", "data": null, "address": "/Bibliography/"}],
    "konig-1927":
-   [{"id": "bib-konig-1927", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-konig-1927", "data": null, "address": "/Bibliography/"}],
    "konig-1916":
-   [{"id": "bib-konig-1916", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-konig-1916", "data": null, "address": "/Bibliography/"}],
    "kneser-1955":
-   [{"id": "bib-kneser-1955", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-kneser-1955", "data": null, "address": "/Bibliography/"}],
    "kirchhoff-1847":
-   [{"id": "bib-kirchhoff-1847", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-kirchhoff-1847", "data": null, "address": "/Bibliography/"}],
    "hoffman-singleton-1960":
    [{"id": "bib-hoffman-singleton-1960",
      "data": null,
-     "address": "/Appendix/"}],
+     "address": "/Bibliography/"}],
    "hierholzer-1873":
-   [{"id": "bib-hierholzer-1873", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-hierholzer-1873", "data": null, "address": "/Bibliography/"}],
    "havel-1955":
-   [{"id": "bib-havel-1955", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-havel-1955", "data": null, "address": "/Bibliography/"}],
    "hamming-1950":
-   [{"id": "bib-hamming-1950", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-hamming-1950", "data": null, "address": "/Bibliography/"}],
    "hall-1935":
-   [{"id": "bib-hall-1935", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-hall-1935", "data": null, "address": "/Bibliography/"}],
    "hakimi-1962":
-   [{"id": "bib-hakimi-1962", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-hakimi-1962", "data": null, "address": "/Bibliography/"}],
    "grotzsch-1959":
-   [{"id": "bib-grotzsch-1959", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-grotzsch-1959", "data": null, "address": "/Bibliography/"}],
    "gray-1953":
-   [{"id": "bib-gray-1953", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-gray-1953", "data": null, "address": "/Bibliography/"}],
    "furedi-2015":
-   [{"id": "bib-furedi-2015", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-furedi-2015", "data": null, "address": "/Bibliography/"}],
    "euler-1758":
-   [{"id": "bib-euler-1758", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-euler-1758", "data": null, "address": "/Bibliography/"}],
    "euler-1741":
-   [{"id": "bib-euler-1741", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-euler-1741", "data": null, "address": "/Bibliography/"}],
    "erdos-stone-1946":
-   [{"id": "bib-erdos-stone-1946", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-erdos-stone-1946", "data": null, "address": "/Bibliography/"}],
    "erdos-simonovits-1966":
-   [{"id": "bib-erdos-simonovits-1966", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-erdos-simonovits-1966",
+     "data": null,
+     "address": "/Bibliography/"}],
    "erdos-ko-rado-1961":
-   [{"id": "bib-erdos-ko-rado-1961", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-erdos-ko-rado-1961",
+     "data": null,
+     "address": "/Bibliography/"}],
    "erdos-gallai-1960":
-   [{"id": "bib-erdos-gallai-1960", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-erdos-gallai-1960", "data": null, "address": "/Bibliography/"}],
    "erdos-1970":
-   [{"id": "bib-erdos-1970", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-erdos-1970", "data": null, "address": "/Bibliography/"}],
    "dirac-1952":
-   [{"id": "bib-dirac-1952", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-dirac-1952", "data": null, "address": "/Bibliography/"}],
    "diestel-kuhn-2003":
-   [{"id": "bib-diestel-kuhn-2003", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-diestel-kuhn-2003", "data": null, "address": "/Bibliography/"}],
    "de-bruijn-erdos-1951":
-   [{"id": "bib-de-bruijn-erdos-1951", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-de-bruijn-erdos-1951",
+     "data": null,
+     "address": "/Bibliography/"}],
    "cayley-1889":
-   [{"id": "bib-cayley-1889", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-cayley-1889", "data": null, "address": "/Bibliography/"}],
    "cayley-1878":
-   [{"id": "bib-cayley-1878", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-cayley-1878", "data": null, "address": "/Bibliography/"}],
    "brooks-1941":
-   [{"id": "bib-brooks-1941", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-brooks-1941", "data": null, "address": "/Bibliography/"}],
    "bondy-chvatal-1976":
-   [{"id": "bib-bondy-chvatal-1976", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-bondy-chvatal-1976",
+     "data": null,
+     "address": "/Bibliography/"}],
    "berge-1957":
-   [{"id": "bib-berge-1957", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-berge-1957", "data": null, "address": "/Bibliography/"}],
    "behrend-1946":
-   [{"id": "bib-behrend-1946", "data": null, "address": "/Appendix/"}],
+   [{"id": "bib-behrend-1946", "data": null, "address": "/Bibliography/"}],
    "andrasfai-erdos-sos-1974":
    [{"id": "bib-andrasfai-erdos-sos-1974",
      "data": null,
-     "address": "/Appendix/"}],
+     "address": "/Bibliography/"}],
    "albertson-1998":
-   [{"id": "bib-albertson-1998", "data": null, "address": "/Appendix/"}]}}};
+   [{"id": "bib-albertson-1998", "data": null, "address": "/Bibliography/"}]}}};
 /**
  * Copyright (c) 2024 Lean FRO LLC. All rights reserved.
  * Released under Apache 2.0 license as described in the file LICENSE.
@@ -17146,46 +17104,4 @@ if (paramName) {
         }
     });
 }
-</script><script>
-window.addEventListener("DOMContentLoaded", function () {
-  var refs = document.querySelectorAll("span.stil-footnote-ref");
-  for (var i = 0; i < refs.length; i++) {
-    refs[i].textContent = "[" + (i + 1) + "]";
-  }
-});
-
-/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
-
-   Hovering alone is not enough: the Lean hover tooltips are appended to
-   `document.body`, outside the footnote span, so as soon as the pointer touches
-   one the span loses `:hover` and the note closes — dropping the pointer onto the
-   prose underneath, whose tooltips then appear instead. A pinned note survives
-   that. Closes on a second click, on Escape, or on a click elsewhere; clicks
-   inside the note or inside a tooltip keep it open. */
-window.addEventListener("DOMContentLoaded", function () {
-  function closeAll() {
-    var open = document.querySelectorAll("span.stil-footnote.stil-footnote-open");
-    for (var i = 0; i < open.length; i++) {
-      open[i].classList.remove("stil-footnote-open");
-    }
-  }
-  document.addEventListener("click", function (e) {
-    if (!e.target || !e.target.closest) { return; }
-    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
-    if (ref) {
-      var note = ref.closest("span.stil-footnote");
-      var wasOpen = note.classList.contains("stil-footnote-open");
-      closeAll();
-      if (!wasOpen) { note.classList.add("stil-footnote-open"); }
-      e.preventDefault();
-      return;
-    }
-    if (e.target.closest("span.stil-footnote-content") ||
-        e.target.closest("[data-tippy-root]")) { return; }
-    closeAll();
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { closeAll(); }
-  });
-});
-</script><link rel="stylesheet" href="guide.css"/><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Cross-Reference Redirection</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Cross-Reference Redirection</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><div></div><div></div></nav><section><h1 id="title"></h1><div id="message"></div></section><nav class="prev-next-buttons"><div></div><div></div></nav></div></main></div></body></html>
+</script><link rel="stylesheet" href="guide.css"/><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Cross-Reference Redirection</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Cross-Reference Redirection</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Bibliography/#chapter-bibliography">Bibliography</a></td></tr><tr class="numbered"><td class="num">15.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><div></div><div></div></nav><section><h1 id="title"></h1><div id="message"></div></section><nav class="prev-next-buttons"><div></div><div></div></nav></div></main></div></body></html>

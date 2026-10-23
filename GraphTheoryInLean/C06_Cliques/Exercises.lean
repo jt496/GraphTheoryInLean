@@ -25,7 +25,7 @@ example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by
 should be able to prove this, it will probably time out; you may want to use
 `native_decide` instead.)
 -/
-lemma paleyGraph_seventeen_cliqueFree_four' :
+lemma cliqueFree_paleyGraph_seventeen_four' :
     (paleyGraph (ZMod 17)).CliqueFree 4 := by
   sorry
 
@@ -128,8 +128,8 @@ example {W : Type*} {H : SimpleGraph W} {s : Set V} (h₀ : W) (h : G.IsClique s
 the embedding `boxProdLeft` can transport a maximum clique of `G` to a clique of the
 same size in `G □ H`.
 -/
-lemma cliqueNum_boxProd_le_left' {W : Type*} [Finite V] [Finite W] [Nonempty W]
-    {H : SimpleGraph W} : ω G ≤ ω (G □ H) := by
+lemma cliqueNum_le_cliqueNum_boxProd_left' {W : Type*} [Finite V] [Finite W]
+    [Nonempty W] {H : SimpleGraph W} : ω G ≤ ω (G □ H) := by
   sorry
 
 /-!
@@ -153,9 +153,10 @@ lemma IsNClique.boxProd_image_fst' {W : Type*} [DecidableEq V] {H : SimpleGraph 
 /-!
 17. A clique of `G □ H` containing a "horizontal" edge has size at most `ω G`.
 -/
-lemma boxProd_card_le_left' {W : Type*} [Finite V] {H : SimpleGraph W} {m : ℕ}
-    {t : Finset (V × W)} {x y : V × W} (ht : (G □ H).IsNClique m t) (hx : x ∈ t)
-    (hy : y ∈ t) (hG : G.Adj x.1 y.1) (hsnd : x.2 = y.2) : m ≤ ω G := by
+lemma IsNClique.boxProd_le_cliqueNum_left' {W : Type*} [Finite V]
+    {H : SimpleGraph W} {m : ℕ} {t : Finset (V × W)} {x y : V × W}
+    (ht : (G □ H).IsNClique m t) (hx : x ∈ t) (hy : y ∈ t) (hG : G.Adj x.1 y.1)
+    (hsnd : x.2 = y.2) : m ≤ ω G := by
   sorry
 
 /-!
@@ -236,12 +237,12 @@ their Mycielskians).
 25. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
-lemma completeBipartiteGraph_not_adj_inl' {V W : Type*} {v : V} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inl_iff' {V W : Type*} {v : V} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
       x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
   sorry
 
-lemma completeBipartiteGraph_not_adj_inr' {V W : Type*} {w : W} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inr_iff' {V W : Type*} {w : W} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
       x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
   sorry
@@ -270,7 +271,7 @@ lemma card_le_of_subset_range' {α β : Type*} [Finite α] {f : α → β} {s : 
 28. Any set of vertices contained in one part of a complete bipartite graph is
 independent, since a part contains no edges (we only need this for the right part).
 -/
-lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr' {V W : Type*}
+lemma isIndepSet_completeBipartiteGraph_of_subset_range_inr' {V W : Type*}
     {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   sorry
@@ -280,7 +281,7 @@ lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr' {V W : Type*}
 part; we state this as `⍺ K[a, b] = b` when `a ≤ b`. The right part is a `b`-element
 independent set, and by Exercises 26 and 27 no independent set is larger.
 -/
-theorem indepNum_completeBipartiteGraph' {a b : ℕ} (h : a ≤ b) :
+lemma indepNum_completeBipartiteGraph' {a b : ℕ} (h : a ≤ b) :
     ⍺ K[a, b] = b := by
   sorry
 
@@ -314,7 +315,7 @@ so it contributes at least `2 * b`, and no independent set does better by the
 previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
 `none`, so its independence number is `1`.)
 -/
-theorem indepNum_mycielskian_completeBipartiteGraph' {a b : ℕ} [NeZero b]
+lemma indepNum_mycielskian_completeBipartiteGraph' {a b : ℕ} [NeZero b]
     (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
   sorry
 
@@ -338,7 +339,7 @@ example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by
 should be able to prove this, it will probably time out; you may want to use
 `native_decide` instead.)
 -/
-lemma paleyGraph_seventeen_cliqueFree_four :
+lemma cliqueFree_paleyGraph_seventeen_four :
     (paleyGraph (ZMod 17)).CliqueFree 4 := by
   native_decide
 
@@ -383,7 +384,7 @@ example of a `3`-clique and show that the graph is `4`-clique-free.)
 example : ω (paleyGraph (ZMod 17)) = 3 := by
   -- the Paley graph on 17 vertices is `4`-clique-free (Exercise 3)
   have h4 : (paleyGraph (ZMod 17)).CliqueFree 4 :=
-    paleyGraph_seventeen_cliqueFree_four
+    cliqueFree_paleyGraph_seventeen_four
   -- and it contains a triangle (Exercise 2)
   have h3 : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by decide
   exact h3.cliqueNum_eq_of_cliqueFree h4
@@ -498,8 +499,8 @@ example {W : Type*} {H : SimpleGraph W} {s : Set V} (h₀ : W) (h : G.IsClique s
 the embedding `boxProdLeft` can transport a maximum clique of `G` to a clique of the
 same size in `G □ H`.
 -/
-lemma cliqueNum_boxProd_le_left {W : Type*} [Finite V] [Finite W] [Nonempty W]
-    {H : SimpleGraph W} : ω G ≤ ω (G □ H) :=
+lemma cliqueNum_le_cliqueNum_boxProd_left {W : Type*} [Finite V] [Finite W]
+    [Nonempty W] {H : SimpleGraph W} : ω G ≤ ω (G □ H) :=
   (boxProdLeft G H (Classical.arbitrary W)).toHom.cliqueNum_le
 
 /-!
@@ -533,9 +534,10 @@ lemma IsNClique.boxProd_image_fst {W : Type*} [DecidableEq V] {H : SimpleGraph W
 /-!
 17. A clique of `G □ H` containing a "horizontal" edge has size at most `ω G`.
 -/
-lemma boxProd_card_le_left {W : Type*} [Finite V] {H : SimpleGraph W} {m : ℕ}
-    {t : Finset (V × W)} {x y : V × W} (ht : (G □ H).IsNClique m t) (hx : x ∈ t)
-    (hy : y ∈ t) (hG : G.Adj x.1 y.1) (hsnd : x.2 = y.2) : m ≤ ω G := by
+lemma IsNClique.boxProd_le_cliqueNum_left {W : Type*} [Finite V]
+    {H : SimpleGraph W} {m : ℕ} {t : Finset (V × W)} {x y : V × W}
+    (ht : (G □ H).IsNClique m t) (hx : x ∈ t) (hy : y ∈ t) (hG : G.Adj x.1 y.1)
+    (hsnd : x.2 = y.2) : m ≤ ω G := by
   classical
   -- every vertex of `t` shares the second coordinate `x.2`
   have hconst : ∀ z ∈ t, z.2 = x.2 :=
@@ -561,15 +563,15 @@ lemma cliqueNum_boxProd {W : Type*} [Finite V] [Finite W] [Nonempty V]
       rw [boxProd_adj] at hadj
       rcases hadj with ⟨hG, hsnd⟩ | ⟨hH, hfst⟩
       · -- horizontal edge: bound the clique directly by `ω G`
-        exact (boxProd_card_le_left ht hx hy hG hsnd).trans (le_max_left _ _)
+        exact (ht.boxProd_le_cliqueNum_left hx hy hG hsnd).trans (le_max_left _ _)
       · -- vertical edge: swap the factors with `boxProdComm` to turn it into a
         -- horizontal edge of `H □ G`, then reuse the same bound, now giving `ω H`
-        have htH := ht.mapHom (boxProdComm ..).toHom
-        exact (boxProd_card_le_left htH (Finset.mem_image_of_mem _ hx)
+        have htH := ht.image (boxProdComm ..).toHom
+        exact (htH.boxProd_le_cliqueNum_left (Finset.mem_image_of_mem _ hx)
           (Finset.mem_image_of_mem _ hy) hH hfst).trans (le_max_right _ _)
   · -- lower bound: a row realizes `ω G` (`boxProdLeft`) and a column realizes `ω H`
     -- (`boxProdRight`); both are graph embeddings into `G □ H`
-    exact max_le cliqueNum_boxProd_le_left
+    exact max_le cliqueNum_le_cliqueNum_boxProd_left
       (boxProdRight G H (Classical.arbitrary V)).toHom.cliqueNum_le
 
 /-!
@@ -698,12 +700,12 @@ their Mycielskians).
 25. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
-lemma completeBipartiteGraph_not_adj_inl {V W : Type*} {v : V} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inl_iff {V W : Type*} {v : V} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
       x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
   cases x <;> simp
 
-lemma completeBipartiteGraph_not_adj_inr {V W : Type*} {w : W} {x : V ⊕ W} :
+lemma completeBipartiteGraph_not_adj_inr_iff {V W : Type*} {w : W} {x : V ⊕ W} :
     ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
       x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
   cases x <;> simp
@@ -719,7 +721,7 @@ lemma completeBipartiteGraph_isIndepSet_subset_left_or_right {V W : Type*}
   by_cases h : ∃ v, Sum.inl v ∈ s
   · obtain ⟨v, hv⟩ := h
     exact Or.inl fun x hx =>
-      completeBipartiteGraph_not_adj_inl.mp fun hadj => hs hv hx hadj.ne hadj
+      completeBipartiteGraph_not_adj_inl_iff.mp fun hadj => hs hv hx hadj.ne hadj
   · refine Or.inr fun x hx => ?_
     rcases x with x | x
     · exact absurd ⟨x, hx⟩ h
@@ -744,7 +746,7 @@ lemma card_le_of_subset_range {α β : Type*} [Finite α] {f : α → β} {s : F
 28. Any set of vertices contained in one part of a complete bipartite graph is
 independent, since a part contains no edges (we only need this for the right part).
 -/
-lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr {V W : Type*}
+lemma isIndepSet_completeBipartiteGraph_of_subset_range_inr {V W : Type*}
     {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   intro u hu v hv hne hadj
@@ -757,10 +759,10 @@ lemma completeBipartiteGraph_isIndepSet_of_subset_range_inr {V W : Type*}
 part; we state this as `⍺ K[a, b] = b` when `a ≤ b`. The right part is a `b`-element
 independent set, and by Exercises 26 and 27 no independent set is larger.
 -/
-theorem indepNum_completeBipartiteGraph {a b : ℕ} (h : a ≤ b) :
+lemma indepNum_completeBipartiteGraph {a b : ℕ} (h : a ≤ b) :
     ⍺ K[a, b] = b := by
   apply IsNIndepSet.indepNum_eq_of_indepSetFree (s := univ.map .inr)
-  · exact ⟨completeBipartiteGraph_isIndepSet_of_subset_range_inr (by simp), by simp⟩
+  · exact ⟨isIndepSet_completeBipartiteGraph_of_subset_range_inr (by simp), by simp⟩
   · intro s hs
     rcases completeBipartiteGraph_isIndepSet_subset_left_or_right hs.isIndepSet
       with h | h <;> grind [hs.card_eq, card_le_of_subset_range h, Nat.card_fin]
@@ -795,14 +797,14 @@ lemma completeBipartiteGraph_isIndepSet_card_add_le {a b : ℕ} (hab : a ≤ b)
     have h1 : #s ≤ a := by simpa using card_le_of_subset_range hL
     have h2 : #t ≤ a := by
       simpa using card_le_of_subset_range fun z hz =>
-        completeBipartiteGraph_not_adj_inl.mp ((ht z).mp (mem_coe.mp hz) _ hx)
+        completeBipartiteGraph_not_adj_inl_iff.mp ((ht z).mp (mem_coe.mp hz) _ hx)
     grind
   · -- `s` lies in the right part, and so does `t`
     obtain ⟨y, rfl⟩ := hR (mem_coe.mpr hx)
     have h1 : #s ≤ b := by simpa using card_le_of_subset_range hR
     have h2 : #t ≤ b := by
       simpa using card_le_of_subset_range fun z hz =>
-        completeBipartiteGraph_not_adj_inr.mp ((ht z).mp (mem_coe.mp hz) _ hx)
+        completeBipartiteGraph_not_adj_inr_iff.mp ((ht z).mp (mem_coe.mp hz) _ hx)
     grind
 
 /-!
@@ -812,7 +814,7 @@ so it contributes at least `2 * b`, and no independent set does better by the
 previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
 `none`, so its independence number is `1`.)
 -/
-theorem indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
+lemma indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
     (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
   refine le_antisymm ?_ ?_
   · -- `≤` : a maximum independent set `T` of `mμ[K[a, b]]` satisfies
@@ -825,7 +827,7 @@ theorem indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
         fun _ => by simp)
   · -- `≥` : the right part is an independent set `s` with `#s = b` and `s ⊆ N(s)ᶜ`
     have hind : K[a, b].IsIndepSet (↑(univ.map .inr : Finset (Fin a ⊕ Fin b))) :=
-      completeBipartiteGraph_isIndepSet_of_subset_range_inr (by simp)
+      isIndepSet_completeBipartiteGraph_of_subset_range_inr (by simp)
     refine le_trans ?_ (le_indepNum_mycielskian hind)
     have h1 : #(univ.map .inr : Finset (Fin a ⊕ Fin b)) = b := by simp
     have h2 := card_le_card (subset_compl_openNeighborhoodFinset hind)

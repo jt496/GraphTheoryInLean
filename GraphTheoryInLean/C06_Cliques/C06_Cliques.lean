@@ -175,7 +175,7 @@ lemma IsNClique.image_of_adj {W : Type*} {H : SimpleGraph W} [DecidableEq W]
   exact hadj hx hy (hs.isClique hx hy fun h => hne (by rw [h]))
 
 /-- The image of an `n`-clique under a graph homomorphism is an `n`-clique. -/
-protected lemma IsNClique.mapHom {W : Type*} {H : SimpleGraph W} [DecidableEq W]
+protected lemma IsNClique.image {W : Type*} {H : SimpleGraph W} [DecidableEq W]
     {n : ℕ} {s : Finset V} (hs : G.IsNClique n s) (f : G →g H) :
     H.IsNClique n (s.image f) :=
   hs.image_of_adj fun _ _ _ _ h => f.map_adj h
@@ -207,14 +207,14 @@ If `G ≤ H` and `H` is `n`-clique-free then so is `G`, so the property of being
 More generally, Mathlib's `CliqueFree.comap` says that if `G` contains a copy of `H`
 (`H ⊑ G`, see `IsContained`) and `G` is `n`-clique-free then so is `H`.
 Since a copy is just an injective homomorphism, we can ask whether injectivity is
-needed. It is not: a homomorphism `G →g H` is enough, since by `IsNClique.mapHom` it
+needed. It is not: a homomorphism `G →g H` is enough, since by `IsNClique.image` it
 maps any `n`-clique of `G` to an `n`-clique of `H`.
 -/
 #check CliqueFree.comap     -- G ⊑ H → CliqueFree n H → CliqueFree n G
 
 lemma CliqueFree.of_hom {W : Type*} {H : SimpleGraph W} {n : ℕ} (f : G →g H)
     (h : H.CliqueFree n) : G.CliqueFree n :=
-  fun t ht => by classical exact h _ (ht.mapHom f)
+  fun t ht => by classical exact h _ (ht.image f)
 
 /-!
 An `n`-clique is the same thing as a copy of the complete graph `K[n]`, so `G` is
@@ -242,7 +242,7 @@ Notice how this lemma requires the parts to be nonempty. Instead of a hypothesis
 `∀ i, Nonempty (W i)` it takes a function `f : ∀ i, W i` choosing a vertex in each
 part. Having such a choice function is equivalent to assuming that all its parts are
 nonempty, but is often easier to work with. We do the same in
-`blowUpGraph_cliqueFree_iff` below.
+`cliqueFree_blowUpGraph_iff` below.
 
 Conversely, if `ι` is finite with less than `n` elements then the graph is
 `n`-clique-free. (Mathlib states this direction for a `Fintype` index.)
@@ -251,7 +251,7 @@ Conversely, if `ι` is finite with less than `n` elements then the graph is
 
 /-- The blow-up of a graph `G` with nonempty parts is `n`-clique-free if and only if
 `G` is `n`-clique-free. -/
-lemma blowUpGraph_cliqueFree_iff {n : ℕ} {ι : Type*} (G : SimpleGraph ι)
+lemma cliqueFree_blowUpGraph_iff {n : ℕ} {ι : Type*} (G : SimpleGraph ι)
     (W : ι → Type*) (f : ∀ i, W i) :
     (G.blowUpGraph W).CliqueFree n ↔ G.CliqueFree n := by
   constructor <;> intro h
@@ -404,7 +404,7 @@ lemma Hom.cliqueNum_le {W : Type*} [Finite W] {H : SimpleGraph W} (f : G →g H)
     ω G ≤ ω H := by
   classical
   obtain ⟨s, hs⟩ := G.exists_isNClique_cliqueNum
-  exact (hs.mapHom f).le_cliqueNum
+  exact (hs.image f).le_cliqueNum
 
 /-!
 By contrast, the clique number is invariant under graph isomorphism with no
@@ -417,8 +417,8 @@ lemma Iso.cliqueNum_eq {W : Type*} {H : SimpleGraph W} (e : G ≃g H) : ω G = �
   simp only [cliqueNum]
   congr 1
   ext n
-  exact ⟨fun ⟨_, hs⟩ => ⟨_, hs.mapHom e.toHom⟩,
-         fun ⟨_, hs⟩ => ⟨_, hs.mapHom e.symm.toHom⟩⟩
+  exact ⟨fun ⟨_, hs⟩ => ⟨_, hs.image e.toHom⟩,
+         fun ⟨_, hs⟩ => ⟨_, hs.image e.symm.toHom⟩⟩
 
 /-!
 If `G` is `(n + 1)`-clique-free then `ω G ≤ n`. Once again no finiteness is needed,
@@ -571,7 +571,7 @@ lemma degree_le_indepNum_of_triangleFree [Finite V] [G.LocallyFinite]
 So in a triangle-free graph with no large independent sets every vertex has small
 degree. Applying this to both a graph and its complement is the idea behind the
 simplest case of Ramsey's theorem
-[Ramsey 1930](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-ramsey-1930).
+[Ramsey 1930](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-ramsey-1930).
 The *Ramsey number* `R(3, 3)` is the least `n` such that every graph on `n` vertices
 contains a triangle or an independent set of size `3`. Mathlib has no graph Ramsey
 numbers, but we can still prove the classical value `R(3, 3) = 6`.
@@ -606,7 +606,7 @@ is its independence number? Due to the `sSup` definition, it is `0`!
 Adjacent vertices of `pathNat₁` differ by one, so they have different parities. Hence
 any set of natural numbers that all have the same parity is independent.
 -/
-lemma pathNat₁_isIndepSet_of_mod_two_eq {s : Set ℕ}
+lemma isIndepSet_pathNat₁_of_mod_two_eq {s : Set ℕ}
     (h : ∀ ⦃a b⦄, a ∈ s → b ∈ s → a % 2 = b % 2) : pathNat₁.IsIndepSet s := by
   rw [isIndepSet_iff_forall_not_adj]
   rintro a b ha hb (rfl | rfl) <;> grind [h ha hb]
@@ -621,7 +621,7 @@ lemma indepNum_pathNat₁ : ⍺ pathNat₁ = 0 := by
   rintro ⟨N, hN⟩
   have hs : pathNat₁.IsNIndepSet (N + 1)
       ((Finset.range (N + 1)).map ⟨(2 * ·), mul_right_injective₀ two_ne_zero⟩) := by
-    refine ⟨pathNat₁_isIndepSet_of_mod_two_eq ?_, by simp⟩
+    refine ⟨isIndepSet_pathNat₁_of_mod_two_eq ?_, by simp⟩
     simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Set.mem_image]
     grind
   exact N.not_succ_le_self (hN ⟨_, hs⟩)
@@ -639,7 +639,7 @@ subsets are disjoint and distinct. When `β` is `Fin n`, we have the notation
 So an independent set in `Kn[n, k]` is a family of `k`-element subsets of `Fin n` in
 which no two members are disjoint: an *intersecting family*. The Erdős–Ko–Rado
 theorem
-[Erdős–Ko–Rado 1961](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-erdos-ko-rado-1961)
+[Erdős–Ko–Rado 1961](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-erdos-ko-rado-1961)
 says that if `2 * k ≤ n` then an intersecting family of `k`-element subsets of an
 `n`-element set has at most `(n - 1).choose (k - 1)` members. This is in Mathlib, and
 it is essentially the computation of the independence number of `Kn[n, k]`.
@@ -676,7 +676,7 @@ larger `k` the graph has no edges at all.)
 
 [Figure: The star at $0$, a largest independent set in the Petersen graph $\mathrm{Kn}(5,2)$](https://jt496.github.io/GraphTheoryInLean/figures/kneser_star.svg)
 -/
-lemma kneserGraph_isIndepSet_of_mem (i : β) :
+lemma isIndepSet_kneserGraph_of_mem (i : β) :
     (kneserGraph β k).IsIndepSet {b | i ∈ b.val} := by
   intro a ha b hb hne hf
   rw [kneserGraph_adj, ne_eq] at hf
@@ -727,7 +727,7 @@ As well as stars, the Kneser graph also contains independent sets determined by 
 if we take less than `2 * k` elements of `β` then the set of all `k`-element subsets
 of this set is an independent set in `kneserGraph β k`.
 -/
-lemma kneserGraph_isIndepSet_of_card_lt {s : Finset β} (h : #s < 2 * k) :
+lemma isIndepSet_kneserGraph_of_card_lt {s : Finset β} (h : #s < 2 * k) :
     (kneserGraph β k).IsIndepSet {b | b.val ⊆ s} := by
   classical
   intro a ha b hb hne hf
@@ -737,7 +737,7 @@ lemma kneserGraph_isIndepSet_of_card_lt {s : Finset β} (h : #s < 2 * k) :
   grind [card_le_card (union_subset ha hb)]
 
 /-!
-Taking `s = univ` in `kneserGraph_isIndepSet_of_card_lt`: if `β` has less than
+Taking `s = univ` in `isIndepSet_kneserGraph_of_card_lt`: if `β` has less than
 `2 * k` elements then `kneserGraph β k` is the edgeless graph, since any distinct
 pair of `k`-element subsets of `β` must intersect.
 -/
@@ -745,7 +745,7 @@ lemma kneserGraph_eq_bot_of_card_lt [Finite β] (h : Nat.card β < 2 * k) :
     kneserGraph β k = ⊥ := by
   have := Fintype.ofFinite β
   rw [Nat.card_eq_fintype_card] at h
-  have := kneserGraph_isIndepSet_of_card_lt (k := k) (s := Finset.univ)
+  have := isIndepSet_kneserGraph_of_card_lt (k := k) (s := Finset.univ)
     (by simpa using h)
   ext u v
   simpa using fun huv => this (by simp) (by simp) huv.2 huv
@@ -795,7 +795,7 @@ theorem indepNum_kneserGraph {n : ℕ} [NeZero k] :
       (s := {b ∈ (Finset.univ : Finset {s : Finset (Fin n) // #s = k}) |
         (0 : Fin n) ∈ b.val})
     · constructor
-      · simp [kneserGraph_isIndepSet_of_mem (0 : Fin n)]
+      · simp [isIndepSet_kneserGraph_of_mem (0 : Fin n)]
       · simp [card_filter_mem_eq_choose_sub_one]
     · intro t ht
       have hAcard : (t.image Subtype.val).card = t.card :=
@@ -869,7 +869,7 @@ theorem CliqueFree.iterMycielskian (n : ℕ) (h : G.CliqueFree 3) :
 /-!
 In particular every iterated Mycielskian of the single edge `K[2]` is triangle-free.
 Up to isomorphism this sequence begins `K[2]`, `C[5]`, `grotzschGraph`: we have
-`mμ[K[2]] ≃g C[5]` (`isoMycielskianCompleteTwoCycleGraphFive`), and applying
+`mμ[K[2]] ≃g C[5]` (`mycielskianCompleteTwoIsoCycleFive`), and applying
 `Iso.mapMycielskian` to this gives `mμ^2 K[2] ≃g grotzschGraph`.
 -/
 theorem cliqueFree_three_iterMycielskian_completeGraph_two (n : ℕ) :
@@ -895,7 +895,7 @@ We first prove that the Mycielskian embedding mapping `G` into its Mycielskian s
 lemma IsNClique.mycielskian {k : ℕ} {s : Finset V} (h : G.IsNClique k s) :
     (mμ[G]).IsNClique k (s.map (Embedding.mycielskianLeft G).toEmbedding) := by
   classical
-  simpa [Finset.map_eq_image] using h.mapHom (Embedding.mycielskianLeft G).toHom
+  simpa [Finset.map_eq_image] using h.image (Embedding.mycielskianLeft G).toHom
 
 /-!
 Next we want to show that the vertex `none` cannot belong to any `k`-clique in
@@ -1140,13 +1140,13 @@ lemma IsIndepSet.mycielskian {s : Set V} (h : G.IsIndepSet s) :
   -- symmetric to the previous case
   · exact mem_compl_openNeighborhoodSet.mp hx _ hy hf.symm
 
-open Finset mycielskian
 /-!
 The following simple lemma will help us to compute the size of independent sets in
 `mμ[G]`. The left and right images of any two finsets are disjoint (they lie in
 different summands) and both maps are injective, so the union of the images has size
 `#s + #t`.
 -/
+open Finset mycielskian
 lemma card_image_left_union_image_right [DecidableEq V] (s t : Finset V) :
     #(s.image (·ₗ) ∪ t.image (·ᵣ)) = #s + #t := by
   rw [Finset.card_union_of_disjoint,

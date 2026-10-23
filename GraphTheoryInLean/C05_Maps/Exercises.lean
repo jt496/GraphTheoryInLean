@@ -71,7 +71,7 @@ example : ∃ (f : Fin 1 ↪ Fin 2) (H : SimpleGraph (Fin 2)),
 10. Define an embedding of `Q[n]` into `Q[n + k]` by iterating
 `hypercube.embedFalse`.
 -/
-def hypercubeEmbedding' (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k] := sorry
+def hypercube.embedding' (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k] := sorry
 
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
@@ -204,14 +204,14 @@ last `n` vertices.
 -/
 /-- The embedding of `P[n]` into `P[n + k]` as the last `n` vertices. -/
 @[simps]
-def pathGraphEmbedding (n k : ℕ) : (P[n]) ↪g (P[n + k]) where
+def pathGraph.embedding (n k : ℕ) : (P[n]) ↪g (P[n + k]) where
   toFun i := i.addNat k
   inj' := (Fin.addNatEmb k).injective
   map_rel_iff' := by
     intro i j
     grind [Function.Embedding.coeFn_mk, pathGraph_adj]
 
-#check pathGraphEmbedding_apply
+#check pathGraph.embedding_apply
 
 /-!
 3. Show that any `G ↪g H` gives rise to an embedding of `G` into any blow-up of `H`
@@ -291,9 +291,9 @@ example : ∃ (f : Fin 1 ↪ Fin 2) (H : SimpleGraph (Fin 2)),
 `hypercube.embedFalse`.
 -/
 /-- The embedding `Q[n] ↪g Q[n + k]` obtained by iterating `hypercube.embedFalse`. -/
-def hypercubeEmbedding (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k]
+def hypercube.embedding (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k]
   | 0 => Embedding.refl
-  | k + 1 => (hypercube.embedFalse (n + k)).comp (hypercubeEmbedding n k)
+  | k + 1 => (hypercube.embedFalse (n + k)).comp (hypercube.embedding n k)
 
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
@@ -388,8 +388,8 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
 16. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
 to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
 -/
-lemma piTensorProd_hom_iff_of_isEmpty {ι : Type*} [IsEmpty ι] {V : ι → Type*}
-    {K : SimpleGraph X} (G : ∀ i, SimpleGraph (V i)) :
+lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
+    {V : ι → Type*} {K : SimpleGraph X} (G : ∀ i, SimpleGraph (V i)) :
     Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
   constructor
   · rintro ⟨f⟩

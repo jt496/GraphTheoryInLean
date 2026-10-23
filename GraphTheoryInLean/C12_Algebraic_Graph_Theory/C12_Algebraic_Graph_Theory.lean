@@ -77,9 +77,9 @@ all: a graph is *asymmetric* if its only automorphism is the identity, i.e. its
 automorphism group is trivial. A simple example is the infinite path `pathNat₁`. This
 may seem surprising since, as we saw in
 [Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps), `pathNat₁` has
-many embeddings into itself: for each `j : ℕ` the embedding `pathNat₁Translate j`
+many embeddings into itself: for each `j : ℕ` the embedding `pathNat₁.translate j`
 sends `i` to `i + j`. However, none of these is surjective, except for the identity
-`pathNat₁Translate 0`.
+`pathNat₁.translate 0`.
 
 The key observation is that `0` is the only vertex of `pathNat₁` of degree one (all
 the other vertices have degree two), and isomorphisms preserve degrees. So every
@@ -140,7 +140,7 @@ reflection `i ↦ -i` and the translations `i ↦ i + j` as automorphisms.
 ## Automorphisms of Cycle Graphs
 
 In `isVertexTransitive_cycleGraph` we showed that the cycle graph `C[n]` is
-vertex-transitive, using the rotations `cycleGraphRotate d`, which send the vertex
+vertex-transitive, using the rotations `cycleGraph.rotate d`, which send the vertex
 `d` to `0`. We now determine its whole automorphism group. Besides the rotations
 there is an automorphism given by reflecting the vertices, i.e. sending `k` to `-k`
 modulo `n`.
@@ -149,7 +149,7 @@ modulo `n`.
 The automorphism of the cycle graph `C[n]` given by reflecting the vertices.
 -/
 @[simps]
-def cycleGraphReflect {n : ℕ} : C[n] ≃g C[n] where
+def cycleGraph.reflect {n : ℕ} : C[n] ≃g C[n] where
   toFun k := -k
   invFun k := -k
   left_inv k := by simp
@@ -172,7 +172,7 @@ the empty map is an automorphism, yet `Fin 0` has no element to witness the
 existential.)
 -/
 lemma aut_cycleGraph_eq_rotate {n : ℕ} (e : C[n + 2] ≃g C[n + 2])
-    (h : e 1 - e 0 = 1) : e = cycleGraphRotate (e.symm 0) := by
+    (h : e 1 - e 0 = 1) : e = cycleGraph.rotate (e.symm 0) := by
   let i := e 0
   have hstep : e 1 = 1 + i := by grind
   have hall : ∀ (j : ℕ) (hj : j < n + 2),
@@ -209,14 +209,14 @@ lemma aut_cycleGraph_eq_rotate {n : ℕ} (e : C[n + 2] ≃g C[n + 2])
 
 /-!
 If instead `e 0 - e 1 = 1` then `e` is a rotation followed by the reflection. To
-see this note that `f = cycleGraphReflect ∘ e` satisfies `f 1 - f 0 = 1`, so `f` is
-a rotation by the previous lemma, and hence `e = cycleGraphReflect ∘ f` is as
+see this note that `f = cycleGraph.reflect ∘ e` satisfies `f 1 - f 0 = 1`, so `f` is
+a rotation by the previous lemma, and hence `e = cycleGraph.reflect ∘ f` is as
 claimed (the reflection is an involution).
 -/
 lemma aut_cycleGraph_eq_rotate_trans_reflect {n : ℕ} (e : C[n + 2] ≃g C[n + 2])
     (h : e 0 - e 1 = 1) :
-    e = (cycleGraphRotate (e.symm 0)).trans cycleGraphReflect := by
-  let f := e.trans cycleGraphReflect
+    e = (cycleGraph.rotate (e.symm 0)).trans cycleGraph.reflect := by
+  let f := e.trans cycleGraph.reflect
   have hf : f 1 - f 0 = 1 := by
     simpa [f, sub_eq_add_neg, add_comm] using h
   have hsymm : e.symm 0 = f.symm 0 := e.symm_apply_eq.2 (by simp [f])
@@ -229,7 +229,8 @@ Hence any automorphism of the cycle graph `C[n + 2]` is either a rotation or a
 rotation followed by reflection.
 -/
 lemma aut_cycleGraph {n : ℕ} (e : C[n + 2] ≃g C[n + 2]) : ∃ i : Fin (n + 2),
-    e = cycleGraphRotate i ∨ e = (cycleGraphRotate i).trans cycleGraphReflect := by
+    e = cycleGraph.rotate i ∨
+      e = (cycleGraph.rotate i).trans cycleGraph.reflect := by
   have h0 : C[n + 2].Adj (e 0) (e 1) :=
     e.toHom.map_adj (by grind [cycleGraph_adj])
   rcases h0 with h | h
@@ -248,8 +249,8 @@ fails for trivial reasons:
   elements.
 
 Our rotations match Mathlib's conventions for `DihedralGroup` exactly: `r i`
-corresponds to `cycleGraphRotate i` and, since `sr i = sr 0 * r i`, the reflection
-`sr i` corresponds to `cycleGraphRotate i` followed by the reflection. In both cases
+corresponds to `cycleGraph.rotate i` and, since `sr i = sr 0 * r i`, the reflection
+`sr i` corresponds to `cycleGraph.rotate i` followed by the reflection. In both cases
 the index `i` is the vertex sent to `0`, i.e. `e.symm 0`.
 -/
 #source DihedralGroup
@@ -264,9 +265,9 @@ def autCycleGraphMulEquivDihedral (n : ℕ) :
     (C[n + 3] ≃g C[n + 3]) ≃* DihedralGroup (n + 3) :=
   MulEquiv.symm
     { toFun := fun d => match d with
-        | .r i => cycleGraphRotate ((ZMod.finEquiv (n + 3)).symm i)
-        | .sr i => (cycleGraphRotate ((ZMod.finEquiv (n + 3)).symm i)).trans
-            cycleGraphReflect
+        | .r i => cycleGraph.rotate ((ZMod.finEquiv (n + 3)).symm i)
+        | .sr i => (cycleGraph.rotate ((ZMod.finEquiv (n + 3)).symm i)).trans
+            cycleGraph.reflect
       invFun e := if e 1 - e 0 = 1 then .r (ZMod.finEquiv (n + 3) (e.symm 0))
         else .sr (ZMod.finEquiv (n + 3) (e.symm 0))
       left_inv d := by
@@ -663,7 +664,7 @@ theorem mem_spectrum_adjMatrix_mycielskian [Fintype V] [DecidableEq V]
 /-!
 For example, `K[2]` has the eigenvector `![1, -1]` with eigenvalue `-1`, and its
 entries sum to zero. Since `mμ[K[2]]` is isomorphic to `C[5]`
-(`isoMycielskianCompleteTwoCycleGraphFive`), the `5`-cycle has eigenvalues `-φ` and
+(`mycielskianCompleteTwoIsoCycleFive`), the `5`-cycle has eigenvalues `-φ` and
 `-ψ`.
 -/
 open Matrix in
@@ -673,7 +674,7 @@ example :
   have hK : K[2].adjMatrix ℝ *ᵥ ![1, -1] = (-1 : ℝ) • ![1, -1] := by
     ext i
     fin_cases i <;> simp [mulVec, dotProduct, Fin.sum_univ_two, adjMatrix_apply]
-  rw [← isoMycielskianCompleteTwoCycleGraphFive.spectrum_adjMatrix]
+  rw [← mycielskianCompleteTwoIsoCycleFive.spectrum_adjMatrix]
   simpa using mem_spectrum_adjMatrix_mycielskian (by simp) hK (by simp)
 
 /-!
@@ -773,12 +774,12 @@ matrix is built from `DecidableRel Q[n].Adj`.)
 example (n : ℕ) :
     Module.finrank ℝ (Module.End.eigenspace (Q[n].adjMatrix ℝ).toLin' n) = 1 := by
   -- put the filtering instance in scope, so that
-  -- `hypercube_isRegularOfDegree` uses it
+  -- `IsRegularOfDegree.hypercube` uses it
   let : Q[n].LocallyFinite := fun v => Subtype.fintype _
-  rw [(hypercube_isRegularOfDegree n).finrank_eigenspace_adjMatrix]
+  rw [(IsRegularOfDegree.hypercube n).finrank_eigenspace_adjMatrix]
   -- `Q[n]` is connected, so it has exactly one connected component
   rw [Fintype.card_eq_nat_card]
-  exact (hypercube_connected n).card_connectedComponent
+  exact (connected_hypercube n).card_connectedComponent
 
 /-!
 The *incidence matrix* (`incMatrix`) has rows indexed by vertices and columns by
@@ -806,7 +807,7 @@ least one. We can check each field with `decide`, but two need an initial `intro
 since `decide` needs a `Decidable` instance for the exact statement and neither
 `IsRegularOfDegree` nor `Pairwise` has one.
 -/
-lemma petersenGraph_isSRGWith : petersenGraph.IsSRGWith 10 3 0 1 where
+lemma IsSRGWith.petersenGraph : petersenGraph.IsSRGWith 10 3 0 1 where
   card := by decide
   regular := by intro v; decide +revert
   of_adj := by decide
@@ -831,7 +832,7 @@ example : petersenGraph.ediam = 2 := by
   have : Nontrivial {s : Finset (Fin 5) // s.card = 2} :=
     Fintype.one_lt_card_iff_nontrivial.mp (by decide)
   have hne : ¬ petersenGraph.Adj ⟨{0, 1}, rfl⟩ ⟨{0, 2}, rfl⟩ := by decide
-  refine petersenGraph_isSRGWith.ediam_eq_two (fun h => hne ?_) one_ne_zero
+  refine IsSRGWith.petersenGraph.ediam_eq_two (fun h => hne ?_) one_ne_zero
   rw [h, top_adj]
   decide
 
@@ -840,7 +841,7 @@ The complement of a strongly regular graph is strongly regular. The complement o
 Petersen graph is the line graph of `K[5]`, with parameters `(10, 6, 3, 4)`.
 -/
 example : petersenGraphᶜ.IsSRGWith 10 6 3 4 :=
-  petersenGraph_isSRGWith.compl
+  IsSRGWith.petersenGraph.compl
 
 /-!
 More generally, the line graph `L[K[n]]` is strongly regular with parameters
@@ -1096,14 +1097,14 @@ lemma hypercubeHamming_adj_iff_exists {n : ℕ} {x y : Fin n → Bool} :
 Translation by a fixed vector `t` is an automorphism of the Hamming cube: it
 preserves the Hamming distance since `(t + x) - (t + y) = x - y`. Under the
 isomorphism `hypercubeIsoHamming`, this corresponds to the automorphism
-`hypercubeTranslate` of `Q[n]`. There we had to define `xor` on `HypercubeVert n` and
-prove its basic properties (such as `HypercubeVert.xor_xor`) by hand. On
+`hypercube.translate` of `Q[n]`. There we had to define `xor` on `HypercubeVert n`
+and prove its basic properties (such as `HypercubeVert.xor_xor`) by hand. On
 `Fin n → Bool`, addition is pointwise `xor`, and the group structure (associativity,
 `0`, negation) comes for free from Mathlib, as do the characteristic-two facts once
 we have the `BooleanRing` instance above.
 -/
 /-- Translation by `t` (pointwise `xor`) as an automorphism of the Hamming cube. -/
-def hammingTranslate {n : ℕ} (t : Fin n → Bool) :
+def hypercubeHamming.translate {n : ℕ} (t : Fin n → Bool) :
     hypercubeHamming n ≃g hypercubeHamming n where
   toEquiv := Equiv.addLeft t
   map_rel_iff' := by
@@ -1111,8 +1112,8 @@ def hammingTranslate {n : ℕ} (t : Fin n → Bool) :
     grind [Equiv.coe_addLeft, hypercubeHamming_adj, hammingDist_eq_hammingNorm]
 
 @[simp]
-lemma hammingTranslate_apply {n : ℕ} (t x : Fin n → Bool) :
-    hammingTranslate t x = t + x := rfl
+lemma hypercubeHamming.translate_apply {n : ℕ} (t x : Fin n → Bool) :
+    hypercubeHamming.translate t x = t + x := rfl
 
 /-!
 Permuting the coordinates by `σ : Equiv.Perm (Fin n)` also preserves the Hamming
@@ -1125,7 +1126,7 @@ lemma hammingDist_comp_perm {ι : Type*} [Fintype ι] {β : Type*}
 /-- Permutation of coordinates by `σ` as an automorphism of the Hamming cube;
 `x` is sent to `x ∘ σ.symm` so that the `i`-th coordinate of the image is the
 `σ⁻¹ i`-th coordinate of `x`. -/
-def hammingPermute {n : ℕ} (σ : Equiv.Perm (Fin n)) :
+def hypercubeHamming.permute {n : ℕ} (σ : Equiv.Perm (Fin n)) :
     hypercubeHamming n ≃g hypercubeHamming n where
   toEquiv := σ.arrowCongr (Equiv.refl Bool)
   map_rel_iff' {x y} := by
@@ -1134,8 +1135,8 @@ def hammingPermute {n : ℕ} (σ : Equiv.Perm (Fin n)) :
     rfl
 
 @[simp]
-lemma hammingPermute_apply {n : ℕ} (σ : Equiv.Perm (Fin n)) (x : Fin n → Bool) :
-    hammingPermute σ x = x ∘ σ.symm := rfl
+lemma hypercubeHamming.permute_apply {n : ℕ} (σ : Equiv.Perm (Fin n))
+    (x : Fin n → Bool) : hypercubeHamming.permute σ x = x ∘ σ.symm := rfl
 
 /-!
 In the automorphism group the inverse `f⁻¹` is by definition `f.symm`, so the
@@ -1144,12 +1145,12 @@ inverses of translations and coordinate permutations can be computed by `rfl`. S
 translations are involutions (characteristic two again).
 -/
 @[simp]
-lemma hammingTranslate_inv_apply {n : ℕ} (t x : Fin n → Bool) :
-    (hammingTranslate t)⁻¹ x = t + x := rfl
+lemma hypercubeHamming.translate_inv_apply {n : ℕ} (t x : Fin n → Bool) :
+    (hypercubeHamming.translate t)⁻¹ x = t + x := rfl
 
 @[simp]
-lemma hammingPermute_inv_apply {n : ℕ} (σ : Equiv.Perm (Fin n)) (x : Fin n → Bool) :
-    (hammingPermute σ)⁻¹ x = x ∘ σ := rfl
+lemma hypercubeHamming.permute_inv_apply {n : ℕ} (σ : Equiv.Perm (Fin n))
+    (x : Fin n → Bool) : (hypercubeHamming.permute σ)⁻¹ x = x ∘ σ := rfl
 
 /-!
 ## The Hyperoctahedral Group
@@ -1173,7 +1174,7 @@ automorphism `t ↦ t ∘ σ.symm` of `Fin n → Bool`, which Mathlib provides a
 /-- The action of `Equiv.Perm (Fin n)` on translation vectors by permuting
 coordinates, as a `MonoidHom` into the automorphisms of
 `Multiplicative (Fin n → Bool)`. -/
-def hammingPhi (n : ℕ) :
+def hyperoctahedralAction (n : ℕ) :
     Equiv.Perm (Fin n) →* MulAut (Multiplicative (Fin n → Bool)) where
   toFun σ := AddEquiv.toMultiplicative (AddEquiv.arrowCongr σ (AddEquiv.refl Bool))
   map_one' := by ext t; rfl
@@ -1182,8 +1183,8 @@ def hammingPhi (n : ℕ) :
 /-- The hyperoctahedral group `(ℤ/2)ⁿ ⋊ Sₙ`, i.e. the wreath product `ℤ/2 ≀ Sₙ`,
 realized as a semidirect product with `(ℤ/2)ⁿ` as `Fin n → Bool` under pointwise
 `xor`. -/
-abbrev _root_.hyperoctahedralGroup (n : ℕ) : Type :=
-  Multiplicative (Fin n → Bool) ⋊[hammingPhi n] Equiv.Perm (Fin n)
+abbrev _root_.HyperoctahedralGroup (n : ℕ) : Type :=
+  Multiplicative (Fin n → Bool) ⋊[hyperoctahedralAction n] Equiv.Perm (Fin n)
 
 /-!
 Translations and coordinate permutations give monoid homomorphisms into the
@@ -1193,33 +1194,34 @@ is composition, `(f * g) x = f (g x)`.)
 /-- Translations as a monoid homomorphism into the automorphism group of the Hamming
 cube. -/
 @[simps]
-def hammingTranslateHom (n : ℕ) :
+def hypercubeHamming.translateHom (n : ℕ) :
     Multiplicative (Fin n → Bool) →* (hypercubeHamming n ≃g hypercubeHamming n) where
-  toFun t := hammingTranslate t.toAdd
+  toFun t := hypercubeHamming.translate t.toAdd
   map_one' := by ext x; simp
   map_mul' t s := by ext x; simp [add_assoc]
 
 /-- Coordinate permutations as a monoid homomorphism into the automorphism group of
 the Hamming cube. -/
 @[simps]
-def hammingPermuteHom (n : ℕ) :
+def hypercubeHamming.permuteHom (n : ℕ) :
     Equiv.Perm (Fin n) →* (hypercubeHamming n ≃g hypercubeHamming n) where
-  toFun := hammingPermute
+  toFun := hypercubeHamming.permute
   map_one' := by ext x; rfl
   map_mul' σ ρ := by ext x; rfl
 
 /-!
-These two homomorphisms are compatible with the action `hammingPhi`: conjugating a
-translation by a coordinate permutation is the translation by the permuted vector.
-`SemidirectProduct.lift` combines them into a monoid homomorphism from the
-hyperoctahedral group to the automorphism group.
+These two homomorphisms are compatible with the action `hyperoctahedralAction`:
+conjugating a translation by a coordinate permutation is the translation by the
+permuted vector. `SemidirectProduct.lift` combines them into a monoid homomorphism
+from the hyperoctahedral group to the automorphism group.
 -/
 /-- The homomorphism from the hyperoctahedral group to the automorphisms of the
 Hamming cube, sending `(t, σ)` to the automorphism `x ↦ t + x ∘ σ.symm`, i.e.
 coordinate permutation by `σ` followed by translation by `t`. -/
 def hyperoctahedralToAut (n : ℕ) :
-    hyperoctahedralGroup n →* (hypercubeHamming n ≃g hypercubeHamming n) :=
-  SemidirectProduct.lift (hammingTranslateHom n) (hammingPermuteHom n) (by
+    HyperoctahedralGroup n →* (hypercubeHamming n ≃g hypercubeHamming n) :=
+  SemidirectProduct.lift (hypercubeHamming.translateHom n)
+    (hypercubeHamming.permuteHom n) (by
     intro σ
     ext t x i
     change t (σ.symm i) + x i = t (σ.symm i) + x (σ (σ.symm i))
@@ -1337,9 +1339,9 @@ identity. Hence `f` is the image of `(f 0, σ)`: permutation of the coordinates 
 lemma hyperoctahedralToAut_surjective (n : ℕ) :
     Function.Surjective (hyperoctahedralToAut n) := by
   intro f
-  set g := (hammingTranslateHom n (Multiplicative.ofAdd (f 0)))⁻¹ * f with hgdef
+  let g := (hypercubeHamming.translateHom n (Multiplicative.ofAdd (f 0)))⁻¹ * f
   have hg0 : g 0 = 0 := by
-    simp [hgdef]
+    simp [g]
   have hsingle : ∀ i : Fin n, ∃ j, g (e i) = e j := by
     intro i
     exact hammingNorm_eq_one_iff.mp (by rw [hammingNorm_aut hg0, hammingNorm_single])
@@ -1351,22 +1353,22 @@ lemma hyperoctahedralToAut_surjective (n : ℕ) :
     exact single_true_left_inj (g.injective h')
   let σ : Equiv.Perm (Fin n) :=
     Equiv.ofBijective p (Finite.injective_iff_bijective.mp hpinj)
-  have hh0 : ((hammingPermuteHom n σ)⁻¹ * g) 0 = 0 := by
+  have hh0 : ((hypercubeHamming.permuteHom n σ)⁻¹ * g) 0 = 0 := by
     simp [hg0]
   have hhsingle : ∀ i,
-      ((hammingPermuteHom n σ)⁻¹ * g) (e i) = e i := by
+      ((hypercubeHamming.permuteHom n σ)⁻¹ * g) (e i) = e i := by
     intro i
     ext k; simp [hp i, σ, Pi.single_apply, hpinj.eq_iff]
-  have hone : (hammingPermuteHom n σ)⁻¹ * g = 1 := by
+  have hone : (hypercubeHamming.permuteHom n σ)⁻¹ * g = 1 := by
     ext x : 1
     simpa using aut_eq_id_of_fix_zero_and_singles hh0 hhsingle x
   -- so `g` is the permutation by `σ`
-  have hg : g = hammingPermuteHom n σ := (inv_mul_eq_one.mp hone).symm
+  have hg : g = hypercubeHamming.permuteHom n σ := (inv_mul_eq_one.mp hone).symm
   -- and `g` is `f` followed by undoing the translation by `f 0`, so `f` is the
   -- permutation by `σ` followed by that translation
-  have hf : f = hammingTranslateHom n (Multiplicative.ofAdd (f 0)) *
-      hammingPermuteHom n σ := by
-    rw [← hg, hgdef, mul_inv_cancel_left]
+  have hf : f = hypercubeHamming.translateHom n (Multiplicative.ofAdd (f 0)) *
+      hypercubeHamming.permuteHom n σ := by
+    rw [← hg, mul_inv_cancel_left]
   exact ⟨⟨Multiplicative.ofAdd (f 0), σ⟩, hf.symm⟩
 
 /-!
@@ -1380,14 +1382,14 @@ hyperoctahedral group `ℤ/2 ≀ Sₙ`.
 /-- The automorphism group of the Hamming cube is the hyperoctahedral group
 `ℤ/2 ≀ Sₙ`. -/
 noncomputable def hyperoctahedralMulEquivAutHamming (n : ℕ) :
-    hyperoctahedralGroup n ≃* (hypercubeHamming n ≃g hypercubeHamming n) :=
+    HyperoctahedralGroup n ≃* (hypercubeHamming n ≃g hypercubeHamming n) :=
   MulEquiv.ofBijective (hyperoctahedralToAut n)
     ⟨hyperoctahedralToAut_injective n, hyperoctahedralToAut_surjective n⟩
 
 /-- The automorphism group of the hypercube `Q[n]` is the hyperoctahedral group
 `ℤ/2 ≀ Sₙ`. -/
 noncomputable def autHypercubeMulEquivHyperoctahedral (n : ℕ) :
-    (Q[n] ≃g Q[n]) ≃* hyperoctahedralGroup n :=
+    (Q[n] ≃g Q[n]) ≃* HyperoctahedralGroup n :=
   (hypercubeIsoHamming n).autCongr.trans
     (hyperoctahedralMulEquivAutHamming n).symm
 
@@ -1853,7 +1855,7 @@ noncomputable def extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
 selected by `d`: the subcube `{ b + extendEmb d x | x : Fin k → Bool }`. -/
 noncomputable def subcubeCopy {n k : ℕ} (b : Fin n → Bool) (d : Fin k ↪ Fin n) :
     Copy (hypercubeHamming k) (hypercubeHamming n) where
-  toHom := (hammingTranslate b).toHom.comp (extendHom d)
+  toHom := (hypercubeHamming.translate b).toHom.comp (extendHom d)
   injective' := fun _ _ h => extendEmb_injective d (add_left_cancel h)
 
 @[simp]
@@ -1935,7 +1937,7 @@ neighbour of `f 0` and differs from it in a single coordinate, which we call `d 
 Two basis vectors with the same direction would have the same image, so `d` is
 injective because `f` is.
 -/
-lemma copy_exists_direction_embedding {n k : ℕ}
+lemma exists_apply_single_eq_add_single {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
     ∃ d : Fin k ↪ Fin n, ∀ i, f (e i) = f 0 + e (d i) := by
   -- each basis vector is mapped to a neighbour of `f 0`, defining the
@@ -2001,19 +2003,19 @@ lemma copy_apply_eq_add_extendEmb_of_single {n k : ℕ}
 /-!
 Combining the two steps:
 -/
-lemma copy_exists_extendEmb {n k : ℕ}
+lemma exists_apply_eq_add_extendEmb {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
     ∃ d : Fin k ↪ Fin n, ∀ x, f x = f 0 + extendEmb d x := by
-  obtain ⟨d, hd⟩ := copy_exists_direction_embedding f
+  obtain ⟨d, hd⟩ := exists_apply_single_eq_add_single f
   exact ⟨d, copy_apply_eq_add_extendEmb_of_single hd⟩
 
 /-!
 Every copy of `Q[k]` in `Q[n]` *is* a canonical subcube copy.
 -/
-lemma copy_eq_subcubeCopy {n k : ℕ}
+lemma exists_eq_subcubeCopy {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
     ∃ (b : Fin n → Bool) (d : Fin k ↪ Fin n), f = subcubeCopy b d := by
-  obtain ⟨d, hd⟩ := copy_exists_extendEmb f
+  obtain ⟨d, hd⟩ := exists_apply_eq_add_extendEmb f
   exact ⟨f 0, d, Copy.ext fun x => by simpa using hd x⟩
 
 /-!
@@ -2031,16 +2033,16 @@ is `2 ^ n * n`, the number of edges counted with direction.
 /-- Copies of `Q[k]` in `Q[n]` (in the Hamming model) are equivalent to pairs
 `(b, d)` of a base point and a direction embedding. The inverse map sends `(b, d)` to
 `subcubeCopy b d`; it is injective by `subcubeCopy_injective` and surjective by the
-rigidity theorem `copy_eq_subcubeCopy`. -/
+rigidity theorem `exists_eq_subcubeCopy`. -/
 noncomputable def copyEquivProd (n k : ℕ) :
     Copy (hypercubeHamming k) (hypercubeHamming n) ≃
       (Fin n → Bool) × (Fin k ↪ Fin n) :=
   (Equiv.ofBijective (fun bd => subcubeCopy bd.1 bd.2)
     ⟨subcubeCopy_injective, fun f => by
-      obtain ⟨b, d, hf⟩ := copy_eq_subcubeCopy f
+      obtain ⟨b, d, hf⟩ := exists_eq_subcubeCopy f
       exact ⟨(b, d), hf.symm⟩⟩).symm
 
-theorem labelledCopyCount_hypercubeHamming (n k : ℕ) :
+lemma labelledCopyCount_hypercubeHamming (n k : ℕ) :
     (hypercubeHamming n).labelledCopyCount (hypercubeHamming k) =
       2 ^ n * n.descFactorial k := by
   rw [labelledCopyCount, Fintype.card_eq_nat_card,
@@ -2110,8 +2112,9 @@ lemma edist_subcubeCopy {n k : ℕ} (b : Fin n → Bool) (d : Fin k ↪ Fin n)
     (x y : Fin k → Bool) :
     (hypercubeHamming n).edist (subcubeCopy b d x) (subcubeCopy b d y) =
       (hypercubeHamming k).edist x y := by
-  have h := hammingDist_aut (hammingTranslate b) (extendEmb d x) (extendEmb d y)
-  simp only [hammingTranslate_apply] at h
+  have h := hammingDist_aut (hypercubeHamming.translate b) (extendEmb d x)
+    (extendEmb d y)
+  simp only [hypercubeHamming.translate_apply] at h
   rw [edist_hypercubeHamming, edist_hypercubeHamming, subcubeCopy_apply,
     subcubeCopy_apply, h, hammingDist_extendEmb]
 
@@ -2124,7 +2127,7 @@ to the hypercube along the isomorphisms `hypercubeIsoHamming`, using `Iso.copyCo
 lemma copy_hypercubeHamming_adj_iff {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) {x y : Fin k → Bool} :
     (hypercubeHamming n).Adj (f x) (f y) ↔ (hypercubeHamming k).Adj x y := by
-  obtain ⟨b, d, rfl⟩ := copy_eq_subcubeCopy f
+  obtain ⟨b, d, rfl⟩ := exists_eq_subcubeCopy f
   rw [← edist_eq_one_iff_adj, ← edist_eq_one_iff_adj, edist_subcubeCopy]
 
 /-- Every copy of `Q[k]` in `Q[n]` is induced. -/

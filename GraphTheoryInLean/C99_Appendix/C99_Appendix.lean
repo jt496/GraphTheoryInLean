@@ -1,170 +1,26 @@
 import GraphTheoryInLean.Common
+import GraphTheoryInLean.C02_SimpleGraph.Exercises
 import GraphTheoryInLean.C03_Constructions.C03_Constructions
+import GraphTheoryInLean.C03_Constructions.Exercises
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidability_Finiteness_and_Degrees
 import GraphTheoryInLean.C05_Maps.C05_Maps
 import GraphTheoryInLean.C06_Cliques.C06_Cliques
 import GraphTheoryInLean.C07_Colorings.C07_Colorings
+import GraphTheoryInLean.C07_Colorings.Exercises
 import GraphTheoryInLean.C08_Walks.C08_Walks
 import GraphTheoryInLean.C09_Subgraphs.C09_Subgraphs
+import GraphTheoryInLean.C09_Subgraphs.Exercises
 import GraphTheoryInLean.C10_Connectivity.C10_Connectivity
+import GraphTheoryInLean.C10_Connectivity.Exercises
 import GraphTheoryInLean.C11_Distance.C11_Distance
+import GraphTheoryInLean.C11_Distance.Exercises
 import GraphTheoryInLean.C12_Algebraic_Graph_Theory.C12_Algebraic_Graph_Theory
+import GraphTheoryInLean.C12_Algebraic_Graph_Theory.Exercises
 import GraphTheoryInLean.C13_Theorems.C13_Theorems
+import GraphTheoryInLean.C13_Theorems.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Acyclic
 namespace SimpleGraph
 variable {V : Type*} {G : SimpleGraph V}
-
-/-!
-# References
-
-* [Albertson 1998] M. O. Albertson, “You can't paint yourself into a corner”, J.
-  Combin. Theory Ser. B **73** (1998), no. 2, 189–194.
-  <https://doi.org/10.1006/jctb.1998.1827>
-* [Andrásfai–Erdős–Sós 1974] B. Andrásfai, P. Erdős and V. T. Sós, “On the connection
-  between chromatic number, maximal clique and minimal degree of a graph”, Discrete
-  Math. **8** (1974), no. 3, 205–218. <https://doi.org/10.1016/0012-365X(74)90133-2>
-* [Behrend 1946] F. A. Behrend, “On sets of integers which contain no three terms in
-  arithmetical progression”, Proc. Nat. Acad. Sci. U.S.A. **32** (1946), no. 12,
-  331–332. <https://doi.org/10.1073/pnas.32.12.331>
-* [Berge 1957] C. Berge, “Two theorems in graph theory”, Proc. Nat. Acad. Sci. U.S.A.
-  **43** (1957), no. 9, 842–844. <https://doi.org/10.1073/pnas.43.9.842>
-* [Bondy–Chvátal 1976] J. A. Bondy and V. Chvátal, “A method in graph theory”,
-  Discrete Math. **15** (1976), no. 2, 111–135.
-  <https://doi.org/10.1016/0012-365X(76)90078-9>
-* [Brooks 1941] R. L. Brooks, “On colouring the nodes of a network”, Proc. Cambridge
-  Philos. Soc. **37** (1941), no. 2, 194–197.
-  <https://doi.org/10.1017/S030500410002168X>
-* [Cayley 1878] A. Cayley, “Desiderata and suggestions: No. 2. The theory of groups:
-  graphical representation”, Amer. J. Math. **1** (1878), no. 2, 174–176.
-  <https://doi.org/10.2307/2369306>
-* [Cayley 1889] A. Cayley, “A theorem on trees”, Quart. J. Pure Appl. Math. **23**
-  (1889), 376–378. Reprinted in The Collected Mathematical Papers XIII, 26–28.
-  <https://doi.org/10.1017/CBO9780511703799.010>
-* [de Bruijn–Erdős 1951] N. G. de Bruijn and P. Erdős, “A colour problem for infinite
-  graphs and a problem in the theory of relations”, Indag. Math. **13** (1951), no.
-  5, 371–373. <https://doi.org/10.1016/S1385-7258(51)50053-7>
-* [Diestel–Kühn 2003] R. Diestel and D. Kühn, “Graph-theoretical versus topological
-  ends of graphs”, J. Combin. Theory Ser. B **87** (2003), no. 1, 197–206.
-  <https://doi.org/10.1016/S0095-8956(02)00034-5>
-* [Dirac 1952] G. A. Dirac, “Some theorems on abstract graphs”, Proc. London Math.
-  Soc. (3) **2** (1952), no. 1, 69–81. <https://doi.org/10.1112/plms/s3-2.1.69>
-* [Erdős 1970] P. Erdős, “Turán Pál gráf tételéről” [On the graph theorem of Turán],
-  Mat. Lapok **21** (1970), 249–251. <https://www.renyi.hu/~p_erdos/1971-27.pdf>
-* [Erdős–Gallai 1960] P. Erdős and T. Gallai, “Gráfok előírt fokú pontokkal” [Graphs
-  with prescribed degrees of vertices], Mat. Lapok **11** (1960), 264–274.
-  <https://www.renyi.hu/~p_erdos/1961-05.pdf>
-* [Erdős–Ko–Rado 1961] P. Erdős, C. Ko and R. Rado, “Intersection theorems for
-  systems of finite sets”, Quart. J. Math. Oxford Ser. (2) **12** (1961), 313–320.
-  <https://doi.org/10.1093/qmath/12.1.313>
-* [Erdős–Simonovits 1966] P. Erdős and M. Simonovits, “A limit theorem in graph
-  theory”, Studia Sci. Math. Hungar. **1** (1966), 51–57.
-  <https://mathscinet.ams.org/mathscinet/relay-station?mr=0205876>
-* [Erdős–Stone 1946] P. Erdős and A. H. Stone, “On the structure of linear graphs”,
-  Bull. Amer. Math. Soc. **52** (1946), no. 12, 1087–1091.
-  <https://doi.org/10.1090/S0002-9904-1946-08715-7>
-* [Euler 1741] L. Euler, “Solutio problematis ad geometriam situs pertinentis” [The
-  solution of a problem relating to the geometry of position], Comment. Acad. Sci.
-  Petropol. **8** (1741), 128–140. Eneström E53.
-  <https://scholarlycommons.pacific.edu/euler-works/53/>
-* [Euler 1758] L. Euler, “Elementa doctrinae solidorum” [Elements of the doctrine of
-  solids], Novi Comment. Acad. Sci. Petropol. **4** (1758), 109–140. Eneström E230.
-  <https://scholarlycommons.pacific.edu/euler-works/230/>
-* [Füredi 2015] Z. Füredi, “A proof of the stability of extremal graphs, Simonovits'
-  stability from Szemerédi's regularity”, J. Combin. Theory Ser. B **115** (2015),
-  66–71. <https://doi.org/10.1016/j.jctb.2015.05.001>
-* [Gray 1953] F. Gray, “Pulse code communication”, U.S. Patent 2,632,058, 1953. Filed
-  13 November 1947. <https://patents.google.com/patent/US2632058A/en>
-* [Grötzsch 1959] H. Grötzsch, “Zur Theorie der diskreten Gebilde, VII: Ein
-  Dreifarbensatz für dreikreisfreie Netze auf der Kugel” [On the theory of discrete
-  structures, VII: A three-colour theorem for triangle-free networks on the sphere],
-  Wiss. Z. Martin-Luther-Univ. Halle-Wittenberg Math.-Natur. Reihe **8** (1959),
-  109–120. <https://mathscinet.ams.org/mathscinet/relay-station?mr=0116320>
-* [Hakimi 1962] S. L. Hakimi, “On realizability of a set of integers as degrees of
-  the vertices of a linear graph. I”, J. Soc. Indust. Appl. Math. **10** (1962), no.
-  3, 496–506. <https://doi.org/10.1137/0110037>
-* [Hall 1935] P. Hall, “On representatives of subsets”, J. London Math. Soc. **10**
-  (1935), no. 1, 26–30. <https://doi.org/10.1112/jlms/s1-10.37.26>
-* [Hamming 1950] R. W. Hamming, “Error detecting and error correcting codes”, Bell
-  System Tech. J. **29** (1950), no. 2, 147–160.
-  <https://doi.org/10.1002/j.1538-7305.1950.tb00463.x>
-* [Havel 1955] V. Havel, “Poznámka o existenci konečných grafů” [A remark on the
-  existence of finite graphs], Časopis Pěst. Mat. **80** (1955), no. 4, 477–480.
-  <https://doi.org/10.21136/CPM.1955.108220>
-* [Hierholzer 1873] C. Hierholzer, “Ueber die Möglichkeit, einen Linienzug ohne
-  Wiederholung und ohne Unterbrechung zu umfahren” [On the possibility of traversing
-  a line system without repetition and without interruption], Math. Ann. **6**
-  (1873), no. 1, 30–32. Published after his death by C. Wiener.
-  <https://doi.org/10.1007/BF01442866>
-* [Hoffman–Singleton 1960] A. J. Hoffman and R. R. Singleton, “On Moore graphs with
-  diameters 2 and 3”, IBM J. Res. Develop. **4** (1960), no. 5, 497–504.
-  <https://doi.org/10.1147/rd.45.0497>
-* [Kirchhoff 1847] G. R. Kirchhoff, “Ueber die Auflösung der Gleichungen, auf welche
-  man bei der Untersuchung der linearen Vertheilung galvanischer Ströme geführt wird”
-  [On the solution of the equations obtained from the investigation of the linear
-  distribution of galvanic currents], Ann. Phys. Chem. **72** (1847), no. 12,
-  497–508. <https://doi.org/10.1002/andp.18471481202>
-* [Kneser 1955] M. Kneser, “Aufgabe 360” [Problem 360], Jahresber. Deutsch.
-  Math.-Verein. **58** (1955), no. 2, 27. See also Martin Kneser, Collected Works,
-  Springer, 2021, 729–742. <https://doi.org/10.1007/978-3-030-81625-4_6>
-* [Kőnig 1916] D. Kőnig, “Über Graphen und ihre Anwendung auf Determinantentheorie
-  und Mengenlehre”, Math. Ann. **77** (1916), no. 4, 453–465.
-  <https://doi.org/10.1007/BF01456961>
-* [Kőnig 1927] D. Kőnig, “Über eine Schlußweise aus dem Endlichen ins Unendliche” [On
-  a mode of inference from the finite to the infinite], Acta Litt. Sci. Szeged **3**
-  (1927), 121–130. <https://acta.bibl.u-szeged.hu/13338/>
-* [Kőnig 1931] D. Kőnig, “Graphok és matrixok” [Graphs and matrices], Mat. Fiz. Lapok
-  **38** (1931), 116–119. <https://real-j.mtak.hu/7307/>
-* [Kővári–Sós–Turán 1954] T. Kővári, V. T. Sós and P. Turán, “On a problem of K.
-  Zarankiewicz”, Colloq. Math. **3** (1954), no. 1, 50–57.
-  <https://doi.org/10.4064/cm-3-1-50-57>
-* [Lovász 1975] L. Lovász, “Three short proofs in graph theory”, J. Combin. Theory
-  Ser. B **19** (1975), no. 3, 269–271.
-  <https://doi.org/10.1016/0095-8956(75)90089-1>
-* [Mantel 1907] W. Mantel, “Vraagstuk XXVIII” [Problem 28], Wiskundige Opgaven **10**
-  (1907), 60–61. Solution by H. Gouwentak, W. Mantel, J. Teixeira de Mattes, F. Schuh
-  and W. A. Wythoff. <https://zbmath.org/2643703>
-* [Menger 1927] K. Menger, “Zur allgemeinen Kurventheorie” [On the general theory of
-  curves], Fund. Math. **10** (1927), 96–115.
-  <https://doi.org/10.4064/fm-10-1-96-115>
-* [Mycielski 1955] J. Mycielski, “Sur le coloriage des graphs” [On the colouring of
-  graphs], Colloq. Math. **3** (1955), no. 2, 161–162.
-  <https://doi.org/10.4064/cm-3-2-161-162>
-* [Ore 1960] Ø. Ore, “Note on Hamilton circuits”, Amer. Math. Monthly **67** (1960),
-  no. 1, 55. <https://doi.org/10.2307/2308928>
-* [Paley 1933] R. E. A. C. Paley, “On orthogonal matrices”, J. Math. Phys. **12**
-  (1933), 311–320. <https://doi.org/10.1002/sapm1933121311>
-* [Petersen 1898] J. Petersen, “Sur le théorème de Tait” [On Tait's theorem],
-  L'Intermédiaire des Mathématiciens **5** (1898), 225–227.
-* [Pósa 1976] L. Pósa, “Hamiltonian circuits in random graphs”, Discrete Math. **14**
-  (1976), no. 4, 359–364. <https://doi.org/10.1016/0012-365X(76)90068-6>
-* [Ramsey 1930] F. P. Ramsey, “On a problem of formal logic”, Proc. London Math. Soc.
-  (2) **30** (1930), 264–286. <https://doi.org/10.1112/plms/s2-30.1.264>
-* [Roth 1953] K. F. Roth, “On certain sets of integers”, J. London Math. Soc. **28**
-  (1953), no. 1, 104–109. <https://doi.org/10.1112/jlms/s1-28.1.104>
-* [Ruzsa–Szemerédi 1978] I. Z. Ruzsa and E. Szemerédi, “Triple systems with no six
-  points carrying three triangles”, in Combinatorics (Proc. Fifth Hungarian Colloq.,
-  Keszthely, 1976), Vol. II (A. Hajnal and V. T. Sós, eds.), Colloq. Math. Soc. János
-  Bolyai 18, North-Holland, Amsterdam, 1978, pp. 939–945.
-  <https://mathscinet.ams.org/mathscinet/relay-station?mr=0519318>
-* [Szemerédi 1978] E. Szemerédi, “Regular partitions of graphs”, in Problèmes
-  combinatoires et théorie des graphes (Orsay, 1976), Colloq. Internat. CNRS 260,
-  CNRS, Paris, 1978, pp. 399–401.
-  <https://mathscinet.ams.org/mathscinet/relay-station?mr=0540024>
-* [Turán 1941] P. Turán, “Egy gráfelméleti szélsőértékfeladatról” [On an extremal
-  problem in graph theory], Mat. Fiz. Lapok **48** (1941), 436–452.
-  <https://mathscinet.ams.org/mathscinet/relay-station?mr=0018405>
-* [Tutte 1947] W. T. Tutte, “The factorization of linear graphs”, J. London Math.
-  Soc. **22** (1947), no. 2, 107–111. <https://doi.org/10.1112/jlms/s1-22.2.107>
-* [Vizing 1964] V. G. Vizing, “On an estimate of the chromatic class of a $p$-graph”
-  (in Russian), Diskret. Analiz (1964), no. 3, 25–30.
-  <https://mathscinet.ams.org/mathscinet/relay-station?mr=0180505>
-* [Whitney 1932] H. Whitney, “Congruent graphs and the connectivity of graphs”, Amer.
-  J. Math. **54** (1932), no. 1, 150–168. <https://doi.org/10.2307/2371086>
-* [Zarankiewicz 1951] K. Zarankiewicz,
-  “Problem P 101”, Colloq. Math. **2** (1951), 301.
-* [Zykov 1949] A. A. Zykov, “On some properties of linear complexes” (in Russian),
-  Mat. Sb. (N.S.) **24(66)** (1949), no. 2, 163–188. <https://eudml.org/doc/65433>
--/
 
 /-!
 # Notation
@@ -231,7 +87,8 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `hypercubeHasse`: Hasse diagram construction of the `n`-dimensional hypercube.
 * `hypercubeHamming`: Hamming cube definition of the `n`-dimensional hypercube.
 * `HypercubeVert`: recursive definition of the vertex set of the hypercube.
-* `hypercube` / `Q[n]`: recursive definition of the `n`-dimensional hypercube.
+* `hypercube` / `Q[n]`: recursive box product definition of the `n`-dimensional
+  hypercube.
 * `mycielskian` / `mμ[G]`: the Mycielskian of a graph `G`.
 * `grotzschGraph`: Grötzsch graph (i.e. `mμ[C[5]]`).
 * `mycielskian.left` / `v ₗ`: left copy of a vertex in the Mycielskian.
@@ -244,7 +101,7 @@ The following custom definitions and abbreviations are introduced in this guide:
   vertices.
 * `blowUpN` / `G[n]`: `n`-uniform blow-up of a graph `G`.
 * `kneserGraph` / `Kn[n, k]`: the Kneser graph — vertices are the `k`-element subsets
-  of `β` (or of `Fin n`), with edges joining disjoint distinct subsets.
+  of `β` (or of `Fin n`), with edges joining distinct disjoint subsets.
 * `petersenGraph`: the Petersen graph, i.e. `Kn[5, 2]`.
 
 ## Chapter 4: Decidability, Finiteness and Degrees
@@ -268,7 +125,7 @@ The following custom definitions and abbreviations are introduced in this guide:
   non-increasing order.
 * `Graphic`: predicate for a multiset being the degree multiset of some finite simple
   graph.
-* `erdosGallaiLE`: the `k`-th Erdős–Gallai inequality for a multiset of degrees.
+* `ErdosGallaiLE`: the `k`-th Erdős–Gallai inequality for a multiset of degrees.
 * `havelHakimiAux`: the Havel–Hakimi test on a non-increasing list, merging rather
   than re-sorting between rounds.
 * `havelHakimi`: decides whether a multiset of degrees is graphic via Havel–Hakimi.
@@ -284,7 +141,7 @@ The following custom definitions and abbreviations are introduced in this guide:
   is locally finite.
 
 ## Chapter 5: Maps
-* `pathNat₁Translate`: embedding of the infinite path `pathNat₁` into itself.
+* `pathNat₁.translate`: embedding of the infinite path `pathNat₁` into itself.
 * `Embedding.blowUp`: canonical embedding of a graph `G` into its blow-up.
 * `Iso.emptyGraph`: the isomorphism `emptyGraph α ≃g emptyGraph β` induced by an
   equivalence `α ≃ β`.
@@ -298,11 +155,11 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `Iso.mapMycielskian`: graph isomorphism `mμ[G] ≃g mμ[H]` induced by an isomorphism
   `G ≃g H`.
 * `IsVertexTransitive`: predicate for a graph being vertex-transitive.
-* `cycleGraphRotate`: automorphism of `C[n]` rotating the vertices modulo `n`,
+* `cycleGraph.rotate`: automorphism of `C[n]` rotating the vertices modulo `n`,
   sending `d` to `0`.
 * `HypercubeVert.xor` / `⊕ₕ`: bitwise `xor` addition on hypercube vertices.
-* `hypercubeTranslate`: automorphism of `Q[n]` by translating by a vertex.
-* `isoMycielskianCompleteTwoCycleGraphFive`: the isomorphism `mμ[K[2]] ≃g C[5]`.
+* `hypercube.translate`: automorphism of `Q[n]` by translating by a vertex.
+* `mycielskianCompleteTwoIsoCycleFive`: the isomorphism `mμ[K[2]] ≃g C[5]`.
 * `tensorProd` / `G ⊗g H`: tensor (categorical) product of two graphs, on the vertex
   type `V × W`.
 * `tensorProd.fstHom` / `tensorProd.sndHom`: the two projections out of the tensor
@@ -318,11 +175,11 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 *From the exercises:*
 
-* `pathGraphEmbedding`: embedding of a path graph `P[n]` into a longer path
+* `pathGraph.embedding`: embedding of a path graph `P[n]` into a longer path
   `P[n + k]`.
 * `Embedding.mapBlowUp`: embedding of `G` into the blow-up `H.blowUpGraph W` given
   `G ↪g H` and nonempty parts.
-* `hypercubeEmbedding`: embedding of `Q[n]` into `Q[n + k]` by iterating
+* `hypercube.embedding`: embedding of `Q[n]` into `Q[n + k]` by iterating
   `hypercube.embedFalse`.
 * `hypercubeTwoIsoCycleFour`: the Gray-code isomorphism `Q[2] ≃g C[4]`.
 
@@ -338,10 +195,10 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `completeBipartiteGraph.bicoloring`: the natural `Bool`-colouring of
   `completeBipartiteGraph V W` (`true` on the right part); a correctly named alias of
   Mathlib's `CompleteBipartiteGraph.bicoloring`.
-* `boxProdColoringLeft` / `boxProdColoringRight`: the colourings of `G` and `H`
+* `Coloring.ofBoxProdLeft` / `Coloring.ofBoxProdRight`: the colourings of `G` and `H`
   obtained by restricting a colouring of `G □ H` along a fixed vertex of the other
   factor.
-* `boxProdColoring`: the `k`-colouring `(v, w) ↦ C₁ v + C₂ w` (addition modulo `k`)
+* `Coloring.boxProd`: the `k`-colouring `(v, w) ↦ C₁ v + C₂ w` (addition modulo `k`)
   of `G □ H` built from `k`-colourings of `G` and `H`.
 * `HypercubeVert.bool`: the parity (`Bool.xor` of the coordinates) of a hypercube
   vertex, used as a `Bool`-valued colour.
@@ -364,7 +221,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `greedyColoringNat`: `greedy` bundled as a `G.Coloring ℕ` for `G : SimpleGraph ℕ`.
 * `crownGraph`: the complete bipartite graph on the even and odd naturals minus the
   perfect matching `2 * n ↦ 2 * n + 1`.
-* `crownGraph.twoColoring`: the natural `2`-colouring of `crownGraph` by parity.
+* `crownGraph.bicoloring`: the natural `Bool`-colouring of `crownGraph` by parity.
 * `encodeMap`: a graph on an encodable vertex type transported to `ℕ` via
   `SimpleGraph.map`; its adjacency involves existential quantifiers.
 * `SimpleGraph.encode`: a graph on an encodable vertex type transported to a graph on
@@ -388,23 +245,21 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 *From the exercises:*
 
-* `kneserColoring`: the explicit `(n - 2 * k + 2)`-colouring of the Kneser graph
-  `Kn[n, k]` by least element.
+* `kneserGraph.coloring`: the explicit `(n - 2 * k + 2)`-colouring of the Kneser
+  graph `Kn[n, k]` by least element.
 * `starNat`: the infinite star on `ℕ`, in which `0` is adjacent to every other
   vertex.
 
 ## Chapter 8: Walks
-* `Walk.pathNat₁Walk`: walk on the infinite path from `i` to `i + j`.
-* `Walk.pathGraphWalk`: walk along the finite path graph `P[n + 1]` from `0` to
+* `pathNat₁.path`: walk on the infinite path from `i` to `i + j`.
+* `pathGraph.path`: walk along the finite path graph `P[n + 1]` from `0` to
   `Fin.last n`.
-* `Walk.cycleGraphCycle`: walk once around `C[n + 3]`, built by transferring
-  `pathGraphWalk` and closing it with the wrap-around edge.
 * `HypercubeVert.hammingPath`: path between two hypercube vertices.
 * `HypercubeVert.hammingDist`: Hamming distance between two hypercube vertices
   (number of differing coordinates).
 * `HypercubeVert.grayStart` / `HypercubeVert.grayEnd`: start and end vertices of the
   Gray code walk.
-* `Walk.grayWalk`: Gray code walk on `Q[n]`.
+* `hypercube.grayPath`: Gray code walk on `Q[n]`.
 * `Walk.mycielskianAux`: auxiliary zig-zag walk in `mμ[G]`.
 * `Walk.mycielskian`: walk in `mμ[G]` constructed from a walk in `G` (`protected`, to
   coexist with the graph constructor `mycielskian`).
@@ -426,14 +281,14 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 *From the exercises:*
 
-* `Walk.grayCycle`: Gray code Hamiltonian cycle in `Q[n + 2]`.
+* `hypercube.grayCycle`: Gray code Hamiltonian cycle in `Q[n + 2]`.
 * `chordedC5`: `C[5]` with the two chords `0 — 2` and `0 — 3`, a graph that is not
   an Ore graph but whose closure is complete.
 * `Walk.IsMaximumPath`: a *maximum-length* path — a path such that no path in `G` is
   longer.
 
 ## Chapter 9: Subgraphs
-* `Subgraph.mycielskianSubgraph`: lift of a subgraph in `G` to a subgraph in `mμ[G]`.
+* `Subgraph.mycielskianLeft`: lift of a subgraph in `G` to a subgraph in `mμ[G]`.
 * `matchingNum` / `ν G`: matching number of `G` (in `ℕ∞`, mirroring
   `SimpleGraph.vertexCoverNum`), the maximum number of edges in a matching of `G`.
 * `Subgraph.boxProdLeft`: a subgraph `M` of `G` copied into every `G`-fibre of
@@ -444,17 +299,18 @@ The following custom definitions and abbreviations are introduced in this guide:
   `x ᵣ — y ₗ` for each edge `x — y` of a subgraph of `G`.
 * `Subgraph.mycielskianDoubleDartEmbedding`: embedding of the darts of a subgraph
   into the edge set of its Mycielskian double.
-* `ColoringOn`: proper colouring of a subgraph induced by a subset of vertices.
-* `ColorableOn`: predicate for a subset of vertices being colourable.
+* `ColoringOn`: colouring of every vertex of `G` that need only be proper on the
+  edges of `G` with both ends in `s`.
+* `ColorableOn`: predicate for the existence of a `G.ColoringOn (Fin n) s`.
 * `ColoringOn.restrict`: restriction of a `G.ColoringOn γ s` to any `t ⊆ s`.
 * `ColoringOn.copy`: transport a `G.ColoringOn γ s` along a proof that `s = t`.
 * `ColoringOn.toColoring`: a `G.ColoringOn γ Set.univ` is a `G.Coloring γ`.
 * `Coloring.toColoringOn`: the `ColoringOn` of a set `s` induced by a colouring of
   the whole graph.
-* `coloringOnEmpty`: the colouring of the empty set of vertices by a given colour
+* `ColoringOn.empty`: the colouring of the empty set of vertices by a given colour
   `c`.
-* `coloringOnOfSingleton`: colouring of `{a}` by any colour `c`.
-* `coloringOnOfNotAdj`: colouring of `{a, b}` by a single colour `c` when
+* `ColoringOn.singleton`: colouring of `{a}` by any colour `c`.
+* `ColoringOn.ofNotAdj`: colouring of `{a, b}` by a single colour `c` when
   `¬ G.Adj a b`.
 * `ColoringOn.union`: combination of compatible colourings of `s` and `t` into a
   colouring of `s ∪ t`.
@@ -521,7 +377,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 ## Chapter 12: Algebraic Graph Theory
 * `Iso.autCongr`: transport of the automorphism group of a graph along an
   isomorphism.
-* `cycleGraphReflect`: automorphism of `C[n]` reflecting the vertices (`k ↦ -k`).
+* `cycleGraph.reflect`: automorphism of `C[n]` reflecting the vertices (`k ↦ -k`).
 * `autCycleGraphMulEquivDihedral`: the automorphism group of `C[n + 3]` is isomorphic
   to `DihedralGroup (n + 3)`.
 * `autHypercubeTwoMulEquivDihedral`: the automorphism group of `Q[2]` is isomorphic
@@ -532,14 +388,16 @@ The following custom definitions and abbreviations are introduced in this guide:
   `HypercubeVert n` and `Fin n → Bool`, via `Fin.snoc`.
 * `hypercubeIsoHamming`: the hypercube `Q[n]` is isomorphic to the Hamming cube
   `hypercubeHamming n`.
-* `hammingTranslate` / `hammingPermute`: translation by a fixed vector (pointwise
-  `xor`) and coordinate permutation as automorphisms of the Hamming cube.
-* `hammingPhi`: the action of `Equiv.Perm (Fin n)` on translation vectors by
-  permuting coordinates.
-* `hyperoctahedralGroup`: the hyperoctahedral group `(ℤ/2)ⁿ ⋊ Sₙ`, i.e. the wreath
+* `hypercubeHamming.translate` / `hypercubeHamming.permute`: translation by a fixed
+  vector (pointwise `xor`) and coordinate permutation as automorphisms of the Hamming
+  cube.
+* `hyperoctahedralAction`: the action of `Equiv.Perm (Fin n)` on translation vectors
+  by permuting coordinates.
+* `HyperoctahedralGroup`: the hyperoctahedral group `(ℤ/2)ⁿ ⋊ Sₙ`, i.e. the wreath
   product `ℤ/2 ≀ Sₙ`, as a semidirect product.
-* `hammingTranslateHom` / `hammingPermuteHom`: translations and coordinate
-  permutations as monoid homs into the automorphism group of the Hamming cube.
+* `hypercubeHamming.translateHom` / `hypercubeHamming.permuteHom`: translations and
+  coordinate permutations as monoid homs into the automorphism group of the Hamming
+  cube.
 * `hyperoctahedralToAut`: the homomorphism from the hyperoctahedral group to the
   automorphisms of the Hamming cube.
 * `hyperoctahedralMulEquivAutHamming`: the automorphism group of the Hamming cube is
@@ -631,10 +489,12 @@ its exercises:
 * `IsRegularOfDegree.two_mul_card_edgeFinset` / `IsRegularOfDegree.card_edgeFinset`:
   a `d`-regular graph on `n` vertices has `d * n / 2` edges.
 * `card_hypercubeVert`: the hypercube `Q[n]` has `2 ^ n` vertices.
-* `hypercube_isRegularOfDegree`: the hypercube `Q[n]` is `n`-regular.
+* `IsRegularOfDegree.hypercube`: the hypercube `Q[n]` is `n`-regular.
 * `card_edgeFinset_hypercube`: the hypercube `Q[n]` has `n * 2 ^ (n - 1)` edges.
 * `degree_mycielskian_left`: the degree of a left vertex `v ₗ` of the Mycielskian is
   twice the degree of `v`.
+* `Graphic.exists_card_eq`: a graphic multiset `m` is the degree multiset of a graph
+  with exactly `m.card` vertices.
 * `graphic_degreeMultiset` / `graphic_degreeSequence`: the degree multiset, and
   degree sequence, of a finite simple graph are graphic.
 * `degree_coneGraph_none`: the new vertex of `coneGraph H s` has degree `s.card`, a
@@ -656,8 +516,8 @@ its exercises:
   `coneGraph H s`, and its degree multiset.
 
 ## Chapter 5: Maps (Results)
-* `isRegular_of_isVertexTransitive`: a locally finite vertex-transitive graph is
-  regular.
+* `IsVertexTransitive.exists_isRegularOfDegree`: a locally finite vertex-transitive
+  graph is regular.
 * `isVertexTransitive_top`: the complete graph is vertex-transitive.
 * `isVertexTransitive_cycleGraph`: the cycle graph `C[n]` is vertex-transitive.
 * `isVertexTransitive_hypercube`: the hypercube `Q[n]` is vertex-transitive.
@@ -681,6 +541,9 @@ its exercises:
   needed).
 * `CliqueFree.cliqueNum_le`: an `(n + 1)`-clique-free graph has clique number at most
   `n`.
+* `IsNClique.cliqueNum_eq_of_cliqueFree` /
+  `IsNIndepSet.indepNum_eq_of_indepSetFree`: a graph with an `n`-clique but no
+  `(n + 1)`-clique has `ω G = n`, and likewise for independent sets and `⍺ G`.
 * `degree_le_indepNum_of_triangleFree`: in a finite triangle-free graph every vertex
   has degree at most `⍺ G`.
 * `indepNum_kneserGraph`: the independence number of `Kn[n, k]` (for `k ≠ 0`) is
@@ -688,6 +551,9 @@ its exercises:
   Erdős–Ko–Rado theorem.
 * `CliqueFree.mycielskian`: the Mycielskian of a triangle-free graph is
   triangle-free.
+* `CliqueFree.iterMycielskian` /
+  `cliqueFree_three_iterMycielskian_completeGraph_two`: the iterated Mycielskians of
+  a triangle-free graph are triangle-free; in particular so is every `mμ^n K[2]`.
 * `IsNClique.mycielskian`: the Mycielskian embedding maps `k`-cliques in `G` to
   `k`-cliques in `mμ[G]`.
 * `mycielskian_none_notMem_clique`: the apex `none` does not belong to any
@@ -726,12 +592,12 @@ its exercises:
 * `Colorable.sup_of_isClique_inter` / `Colorable.sup_of_subsingleton_inter`:
   colourings of `G₁` and `G₂` from a common palette amalgamate to a colouring of
   `G₁ ⊔ G₂` when the supports meet in a clique (in particular in at most one vertex).
-* `blowUpGraph_colorable_iff`: a blow-up of `G` with nonempty parts is `k`-colourable
+* `colorable_blowUpGraph_iff`: a blow-up of `G` with nonempty parts is `k`-colourable
   iff `G` is.
 * `Colorable.boxProd` / `colorable_boxProd_iff` / `chromaticNumber_boxProd`:
   `G □ H` is `k`-colourable when both factors are (iff, for nonempty `G` and
   `H`), and `χ (G □ H) = max (χ G) (χ H)` for nonempty `G` and `H`.
-* `hypercube_isBipartite` / `hypercube_cliqueFree_three`: the hypercube `Q[n]` is
+* `IsBipartite.hypercube` / `cliqueFree_hypercube_three`: the hypercube `Q[n]` is
   bipartite, hence triangle-free.
 * `colorable_mycielskian_succ_iff`: `G` is `k`-colourable iff `mμ[G]` is
   `(k + 1)`-colourable.
@@ -750,10 +616,10 @@ its exercises:
 * `colorable_of_degreeLT_le`: *the greedy bound* for graphs on `ℕ`: if every vertex
   has at most `Δ` earlier neighbours then the graph is
   `(Δ + 1)`-colourable.
-* `crownGraph_neighborLTFinset` / `greedy_crownGraph_eq`: in `crownGraph` the earlier
+* `neighborLTFinset_crownGraph` / `greedy_crownGraph_eq`: in `crownGraph` the earlier
   neighbours of `n` are the `n / 2` vertices of the other parity below `n`, and the
   greedy colouring colours `n` with `n / 2`, the worst possible.
-* `encode_degreeLT_le`: `degreeLT` of an encoded vertex is at most the degree of the
+* `degreeLT_encode_le`: `degreeLT` of an encoded vertex is at most the degree of the
   original vertex.
 * `colorable_of_degree_le_of_countable`: a locally finite graph on a countable vertex
   type with all degrees at most `Δ` is `(Δ + 1)`-colourable.
@@ -774,18 +640,14 @@ its exercises:
 * `Walk.IsEulerian.even_degree_iff'`: Mathlib's `even_degree_iff` (in a graph with an
   Eulerian trail every vertex has even degree, except the endpoints of a non-closed
   trail) without `Fintype V`, needing only a finite neighbour set.
-* `Walk.cycleGraphCycle_isHamiltonianCycle`: the walk once around `C[n + 3]` is a
-  Hamiltonian cycle.
-* `cycleGraph_isHamiltonian`: the cycle graph `C[n + 3]` is Hamiltonian.
-* `top_isHamiltonian`: the complete graph on at least three vertices is Hamiltonian.
-* `HypercubeVert.hammingPath_isPath` / `HypercubeVert.length_hammingPath`: the
+* `HypercubeVert.isPath_hammingPath` / `HypercubeVert.length_hammingPath`: the
   Hamming walk between any two vertices in `Q[n]` is a path of length equal to their
   Hamming distance.
-* `Walk.grayWalk_isHamiltonian`: the Gray code walk on `Q[n]` is Hamiltonian.
+* `hypercube.isHamiltonian_grayPath`: the Gray code walk on `Q[n]` is Hamiltonian.
 * `isCycle_mycielskianClosed_of_adj`: every edge of `G` gives a `5`-cycle in `mμ[G]`.
 * `IsHamiltonian.mycielskian`: if `G` is Hamiltonian and does not have exactly one
   vertex, then its Mycielskian `mμ[G]` is Hamiltonian.
-* `Walk.IsPath.posaRotate` / `Walk.IsPath.posaClosed_isCycle`: a Pósa rotation of a
+* `Walk.IsPath.posaRotate` / `Walk.IsPath.isCycle_posaClosed`: a Pósa rotation of a
   path is again a path; closing a path of length at least two at a crossing pair
   yields a cycle.
 * `Walk.IsMaximalPath.exists_crossing_index`: pigeonhole counting — a maximal path
@@ -798,12 +660,13 @@ its exercises:
 * `Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges`: a Hamiltonian
   cycle through an edge `u — v` can be cut open into a Hamiltonian walk from `u` to
   `v` avoiding `u — v`.
-* `sup_edge_isHamiltonian_iff`: joining a non-adjacent pair with degree sum at
+* `isHamiltonian_sup_edge_iff`: joining a non-adjacent pair with degree sum at
   least `|V|` does not change whether the graph is Hamiltonian.
-* `closureStep_isHamiltonian_iff`: a round of the closure process does not change
+* `isHamiltonian_closureStep_iff`: a round of the closure process does not change
   whether the graph is Hamiltonian.
-* `closure_isHamiltonian_iff`: the Bondy–Chvátal theorem — a graph is Hamiltonian iff
+* `isHamiltonian_closure_iff`: the Bondy–Chvátal theorem — a graph is Hamiltonian iff
   its closure is.
+* `le_closure`: `G ≤ G.closure`, i.e. forming the closure only adds edges.
 * `isClosed_closure`: the closure is closed — no eligible pair remains in it.
 * `closure_min`: the closure is below every closed graph above `G`, hence is the
   *least* closed supergraph — independent of the order in which eligible pairs are
@@ -822,14 +685,12 @@ its exercises:
 
 *From the exercises:*
 
-* `cycleGraph_isHamiltonian_iff` / `completeGraph_isHamiltonian_iff`: `C[n]` and
-  `K[n]` are Hamiltonian iff `n ≠ 0` and `n ≠ 2`.
 * `HypercubeVert.hammingDist_comm`: the Hamming distance on the hypercube is
   symmetric.
-* `Walk.grayCycle_isHamiltonianCycle`: closing the Gray code walk yields a
+* `hypercube.isHamiltonianCycle_grayCycle`: closing the Gray code walk yields a
   Hamiltonian cycle in `Q[n + 2]`.
-* `hypercube_isHamiltonian`: the hypercube `Q[n]` is Hamiltonian for `n ≠ 1`.
-* `Walk.IsHamiltonian.posaClosed_isHamiltonianCycle`: closing a Hamiltonian path via
+* `isHamiltonian_hypercube`: the hypercube `Q[n]` is Hamiltonian for `n ≠ 1`.
+* `Walk.IsHamiltonian.isHamiltonianCycle_posaClosed`: closing a Hamiltonian path via
   a Pósa rotation yields a Hamiltonian cycle.
 * `Walk.IsMaximumPath.isMaximalPath`: a maximum-length path is in particular a
   maximal path, so the chapter's closing construction applies to it.
@@ -878,7 +739,7 @@ its exercises:
 * `Connected.card_connectedComponent` / `connected_iff_card_connectedComponent`: a
   graph is connected iff it has exactly one connected component (counted with
   `Nat.card`, so with no finiteness assumption).
-* `hypercube_connected`: the `n`-dimensional hypercube is connected.
+* `connected_hypercube`: the `n`-dimensional hypercube is connected.
 * `connected_mycielskian_iff`: the Mycielskian `mμ[G]` is connected iff `G` has no
   isolated vertices.
 * `isBridge_mycielskian_iff`: the bridges of `mμ[G]` are the edges `none — u ᵣ` with
@@ -889,7 +750,7 @@ its exercises:
   most `2`, every cycle passes through every vertex of its component, and as a
   subgraph is equal to that component, so in a connected such graph every cycle is a
   Hamiltonian cycle.
-* `pathNat₁_connected` / `pathNat₁_isAcyclic` / `pathNat₁_isTree`: the infinite path
+* `connected_pathNat₁` / `isAcyclic_pathNat₁` / `isTree_pathNat₁`: the infinite path
   on `ℕ` is a tree (so every edge is a bridge).
 * `Walk.exists_isEulerian_circuit`: Euler's theorem, existence direction (in a graph
   with finitely many edges, if all edges lie in one component and every vertex has
@@ -897,8 +758,16 @@ its exercises:
 * `Walk.exists_isEulerian_trail_of_two_odd`: in a graph with finitely many edges, if
   all edges lie in one component and exactly two vertices `a ≠ b` have odd degree,
   there is an Eulerian trail from `a` to `b`.
+* `Connected.exists_isEulerian_circuit` / `Connected.exists_isEulerian_trail`: the
+  same two results for a connected graph, the form in which Euler's theorem is
+  usually stated.
+* `Walk.exists_isEulerian_iff`: Euler's theorem in full — a finite graph with at
+  least one vertex has an Eulerian trail iff all its edges lie in one component and
+  it has either no vertex of odd degree or exactly two.
 * `isVertexConnected_iff_induce`: `G` is `k`-vertex-connected iff it has more than
   `k` vertices and `G.induce Sᶜ` is preconnected whenever `S.encard < k`.
+* `IsVertexConnected.isEdgeConnected`: a `k`-vertex-connected graph is
+  `k`-edge-connected.
 * `vertexConnectivity_le_edgeConnectivity`: `κ(G) ≤ λ(G)` for every
   graph.
 * `brooks_two`: Brooks' theorem for `Δ = 2`, a graph of maximum degree at most `2` is
@@ -922,7 +791,7 @@ its exercises:
   at least `k`.
 * `IsVertexConnected.boxProd_top_bool`: if `G` is connected and `k`-vertex-connected
   then `G □ K₂` is `(k + 1)`-vertex-connected.
-* `hypercube_isVertexConnected` / `hypercube_isEdgeConnected`: the `n`-dimensional
+* `isVertexConnected_hypercube` / `isEdgeConnected_hypercube`: the `n`-dimensional
   hypercube is `n`-vertex-connected and `n`-edge-connected.
 * `edgeConnectivity_le_minDegree`: `λ(G) ≤ δ(G)` for a finite graph
   with at least two vertices (completing Whitney's inequalities).
@@ -961,8 +830,9 @@ its exercises:
   girth at least `k + 1`.
 * `cliqueFree_three_iff_free_cycleGraph`: a graph is triangle-free iff it contains no
   copy of `C[3]`.
-* `four_le_egirth_of_cliqueFree_three` / `five_le_egirth`: a triangle-free graph has
-  girth at least `4`, and at least `5` if it also has no `4`-cycle.
+* `four_le_egirth_of_cliqueFree_three` /
+  `five_le_egirth_of_cliqueFree_three_of_free`: a triangle-free graph has girth at
+  least `4`, and at least `5` if it also has no `4`-cycle.
 * `egirth_cycleGraph` / `ediam_cycleGraph`: the cycle graph `C[n + 3]` has girth
   `n + 3` and diameter `(n + 3) / 2`.
 * `egirth_completeBipartiteGraph`: the complete bipartite graph `K[s + 2, t + 2]` has
@@ -976,6 +846,8 @@ its exercises:
   `G.edist r a + G.edist r b + 2`.
 * `moore_bound` / `moore_bound_of_radius_le`: the Moore bound on the order of a graph
   of maximum degree at most `d + 1` and diameter (or radius) at most `k`.
+* `finite_of_eccent_le`: a locally finite graph with a vertex of finite eccentricity
+  is finite.
 * `cage_bound_odd` / `cage_bound_even`: the cage bounds on the order of a graph of
   minimum degree at least `d + 1` and girth at least `2 * k + 1` (resp. `2 * k`).
 * `ediam_petersenGraph` / `egirth_petersenGraph`: the Petersen graph has diameter `2`
@@ -1008,7 +880,7 @@ its exercises:
   `ψ * ξ`, where `φ` and `ψ` are the golden ratio and its conjugate.
 * `IsRegularOfDegree.finrank_eigenspace_adjMatrix`: in a `d`-regular graph the
   multiplicity of the eigenvalue `d` is the number of connected components.
-* `petersenGraph_isSRGWith`: the Petersen graph is strongly regular with parameters
+* `IsSRGWith.petersenGraph`: the Petersen graph is strongly regular with parameters
   `(10, 3, 0, 1)`.
 * `HypercubeVert.hammingDist_equivPi`: `HypercubeVert.equivPi` identifies
   `HypercubeVert.hammingDist` with Mathlib's `hammingDist`.

@@ -415,7 +415,7 @@ A graph `G` is `n`-colourable iff every blow-up of `G` with nonempty parts is
 nonempty); in the other we compose with the projection `Sigma.fst`, which is a
 homomorphism from the blow-up to `G`.
 -/
-lemma blowUpGraph_colorable_iff {n : ℕ} {ι : Type*} {W : ι → Type*}
+lemma colorable_blowUpGraph_iff {n : ℕ} {ι : Type*} {W : ι → Type*}
     (G : SimpleGraph ι) (f : ∀ i, W i) :
     (G.blowUpGraph W).Colorable n ↔ G.Colorable n :=
   ⟨fun h => h.of_hom (Embedding.blowUp G W f).toHom,
@@ -441,12 +441,12 @@ colouring of the other factor with the same colours: `v ↦ C (v, w₀)` colours
 `w ↦ C (v₀, w)` colours `H`.
 -/
 /-- The colouring of `G` induced by a colouring of `G □ H`. -/
-def boxProdColoringLeft {α : Type*} (C : (G □ H).Coloring α) (w : W) :
+def Coloring.ofBoxProdLeft {α : Type*} (C : (G □ H).Coloring α) (w : W) :
     G.Coloring α :=
   C.comp <| boxProdLeft G H w
 
 /-- The colouring of `H` induced by a colouring of `G □ H`. -/
-def boxProdColoringRight {α : Type*} (C : (G □ H).Coloring α) (v : V) :
+def Coloring.ofBoxProdRight {α : Type*} (C : (G □ H).Coloring α) (v : V) :
     H.Coloring α :=
   C.comp <| boxProdRight G H v
 
@@ -459,7 +459,7 @@ because the colouring of the other factor is valid. (In the proof we need to
 use `add_left/right_inj` in the final `simpa`s. These require `NeZero k`.)
 -/
 /-- The `k`-colouring of `G □ H` induced by `k`-colourings of `G` and `H`. -/
-def boxProdColoring {k : ℕ} (C₁ : G.Coloring (Fin k)) (C₂ : H.Coloring (Fin k)) :
+def Coloring.boxProd {k : ℕ} (C₁ : G.Coloring (Fin k)) (C₂ : H.Coloring (Fin k)) :
     (G □ H).Coloring (Fin k) :=
   Coloring.mk (fun x => C₁ x.1 + C₂ x.2) <| by
     rintro ⟨v, w⟩ ⟨v', w'⟩ (⟨hadj, rfl⟩ | ⟨hadj, rfl⟩)
@@ -471,7 +471,7 @@ def boxProdColoring {k : ℕ} (C₁ : G.Coloring (Fin k)) (C₂ : H.Coloring (Fi
 /-- If `G` and `H` are both `k`-colourable then so is `G □ H`. -/
 theorem Colorable.boxProd {k : ℕ} (h₁ : G.Colorable k) (h₂ : H.Colorable k) :
     (G □ H).Colorable k :=
-  ⟨boxProdColoring h₁.some h₂.some⟩
+  ⟨Coloring.boxProd h₁.some h₂.some⟩
 
 /-!
 Combining this with the restricted colourings above, if `G` and `H` are both nonempty
@@ -481,8 +481,8 @@ when `G` is not.)
 -/
 theorem colorable_boxProd_iff [Nonempty V] [Nonempty W] {k : ℕ} :
     (G □ H).Colorable k ↔ G.Colorable k ∧ H.Colorable k :=
-  ⟨fun ⟨C⟩ => ⟨⟨boxProdColoringLeft C (Classical.arbitrary W)⟩,
-      ⟨boxProdColoringRight C (Classical.arbitrary V)⟩⟩,
+  ⟨fun ⟨C⟩ => ⟨⟨Coloring.ofBoxProdLeft C (Classical.arbitrary W)⟩,
+      ⟨Coloring.ofBoxProdRight C (Classical.arbitrary V)⟩⟩,
    fun h => h.1.boxProd h.2⟩
 
 /-!
@@ -514,7 +514,7 @@ Recall that `Q[n + 1]` is defined to be `Q[n] □ ⊤`, where `⊤` is the compl
 on `Bool`. So `Colorable.boxProd` and induction on `n` show at once that every
 hypercube is bipartite: `Q[0]` has no edges, and `⊤` on `Bool` is `2`-colourable.
 -/
-lemma hypercube_isBipartite (n : ℕ) : Q[n].IsBipartite := by
+lemma IsBipartite.hypercube (n : ℕ) : Q[n].IsBipartite := by
   induction n with
   | zero => exact ⟨Coloring.mk (fun _ => 0) (by simp [hypercube_zero])⟩
   | succ n ih => exact ih.boxProd (⊤ : SimpleGraph Bool).colorable_of_fintype
@@ -535,8 +535,8 @@ def HypercubeVert.bool : {n : ℕ} → HypercubeVert n → Bool
 /-!
 This is a valid colouring.
 -/
-lemma HypercubeVert.bool_valid {n : ℕ} {v w : HypercubeVert n} (h : Q[n].Adj v w) :
-    HypercubeVert.bool v ≠ HypercubeVert.bool w := by
+lemma HypercubeVert.bool_ne_of_adj {n : ℕ} {v w : HypercubeVert n}
+    (h : Q[n].Adj v w) : HypercubeVert.bool v ≠ HypercubeVert.bool w := by
   induction n with
   | zero => cases h
   | succ n ih =>
@@ -545,7 +545,7 @@ lemma HypercubeVert.bool_valid {n : ℕ} {v w : HypercubeVert n} (h : Q[n].Adj v
 
 /-- The natural `Bool`-colouring of the hypercube `Q[n]`. -/
 def hypercube.bicoloring (n : ℕ) : Q[n].Coloring Bool :=
-  ⟨HypercubeVert.bool, HypercubeVert.bool_valid⟩
+  ⟨HypercubeVert.bool, HypercubeVert.bool_ne_of_adj⟩
 
 /-!
 The hypercube is bipartite with the two parts being the sets of vertices with `bool`
@@ -556,14 +556,14 @@ example (n : ℕ) : Q[n].IsBipartiteWith {v | v.bool} {v | ¬ v.bool} where
     rw [Set.disjoint_iff_inter_eq_empty]
     ext; simp
   mem_of_adj {u v} h := by
-    have := HypercubeVert.bool_valid h
+    have := HypercubeVert.bool_ne_of_adj h
     by_cases u.bool <;> simp_all
 
 /-!
 Bipartite graphs are `3`-clique-free, hence `Q[n]` is `3`-clique-free.
 -/
-lemma hypercube_cliqueFree_three (n : ℕ) : Q[n].CliqueFree 3 :=
-  (hypercube_isBipartite _).cliqueFree (by decide)
+lemma cliqueFree_hypercube_three (n : ℕ) : Q[n].CliqueFree 3 :=
+  (IsBipartite.hypercube _).cliqueFree (by decide)
 
 /-!
 The `Bool`-colouring of `Q[4]` using `HypercubeVert.bool`.
@@ -788,14 +788,14 @@ end mycielskian_and_edges
 
 /-!
 Vizing's theorem
-[Vizing 1964](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-vizing-1964)
+[Vizing 1964](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-vizing-1964)
 says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for every finite graph
 `G`, and Kőnig's line colouring theorem
-[Kőnig 1916](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-konig-1916) says
-that `χ'(G) = Δ(G)` for every finite bipartite graph `G`. Neither is in Mathlib yet.
-The greedy bound of the next section, applied to `L[G]`, whose vertices have degree
-at most `2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib is
-also missing many other standard topics of colouring theory such as chromatic
+[Kőnig 1916](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-konig-1916)
+says that `χ'(G) = Δ(G)` for every finite bipartite graph `G`. Neither is in Mathlib
+yet. The greedy bound of the next section, applied to `L[G]`, whose vertices have
+degree at most `2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib
+is also missing many other standard topics of colouring theory such as chromatic
 polynomials and list colourings.)
 
 # Greedy Colouring *
@@ -1095,7 +1095,7 @@ and will prove it below.
 #eval crownGraph.neighborLTFinset 6 -- {1, 3, 5}
 #eval crownGraph.neighborLTFinset 11 -- {0, 2, 4, 6, 8}
 
-lemma crownGraph_neighborLTFinset (n : ℕ) :
+lemma neighborLTFinset_crownGraph (n : ℕ) :
     crownGraph.neighborLTFinset n = (range (n / 2)).image
         (fun k => if n % 2 = 0 then 2 * k + 1 else 2 * k) := by
   ext m
@@ -1105,15 +1105,16 @@ lemma crownGraph_neighborLTFinset (n : ℕ) :
     exact ⟨m / 2, by grind⟩
   · grind
 
-/-- The natural `2`-colouring of the `crownGraph`. -/
-def crownGraph.twoColoring : crownGraph.Coloring (Fin 2) where
-  toFun n := ⟨n % 2, by grind⟩
-  map_rel' h := by simp_all
+/-- The natural `Bool`-colouring of the `crownGraph`, by parity. -/
+def crownGraph.bicoloring : crownGraph.Coloring Bool where
+  toFun n := n % 2 = 0
+  map_rel' h := by
+    grind [crownGraph_adj, top_adj]
 
 /-!
 Colouring each vertex by its parity shows that `crownGraph` is bipartite.
 -/
-example : crownGraph.IsBipartite := crownGraph.twoColoring.colorable
+example : crownGraph.IsBipartite := crownGraph.bicoloring.colorable
 
 /-!
 The greedy colouring of `crownGraph` colours vertex `n` with colour `n / 2`. Given
@@ -1130,7 +1131,7 @@ theorem greedy_crownGraph_eq (n : ℕ) :
   -- by induction the earlier neighbours of `n` use exactly the colours `< n / 2`
   refine crownGraph.greedy_eq_of_image_eq_range ?_
   ext c
-  simp only [crownGraph_neighborLTFinset, mem_image, mem_range]
+  simp only [neighborLTFinset_crownGraph, mem_image, mem_range]
   grind
 
 /-!
@@ -1230,7 +1231,7 @@ We need a couple of simple lemmas. Firstly the earlier neighbourhood of an encod
 vertex in the encoded graph is contained in the image of the neighbourhood of that
 vertex in the original graph under the encoding.
 -/
-lemma encode_neighborLTFinset_subset {G : SimpleGraph V} [DecidableRel G.Adj]
+lemma neighborLTFinset_encode_subset {G : SimpleGraph V} [DecidableRel G.Adj]
     [G.LocallyFinite] (v : V) : G.encode.neighborLTFinset (encode v)
       ⊆ (G.neighborFinset v).image encode := by
   intro m hm
@@ -1245,10 +1246,10 @@ lemma encode_neighborLTFinset_subset {G : SimpleGraph V} [DecidableRel G.Adj]
 Hence the `degreeLT` of an encoded vertex is at most the degree of the original
 vertex.
 -/
-lemma encode_degreeLT_le {G : SimpleGraph V} [DecidableRel G.Adj] [G.LocallyFinite]
+lemma degreeLT_encode_le {G : SimpleGraph V} [DecidableRel G.Adj] [G.LocallyFinite]
     (v : V) : G.encode.degreeLT (encode v) ≤ G.degree v := by
   rw [degreeLT, degree]
-  exact (card_le_card (encode_neighborLTFinset_subset v)).trans card_image_le
+  exact (card_le_card (neighborLTFinset_encode_subset v)).trans card_image_le
 
 /-!
 Using these lemmas we can now give the greedy `(Δ + 1)`-colouring of a graph with
@@ -1262,7 +1263,7 @@ have finite neighbourhoods using `G.LocallyFinite` and a bound `Δ : ℕ` such t
 def greedyColoringFin {Δ : ℕ} {G : SimpleGraph V} [DecidableRel G.Adj]
     [G.LocallyFinite] (hdeg : ∀ v, G.degree v ≤ Δ) : G.Coloring (Fin (Δ + 1)) where
   toFun v := ⟨G.encode.greedy (encode v), by
-    grind [G.encode_degreeLT_le v, G.encode.greedy_lt (encode v)]⟩
+    grind [G.degreeLT_encode_le v, G.encode.greedy_lt (encode v)]⟩
   map_rel' h := Fin.ne_of_val_ne ((Embedding.encode G).map_rel_iff.mpr h).greedy_ne
 
 end encode

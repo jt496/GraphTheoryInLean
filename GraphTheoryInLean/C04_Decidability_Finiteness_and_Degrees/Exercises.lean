@@ -190,7 +190,7 @@ lemma minDegree_mycielskian_of_one_le' [Fintype V] [DecidableRel G.Adj]
 20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
 of `n - 1`.
 -/
-theorem degreeMultiset_top' (n : ℕ) :
+lemma degreeMultiset_top' (n : ℕ) :
     K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
   sorry
 
@@ -198,7 +198,7 @@ theorem degreeMultiset_top' (n : ℕ) :
 21. A multiset of `n` copies of `n - 1` is graphic, realized by the complete graph
 `K[n]`.
 -/
-theorem graphic_const' (n : ℕ) :
+lemma graphic_const' (n : ℕ) :
     Graphic (Multiset.replicate n (n - 1)) := by
   sorry
 
@@ -418,10 +418,10 @@ be regular with respect to the filtering instance for its neighbourhoods; see
 [Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).)
 -/
 example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
-  -- put the filtering instance in scope, so that `hypercube_isRegularOfDegree`
+  -- put the filtering instance in scope, so that `IsRegularOfDegree.hypercube`
   -- produces the regularity statement `IsRegularOfDegree.compl` expects
   let : Q[n].LocallyFinite := fun v => Subtype.fintype _
-  have := (hypercube_isRegularOfDegree n).compl
+  have := (IsRegularOfDegree.hypercube n).compl
   rwa [card_hypercubeVert] at this
 
 /-!
@@ -558,7 +558,7 @@ lemma minDegree_mycielskian_of_one_le [Fintype V] [DecidableRel G.Adj]
 20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
 of `n - 1`.
 -/
-theorem degreeMultiset_top (n : ℕ) :
+lemma degreeMultiset_top (n : ℕ) :
     K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
   simp [degreeMultiset]
 
@@ -566,7 +566,7 @@ theorem degreeMultiset_top (n : ℕ) :
 21. A multiset of `n` copies of `n - 1` is graphic, realized by the complete graph
 `K[n]`.
 -/
-theorem graphic_const (n : ℕ) :
+lemma graphic_const (n : ℕ) :
     Graphic (Multiset.replicate n (n - 1)) :=
   degreeMultiset_top n ▸ graphic_degreeMultiset K[n]
 

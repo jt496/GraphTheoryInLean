@@ -323,7 +323,7 @@ to `i + j`, for any fixed `j : ℕ`.
 
 /-- The graph embedding `pathNat₁ ↪g pathNat₁`, with `i ↦ i + j`. -/
 @[simps]
-def pathNat₁Translate (j : ℕ) : pathNat₁ ↪g pathNat₁ where
+def pathNat₁.translate (j : ℕ) : pathNat₁ ↪g pathNat₁ where
   toFun i := i + j
   inj' := add_left_injective j
   map_rel_iff' := by grind [Function.Embedding.coeFn_mk]
@@ -524,7 +524,6 @@ would otherwise become a loop.
 [Figure: $G$ (left) pushed forward along $f : V \to W$ (dashed arrows), to give `G.map f` (right)](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
 -/
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
-
 #source SimpleGraph.map
 
 example (f : V → W) {w₁ w₂ : W} (G : SimpleGraph V) :
@@ -690,7 +689,7 @@ the composite of the maps induced by `f` and `g`. (Together with
 of simple graphs and homomorphisms: it acts on homomorphisms as well as on graphs,
 compatibly with identities and composition.)
 -/
-theorem Hom.mapMycielskian_comp {V W X : Type*} {G : SimpleGraph V}
+lemma Hom.mapMycielskian_comp {V W X : Type*} {G : SimpleGraph V}
     {H : SimpleGraph W} {K : SimpleGraph X} (f : G →g H) (g : H →g K) :
     (g.comp f).mapMycielskian = g.mapMycielskian.comp f.mapMycielskian := by
   ext x; rcases x with _ | (_|_) <;> rfl
@@ -750,7 +749,7 @@ abbrev IsVertexTransitive {V : Type*} (G : SimpleGraph V) : Prop :=
   ∀ u v : V, ∃ f : G ≃g G, f u = v
 
 /-- Any vertex-transitive graph is regular. -/
-theorem isRegular_of_isVertexTransitive {V : Type*} {G : SimpleGraph V}
+theorem IsVertexTransitive.exists_isRegularOfDegree {V : Type*} {G : SimpleGraph V}
     [G.LocallyFinite] (h : G.IsVertexTransitive) : ∃ d, G.IsRegularOfDegree d := by
   rcases isEmpty_or_nonempty V with hV | ⟨⟨v₀⟩⟩
   · exact ⟨0, isEmptyElim⟩
@@ -783,7 +782,7 @@ graph, by showing that the complement of a vertex-transitive graph is
 vertex-transitive.
 
 The cycle graph `C[n]` is vertex-transitive. To prove this we define an automorphism
-of `C[n]` by rotating the vertices modulo `n`: the rotation `cycleGraphRotate d` is
+of `C[n]` by rotating the vertices modulo `n`: the rotation `cycleGraph.rotate d` is
 the one sending the vertex `d` to `0`, i.e. `x ↦ x - d`. (Rotating in this direction
 rather than `x ↦ x + d` makes the rotations match Mathlib's conventions for dihedral
 groups, as we shall see in
@@ -794,7 +793,7 @@ The definition makes sense for every `n`, with the cases `n = 0, 1` trivial sinc
 /-- The automorphism of the cycle graph `C[n]` given by rotating the vertices
 modulo `n`, sending the vertex `d : Fin n` to `0`. -/
 @[simps]
-def cycleGraphRotate {n : ℕ} (d : Fin n) : C[n] ≃g C[n] where
+def cycleGraph.rotate {n : ℕ} (d : Fin n) : C[n] ≃g C[n] where
   toFun x := x - d
   invFun x := x + d
   left_inv x := by cases n <;> grind
@@ -809,7 +808,7 @@ there are no vertices.) -/
 lemma isVertexTransitive_cycleGraph (n : ℕ) : C[n].IsVertexTransitive :=
   match n with
   | 0 => fun u _ => u.elim0
-  | _ + 1 => fun u v => ⟨cycleGraphRotate (u - v), sub_sub_cancel u v⟩
+  | _ + 1 => fun u v => ⟨cycleGraph.rotate (u - v), sub_sub_cancel u v⟩
 
 /-!
 ## Vertex-Transitivity of Hypercubes
@@ -878,13 +877,13 @@ lemma HypercubeVert.xor_adj {n : ℕ} (v w t : HypercubeVert n) :
 
 /-- Translation of `Q[n]` by a fixed vertex `t`, via componentwise `xor`, as a graph
 automorphism. -/
-def hypercubeTranslate {n : ℕ} (t : HypercubeVert n) : Q[n] ≃g Q[n] where
+def hypercube.translate {n : ℕ} (t : HypercubeVert n) : Q[n] ≃g Q[n] where
   toEquiv := (HypercubeVert.xor_involutive t).toPerm
   map_rel_iff' := HypercubeVert.xor_adj _ _ t
 
 /-- The hypercube `Q[n]` is vertex-transitive. -/
 lemma isVertexTransitive_hypercube (n : ℕ) : Q[n].IsVertexTransitive :=
-  fun u v => ⟨hypercubeTranslate (u ⊕ₕ v), HypercubeVert.xor_xor_cancel u v⟩
+  fun u v => ⟨hypercube.translate (u ⊕ₕ v), HypercubeVert.xor_xor_cancel u v⟩
 
 /-!
 We do not describe the full automorphism group of `Q[n]` here: it is the wreath
@@ -901,8 +900,8 @@ group of `Q[n]` as `ℤ/2 ≀ Sₙ`.
 
 The Mycielskian of a graph is rarely vertex-transitive. In fact we can see this
 easily by looking at degrees, which are equal in any vertex-transitive graph
-(`isRegular_of_isVertexTransitive`). If `V` is finite and nonempty then `mμ[G]` is
-vertex-transitive iff `G` is isomorphic to `K[2]`.
+(`IsVertexTransitive.exists_isRegularOfDegree`). If `V` is finite and nonempty then
+`mμ[G]` is vertex-transitive iff `G` is isomorphic to `K[2]`.
 
 To help in the proof we first construct a graph isomorphism from `mμ[K[2]]` to
 `C[5]`, which we already know to be vertex-transitive. We define both maps using
@@ -910,10 +909,10 @@ Mathlib's *vector notation*: `![a, b, c]` is the function `Fin 3 → α` sending
 `1` and `2` to `a`, `b` and `c`. So the forward map sends the apex `none` to `0`,
 `0 ₗ` and `1 ₗ` to `3` and `2`, and `0 ᵣ` and `1 ᵣ` to `1` and `4`.
 
-[Figure: Left: $K_2$. Right: its Mycielskian drawn as a $5$-cycle. The orange numbers are the vertices of $C_5$ to which `isoMycielskianCompleteTwoCycleGraphFive` sends them](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_K2.svg)
+[Figure: Left: $K_2$. Right: its Mycielskian drawn as a $5$-cycle. The orange numbers are the vertices of $C_5$ to which `mycielskianCompleteTwoIsoCycleFive` sends them](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_K2.svg)
 -/
 /-- A graph isomorphism from `mμ[K[2]]` to `C[5]`. -/
-def isoMycielskianCompleteTwoCycleGraphFive : mμ[K[2]] ≃g C[5] where
+def mycielskianCompleteTwoIsoCycleFive : mμ[K[2]] ≃g C[5] where
   toFun := Option.elim' 0 (Sum.elim ![3, 2] ![1, 4])
   invFun := ![none, 0 ᵣ, 1 ₗ, 0 ₗ, 1 ᵣ]
   left_inv := by decide +revert
@@ -955,10 +954,10 @@ theorem isVertexTransitive_mycielskian_iff {V : Type*} (G : SimpleGraph V) [Fini
   constructor
   · intro h
     cases nonempty_fintype V
-    obtain ⟨d, hd⟩ := isRegular_of_isVertexTransitive h
+    obtain ⟨d, hd⟩ := IsVertexTransitive.exists_isRegularOfDegree h
     exact nonempty_iso_completeGraph_two_of_regular_mycielskian hd
   · intro ⟨e⟩
-    exact (e.mapMycielskian.symm.comp isoMycielskianCompleteTwoCycleGraphFive.symm)
+    exact (e.mapMycielskian.symm.comp mycielskianCompleteTwoIsoCycleFive.symm)
       |>.isVertexTransitive (isVertexTransitive_cycleGraph _)
 
 /-!

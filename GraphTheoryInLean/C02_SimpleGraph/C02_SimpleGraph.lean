@@ -220,6 +220,30 @@ example : d.fst = d.symm.snd := rfl
 end darts
 
 /-!
+# Naming Conventions
+
+We have now met a few Mathlib names, and they follow fixed patterns. Knowing the
+rules will help us guess a lemma's name. The full rules are in Mathlib's
+[naming conventions](https://leanprover-community.github.io/contribute/naming.html).
+The key points are:
+
+* Theorems are named in `snake_case`, predicates and structures in `UpperCamelCase`
+  (`IsIsolated`, `Dart`) and other definitions in `lowerCamelCase` (`neighborSet`).
+* A theorem's name describes its statement, with the conclusion first and any
+  hypotheses after `of`. Symbols have standard names: `∈` is `mem`, `⊆` is `subset`,
+  `≠` is `ne`, `¬` is `not` and `⊤` is `top`. So `not_isDiag_of_mem_edgeSet` says
+  that an edge `e ∈ G.edgeSet` is not a loop, and `neighborSet_subset_support` says
+  that `G.neighborSet u ⊆ G.support`.
+* An equivalence that characterises membership of a set, such as `mem_edgeSet` or
+  `mem_support`, is named after its left-hand side alone. Other equivalences often
+  end in `_iff`, such as `Sym2.mk_isDiag_iff`.
+* A theorem about `h : G.Adj u v` lives in the namespace `SimpleGraph.Adj`, so we can
+  use it with dot notation, as with `h.ne` and `h.left_mem_support`. A prime marks a
+  minor variant, so `h.ne'` proves `v ≠ u`.
+
+When the rules don't give us the name, we can search for it as described in
+[Finding Lemmas](https://jt496.github.io/GraphTheoryInLean/Introduction/#section-finding-lemmas).
+
 # Order
 
 There is a partial order on `SimpleGraph V` given by `G ≤ H` iff `G` is a subgraph of

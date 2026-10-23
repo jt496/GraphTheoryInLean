@@ -509,7 +509,7 @@ of `G` induced by `s`. Since it is a `SimpleGraph V`, we can use the
 ## De Bruijn–Erdős Theorem
 
 The *De Bruijn–Erdős theorem*
-[de Bruijn–Erdős 1951](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-de-bruijn-erdos-1951)
+[de Bruijn–Erdős 1951](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-de-bruijn-erdos-1951)
 says that if every finite subgraph of a (possibly infinite) graph `G` is
 `n`-colourable then `G` itself is `n`-colourable.
 
@@ -708,24 +708,24 @@ the Mycielskian `mμ[G]`. If `H : G.Subgraph` then we can map `H` to a subgraph 
 /--
 The subgraph of the Mycielskian `mμ[G]` corresponding to a subgraph `H` of `G`. -/
 @[simps!]
-def Subgraph.mycielskianSubgraph (H : G.Subgraph) : mμ[G].Subgraph :=
+def Subgraph.mycielskianLeft (H : G.Subgraph) : mμ[G].Subgraph :=
   Subgraph.map (Embedding.mycielskianLeft G).toHom H
 
 /-!
-Pulling `mycielskianSubgraph H` back along the same embedding recovers `H`.
+Pulling `mycielskianLeft H` back along the same embedding recovers `H`.
 -/
-lemma Subgraph.comap_mycielskianSubgraph (H : G.Subgraph) :
-    H.mycielskianSubgraph.comap (Embedding.mycielskianLeft G).toHom = H := by
+lemma Subgraph.comap_mycielskianLeft (H : G.Subgraph) :
+    H.mycielskianLeft.comap (Embedding.mycielskianLeft G).toHom = H := by
   ext v w <;> simp_all [Relation.Map, H.adj_sub]
 
 /-!
 Combined with the Galois connection `Subgraph.map_le_iff_le_comap`, this shows that
-`mycielskianSubgraph` both preserves and reflects the subgraph order.
+`mycielskianLeft` both preserves and reflects the subgraph order.
 -/
-lemma Subgraph.mycielskianSubgraph_le_iff {H₁ H₂ : G.Subgraph} :
-    H₁.mycielskianSubgraph ≤ H₂.mycielskianSubgraph ↔ H₁ ≤ H₂ := by
-  rw [Subgraph.mycielskianSubgraph, Subgraph.map_le_iff_le_comap,
-    Subgraph.comap_mycielskianSubgraph]
+lemma Subgraph.mycielskianLeft_le_mycielskianLeft_iff {H₁ H₂ : G.Subgraph} :
+    H₁.mycielskianLeft ≤ H₂.mycielskianLeft ↔ H₁ ≤ H₂ := by
+  rw [Subgraph.mycielskianLeft, Subgraph.map_le_iff_le_comap,
+    Subgraph.comap_mycielskianLeft]
 
 end basics
 
@@ -1066,17 +1066,17 @@ def hypercube.matching : (n : ℕ) → Q[n + 1].Subgraph
 /-!
 By induction `hypercube.matching n` is a perfect matching of `Q[n + 1]`.
 -/
-lemma hypercube.matching_isPerfectMatching :
+lemma hypercube.isPerfectMatching_matching :
     ∀ n : ℕ, (hypercube.matching n).IsPerfectMatching
-  | 0 => Subgraph.isPerfectMatching_top_iff.mpr <| hypercube_isRegularOfDegree _
-  | n + 1 => (hypercube.matching_isPerfectMatching n).boxProdLeft ⊤
+  | 0 => Subgraph.isPerfectMatching_top_iff.mpr <| IsRegularOfDegree.hypercube _
+  | n + 1 => (hypercube.isPerfectMatching_matching n).boxProdLeft ⊤
 
 /-!
 Since `Q[n + 1]` has `2 ^ (n + 1)` vertices, this perfect matching gives
 `ν Q[n + 1] = 2 ^ n`.
 -/
 lemma matchingNum_hypercube_succ (n : ℕ) : ν Q[n + 1] = 2 ^ n := by
-  rw [(hypercube.matching_isPerfectMatching n).matchingNum_eq]
+  rw [(hypercube.isPerfectMatching_matching n).matchingNum_eq]
   have h : Nat.card (HypercubeVert (n + 1)) / 2 = 2 ^ n := by
     rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ]; grind
   exact_mod_cast h
@@ -1133,7 +1133,7 @@ graph has twice as many darts as edges, so the double has at least twice as many
 edges as `M`. Counting darts is a `Fintype` computation, so we do it in `ℕ` with
 `Nat.card` and only cast up to `ℕ∞` at the end.
 -/
-lemma Subgraph.two_mul_edgeSet_encard_le_mycielskianDouble [Finite V]
+lemma Subgraph.two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble [Finite V]
     (M : G.Subgraph) :
     2 * M.edgeSet.encard ≤ (M.mycielskianDouble).edgeSet.encard := by
   classical
@@ -1160,7 +1160,7 @@ lemma two_mul_matchingNum_le_matchingNum_mycielskian [Finite V] :
   calc
     2 * ν G = 2 * M.edgeSet.encard := by rw [hc]
     _ ≤ (M.mycielskianDouble).edgeSet.encard :=
-        two_mul_edgeSet_encard_le_mycielskianDouble M
+        two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble M
     _ ≤ ν mμ[G] := hM.mycielskianDouble.le_matchingNum
 
 /-!
@@ -1242,16 +1242,17 @@ example {a b : V} {s : Set V} :
       a ≠ b ∧ ∃ u v : ↑s, (G.induce s).Adj u v ∧ ↑u = a ∧ ↑v = b := Iff.rfl
 
 variable (G)
-/-- A `ColoringOn γ s` of `G : SimpleGraph V` is a `γ`-colouring of all vertices of
-`G` that is a valid colouring on the set `s`. -/
+/-- `G.ColoringOn γ s` assigns a colour in `γ` to every vertex of `G`, but only
+requires adjacent vertices that both lie in `s` to get different colours: vertices
+outside `s` are coloured arbitrarily. -/
 abbrev ColoringOn (γ : Type*) (s : Set V) :=
   ((⊤ : G.Subgraph).induce s).spanningCoe.Coloring γ
 
-/-- `G.ColorableOn n s` iff there is a total function `V → Fin n` that is a valid
-colouring of `G` on the set `s`. -/
+/-- `G.ColorableOn n s` holds if there is a `G.ColoringOn (Fin n) s`: a colouring of
+every vertex of `G` with `n` colours in which adjacent vertices that both lie in `s`
+get different colours. -/
 abbrev ColorableOn (n : ℕ) (s : Set V) := Nonempty (G.ColoringOn (Fin n) s)
 
-variable {s t : Set V} {γ : Type*} {G}
 /-!
 ## Restricting and Copying Partial Colourings
 
@@ -1259,6 +1260,8 @@ A partial colouring of `s` can be *restricted* to any subset `t ⊆ s`: we use t
 function and note that the validity condition holds for the subset. We call this
 `ColoringOn.restrict`.
 -/
+variable {s t : Set V} {γ : Type*} {G}
+
 /-- Restrict `C : G.ColoringOn γ s` to any `t ⊆ s`. -/
 @[simps]
 protected def ColoringOn.restrict (C : G.ColoringOn γ s) (h : t ⊆ s) :
@@ -1372,30 +1375,29 @@ There are a few basic partial colourings that we will need to construct: the par
 colouring of the empty set, the partial colouring of a singleton, and the partial
 colouring of a pair of non-adjacent vertices.
 -/
-
+variable {G}
 /-- The partial colouring of the empty set by a colour `c`. -/
 @[simps!]
-def coloringOnEmpty (c : γ) : G.ColoringOn γ ∅ :=
+def ColoringOn.empty (c : γ) : G.ColoringOn γ ∅ :=
   Coloring.mk (fun _ => c) fun h => h.1.elim
 
 
 /-- The partial colouring of the singleton set `{a}` by a colour `c`. -/
 @[simps]
-def coloringOnOfSingleton {γ : Type*} (a : V) (c : γ) :
+def ColoringOn.singleton {γ : Type*} (a : V) (c : γ) :
     G.ColoringOn γ {a} where
   toFun := fun _ ↦ c
   map_rel' := by simp
 
 /-- The partial colouring of a pair of non-adjacent vertices by a colour `c`. -/
 @[simps]
-def coloringOnOfNotAdj {γ : Type*} {a b : V} (h : ¬ G.Adj a b) (c : γ) :
+def ColoringOn.ofNotAdj {γ : Type*} {a b : V} (h : ¬ G.Adj a b) (c : γ) :
     G.ColoringOn γ {a, b} where
   toFun := fun _ ↦ c
   map_rel' := by
     rintro x y ⟨hx, hy, hxy⟩ -
     grind [adj_comm]
 
-variable {G}
 /-!
 We can combine two partial colourings by extending the first using the second,
 provided they are compatible in the sense that there is no edge between a vertex
@@ -1424,7 +1426,7 @@ def ColoringOn.union [DecidablePred (· ∈ s)] (C₁ : G.ColoringOn γ s)
 /-!
 Next we extend a colouring `C` of `s` to `insert x s` using a colour `c` that is not
 used by `C` to colour a neighbour of `x` in `s`. We could build this as
-`(G.coloringOnOfSingleton x c).union C _`, followed by a `copy` from `{x} ∪ s` to
+`(ColoringOn.singleton x c).union C _`, followed by a `copy` from `{x} ∪ s` to
 `insert x s`, but then `@[simps!]` would only unfold it as far as that `union`.
 Instead we define it directly, with the same four cases in the validity proof as for
 `union`, and `@[simps]` then generates exactly the lemma we want.

@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html><head><script>(function(){
+  const {protocol:proto, host:hostName, pathname:path, search:srch, hash:hsh} = window.location;
+  if (!(path.endsWith("/") || path.endsWith(".html"))) {
+    window.location.replace(`${proto}//${hostName}${path}/${srch}${hsh}`);
+  }
+})()</script><script>// Enable TypeScript checking.
+// @ts-check
+
+// Applies a saved table-of-contents width before the first paint.
+//
+// This is a tiny inline counterpart to toc-resize.js: it runs in the page head so that
+// returning desktop readers do not see the default width flash to their saved width.
+// It only records the width in the --verso-toc-user-width custom property; the
+// stylesheet clamps it and ignores it on mobile, and toc-resize.js then takes over the
+// interactive resizing. Keep the storage key in sync with toc-resize.js.
+
+(function () {
+    try {
+        const saved = localStorage.getItem("verso-toc-width");
+        // Parse to a number (as toc-resize.js does) and write that back, so a stored
+        // value with stray whitespace becomes a valid length rather than `" 420 px"`.
+        const width = saved === null ? NaN : Number(saved);
+        if (Number.isFinite(width)) {
+            document.documentElement.style.setProperty("--verso-toc-user-width", `${width}px`);
+        }
+    } catch (_) {
+        // Leave the default width in place when local storage is unavailable.
+    }
+})();
+</script><base href="./../"/><meta charset="utf-8"/><meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/><title>Bibliography</title><link rel="stylesheet" href="book.css"/><link rel="stylesheet" href="verso-vars.css"/><script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script><script defer="defer" src="-verso-search/elasticlunr.min.js"></script><script defer="defer" src="-verso-search/fuzzysort.min.js"></script><script defer="defer" src="-verso-search/searchIndex.js"></script><script defer="defer" src="-verso-search/search-config.js"></script><script type="module" src="-verso-search/search-init.js"></script><link rel="stylesheet" href="-verso-search/search-box.css"/><link rel="stylesheet" href="-verso-search/search-page.css"/><link rel="stylesheet" href="-verso-search/search-highlight.css"/><link rel="stylesheet" href="-verso-search/domain-display.css"/><script src="-verso-search/search-highlight.js" defer="defer"></script><script src="toc-resize.js" defer="defer"></script><script src="-verso-data/katex/katex.js"></script><script src="-verso-data/katex/math.js"></script><script src="-verso-data/popper.min.js"></script><script src="-verso-data/tippy-bundle.umd.min.js"></script><link rel="stylesheet" href="-verso-data/tippy-border.css"/><link rel="stylesheet" href="-verso-data/katex/katex.css"/><style>
+figure.stil-figure {
+  text-align: center;
+  margin: 1.5em auto;
+}
+figure.stil-figure img {
+  max-width: 100%;
+  height: auto;
+}
+figure.stil-figure figcaption {
+  margin-top: 1.3em;
+}
+</style><style>
+
+.hl.lean {
+  white-space: pre;
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+}
+
+.hl.lean .keyword {
+  color: var(--verso-code-keyword-color,);
+  font-weight: var(--verso-code-keyword-weight, bold);
+  font-style: var(--verso-code-keyword-style, normal);
+  font-family: var(--verso-code-keyword-font-family,);
+}
+
+.hl.lean .const {
+  color: var(--verso-code-const-color,);
+  font-weight: var(--verso-code-const-weight, normal);
+  font-style: var(--verso-code-const-style, normal);
+  font-family: var(--verso-code-const-font-family,);
+}
+
+.hl.lean .var {
+  color: var(--verso-code-var-color,);
+  font-weight: var(--verso-code-var-weight, normal);
+  font-style: var(--verso-code-var-style, italic);
+  font-family: var(--verso-code-var-font-family,);
+
+  position: relative;
+}
+
+.hl.lean .literal, .hl.lean .unknown {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+/* These lexically-classified token kinds default to the `.unknown` appearance. The rule follows
+   `.const` so it wins for the `anon-ctor` tokens, which also carry the `const` class. */
+.hl.lean .anon-ctor,
+.hl.lean .number,
+.hl.lean .char,
+.hl.lean .comment,
+.hl.lean .punctuation,
+.hl.lean .delim,
+.hl.lean .wildcard {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+.hover-container {
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline;
+}
+
+.hl.lean a {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+
+.hl.lean a:hover {
+  text-decoration: currentcolor underline solid;
+}
+
+/* Links inside tooltips show their underline only when hovered. */
+.tippy-box .hl.lean a {
+  text-decoration: none;
+}
+
+.hl.lean .hover-info {
+  white-space: normal;
+}
+
+.hl.lean .token .hover-info {
+  display: none;
+  position: absolute;
+  color: var(--verso-tooltip-color, black);
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 300;
+}
+
+.hl.lean .hover-info.messages {
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding: 0 0.5rem 0 0;
+  display: block;
+}
+
+.hl.lean .hover-info code {
+  white-space: pre-wrap;
+  background: none;
+}
+
+.hl.lean .hover-info code:not(.verso-message) {
+  color: var(--verso-tooltip-color, black);
+}
+
+.hl.lean .hover-info.messages > code {
+  padding: 0.5rem;
+  display: block;
+  width: fit-content;
+}
+
+.hl.lean .hover-info.messages > code:only-child {
+  margin: 0;
+}
+
+.hl.lean .hover-info.messages > code {
+  margin: 0.1rem;
+}
+
+.hl.lean .hover-info.messages > code:not(:first-child) {
+  margin-top: 0rem;
+}
+
+.hl.lean {
+}
+
+.hl.lean.block {
+  display: block;
+}
+
+.hl.lean.inline {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.hl.lean * {
+}
+
+.hl.lean .token {
+  transition: all 0.25s; /* Slight fade for highlights */
+}
+
+@media (hover: hover) {
+  /* Hovered content nested in a collapsed tactic region keeps its plain background: the
+     region's proof state is the tooltip that appears there, and its label is what
+     highlights. `:where` keeps the exclusion out of the specificity computation. */
+  .hl.lean .token.binding-hl,
+  .hl.lean :is(.literal, .token.typed, .token[data-verso-hover]):hover:not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+    border-radius: 2px;
+    transition: none;
+  }
+
+  /* Within a hovered message span, token hover backgrounds are removed so the span's own
+     hover background shows across the whole span. The exception is a hovered documented
+     token, which keeps its background because its tooltip is the one shown. */
+  .hl.lean .has-info:hover .token.binding-hl:not(:hover),
+  .hl.lean .has-info:hover .token.binding-hl:not([data-verso-hover]),
+  .hl.lean .has-info:hover .literal:hover:not([data-verso-hover]),
+  .hl.lean .has-info:hover .token.typed:hover:not([data-verso-hover]) {
+    background-color: transparent;
+  }
+}
+
+
+.hl.lean .has-info .token:not(.tactic-state):not(.tactic-state *), .hl.lean .has-info .inter-text:not(.tactic-state):not(.tactic-state *) {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-thickness: from-font;
+  text-decoration-skip-ink: none;
+}
+
+/*
+The underline color comes from the nearest enclosing message span: each severity's span rule
+sets `--verso--region-indicator-color`, which inherits, so a region nested inside one of
+another severity keeps its own indicator color.
+*/
+.hl.lean .has-info :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso--region-indicator-color);
+}
+
+.hl.lean .has-info .hover-info {
+  display: none;
+  position: absolute;
+  transform: translate(0.25rem, 0.3rem);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 400;
+  text-align: left;
+}
+
+.hl.lean .has-info.error {
+  --verso--region-indicator-color: var(--verso-error-indicator-color, #ff0000);
+  --verso--region-hover-color: var(--verso-code-error-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-error-hover-bg-color, #ffb3b3);
+  color: var(--verso-code-error-color, currentcolor);
+  background-color: var(--verso-code-error-bg-color, transparent);
+}
+
+/*
+The hover highlight follows the tooltip: a message span highlights only when its own tooltip
+is the one that appears. When a hovered nested message span, a hovered documented token, or
+a hovered collapsed tactic label shows its own tooltip instead, the message span does not
+highlight. A span nested in a collapsed tactic region likewise stays plain, because hovering
+it shows the region's proof state; `:where` keeps that exclusion out of the specificity
+computation.
+
+The hover colors come from `--verso--region-hover-color` and `--verso--region-hover-bg-color`,
+which each severity's span rule sets. This keeps the hover conditions in this one rule, and
+because the properties inherit, a region nested inside one of another severity keeps its own
+hover colors.
+*/
+@media (hover: hover) {
+  .hl.lean .has-info:hover:not(:has(.has-info:hover)):not(:has([data-verso-hover]:hover)):not(:has(.tactic > label:hover + .tactic-toggle:not(:checked))):not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    color: var(--verso--region-hover-color, currentcolor);
+    background-color: var(--verso--region-hover-bg-color, transparent);
+  }
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+
+/*
+A tooltip that shows only messages of the box's own severity leaves severity styling to the
+box itself. When messages of several severities share the tooltip, or a `mixed` tooltip
+combines messages with other content (such as documentation), each message keeps its
+severity accent to distinguish them.
+*/
+.tippy-box .hl.lean.mixed > .hover-info.messages {
+  margin-bottom: 0.5rem;
+}
+
+.tippy-box[data-theme~='error'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.warning)):not(:has(> code.information)) > code.error {
+  background: none;
+  border: none;
+}
+
+.error .verso-message, .error .verso-message .token, .error .verso-message label {
+  color: var(--verso-message-error-color, #cc0000);
+}
+
+.error .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-error-color, #cc0000) !important;
+}
+
+.hl.lean .has-info.warning {
+  --verso--region-indicator-color: var(--verso-warning-indicator-color, #e7a71d);
+  --verso--region-hover-color: var(--verso-code-warning-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-warning-hover-bg-color, #ffd580);
+  color: var(--verso-code-warning-color, currentcolor);
+  background-color: var(--verso-code-warning-bg-color, transparent);
+}
+
+.hl.lean .hover-info.messages > code.warning {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+
+.lean-output {
+  border-left: 0.2em solid transparent;
+  padding: 0 0 0 0.5em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.lean-output.error {
+  border-color: var(--verso-output-error-color, var(--verso-error-indicator-color, #ff0000));
+}
+
+.lean-output.information {
+  border-color: var(--verso-output-info-color, var(--verso-info-indicator-color, #4777ff));
+}
+
+.lean-output.warning {
+  border-color: var(--verso-output-warning-color, var(--verso-warning-indicator-color, #e7a71d));
+}
+
+.tippy-box[data-theme~='warning'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.information)) > code.warning {
+  background: none;
+  border: none;
+}
+
+.warning .verso-message, .warning .verso-message .token, .warning .verso-message label {
+  color: var(--verso-message-warning-color, currentcolor);
+}
+
+.warning .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-warning-color, currentcolor) !important;
+}
+
+
+.hl.lean .has-info.information {
+  --verso--region-indicator-color: var(--verso-info-indicator-color, #4777ff);
+  --verso--region-hover-color: var(--verso-code-info-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-info-hover-bg-color, #4777ff);
+  color: var(--verso-code-info-color, currentcolor);
+  background-color: var(--verso-code-info-bg-color, transparent);
+}
+
+
+.hl.lean .hover-info.messages > code.information {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+
+.tippy-box[data-theme~='info'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.warning)) > code.information {
+  background: none;
+  border: none;
+}
+
+.information .verso-message, .information .verso-message .token, .information .verso-message label {
+  color: var(--verso-message-info-color, currentcolor);
+}
+
+.information .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-info-color, currentcolor) !important;
+}
+
+.hl.lean div.docstring {
+  font-family: var(--verso-text-font-family, sans-serif);
+  white-space: normal;
+  max-width: calc(min(40rem, 90vw));
+  width: max-content;
+}
+
+.hl.lean div.docstring > :last-child {
+  margin-bottom: 0;
+}
+
+.hl.lean div.docstring > :first-child {
+  margin-top: 0;
+}
+
+.hl.lean .hover-info .sep {
+  display: block;
+  width: auto;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid var(--verso-tooltip-separator-color, #ccc);
+}
+
+.hl.lean code {
+  font-family: var(--verso-code-font-family);
+}
+
+.hl.lean .tactic-state {
+  display: none;
+  position: relative;
+  width: fit-content;
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  color: var(--verso-tactic-state-color, black);
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+.hl.lean.popup .tactic-state {
+  position: static;
+  display: block;
+  width: auto;
+  border: none;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+
+.hl.lean .tactic {
+  position: relative;
+  display: inline;
+  vertical-align: top;
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.hl.lean .tactic:has(> .tactic-toggle:checked) {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+}
+
+.hl.lean .tactic-toggle:checked ~ .tactic-state {
+  display: inline-block;
+  vertical-align: top;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.hl.lean .tactic > label {
+  position: relative;
+  grid-row: 1;
+  display: inline;
+}
+
+@media (hover: hover) {
+  /* Highlight a region on hover only when its own toggle is unchecked, and only the innermost
+     hovered region: `label:hover` bubbles to ancestor labels, so suppress the highlight on a region
+     whose label contains a more deeply nested hovered tactic label. The region's proof state is the
+     tooltip for everything else in its label, so the label keeps its highlight while any of that
+     content is hovered. */
+  .hl.lean .tactic:has(> .tactic-toggle:not(:checked)) > label:hover:not(:has(.tactic > label:hover)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+  }
+}
+
+.hl.lean .tactic-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .tactic > label::after {
+  content: "";
+  border: 1px solid var(--verso-tactic-toggle-color, #bbbbbb);
+  /* These need to be em, not rem, to scale with the font */
+  border-radius: 1em;
+  height: 0.25em;
+  vertical-align: middle;
+  width: 0.6em;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  display: inline-block;
+  transition: all 0.5s;
+}
+
+/*
+@media (hover: hover) {
+  .hl.lean .tactic > label:hover::after {
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    transition: all 0.5s;
+  }
+}
+*/
+
+.hl.lean .tactic > label:has(+ .tactic-toggle:checked)::after {
+  border: 1px solid var(--verso-tactic-toggle-checked-color, #999999);
+  background-color: var(--verso-tactic-toggle-checked-color, #999999);
+  transition: all 0.5s;
+}
+
+.hl.lean .tactic-state .goal + .goal {
+  margin-top: 1.5em;
+}
+
+/*
+Some CSS frameworks customize details/summary in ways not compatible with Verso's output.
+*/
+
+.hl.lean details {
+  display: block !important;
+  margin: 0;
+}
+
+.hl.lean details summary {
+  display: list-item !important;
+  margin: 0;
+}
+
+.hl.lean details summary:focus {
+  outline: none;
+  outline-offset: none;
+  color: inherit;
+}
+
+.hl.lean ul > li {
+  margin-bottom: 0;
+}
+
+.hl.lean details summary::marker {
+  display: inline !important;
+}
+
+.hl.lean details > summary:first-of-type {
+  list-style-type: disclosure-closed;
+  list-style-position: inside;
+}
+
+.hl.lean details[open] > summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+.hl.lean details summary::before, .hl.lean details summary::after {
+  content: "" !important;
+  background: none;
+  display: none;
+}
+
+.hl.lean .tactic-state summary {
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: -0.5em;
+}
+
+.hl.lean .tactic-state details {
+  /* These need to be em, not rem, to scale with the font */
+  padding-left: 0.5em;
+}
+
+.hl.lean .case-label {
+  display: block;
+  position: relative;
+}
+
+.hl.lean .case-label input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"])::before {
+  display: inline-block;
+  background-color: currentcolor;
+  content: ' ';
+  transition: ease 0.2s;
+  margin-right: 0.7em;
+  clip-path: polygon(100% 0, 0 0, 50% 100%);
+  width: 0.6em;
+  height: 0.6em;
+  vertical-align: middle;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:not(:checked))::before {
+  transform: rotate(-90deg);
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]) {
+
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:checked) {
+
+}
+
+
+.hl.lean .labeled-case > :not(:first-child) {
+  max-height: 0px;
+  display: block;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in;
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: 0.5em;
+  margin-top: 0.1em;
+}
+
+.hl.lean .labeled-case:has(.case-label input[type="checkbox"]:checked) > :not(:first-child) {
+  max-height: 100%;
+}
+
+
+.hl.lean .goal-name::before {
+  font-style: normal;
+  content: "case ";
+}
+
+.hl.lean .goal-name {
+  font-style: italic;
+  font-family: var(--verso-code-font-family);
+  color: inherit;
+}
+
+.hl.lean .hypotheses {
+  display: table;
+}
+
+.hl.lean .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypothesis > * {
+  display: table-cell;
+}
+
+
+.hl.lean .hypotheses .colon {
+  text-align: center;
+  /* This needs to be em, not rem, to scale with the font */
+  min-width: 1em;
+}
+
+.hl.lean .hypotheses .name {
+  text-align: right;
+}
+
+.hl.lean .hypotheses .name,
+.hl.lean .hypotheses .type,
+.hl.lean .conclusion .type {
+  font-family: var(--verso-code-font-family);
+}
+
+.tippy-box {
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/*
+Tippy's stylesheet paints each arrow's fill triangle with the arrow element's `color` (its
+placement-specific `::before` rules use `border-color: initial`, which is `currentcolor`),
+and its border extension paints the outline triangle with the box's border color. Setting
+`color` on the arrow therefore matches it to the tooltip background for every placement.
+*/
+.tippy-box[data-theme~='lean'] {
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+}
+.tippy-box[data-theme~='lean'] > .tippy-arrow {
+  color: var(--verso-tooltip-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::after {
+  bottom: -11px;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::after {
+  top: -11px;
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::after {
+  right: -11px;
+  border-width: 11px 0 11px 11px;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-width: 11px 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::after {
+  left: -11px;
+  border-width: 11px 11px 11px 0;
+}
+
+
+
+.tippy-box[data-theme~='warning'] {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-warning-color, black);
+  border: 3px solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+.tippy-box[data-theme~='warning'] > .tippy-arrow {
+  color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='error'] {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-error-color, black);
+  border: 3px solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+.tippy-box[data-theme~='error'] > .tippy-arrow {
+  color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='info'] {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-info-color, black);
+  border: 3px solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+.tippy-box[data-theme~='info'] > .tippy-arrow {
+  color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='tactic'] {
+  background-color: var(--verso-tactic-state-bg-color, white);
+  color: var(--verso-tactic-state-color, black);
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+}
+.tippy-box[data-theme~='tactic'] > .tippy-arrow {
+  color: var(--verso-tactic-state-bg-color, white);
+}
+
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+}
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: var(--verso-text-color, black);
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+</style><style>
+table.tabular {
+  margin: auto;
+  border-spacing: 1rem;
+}
+table.tabular.left-align {
+  margin-right: auto;
+  margin-left: 0;
+}
+table.tabular.center-align {
+  margin: auto;
+}
+table.tabular.right-align {
+  margin-left auto;
+  margin-right: 0;
+}
+table.tabular td, table.tabular th {
+  text-align: left;
+  vertical-align: top;
+}
+table.tabular td > p:first-child, table.tabular th > p:first-child {
+  margin-top: 0;
+}
+table.tabular td > p:last-child, table.tabular th > p:first-child {
+  margin-bottom: 0;
+}
+</style><style>
+span.stil-cite-ref {
+  cursor: pointer;
+  outline: none;
+}
+span.stil-cite-ref:hover,
+span.stil-cite-ref:focus {
+  text-decoration: underline dotted;
+}
+span.stil-bib-label {
+  font-weight: bold;
+}
+</style><style>
+details.solutions-spoiler {
+  border: 1px solid #4777ff;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  margin: 1em 0;
+  background-color: #f4f7ff;
+}
+details.solutions-spoiler > summary {
+  cursor: pointer;
+  font-family: var(--verso-structure-font-family);
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #4777ff;
+  list-style: none;
+}
+details.solutions-spoiler > summary::before {
+  content: "▶ ";
+}
+details.solutions-spoiler[open] > summary::before {
+  content: "▼ ";
+}
+details.solutions-spoiler[open] > summary {
+  margin-bottom: 0.5em;
+}
+</style><style>
+span.stil-footnote {
+  position: relative;
+}
+span.stil-footnote-ref {
+  cursor: pointer;
+  font-size: 0.75em;
+  vertical-align: super;
+  font-weight: bold;
+  outline: none;
+}
+/* Bridges the gap between the superscript marker and the box below it. Without
+   this, moving the pointer down into the box crosses ~10px of dead space, the
+   footnote span loses `:hover`, the box closes, and the pointer lands on the
+   prose underneath — whose tooltip then appears instead of the one you aimed at. */
+span.stil-footnote-content::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1em;
+  height: 1em;
+}
+span.stil-footnote-content {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 1.5em;
+  z-index: 100;
+  min-width: 18em;
+  max-width: 32em;
+  background: #fffbe6;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5em 0.75em;
+  font-size: 0.9em;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+}
+span.stil-footnote:hover span.stil-footnote-content,
+span.stil-footnote:focus-within span.stil-footnote-content,
+span.stil-footnote.stil-footnote-open span.stil-footnote-content {
+  display: block;
+}
+</style><script>
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script><script>
+window.addEventListener("DOMContentLoaded", function () {
+  var refs = document.querySelectorAll("span.stil-footnote-ref");
+  for (var i = 0; i < refs.length; i++) {
+    refs[i].textContent = "[" + (i + 1) + "]";
+  }
+});
+
+/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
+
+   Hovering alone is not enough: the Lean hover tooltips are appended to
+   `document.body`, outside the footnote span, so as soon as the pointer touches
+   one the span loses `:hover` and the note closes — dropping the pointer onto the
+   prose underneath, whose tooltips then appear instead. A pinned note survives
+   that. Closes on a second click, on Escape, or on a click elsewhere; clicks
+   inside the note or inside a tooltip keep it open. */
+window.addEventListener("DOMContentLoaded", function () {
+  function closeAll() {
+    var open = document.querySelectorAll("span.stil-footnote.stil-footnote-open");
+    for (var i = 0; i < open.length; i++) {
+      open[i].classList.remove("stil-footnote-open");
+    }
+  }
+  document.addEventListener("click", function (e) {
+    if (!e.target || !e.target.closest) { return; }
+    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
+    if (ref) {
+      var note = ref.closest("span.stil-footnote");
+      var wasOpen = note.classList.contains("stil-footnote-open");
+      closeAll();
+      if (!wasOpen) { note.classList.add("stil-footnote-open"); }
+      e.preventDefault();
+      return;
+    }
+    if (e.target.closest("span.stil-footnote-content") ||
+        e.target.closest("[data-tippy-root]")) { return; }
+    closeAll();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeAll(); }
+  });
+});
+</script><link rel="stylesheet" href="guide.css"/><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Graph Theory in Lean</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Graph Theory in Lean</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="current numbered"><td class="num">14.</td><td><a href="Bibliography/#chapter-bibliography">Bibliography</a></td></tr><tr class="numbered"><td class="num">15.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div><div class="split-toc"><div class="title"><span class="no-toggle"></span><span class="number">14.</span> <span class="current"><a href="Bibliography/#chapter-bibliography">Bibliography</a></span></div></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><a class="local-button active" href="Theorems/#chapter-theorems" rel="prev" title="13. Theorems"><span class="arrow">←</span><span class="where">13. Theorems</span></a><a class="local-button active" href="Appendix/#chapter-appendix" rel="next" title="15. Appendix"><span class="where">15. Appendix</span><span class="arrow">→</span></a></nav><section><h1>14. Bibliography<span class="permalink-widget inline"><a href="find/?domain=Verso.Genre.Manual.section&amp;name=chapter-bibliography" title="Permalink">🔗</a></span></h1><ul><li><p><span class="stil-bib-label" id="bib-albertson-1998">[Albertson 1998]</span> M. O. Albertson, <a href="https://doi.org/10.1006/jctb.1998.1827"><em>You can't paint yourself into a corner</em></a>, J. Combin. Theory Ser. B <strong>73</strong> (1998), no. 2, 189–194.</p></li><li><p><span class="stil-bib-label" id="bib-andrasfai-erdos-sos-1974">[Andrásfai–Erdős–Sós 1974]</span> B. Andrásfai, P. Erdős and V. T. Sós, <a href="https://doi.org/10.1016/0012-365X%2874%2990133-2"><em>On the connection between chromatic number, maximal clique and minimal degree of a graph</em></a>, Discrete Math. <strong>8</strong> (1974), no. 3, 205–218.</p></li><li><p><span class="stil-bib-label" id="bib-behrend-1946">[Behrend 1946]</span> F. A. Behrend, <a href="https://doi.org/10.1073/pnas.32.12.331"><em>On sets of integers which contain no three terms in arithmetical progression</em></a>, Proc. Nat. Acad. Sci. U.S.A. <strong>32</strong> (1946), no. 12, 331–332.</p></li><li><p><span class="stil-bib-label" id="bib-berge-1957">[Berge 1957]</span> C. Berge, <a href="https://doi.org/10.1073/pnas.43.9.842"><em>Two theorems in graph theory</em></a>, Proc. Nat. Acad. Sci. U.S.A. <strong>43</strong> (1957), no. 9, 842–844.</p></li><li><p><span class="stil-bib-label" id="bib-bondy-chvatal-1976">[Bondy–Chvátal 1976]</span> J. A. Bondy and V. Chvátal, <a href="https://doi.org/10.1016/0012-365X%2876%2990078-9"><em>A method in graph theory</em></a>, Discrete Math. <strong>15</strong> (1976), no. 2, 111–135.</p></li><li><p><span class="stil-bib-label" id="bib-brooks-1941">[Brooks 1941]</span> R. L. Brooks, <a href="https://doi.org/10.1017/S030500410002168X"><em>On colouring the nodes of a network</em></a>, Proc. Cambridge Philos. Soc. <strong>37</strong> (1941), no. 2, 194–197.</p></li><li><p><span class="stil-bib-label" id="bib-cayley-1878">[Cayley 1878]</span> A. Cayley, <a href="https://doi.org/10.2307/2369306"><em>Desiderata and suggestions: No. 2. The theory of groups: graphical representation</em></a>, Amer. J. Math. <strong>1</strong> (1878), no. 2, 174–176.</p></li><li><p><span class="stil-bib-label" id="bib-cayley-1889">[Cayley 1889]</span> A. Cayley, <a href="https://doi.org/10.1017/CBO9780511703799.010"><em>A theorem on trees</em></a>, Quart. J. Pure Appl. Math. <strong>23</strong> (1889), 376–378. Reprinted in The Collected Mathematical Papers XIII, 26–28.</p></li><li><p><span class="stil-bib-label" id="bib-de-bruijn-erdos-1951">[de Bruijn–Erdős 1951]</span> N. G. de Bruijn and P. Erdős, <a href="https://doi.org/10.1016/S1385-7258%2851%2950053-7"><em>A colour problem for infinite graphs and a problem in the theory of relations</em></a>, Indag. Math. <strong>13</strong> (1951), no. 5, 371–373.</p></li><li><p><span class="stil-bib-label" id="bib-diestel-kuhn-2003">[Diestel–Kühn 2003]</span> R. Diestel and D. Kühn, <a href="https://doi.org/10.1016/S0095-8956%2802%2900034-5"><em>Graph-theoretical versus topological ends of graphs</em></a>, J. Combin. Theory Ser. B <strong>87</strong> (2003), no. 1, 197–206.</p></li><li><p><span class="stil-bib-label" id="bib-dirac-1952">[Dirac 1952]</span> G. A. Dirac, <a href="https://doi.org/10.1112/plms/s3-2.1.69"><em>Some theorems on abstract graphs</em></a>, Proc. London Math. Soc. (3) <strong>2</strong> (1952), no. 1, 69–81.</p></li><li><p><span class="stil-bib-label" id="bib-erdos-1970">[Erdős 1970]</span> P. Erdős, <a href="https://www.renyi.hu/~p_erdos/1971-27.pdf"><em>Turán Pál gráf tételéről</em></a> [On the graph theorem of Turán], Mat. Lapok <strong>21</strong> (1970), 249–251.</p></li><li><p><span class="stil-bib-label" id="bib-erdos-gallai-1960">[Erdős–Gallai 1960]</span> P. Erdős and T. Gallai, <a href="https://www.renyi.hu/~p_erdos/1961-05.pdf"><em>Gráfok előírt fokú pontokkal</em></a> [Graphs with prescribed degrees of vertices], Mat. Lapok <strong>11</strong> (1960), 264–274.</p></li><li><p><span class="stil-bib-label" id="bib-erdos-ko-rado-1961">[Erdős–Ko–Rado 1961]</span> P. Erdős, C. Ko and R. Rado, <a href="https://doi.org/10.1093/qmath/12.1.313"><em>Intersection theorems for systems of finite sets</em></a>, Quart. J. Math. Oxford Ser. (2) <strong>12</strong> (1961), 313–320.</p></li><li><p><span class="stil-bib-label" id="bib-erdos-simonovits-1966">[Erdős–Simonovits 1966]</span> P. Erdős and M. Simonovits, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0205876"><em>A limit theorem in graph theory</em></a>, Studia Sci. Math. Hungar. <strong>1</strong> (1966), 51–57.</p></li><li><p><span class="stil-bib-label" id="bib-erdos-stone-1946">[Erdős–Stone 1946]</span> P. Erdős and A. H. Stone, <a href="https://doi.org/10.1090/S0002-9904-1946-08715-7"><em>On the structure of linear graphs</em></a>, Bull. Amer. Math. Soc. <strong>52</strong> (1946), no. 12, 1087–1091.</p></li><li><p><span class="stil-bib-label" id="bib-euler-1741">[Euler 1741]</span> L. Euler, <a href="https://scholarlycommons.pacific.edu/euler-works/53/"><em>Solutio problematis ad geometriam situs pertinentis</em></a> [The solution of a problem relating to the geometry of position], Comment. Acad. Sci. Petropol. <strong>8</strong> (1741), 128–140. Eneström E53.</p></li><li><p><span class="stil-bib-label" id="bib-euler-1758">[Euler 1758]</span> L. Euler, <a href="https://scholarlycommons.pacific.edu/euler-works/230/"><em>Elementa doctrinae solidorum</em></a> [Elements of the doctrine of solids], Novi Comment. Acad. Sci. Petropol. <strong>4</strong> (1758), 109–140. Eneström E230.</p></li><li><p><span class="stil-bib-label" id="bib-furedi-2015">[Füredi 2015]</span> Z. Füredi, <a href="https://doi.org/10.1016/j.jctb.2015.05.001"><em>A proof of the stability of extremal graphs, Simonovits' stability from Szemerédi's regularity</em></a>, J. Combin. Theory Ser. B <strong>115</strong> (2015), 66–71.</p></li><li><p><span class="stil-bib-label" id="bib-gray-1953">[Gray 1953]</span> F. Gray, <a href="https://patents.google.com/patent/US2632058A/en"><em>Pulse code communication</em></a>, U.S. Patent 2,632,058, 1953. Filed 13 November 1947.</p></li><li><p><span class="stil-bib-label" id="bib-grotzsch-1959">[Grötzsch 1959]</span> H. Grötzsch, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0116320"><em>Zur Theorie der diskreten Gebilde, VII: Ein Dreifarbensatz für dreikreisfreie Netze auf der Kugel</em></a> [On the theory of discrete structures, VII: A three-colour theorem for triangle-free networks on the sphere], Wiss. Z. Martin-Luther-Univ. Halle-Wittenberg Math.-Natur. Reihe <strong>8</strong> (1959), 109–120.</p></li><li><p><span class="stil-bib-label" id="bib-hakimi-1962">[Hakimi 1962]</span> S. L. Hakimi, <a href="https://doi.org/10.1137/0110037"><em>On realizability of a set of integers as degrees of the vertices of a linear graph. I</em></a>, J. Soc. Indust. Appl. Math. <strong>10</strong> (1962), no. 3, 496–506.</p></li><li><p><span class="stil-bib-label" id="bib-hall-1935">[Hall 1935]</span> P. Hall, <a href="https://doi.org/10.1112/jlms/s1-10.37.26"><em>On representatives of subsets</em></a>, J. London Math. Soc. <strong>10</strong> (1935), no. 1, 26–30.</p></li><li><p><span class="stil-bib-label" id="bib-hamming-1950">[Hamming 1950]</span> R. W. Hamming, <a href="https://doi.org/10.1002/j.1538-7305.1950.tb00463.x"><em>Error detecting and error correcting codes</em></a>, Bell System Tech. J. <strong>29</strong> (1950), no. 2, 147–160.</p></li><li><p><span class="stil-bib-label" id="bib-havel-1955">[Havel 1955]</span> V. Havel, <a href="https://doi.org/10.21136/CPM.1955.108220"><em>Poznámka o existenci konečných grafů</em></a> [A remark on the existence of finite graphs], Časopis Pěst. Mat. <strong>80</strong> (1955), no. 4, 477–480.</p></li><li><p><span class="stil-bib-label" id="bib-hierholzer-1873">[Hierholzer 1873]</span> C. Hierholzer, <a href="https://doi.org/10.1007/BF01442866"><em>Ueber die Möglichkeit, einen Linienzug ohne Wiederholung und ohne Unterbrechung zu umfahren</em></a> [On the possibility of traversing a line system without repetition and without interruption], Math. Ann. <strong>6</strong> (1873), no. 1, 30–32. Published after his death by C. Wiener.</p></li><li><p><span class="stil-bib-label" id="bib-hoffman-singleton-1960">[Hoffman–Singleton 1960]</span> A. J. Hoffman and R. R. Singleton, <a href="https://doi.org/10.1147/rd.45.0497"><em>On Moore graphs with diameters 2 and 3</em></a>, IBM J. Res. Develop. <strong>4</strong> (1960), no. 5, 497–504.</p></li><li><p><span class="stil-bib-label" id="bib-kirchhoff-1847">[Kirchhoff 1847]</span> G. R. Kirchhoff, <a href="https://doi.org/10.1002/andp.18471481202"><em>Ueber die Auflösung der Gleichungen, auf welche man bei der Untersuchung der linearen Vertheilung galvanischer Ströme geführt wird</em></a> [On the solution of the equations obtained from the investigation of the linear distribution of galvanic currents], Ann. Phys. Chem. <strong>72</strong> (1847), no. 12, 497–508.</p></li><li><p><span class="stil-bib-label" id="bib-kneser-1955">[Kneser 1955]</span> M. Kneser, <a href="https://doi.org/10.1007/978-3-030-81625-4_6"><em>Aufgabe 360</em></a> [Problem 360], Jahresber. Deutsch. Math.-Verein. <strong>58</strong> (1955), no. 2, 27. See also Martin Kneser, Collected Works, Springer, 2021, 729–742.</p></li><li><p><span class="stil-bib-label" id="bib-konig-1916">[Kőnig 1916]</span> D. Kőnig, <a href="https://doi.org/10.1007/BF01456961"><em>Über Graphen und ihre Anwendung auf Determinantentheorie und Mengenlehre</em></a>, Math. Ann. <strong>77</strong> (1916), no. 4, 453–465.</p></li><li><p><span class="stil-bib-label" id="bib-konig-1927">[Kőnig 1927]</span> D. Kőnig, <a href="https://acta.bibl.u-szeged.hu/13338/"><em>Über eine Schlußweise aus dem Endlichen ins Unendliche</em></a> [On a mode of inference from the finite to the infinite], Acta Litt. Sci. Szeged <strong>3</strong> (1927), 121–130.</p></li><li><p><span class="stil-bib-label" id="bib-konig-1931">[Kőnig 1931]</span> D. Kőnig, <a href="https://real-j.mtak.hu/7307/"><em>Graphok és matrixok</em></a> [Graphs and matrices], Mat. Fiz. Lapok <strong>38</strong> (1931), 116–119.</p></li><li><p><span class="stil-bib-label" id="bib-kovari-sos-turan-1954">[Kővári–Sós–Turán 1954]</span> T. Kővári, V. T. Sós and P. Turán, <a href="https://doi.org/10.4064/cm-3-1-50-57"><em>On a problem of K. Zarankiewicz</em></a>, Colloq. Math. <strong>3</strong> (1954), no. 1, 50–57.</p></li><li><p><span class="stil-bib-label" id="bib-lovasz-1975">[Lovász 1975]</span> L. Lovász, <a href="https://doi.org/10.1016/0095-8956%2875%2990089-1"><em>Three short proofs in graph theory</em></a>, J. Combin. Theory Ser. B <strong>19</strong> (1975), no. 3, 269–271.</p></li><li><p><span class="stil-bib-label" id="bib-mantel-1907">[Mantel 1907]</span> W. Mantel, <a href="https://zbmath.org/2643703"><em>Vraagstuk XXVIII</em></a> [Problem 28], Wiskundige Opgaven <strong>10</strong> (1907), 60–61. Solution by H. Gouwentak, W. Mantel, J. Teixeira de Mattes, F. Schuh and W. A. Wythoff.</p></li><li><p><span class="stil-bib-label" id="bib-menger-1927">[Menger 1927]</span> K. Menger, <a href="https://doi.org/10.4064/fm-10-1-96-115"><em>Zur allgemeinen Kurventheorie</em></a> [On the general theory of curves], Fund. Math. <strong>10</strong> (1927), 96–115.</p></li><li><p><span class="stil-bib-label" id="bib-mycielski-1955">[Mycielski 1955]</span> J. Mycielski, <a href="https://doi.org/10.4064/cm-3-2-161-162"><em>Sur le coloriage des graphs</em></a> [On the colouring of graphs], Colloq. Math. <strong>3</strong> (1955), no. 2, 161–162.</p></li><li><p><span class="stil-bib-label" id="bib-ore-1960">[Ore 1960]</span> Ø. Ore, <a href="https://doi.org/10.2307/2308928"><em>Note on Hamilton circuits</em></a>, Amer. Math. Monthly <strong>67</strong> (1960), no. 1, 55.</p></li><li><p><span class="stil-bib-label" id="bib-paley-1933">[Paley 1933]</span> R. E. A. C. Paley, <a href="https://doi.org/10.1002/sapm1933121311"><em>On orthogonal matrices</em></a>, J. Math. Phys. <strong>12</strong> (1933), 311–320.</p></li><li><p><span class="stil-bib-label" id="bib-petersen-1898">[Petersen 1898]</span> J. Petersen, <em>Sur le théorème de Tait</em> [On Tait's theorem], L'Intermédiaire des Mathématiciens <strong>5</strong> (1898), 225–227.</p></li><li><p><span class="stil-bib-label" id="bib-posa-1976">[Pósa 1976]</span> L. Pósa, <a href="https://doi.org/10.1016/0012-365X%2876%2990068-6"><em>Hamiltonian circuits in random graphs</em></a>, Discrete Math. <strong>14</strong> (1976), no. 4, 359–364.</p></li><li><p><span class="stil-bib-label" id="bib-ramsey-1930">[Ramsey 1930]</span> F. P. Ramsey, <a href="https://doi.org/10.1112/plms/s2-30.1.264"><em>On a problem of formal logic</em></a>, Proc. London Math. Soc. (2) <strong>30</strong> (1930), 264–286.</p></li><li><p><span class="stil-bib-label" id="bib-roth-1953">[Roth 1953]</span> K. F. Roth, <a href="https://doi.org/10.1112/jlms/s1-28.1.104"><em>On certain sets of integers</em></a>, J. London Math. Soc. <strong>28</strong> (1953), no. 1, 104–109.</p></li><li><p><span class="stil-bib-label" id="bib-ruzsa-szemeredi-1978">[Ruzsa–Szemerédi 1978]</span> I. Z. Ruzsa and E. Szemerédi, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0519318"><em>Triple systems with no six points carrying three triangles</em></a>, in Combinatorics (Proc. Fifth Hungarian Colloq., Keszthely, 1976), Vol. II (A. Hajnal and V. T. Sós, eds.), Colloq. Math. Soc. János Bolyai 18, North-Holland, Amsterdam, 1978, pp. 939–945.</p></li><li><p><span class="stil-bib-label" id="bib-szemeredi-1978">[Szemerédi 1978]</span> E. Szemerédi, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0540024"><em>Regular partitions of graphs</em></a>, in Problèmes combinatoires et théorie des graphes (Orsay, 1976), Colloq. Internat. CNRS 260, CNRS, Paris, 1978, pp. 399–401.</p></li><li><p><span class="stil-bib-label" id="bib-turan-1941">[Turán 1941]</span> P. Turán, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0018405"><em>Egy gráfelméleti szélsőértékfeladatról</em></a> [On an extremal problem in graph theory], Mat. Fiz. Lapok <strong>48</strong> (1941), 436–452.</p></li><li><p><span class="stil-bib-label" id="bib-tutte-1947">[Tutte 1947]</span> W. T. Tutte, <a href="https://doi.org/10.1112/jlms/s1-22.2.107"><em>The factorization of linear graphs</em></a>, J. London Math. Soc. <strong>22</strong> (1947), no. 2, 107–111.</p></li><li><p><span class="stil-bib-label" id="bib-vizing-1964">[Vizing 1964]</span> V. G. Vizing, <a href="https://mathscinet.ams.org/mathscinet/relay-station?mr=0180505"><em>On an estimate of the chromatic class of a <code class="math inline">p</code>-graph</em></a> (in Russian), Diskret. Analiz (1964), no. 3, 25–30.</p></li><li><p><span class="stil-bib-label" id="bib-whitney-1932">[Whitney 1932]</span> H. Whitney, <a href="https://doi.org/10.2307/2371086"><em>Congruent graphs and the connectivity of graphs</em></a>, Amer. J. Math. <strong>54</strong> (1932), no. 1, 150–168.</p></li><li><p><span class="stil-bib-label" id="bib-zarankiewicz-1951">[Zarankiewicz 1951]</span> K. Zarankiewicz, <em>Problem P 101</em>, Colloq. Math. <strong>2</strong> (1951), 301.</p></li><li><p><span class="stil-bib-label" id="bib-zykov-1949">[Zykov 1949]</span> A. A. Zykov, <a href="https://eudml.org/doc/65433"><em>On some properties of linear complexes</em></a> (in Russian), Mat. Sb. (N.S.) <strong>24(66)</strong> (1949), no. 2, 163–188.</p></li></ul></section><nav class="prev-next-buttons"><a class="local-button active" href="Theorems/#chapter-theorems" rel="prev" title="13. Theorems"><span class="arrow">←</span><span class="where">13. Theorems</span></a><a class="local-button active" href="Appendix/#chapter-appendix" rel="next" title="15. Appendix"><span class="where">15. Appendix</span><span class="arrow">→</span></a></nav></div></main></div></body></html>

@@ -169,17 +169,17 @@ lemma IsAcyclic.edist_eq_length (hG : G.IsAcyclic) {u v : V} {p : G.Walk u v}
   rw [← p.reachable.coe_dist_eq_edist, hql]
 
 /-!
-For example, the infinite path `pathNat₁` is a tree (`pathNat₁_isTree`). In
+For example, the infinite path `pathNat₁` is a tree (`isTree_pathNat₁`). In
 [Constructing Walks](https://jt496.github.io/GraphTheoryInLean/Walks/#section-constructing-walks)
-we built the walk `pathNat₁Walk i j` of length `j`, and `Walk.isPath_pathNat₁Walk`
-shows that it is a path. Hence the distance from `i` to `i + j` is `j`.
+we built the walk `pathNat₁.path i j` of length `j`, and `pathNat₁.isPath_path` shows
+that it is a path. Hence the distance from `i` to `i + j` is `j`.
 -/
-#check Walk.length_pathNat₁Walk -- (pathNat₁Walk i j).length = j
-#check Walk.isPath_pathNat₁Walk -- (pathNat₁Walk i j).IsPath
+#check pathNat₁.length_path -- (pathNat₁.path i j).length = j
+#check pathNat₁.isPath_path -- (pathNat₁.path i j).IsPath
 
 lemma edist_pathNat₁ (i j : ℕ) : pathNat₁.edist i (i + j) = j := by
-  rw [pathNat₁_isAcyclic.edist_eq_length (isPath_pathNat₁Walk i j),
-    length_pathNat₁Walk]
+  rw [isAcyclic_pathNat₁.edist_eq_length (pathNat₁.isPath_path i j),
+    pathNat₁.length_path]
 
 /-!
 # Eccentricity, Diameter and Radius
@@ -217,7 +217,7 @@ which case the diameter is attained by some pair of vertices.
 
 /-!
 The finiteness hypothesis cannot be dropped. The infinite path `pathNat₁` is
-connected (`pathNat₁_connected`), but the distance from `0` to `n` is `n`
+connected (`connected_pathNat₁`), but the distance from `0` to `n` is `n`
 (`edist_pathNat₁`), so its diameter is `⊤`. Its `ℕ`-valued diameter is therefore the
 junk value `0`.
 
@@ -477,7 +477,8 @@ lemma four_le_egirth_of_cliqueFree_three (h : G.CliqueFree 3) : 4 ≤ G.egirth :
     obtain rfl : n = 3 := by grind
     exact cliqueFree_three_iff_free_cycleGraph.mp h
 
-lemma five_le_egirth (h3 : G.CliqueFree 3) (h4 : C[4].Free G) : 5 ≤ G.egirth :=
+lemma five_le_egirth_of_cliqueFree_three_of_free (h3 : G.CliqueFree 3)
+    (h4 : C[4].Free G) : 5 ≤ G.egirth :=
   le_egirth_of_free fun n h3n hn => by
     obtain rfl | rfl : n = 3 ∨ n = 4 := by grind
     exacts [cliqueFree_three_iff_free_cycleGraph.mp h3, h4]
@@ -597,17 +598,17 @@ lemma egirth_completeBipartiteGraph (s t : ℕ) : K[s + 2, t + 2].egirth = 4 := 
 /-!
 ## The Girth of the Hypercube
 
-The hypercube is triangle-free (`hypercube_cliqueFree_three`), so its girth is at
+The hypercube is triangle-free (`cliqueFree_hypercube_three`), so its girth is at
 least `4`, and for `n ≥ 2` it contains a `4`-cycle: in `Q[2]` the Gray-code
-Hamiltonian cycle `grayCycle` is one. Each larger cube contains a copy of the
-previous one, via the embedding `hypercube.embedFalse`, so by `IsContained.egirth_le`
-again its girth is at most that of the smaller cube.
+Hamiltonian cycle `hypercube.grayCycle` is one. Each larger cube contains a copy of
+the previous one, via the embedding `hypercube.embedFalse`, so by
+`IsContained.egirth_le` again its girth is at most that of the smaller cube.
 -/
 lemma egirth_hypercube {n : ℕ} : egirth Q[n + 2] = 4 := by
   refine le_antisymm ?_
-    (four_le_egirth_of_cliqueFree_three (hypercube_cliqueFree_three _))
+    (four_le_egirth_of_cliqueFree_three (cliqueFree_hypercube_three _))
   induction n with
-  | zero => exact (grayCycle_isHamiltonianCycle 0).isCycle.egirth_le_length
+  | zero => exact (hypercube.isCycle_grayCycle 0).egirth_le_length
   | succ n ih =>
     exact (IsContained.egirth_le ⟨(hypercube.embedFalse _).toCopy⟩).trans ih
 
@@ -634,7 +635,7 @@ def mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w) :
   cons (by simp : mμ[G].Adj none v ᵣ) <| cons (by simp [h1.symm])
     <| cons (by simpa : mμ[G].Adj u ₗ w ᵣ) <| cons (by simp) nil
 
-lemma mycielskianFourCycle_isCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w)
+lemma isCycle_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w)
     (h : v ≠ w) : (mycielskianFourCycle h1 h2).IsCycle := by
   simp [mycielskianFourCycle, cons_isCycle_iff, h]
 
@@ -650,7 +651,7 @@ lemma egirth_mycielskian_eq_four (h3 : G.CliqueFree 3)
   obtain ⟨x, y, z, h1, h2, hvw⟩ : ∃ x y z, G.Adj x y ∧ G.Adj x z ∧ y ≠ z := by grind
   refine le_antisymm ?_ (four_le_egirth_of_cliqueFree_three h3.mycielskian)
   simpa [length_mycielskianFourCycle] using
-    (mycielskianFourCycle_isCycle h1 h2 hvw).egirth_le_length
+    (isCycle_mycielskianFourCycle h1 h2 hvw).egirth_le_length
 
 /-!
 If `G` is a matching plus isolated vertices then `mμ[G]` contains no copy of `C[4]`.
@@ -681,8 +682,8 @@ If `G` has an edge and is a matching plus isolated vertices, then `mμ[G]` has g
 -/
 lemma egirth_mycielskian_eq_five {u v : V} (hadj : G.Adj u v)
     (hmatch : G.IsMatchingAndIsolated) : egirth mμ[G] = 5 := by
-  refine le_antisymm ?_ (five_le_egirth hmatch.cliqueFree_three.mycielskian
-    (cycleGraph_four_free_mycielskian hmatch))
+  refine le_antisymm ?_ (five_le_egirth_of_cliqueFree_three_of_free
+    hmatch.cliqueFree_three.mycielskian (cycleGraph_four_free_mycielskian hmatch))
   simpa [mycielskianClosed] using
     (isCycle_mycielskianClosed_of_adj hadj).egirth_le_length
 
@@ -703,7 +704,7 @@ Comparing the sizes of consecutive layers gives two classical bounds relating th
 number of vertices of a graph to its degrees, its diameter and its girth.
 
 * The *Moore bound*
-  [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hoffman-singleton-1960):
+  [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960):
   a graph with maximum degree at most `d + 1` and diameter at most `k` has at most
   `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))` vertices.
 * The *cage bound*: a graph with minimum degree at least `d + 1` and girth at least
@@ -887,7 +888,7 @@ lemma card_layer_le [Finite V] [G.LocallyFinite] {d : ℕ}
 If every vertex is within distance `k` of `r`, i.e. `G.eccent r ≤ k`, then the layers
 `L₀, …, Lₖ` cover `V`, and we can sum these bounds.
 -/
-theorem card_le_of_eccent_le [Finite V] [G.LocallyFinite] {d k : ℕ}
+lemma card_le_of_eccent_le [Finite V] [G.LocallyFinite] {d k : ℕ}
     (h_deg : ∀ v, G.degree v ≤ d + 1) {r : V} (h : G.eccent r ≤ k) :
     Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ range k, d ^ i := by
   classical
@@ -1046,7 +1047,7 @@ lemma edist_eq_add_two_of_adj {r u w x : V} {i : ℕ} (hu : G.edist r u = i + 1)
   have hlt : 2 * i + 3 < m + i + 2 := by exact_mod_cast hg.trans_le (hcyc (by grind))
   grind
 
-lemma eq_of_adj_of_adj {r u v x : V} {j : ℕ} (hu : G.edist r u = j)
+lemma eq_of_adj_of_adj_of_lt_egirth {r u v x : V} {j : ℕ} (hu : G.edist r u = j)
     (hv : G.edist r v = j) (hx : G.edist r x = j + 1) (hux : G.Adj u x)
     (hvx : G.Adj v x) (hg : 2 * j + 2 < G.egirth) : u = v := by
   by_contra hne
@@ -1084,7 +1085,7 @@ lemma mul_card_layer_le [Finite V] [G.LocallyFinite] {d : ℕ}
       degree_le_degIn_add_one _ w hnbr
     grind
   · simp only [mem_layer] at hu hx hv
-    exact eq_of_adj_of_adj hu hx (by rw [hv]; rfl) huv hxv
+    exact eq_of_adj_of_adj_of_lt_egirth hu hx (by rw [hv]; rfl) huv hxv
       (by push_cast; convert hg using 1; ring)
 
 /-!
@@ -1167,7 +1168,7 @@ attains both bounds with `d = 2` and `k = 2`: `10 = 1 + 3 * (1 + 2)`.
 lemma card_petersenGraph : Fintype.card {s : Finset (Fin 5) // s.card = 2} = 10 := by
   decide
 
-lemma petersenGraph_isRegularOfDegree : petersenGraph.IsRegularOfDegree 3 := by
+lemma IsRegularOfDegree.petersenGraph : petersenGraph.IsRegularOfDegree 3 := by
   intro v
   decide +revert
 
@@ -1188,7 +1189,7 @@ lemma petersenGraph_exists_adj_adj : ∀ u v, u ≠ v → ¬ petersenGraph.Adj u
 /-!
 No three `2`-subsets of `Fin 5` are pairwise disjoint, so there are no triangles.
 -/
-lemma petersenGraph_cliqueFree_three : petersenGraph.CliqueFree 3 := fun t ht => by
+lemma cliqueFree_petersenGraph_three : petersenGraph.CliqueFree 3 := fun t ht => by
   obtain ⟨a, b, c, hab, hac, hbc, rfl⟩ := is3Clique_iff.mp ht
   revert a b c
   decide
@@ -1198,7 +1199,7 @@ Two distinct vertices have at most one common neighbour, which must be disjoint
 from their union, a set of at least three elements. By
 `cycleGraph_four_free_iff_common_neighbor_unique`, this rules out a copy of `C[4]`.
 -/
-lemma petersenGraph_cycleGraph_four_free : C[4].Free petersenGraph :=
+lemma cycleGraph_four_free_petersenGraph : C[4].Free petersenGraph :=
   cycleGraph_four_free_iff_common_neighbor_unique.mpr (by decide)
 
 /-!
@@ -1216,20 +1217,20 @@ lemma ediam_petersenGraph : petersenGraph.ediam = 2 := by
     exact (edist_le (cons huw (cons hwv nil))).trans (by simp)
   · by_contra! h
     have := moore_bound petersenGraph 2 1
-      (fun v => (petersenGraph_isRegularOfDegree v).le)
+      (fun v => (IsRegularOfDegree.petersenGraph v).le)
       (Order.le_of_lt_add_one (by simpa [one_add_one_eq_two] using h))
     rw [Nat.card_eq_fintype_card, card_petersenGraph] at this
     norm_num at this
 
 /-!
-The girth is at least `5` by `five_le_egirth`. For the upper bound, as for the
-complete bipartite graphs, we exhibit a copy of a cycle graph: the pentagon
-`{0, 1} — {2, 3} — {0, 4} — {1, 2} — {3, 4} — {0, 1}` is a copy of `C[5]`, and
-`decide` checks that the map is an injective homomorphism.
+The girth is at least `5` by `five_le_egirth_of_cliqueFree_three_of_free`. For the
+upper bound, as for the complete bipartite graphs, we exhibit a copy of a cycle
+graph: the pentagon `{0, 1} — {2, 3} — {0, 4} — {1, 2} — {3, 4} — {0, 1}` is a copy
+of `C[5]`, and `decide` checks that the map is an injective homomorphism.
 -/
 lemma egirth_petersenGraph : petersenGraph.egirth = 5 := by
-  refine le_antisymm ?_ (five_le_egirth petersenGraph_cliqueFree_three
-    petersenGraph_cycleGraph_four_free)
+  refine le_antisymm ?_ (five_le_egirth_of_cliqueFree_three_of_free
+    cliqueFree_petersenGraph_three cycleGraph_four_free_petersenGraph)
   have h5 : C[5] ⊑ petersenGraph :=
     ⟨⟨⟨![⟨{0, 1}, rfl⟩, ⟨{2, 3}, rfl⟩, ⟨{0, 4}, rfl⟩, ⟨{1, 2}, rfl⟩,
       ⟨{3, 4}, rfl⟩], by decide⟩, by decide⟩⟩
@@ -1239,7 +1240,7 @@ lemma egirth_petersenGraph : petersenGraph.egirth = 5 := by
 Moore graphs are rare. Besides `C[5]` and the Petersen graph, the only known Moore
 graph of diameter `2` is the Hoffman–Singleton graph, which is `7`-regular with `50`
 vertices. The Hoffman–Singleton theorem
-[Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-hoffman-singleton-1960)
+[Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960)
 ([Strongly Regular Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-strongly-regular-graphs))
 shows that any other would be `57`-regular, and whether one exists is a famous open
 problem. For diameter at least `3`, it is known that the only Moore graphs are the
@@ -1256,7 +1257,7 @@ A vertex `u ∈ Aᵢ` has a neighbour `w` at distance `i` from `s`. If `i + 1 < 
 all the other neighbours of `u` are at distance `i + 2` from `s` (by
 `edist_eq_add_two_of_adj` with root `s`), and hence at distance `i + 1` from `r`
 (since `r` and `s` are adjacent), so they lie in `Aᵢ₊₁`. Two vertices of `Aᵢ` have
-no common neighbour in `Aᵢ₊₁` (by `eq_of_adj_of_adj` with root `r`). So
+no common neighbour in `Aᵢ₊₁` (by `eq_of_adj_of_adj_of_lt_egirth` with root `r`). So
 `d * #Aᵢ ≤ #Aᵢ₊₁`, and by induction `#Aᵢ ≥ d ^ i` for `i < k`.
 -/
 lemma mul_card_inter_layer_le [Finite V] [G.LocallyFinite] [DecidableEq V]
@@ -1288,8 +1289,8 @@ lemma mul_card_inter_layer_le [Finite V] [G.LocallyFinite] [DecidableEq V]
       degree_le_degIn_add_one _ w hnbr
     grind
   · simp only [mem_inter, mem_layer] at hu hx hv
-    exact eq_of_adj_of_adj hu.1 hx.1 (by rw [hv.1]; push_cast; rfl) huv hxv
-      (hg.trans_le' (by norm_cast; grind))
+    exact eq_of_adj_of_adj_of_lt_egirth hu.1 hx.1 (by rw [hv.1]; push_cast; rfl) huv
+      hxv (hg.trans_le' (by norm_cast; grind))
 
 lemma pow_le_card_inter_layer [Finite V] [G.LocallyFinite] [DecidableEq V]
     {d : ℕ} (h_deg : ∀ v, d + 1 ≤ G.degree v) {r s : V} (hrs : G.Adj r s) {i : ℕ}
@@ -1362,7 +1363,7 @@ example : petersenGraph.egirth ≤ 5 := by
   by_contra! h
   have : Nonempty {s : Finset (Fin 5) // s.card = 2} := ⟨⟨{0, 1}, by decide⟩⟩
   have := cage_bound_even petersenGraph 2 3
-    (fun v => (petersenGraph_isRegularOfDegree v).ge)
+    (fun v => (IsRegularOfDegree.petersenGraph v).ge)
     ((by norm_num : (2 * 3 : ℕ∞) ≤ 5 + 1).trans (Order.add_one_le_of_lt h))
   rw [ENat.card_eq_coe_fintype_card, card_petersenGraph] at this
   norm_num [Finset.sum_range_succ] at this
@@ -1380,7 +1381,7 @@ example (d : ℕ) :
 # Albertson's Precolouring Extension Theorem *
 
 Albertson's precolouring extension theorem
-[Albertson 1998](https://jt496.github.io/GraphTheoryInLean/Appendix/#bib-albertson-1998)
+[Albertson 1998](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-albertson-1998)
 says that if `G` is `k`-colourable and `s` is a set of vertices that are pairwise at
 distance at least `4`, then any assignment `f : s → Fin (k + 1)` of colours to the
 vertices of `s` extends to a proper `(k + 1)`-colouring of `G`. (In general a

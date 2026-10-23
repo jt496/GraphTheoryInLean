@@ -193,12 +193,12 @@ sub-multiset of `s`, using `Multiset.coe_le` and `List.sublist_map_iff`. Then, w
 `L` the sorted list of degrees, realize `L.take k` as the degrees of a set `S` of `k`
 vertices, so that `L.drop k` is the list of degrees of `Sᶜ`.
 -/
-theorem _root_.Multiset.exists_le_map_eq' {α β : Type*} {f : α → β}
+lemma _root_.Multiset.exists_le_map_eq' {α β : Type*} {f : α → β}
     {s : Multiset α} {t : Multiset β} (h : t ≤ s.map f) : ∃ u ≤ s, u.map f = t := by
   sorry
 
 theorem Graphic.erdosGallaiLE' {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
-    (hk : k ≤ m.card) : erdosGallaiLE m k := by
+    (hk : k ≤ m.card) : ErdosGallaiLE m k := by
   sorry
 
 /-!
@@ -344,7 +344,7 @@ theorem IsRegularOfDegree.exists_isPerfectMatching [G.LocallyFinite] {k : ℕ}
           subset_biUnion_of_mem (fun x => G.neighborFinset x) ha
         exact (hG a).ge.trans (degIn_eq_degree hsub).ge
       · -- each `b ∈ N` has at most `k` neighbours in `t`
-        rw [G.bipartiteBelow_adj, ← hG b]
+        rw [← G.degIn_eq_card_bipartiteBelow, ← hG b]
         exact degIn_le_degree t b
     rw [hN, Set.ncard_coe_finset, Set.ncard_eq_toFinset_card s hs]
     exact Nat.le_of_mul_le_mul_right hcount hk
@@ -416,8 +416,8 @@ theorem IsRegularOfDegree.colorable_lineGraph [G.LocallyFinite] {k : ℕ}
       exact Fin.castSucc_injective _ |>.ne (C.valid hadj)
 
 example (n : ℕ) : χ L[Q[n]] = n := by
-  have hG := hypercube_isRegularOfDegree n
-  refine le_antisymm ((hG.colorable_lineGraph (hypercube_isBipartite n))
+  have hG := IsRegularOfDegree.hypercube n
+  refine le_antisymm ((hG.colorable_lineGraph (IsBipartite.hypercube n))
     |>.chromaticNumber_le) ?_
   have := Q[n].degree_le_chromaticNumber_lineGraph (Classical.arbitrary _)
   rwa [hG] at this
@@ -460,8 +460,8 @@ minimum degree `2t = 2n / 5`, but it is not bipartite.
 example (t : ℕ) :
     C[5][t + 1].CliqueFree 3 ∧ ¬ C[5][t + 1].Colorable 2 ∧
       ∀ v, C[5][t + 1].degree v = 2 * (t + 1) := by
-  refine ⟨(blowUpGraph_cliqueFree_iff _ _ fun _ => 0).2 (by decide), fun h => ?_, ?_⟩
-  · have h5 := ((blowUpGraph_colorable_iff _ fun _ => 0).1 h).chromaticNumber_le
+  refine ⟨(cliqueFree_blowUpGraph_iff _ _ fun _ => 0).2 (by decide), fun h => ?_, ?_⟩
+  · have h5 := ((colorable_blowUpGraph_iff _ fun _ => 0).1 h).chromaticNumber_le
     rw [chromaticNumber_cycleGraph_of_odd 5 (by norm_num) (by decide)] at h5
     exact absurd h5 (by decide)
   · rintro ⟨v, i⟩
@@ -579,7 +579,7 @@ sub-multiset of `s`, using `Multiset.coe_le` and `List.sublist_map_iff`. Then, w
 `L` the sorted list of degrees, realize `L.take k` as the degrees of a set `S` of `k`
 vertices, so that `L.drop k` is the list of degrees of `Sᶜ`.
 -/
-theorem _root_.Multiset.exists_le_map_eq {α β : Type*} {f : α → β}
+lemma _root_.Multiset.exists_le_map_eq {α β : Type*} {f : α → β}
     {s : Multiset α} {t : Multiset β} (h : t ≤ s.map f) : ∃ u ≤ s, u.map f = t := by
   induction s using Quotient.inductionOn
   induction t using Quotient.inductionOn
@@ -588,7 +588,7 @@ theorem _root_.Multiset.exists_le_map_eq {α β : Type*} {f : α → β}
   exact ⟨l'', Multiset.coe_le.2 hl''.subperm, Multiset.coe_eq_coe.2 hp⟩
 
 theorem Graphic.erdosGallaiLE {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
-    (hk : k ≤ m.card) : erdosGallaiLE m k := by
+    (hk : k ≤ m.card) : ErdosGallaiLE m k := by
   obtain ⟨V, _, G, _, rfl⟩ := h
   classical
   set L := G.degreeMultiset.sort (· ≥ ·)
