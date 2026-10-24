@@ -71,8 +71,7 @@ theorem IsRegularOfDegree.exists_isPerfectMatching' [G.LocallyFinite] {k : ℕ}
 
 /-!
 8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
-chromatic index `χ'(G) = Δ(G)` (see
-[Edge Colourings](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-edge-colourings)).
+chromatic index `χ'(G) = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
 Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
 properly coloured with `k` colours. (The general case reduces to this one, since
 every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
@@ -202,11 +201,10 @@ theorem Graphic.erdosGallaiLE' {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
 
 /-!
 21. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
-[Ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-ends). Hint: if
-`K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
-square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
-`boxProdRight` to show that every infinite component of `G - K` contains
-`(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
+[Ends](#section-ends). Hint: if `K` lies in the square `[-N, N] × [-N, N]` then the
+rows and columns outside the square avoid `K`. Use `ComponentCompl.mem_of_hom` with
+`boxProdLeft` and `boxProdRight` to show that every infinite component of `G - K`
+contains `(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
 -/
 example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
   sorry
@@ -351,8 +349,7 @@ theorem IsRegularOfDegree.exists_isPerfectMatching [G.LocallyFinite] {k : ℕ}
 
 /-!
 8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
-chromatic index `χ'(G) = Δ(G)` (see
-[Edge Colourings](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-edge-colourings)).
+chromatic index `χ'(G) = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
 Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
 properly coloured with `k` colours. (The general case reduces to this one, since
 every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
@@ -617,11 +614,10 @@ theorem Graphic.erdosGallaiLE {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
 
 /-!
 21. Show that the grid `hasse ℤ □ hasse ℤ` has exactly one end, as in
-[Ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-ends). Hint: if
-`K` lies in the square `[-N, N] × [-N, N]` then the rows and columns outside the
-square avoid `K`. Use `ComponentCompl.mem_of_hom` with `boxProdLeft` and
-`boxProdRight` to show that every infinite component of `G - K` contains
-`(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
+[Ends](#section-ends). Hint: if `K` lies in the square `[-N, N] × [-N, N]` then the
+rows and columns outside the square avoid `K`. Use `ComponentCompl.mem_of_hom` with
+`boxProdLeft` and `boxProdRight` to show that every infinite component of `G - K`
+contains `(N + 1, N + 1)`, and apply `subsingleton_end_of_common_vertex`.
 -/
 example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
   have hadj (n : ℤ) : (hasse ℤ).Adj n (n + 1) :=

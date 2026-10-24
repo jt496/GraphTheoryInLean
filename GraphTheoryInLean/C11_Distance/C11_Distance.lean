@@ -32,7 +32,7 @@ two versions: `edist` takes values in `ℕ∞` (the extended naturals, where `�
 and `dist` takes values in `ℕ`, with the convention that unreachable pairs are at
 distance `0`. In this chapter we will work almost entirely with `edist`, and pass to
 `dist` only when a natural number is needed; we explain why in
-[edist vs dist](https://jt496.github.io/GraphTheoryInLean/Distance/#section-edist-vs-dist).
+[edist vs dist](#section-edist-vs-dist).
 
 [Figure: breadth-first search layers from a root vertex partition $V$ by graph distance](https://jt496.github.io/GraphTheoryInLean/figures/distance_bfs.svg)
 -/
@@ -86,21 +86,19 @@ triangle inequalities for `dist` need a connectivity or reachability hypothesis.
 
 /-!
 This is the convention for cardinalities from
-[Counting in ℕ∞ : ENat.card](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-counting-in-enat-card)
-again: `Nat.card α` is `(ENat.card α).toNat`, so an infinite type has `Nat.card`
-equal to `0`, just as `G.dist u v` is `(G.edist u v).toNat`, which sends `⊤` to `0`.
-Each `ℕ∞`-valued parameter in this chapter is related to its `ℕ`-valued version in
-the same way.
+[Counting in ℕ∞ : ENat.card](#section-counting-in-enat-card) again: `Nat.card α` is
+`(ENat.card α).toNat`, so an infinite type has `Nat.card` equal to `0`, just as
+`G.dist u v` is `(G.edist u v).toNat`, which sends `⊤` to `0`. Each `ℕ∞`-valued
+parameter in this chapter is related to its `ℕ`-valued version in the same way.
 
 ## Distance under Homomorphisms and Isomorphisms
 
 A graph homomorphism maps walks to walks of the same length, and so does not increase
 distances. Consequently a graph isomorphism preserves distances. Mathlib has both
-facts, as `Hom.edist_le` and `Iso.edist_eq`, and we will use them repeatedly: to show
-that automorphisms preserve eccentricities, and in
-[Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-to transport the distance between two constructions of the hypercube. Both are easy
-to prove.
+facts, as `Hom.edist_le` and `Iso.edist_eq`, and we will use them repeatedly: to
+show that automorphisms preserve eccentricities, and in
+[Algebraic Graph Theory](#chapter-algebraic-graph-theory) to transport the
+distance between two constructions of the hypercube. Both are easy to prove.
 -/
 example {W : Type*} {H : SimpleGraph W} (e : G →g H) (u v : V) :
     H.edist (e u) (e v) ≤ G.edist u v := e.edist_le ..
@@ -170,9 +168,9 @@ lemma IsAcyclic.edist_eq_length (hG : G.IsAcyclic) {u v : V} {p : G.Walk u v}
 
 /-!
 For example, the infinite path `pathNat₁` is a tree (`isTree_pathNat₁`). In
-[Constructing Walks](https://jt496.github.io/GraphTheoryInLean/Walks/#section-constructing-walks)
-we built the walk `pathNat₁.path i j` of length `j`, and `pathNat₁.isPath_path` shows
-that it is a path. Hence the distance from `i` to `i + j` is `j`.
+[Constructing Walks](#section-constructing-walks) we built the walk
+`pathNat₁.path i j` of length `j`, and `pathNat₁.isPath_path` shows that it is a
+path. Hence the distance from `i` to `i + j` is `j`.
 -/
 #check pathNat₁.length_path -- (pathNat₁.path i j).length = j
 #check pathNat₁.isPath_path -- (pathNat₁.path i j).IsPath
@@ -395,8 +393,7 @@ two versions: `G.egirth : ℕ∞`, which is `⊤` for an acyclic graph, and `G.g
 which is `0` for an acyclic graph. Girth is the natural counterpart of the diameter:
 if the maximum degree is bounded, small diameter forces *few* vertices, while if the
 minimum degree is bounded below, large girth forces *many* vertices. These are the
-Moore and cage bounds of
-[Moore and Cage Bounds](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-and-cage-bounds).
+Moore and cage bounds of [Moore and Cage Bounds](#section-moore-and-cage-bounds).
 Girth also enters the Mycielski construction: `mμ[G]` raises the chromatic number
 (`chromaticNumber_mycielskian`) while staying triangle-free
 (`CliqueFree.mycielskian`), and below we compute its girth exactly.
@@ -698,9 +695,9 @@ graphs exist is a famous theorem of Erdős (1959), proved by the probabilistic m
 Fix a vertex `r` (for *root*). The *distance layers* around `r` are the sets of
 vertices at distance exactly `0, 1, 2, …` from `r`: they are the levels of a
 breadth-first search tree rooted at `r`, as in the figure of the Petersen graph in
-[Moore Graphs](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-graphs).
-Comparing the sizes of consecutive layers gives two classical bounds relating the
-number of vertices of a graph to its degrees, its diameter and its girth.
+[Moore Graphs](#section-moore-graphs). Comparing the sizes of consecutive layers
+gives two classical bounds relating the number of vertices of a graph to its degrees,
+its diameter and its girth.
 
 * The *Moore bound*
   [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960):
@@ -753,19 +750,18 @@ lemma exists_adj_edist_eq {r v : V} (i : ℕ) (h : G.edist r v = i + 1) :
 
 /-!
 To count vertices in each layer we package them as `Finset`s, so from now on we
-assume that the vertex type is finite; we return to this assumption in
-[Finite Eccentricity](https://jt496.github.io/GraphTheoryInLean/Distance/#section-finite-eccentricity).
-The predicate `G.edist r v = i` is decidable, since `ℕ∞` has decidable equality, so
-the set-builder notation produces a `Finset`. But `edist` itself is noncomputable (it
-is an infimum over all walks), so the definition must be marked `noncomputable`. For
-the same reason `decide` cannot evaluate distances: even `K[2].edist 0 1 = 1` cannot
-be proved by `decide`.
+assume that the vertex type is finite; we return to this assumption in [Finite
+Eccentricity](#section-finite-eccentricity). The predicate `G.edist r v = i` is
+decidable, since `ℕ∞` has decidable equality, so the set-builder notation produces a
+`Finset`. But `edist` itself is noncomputable (it is an infimum over all walks), so
+the definition must be marked `noncomputable`. For the same reason `decide` cannot
+evaluate distances: even `K[2].edist 0 1 = 1` cannot be proved by `decide`.
 
 Since `layer` is noncomputable anyway, a `Fintype V` argument would be pointless, so
 we assume only `[Finite V]` and pick a `Fintype` instance inside the definition with
 `Fintype.ofFinite`. As a bonus, no lemma about layers depends on a choice of
-`Fintype` instance (see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)).
+`Fintype` instance (see [Stating Results Across a
+Diamond*](#section-stating-results-across-a-diamond)).
 -/
 /-- The `i`-th *distance layer* around `r`: the vertices at distance exactly `i`
 from `r`. -/
@@ -1173,9 +1169,8 @@ lemma IsRegularOfDegree.petersenGraph : petersenGraph.IsRegularOfDegree 3 := by
 
 /-!
 We cannot ask `decide` for the distances directly, since it cannot evaluate `edist`
-([Distance Layers](https://jt496.github.io/GraphTheoryInLean/Distance/#section-distance-layers)).
-Instead we reduce everything to facts about adjacency, which `decide` can easily
-check.
+([Distance Layers](#section-distance-layers)). Instead we reduce everything to facts
+about adjacency, which `decide` can easily check.
 
 Two distinct non-adjacent vertices are `2`-subsets sharing exactly one element, so
 their union has three elements, and the remaining two elements of `Fin 5` form a
@@ -1240,10 +1235,9 @@ Moore graphs are rare. Besides `C[5]` and the Petersen graph, the only known Moo
 graph of diameter `2` is the Hoffman–Singleton graph, which is `7`-regular with `50`
 vertices. The Hoffman–Singleton theorem
 [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960)
-([Strongly Regular Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-strongly-regular-graphs))
-shows that any other would be `57`-regular, and whether one exists is a famous open
-problem. For diameter at least `3`, it is known that the only Moore graphs are the
-odd cycles.
+([Strongly Regular Graphs](#section-strongly-regular-graphs)) shows that any other
+would be `57`-regular, and whether one exists is a famous open problem. For diameter
+at least `3`, it is known that the only Moore graphs are the odd cycles.
 
 ## The Cage Bound for Even Girth *
 

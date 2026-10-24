@@ -107,9 +107,8 @@ in the goal. This result is `G.not_isDiag_of_mem_edgeSet` in Mathlib.
 The vertex set of a `SimpleGraph V` is `V` (although strictly speaking `V` is a type,
 not a set). These can be infinite (`ℕ`), or empty (`Fin 0`). Nonemptiness and
 finiteness are extra hypotheses that need to be stated: for example as `[Nonempty V]`
-and `[Fintype V]`. See
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees)
-for more details.
+and `[Fintype V]`. See [Decidability, Finiteness and
+Degrees](#chapter-decidability-finiteness-and-degrees) for more details.
 
 Mathlib defines a number of useful subsets of `V` (terms `s : Set V`), in
 particular the `support` of the graph and the `neighborSet` of a vertex. (We can
@@ -244,14 +243,14 @@ The key points are:
   minor variant, so `h.ne'` proves `v ≠ u`.
 
 When the rules don't give us the name, we can search for it as described in
-[Finding Lemmas](https://jt496.github.io/GraphTheoryInLean/Introduction/#section-finding-lemmas).
+[Finding Lemmas](#section-finding-lemmas).
 
 # Order
 
 There is a partial order on `SimpleGraph V` given by `G ≤ H` iff `G` is a subgraph of
-`H`. (Note that these are necessarily spanning subgraphs since all `SimpleGraph V`
-have the same vertex set. We will consider general subgraphs later, see
-[Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#chapter-subgraphs).)
+`H`. (Note that these are necessarily spanning subgraphs since all
+`SimpleGraph V` have the same vertex set. We will consider general subgraphs later,
+see [Subgraphs](#chapter-subgraphs).)
 
 This gives `SimpleGraph V` the structure of a *complete atomic Boolean algebra*, with
 operations `sup`, `inf`, `compl` and `sdiff`, and elements `top` and `bot`. This
@@ -264,8 +263,8 @@ one edge, and *atomic* means that every graph is the supremum of the atoms below
 i.e. the union of its single-edge subgraphs. Mathlib registers this structure as an
 *instance*, which Lean supplies automatically wherever it is needed. The command
 `#synth` asks Lean to find (synthesize) an instance and shows it; we say more about
-instances in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).
+instances in [Decidability, Finiteness and
+Degrees](#chapter-decidability-finiteness-and-degrees).
 -/
 section order
 
@@ -413,14 +412,13 @@ both. (If we wrote `@[simps]` here, a linter warning would suggest `@[simps!]`.)
 /-!
 Also notice that `pathNat₂` is a `def`, whereas `pathNat₁` (and `pathNat₃` below) are
 `abbrev`s, definitions that Lean unfolds automatically when it needs to. This is
-deliberate: we will see in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees)
-how this choice affects Lean's ability to compute with these graphs.
+deliberate: we will see in [Decidability, Finiteness and
+Degrees](#chapter-decidability-finiteness-and-degrees) how this choice affects Lean's
+ability to compute with these graphs.
 
 These two graphs are equal, but not *definitionally* equal: `rfl` does not prove the
-equality. We explain this important distinction in
-[Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)
-below.
+equality. We explain this important distinction in [Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities) below.
 
 In order to prove that two `SimpleGraph`s are equal, we need to show that they have
 the same adjacency relation (i.e. the same edges). We *don't* need to check that they
@@ -561,7 +559,7 @@ example : (⊤ : SimpleGraph (Fin 6)).Adj 2 3 := by
 Both `#eval` and `decide` rely on adjacency being *decidable*: Lean needs a concrete
 method for deciding whether or not any given pair of vertices are adjacent. We will
 return to this, and to computations with graphs more generally, in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).
+[Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees).
 -/
 
 end SimpleGraph

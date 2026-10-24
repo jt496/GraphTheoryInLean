@@ -290,8 +290,8 @@ If we want to bound the independence number of the Mycielskian of a complete
 bipartite graph we need a bound on the size of any independent set `s` of `K[a, b]`
 plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give this bound
 in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
-`mycielskian_indepSet_card_le` from the starred section
-[Independence Number of the Mycielskian*](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-mycielskian).
+`mycielskian_indepSet_card_le` from the starred section [Independence Number of the
+Mycielskian*](#section-independence-number-of-the-mycielskian).
 -/
 /-!
 30. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies
@@ -772,8 +772,8 @@ If we want to bound the independence number of the Mycielskian of a complete
 bipartite graph we need a bound on the size of any independent set `s` of `K[a, b]`
 plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give this bound
 in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
-`mycielskian_indepSet_card_le` from the starred section
-[Independence Number of the Mycielskian*](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-mycielskian).
+`mycielskian_indepSet_card_le` from the starred section [Independence Number of the
+Mycielskian*](#section-independence-number-of-the-mycielskian).
 -/
 /-!
 30. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies

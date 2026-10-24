@@ -175,9 +175,9 @@ example : grotzschGraph.IsHamiltonian := by
 The next three exercises return to the example from the chapter's closure section:
 `C[5] ⊔ edge 0 2 ⊔ edge 0 3`, i.e. `C[5]` with the two chords `0 — 2` and `0 — 3`.
 Mathlib's `Decidable` instance for adjacency in `edge u v` is currently defined using
-a cast, so `decide` gets stuck on any graph built from `edge` (see
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)).
-So we redefine the graph using `fromRel` instead.
+a cast, so `decide` gets stuck on any graph built from `edge` (see [Decidability and
+Kernel Reduction*](#section-decidability-and-kernel-reduction)). So we redefine the
+graph using `fromRel` instead.
 -/
 /-- `C[5]` with the two chords `0 — 2` and `0 — 3`. -/
 abbrev chordedC5 : SimpleGraph (Fin 5) :=

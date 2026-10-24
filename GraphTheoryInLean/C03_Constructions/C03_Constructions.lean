@@ -19,10 +19,9 @@ theorists but are used throughout Mathlib. These include `Bool`, `Fin`, `Option`
 `Prod`, `Sigma`, `Subtype`, `Sum` and `Unit`.
 
 Two of the constructions we introduce below, the
-[hypercube](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-hypercube)
-and
-[Mycielskian](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-mycielskian),
-will serve as running examples throughout the remaining chapters.
+[hypercube](#section-hypercube) and
+[Mycielskian](#section-mycielskian), will serve as running examples throughout
+the remaining chapters.
 
 Beware that in this chapter we are looking at *constructions*, and so we will see
 examples of complete bipartite graphs and cycle graphs etc., but we won't see any
@@ -48,16 +47,13 @@ Given a vertex set `V` the *complete* graph on `V` has all possible edges while 
 
 In Mathlib these are usually referred to by their roles as the top `⊤` and bottom `⊥`
 elements of the complete atomic Boolean algebra formed by `SimpleGraph V` (see
-[Order](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-order) for
-more details).
+[Order](#section-order) for more details).
 -/
 #source completeGraph
 #source emptyGraph
 /-!
-As we saw in
-[Top and Bottom](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-top-and-bottom),
-results about these graphs use the `top` and `bot` names, as in `top_adj` and
-`bot_adj`.
+As we saw in [Top and Bottom](#section-top-and-bottom), results about these graphs
+use the `top` and `bot` names, as in `top_adj` and `bot_adj`.
 
 [Figure: The complete graphs $K_3$ and $K_5$](https://jt496.github.io/GraphTheoryInLean/figures/complete.svg)
 
@@ -150,9 +146,9 @@ scoped notation "P[" n "]" => pathGraph n
 
 /-!
 Mathlib has no decidability instance for adjacency in `hasse` or `pathGraph`, so we
-will need to provide our own if we want to do computations with these graphs. This is
-a bit more work than the instances we give in this chapter, so we defer it until
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).
+will need to provide our own if we want to do computations with these graphs. This
+is a bit more work than the instances we give in this chapter, so we defer it until
+[Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees).
 
 ## Cycle Graphs
 
@@ -197,11 +193,10 @@ example : ¬ C[5].Adj 4 2 := by decide
 /-!
 As we saw above, for `n = 0` and `n = 1`, `C[n]` is the empty graph on `Fin n`, while
 for `n = 2` it is the complete graph `K[2]`. The first two of these are
-*definitional* equalities (in the sense of
-[Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
-while the last is not. `C[2].Adj a b` is `a - b = 1 ∨ b - a = 1` while `K[2].Adj a b`
-is `a ≠ b`. We can prove that these are equivalent, but they are not definitionally
-equal.
+*definitional* equalities (in the sense of [Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities)), while the last is
+not. `C[2].Adj a b` is `a - b = 1 ∨ b - a = 1` while `K[2].Adj a b` is `a ≠ b`. We
+can prove that these are equivalent, but they are not definitionally equal.
 -/
 example : C[0] = E[0] := rfl
 example : C[1] = E[1] := rfl
@@ -255,8 +250,8 @@ message in VS Code.)
 This is because, as for `pathGraph`, there is no decidability instance for
 `completeBipartiteGraph` in Mathlib. This time, though, it is easy to provide the
 missing instance ourselves. (Don't worry if this is unfamiliar; we will look at
-decidability in *much* more detail in
-[Decidability, Finiteness and Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees).)
+decidability in *much* more detail in [Decidability, Finiteness and
+Degrees](#chapter-decidability-finiteness-and-degrees).)
 -/
 instance (V W : Type*) : DecidableRel (completeBipartiteGraph V W).Adj :=
     fun v w => by
@@ -503,13 +498,13 @@ vertices and splits the adjacency proof into its two parts. The pattern `rfl`
 substitutes `i = j` everywhere, after which `h ▸ v` reduces to `v`.
 
 The substitution is needed because the cast `h ▸ v` only computes (in the sense of
-[Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities))
-when both sides of `h` are definitionally equal, in which case it reduces to `v`.
-While `i` and `j` are distinct variables the cast is stuck, just like `0 + n`, and no
-amount of unfolding gets past it to `v`. We will meet this issue again in
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)
-and when we need to change the endpoints of walks in
-[Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy).
+[Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities)) when both sides of
+`h` are definitionally equal, in which case it reduces to `v`. While `i` and `j` are
+distinct variables the cast is stuck, just like `0 + n`, and no amount of unfolding
+gets past it to `v`. We will meet this issue again in [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction) and when we need to change
+the endpoints of walks in [Copy](#section-copy).
 
 The `@[simps!]` attribute generates `sigma_adj`, in which the `⋯` hides the proof
 of `i = j` used by `▸`. We write `Σg G` for `SimpleGraph.sigma G`.
@@ -598,14 +593,14 @@ def HypercubeVert : ℕ → Type
 (Note that `HypercubeVert n` is really just `Fin n → Bool` but defined so that the
 recursion holds definitionally. We can still easily take the Hamming distance
 viewpoint and we will equip it with the Hamming distance when needed in
-[Hamming Paths](https://jt496.github.io/GraphTheoryInLean/Walks/#section-hamming-paths).)
+[Hamming Paths](#section-hamming-paths).)
 
 The `@[implicit_reducible]` attribute lets Lean unfold `HypercubeVert (n + 1)` to
 `HypercubeVert n × Bool` when it checks that implicit arguments have the expected
 type (as `simp` does before rewriting), while keeping `HypercubeVert` opaque to
 instance search so that the instances we provide for `HypercubeVert n` in
-[Computations with Hypercubes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-computations-with-hypercubes)
-are still found.
+[Computations with Hypercubes](#section-computations-with-hypercubes) are still
+found.
 -/
 @[simp]
 lemma hypercubeVert_zero : HypercubeVert 0 = Unit := rfl
@@ -729,9 +724,9 @@ triangle-free graph then we obtain a sequence of triangle-free graphs with incre
 chromatic number.
 
 In particular we can start with `K[2]`. Its Mycielskian is isomorphic to the
-`5`-cycle `C[5]` (see
-[Vertex-Transitivity of Mycielskians](https://jt496.github.io/GraphTheoryInLean/Maps/#section-vertex-transitivity-of-mycielskians)),
-and the Mycielskian of `C[5]` is called the *Grötzsch graph*
+`5`-cycle `C[5]` (see [Vertex-Transitivity of
+Mycielskians](#section-vertex-transitivity-of-mycielskians)), and the Mycielskian of
+`C[5]` is called the *Grötzsch graph*
 [Grötzsch 1959](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-grotzsch-1959).
 -/
 /-- The *Grötzsch graph* (i.e. the Mycielskian of `C[5]`). -/
@@ -934,9 +929,8 @@ example : (mμ^3 C[5]).Adj (0 : Fin 5)ₗᵣᵣ (1 : Fin 5)ₗₗₗ := by
 Having earlier introduced complete bipartite graphs we would now like to discuss
 complete multipartite graphs and their generalization: blow-up graphs. However these
 constructions make use of the `SimpleGraph.comap` construction which we won't
-formally introduce until
-[Comaps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-comaps). In order to
-properly understand these constructions you may wish to read that short section now.
+formally introduce until [Comaps](#section-comaps). In order to properly understand
+these constructions you may wish to read that short section now.
 
 ## Complete Multipartite Graphs
 [Figure: A complete 4-partite graph](https://jt496.github.io/GraphTheoryInLean/figures/completemultipartite.svg)
@@ -1091,9 +1085,8 @@ but we lose direct access to the `Finset.powersetCard` results. However we can s
 this issue with a simple translation lemma saying that, for any predicate `p`,
 counting the `k`-element subsets satisfying `p` as terms of the subtype
 `{s : Finset β // s.card = k}` gives the same answer as counting them as members of
-the family `(Finset.univ : Finset β).powersetCard k`. (See
-[Independence Number of the Kneser Graph*](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-independence-number-of-the-kneser-graph)
-for details.)
+the family `(Finset.univ : Finset β).powersetCard k`. (See [Independence Number of
+the Kneser Graph*](#section-independence-number-of-the-kneser-graph) for details.)
 -/
 /-- The `k`-th Kneser graph on `β`: vertices are `k`-element subsets of `β`, and
 edges join disjoint, distinct subsets. -/
@@ -1128,11 +1121,9 @@ abbrev petersenGraph : SimpleGraph {s : Finset (Fin 5) // s.card = 2} := Kn[5, 2
 /-!
 [Figure: The Petersen graph as the Kneser graph $Kn(5,2)$](https://jt496.github.io/GraphTheoryInLean/figures/petersen.svg)
 
-We will look at the independence number of `Kn[n, k]` in
-[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques) and
-colourings of `Kn[n, k]` in
-[Exercises](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-exercises-colorings).
-Computing its independence number is really just a case of translating the
-Erdős–Ko–Rado theorem (which is in Mathlib) into the language of `SimpleGraph`.
+We will look at the independence number of `Kn[n, k]` in [Cliques](#chapter-cliques)
+and colourings of `Kn[n, k]` in [Exercises](#section-exercises-colorings). Computing
+its independence number is really just a case of translating the Erdős–Ko–Rado
+theorem (which is in Mathlib) into the language of `SimpleGraph`.
 -/
 end SimpleGraph

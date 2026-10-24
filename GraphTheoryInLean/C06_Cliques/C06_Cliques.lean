@@ -232,9 +232,8 @@ least `n`. Notice that this result makes sense for `ι` an infinite type, so we 
 way to say that `n ≤ #ι` without assuming that `ι` is finite.
 
 In this situation we can use `ENat.card` which is the cardinality of a type as an
-extended natural number `ENat` or `ℕ∞`. (See
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality)
-for more details on the different ways to talk about cardinality.)
+extended natural number `ENat` or `ℕ∞`. (See [Cardinality](#section-cardinality) for
+more details on the different ways to talk about cardinality.)
 -/
 #check completeMultipartiteGraph.not_cliqueFree_of_le_enatCard
 /-!
@@ -277,10 +276,9 @@ variable {V : Type*} {G : SimpleGraph V}
                      --                       {s | G.IsNClique n s}
 
 /-!
-Recall our discussion of
-[Set-Builder Notation](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-set-builder-notation).
-The finset `G.cliqueFinset n` is `univ : Finset (Finset V)`, i.e. the powerset of
-`V`, filtered for those `Finset`s that are `n`-cliques in `G`.
+Recall our discussion of [Set-Builder Notation](#section-set-builder-notation). The
+finset `G.cliqueFinset n` is `univ : Finset (Finset V)`, i.e. the powerset of `V`,
+filtered for those `Finset`s that are `n`-cliques in `G`.
 -/
 example [Fintype V] (n : ℕ) [DecidableRel G.Adj] [DecidableEq V] :
   G.cliqueFinset n =
@@ -335,9 +333,9 @@ What this means for our definition of `cliqueNum` is that:
 
 1. If there is no bound on the size of cliques in `G` then `G.cliqueNum = 0`. This is
    the same lossy `0`-convention we met with `Nat.card` in
-   [Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality):
-   `sSup` on `ℕ` returns the genuine largest element only when its argument is
-   nonempty and bounded above, and falls back to `0` otherwise.
+   [Cardinality](#section-cardinality): `sSup` on `ℕ` returns the genuine largest
+   element only when its argument is nonempty and bounded above, and falls back to
+   `0` otherwise.
 2. If `G` has no vertices then `G.cliqueNum = 0`, but this time for a genuine reason:
    the empty set is a `0`-clique, so `0` really is the largest clique size. (So in
    particular `G.cliqueNum = 0` can hold for very different reasons.)
@@ -820,14 +818,13 @@ end kneser
 /-!
 # Clique and Independence Number of the Mycielskian
 
-Recall from
-[Mycielskian](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-mycielskian)
-Mycielski's two facts: if `G` is triangle-free then so is `mμ[G]`, and if `G` has
-chromatic number `k` then `mμ[G]` has chromatic number `k + 1`. In this section we
-prove the first fact, and more generally that the Mycielskian preserves the clique
-number. The second fact is `chromaticNumber_mycielskian` in the next chapter.
-Together they show that the clique number can be a very poor lower bound for the
-chromatic number. We finish by computing the independence number of `mμ[G]`.
+Recall from [Mycielskian](#section-mycielskian) Mycielski's two facts: if `G` is
+triangle-free then so is `mμ[G]`, and if `G` has chromatic number `k` then `mμ[G]`
+has chromatic number `k + 1`. In this section we prove the first fact, and more
+generally that the Mycielskian preserves the clique number. The second fact is
+`chromaticNumber_mycielskian` in the next chapter. Together they show that the
+clique number can be a very poor lower bound for the chromatic number. We finish by
+computing the independence number of `mμ[G]`.
 
 ## Triangle-Free Mycielskians
 
@@ -1028,10 +1025,9 @@ theorem cliqueNum_iterMycielskian_completeGraph_two (n : ℕ) :
 end mycielskian_cliquenum
 
 /-!
-In
-[Colouring Mycielskians](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-colouring-mycielskians)
-we show that `mμ^n K[2]` has chromatic number `n + 2`. So these graphs all have
-clique number `2` but have arbitrarily large chromatic number.
+In [Colouring Mycielskians](#section-colouring-mycielskians) we show that `mμ^n K[2]`
+has chromatic number `n + 2`. So these graphs all have clique number `2` but have
+arbitrarily large chromatic number.
 
 ## Independence Number of the Mycielskian *
 

@@ -75,8 +75,7 @@ def Iso.autCongr {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} (e : G �
 At the opposite extreme from vertex-transitive graphs are graphs with no symmetry at
 all: a graph is *asymmetric* if its only automorphism is the identity, i.e. its
 automorphism group is trivial. A simple example is the infinite path `pathNat₁`. This
-may seem surprising since, as we saw in
-[Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps), `pathNat₁` has
+may seem surprising since, as we saw in [Maps](#chapter-maps), `pathNat₁` has
 many embeddings into itself: for each `j : ℕ` the embedding `pathNat₁.translate j`
 sends `i` to `i + j`. However, none of these is surjective, except for the identity
 `pathNat₁.translate 0`.
@@ -287,11 +286,10 @@ def autCycleGraphMulEquivDihedral (n : ℕ) :
 
 /-!
 Combining this with the isomorphism `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]` from
-the exercises of
-[Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps), the
-automorphism group of the square `Q[2]` is the dihedral group of order `8`. (We
-identify the automorphism group of every hypercube in
-[The Automorphism Group of the Hypercube*](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-automorphism-group-of-the-hypercube).)
+the exercises of [Maps](#chapter-maps), the automorphism group of the square `Q[2]`
+is the dihedral group of order `8`. (We identify the automorphism group of every
+hypercube in [The Automorphism Group of the
+Hypercube*](#section-the-automorphism-group-of-the-hypercube).)
 -/
 /-- The automorphism group of the square `Q[2]` is the dihedral group of
 order 8. -/
@@ -448,9 +446,9 @@ object of algebraic graph theory. (Mathlib's `spectrum R M` is the set of `ξ : 
 which `ξ • 1 - M` is not invertible; for a matrix over a field these are its
 eigenvalues.)
 
-A `d`-regular graph has eigenvalue `d`, with the all-ones eigenvector. (In
-[The Laplacian](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-laplacian)
-we show that its multiplicity is the number of connected components.)
+A `d`-regular graph has eigenvalue `d`, with the all-ones eigenvector. (In [The
+Laplacian](#section-the-laplacian) we show that its multiplicity is the number of
+connected components.)
 -/
 #check IsRegularOfDegree.mem_spectrum_adjMatrix
 
@@ -765,10 +763,10 @@ end adjmatrix
 
 /-!
 For example, the hypercube `Q[n]` is `n`-regular and connected, so `n` is a simple
-eigenvalue of its adjacency matrix. (As in
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond),
-we first put the filtering `LocallyFinite` instance in scope, since the adjacency
-matrix is built from `DecidableRel Q[n].Adj`.)
+eigenvalue of its adjacency matrix. (As in [Stating Results Across a
+Diamond*](#section-stating-results-across-a-diamond), we first put the filtering
+`LocallyFinite` instance in scope, since the adjacency matrix is built from
+`DecidableRel Q[n].Adj`.)
 -/
 example (n : ℕ) :
     Module.finrank ℝ (Module.End.eigenspace (Q[n].adjMatrix ℝ).toLin' n) = 1 := by
@@ -1405,18 +1403,16 @@ lemma card_aut_hypercube (n : ℕ) :
 # Counting Copies *
 
 In this section we count copies of a graph `A` in a graph `B`, in two senses: the
-*labelled* copies are the elements of `Copy A B` from
-[Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies), and the
-*unlabelled* copies are the subgraphs of `B` isomorphic to `A`. We first show that
-the unlabelled copies of a complete graph `K[s]` are just the `s`-cliques.
+*labelled* copies are the elements of `Copy A B` from [Copies](#section-copies), and
+the *unlabelled* copies are the subgraphs of `B` isomorphic to `A`. We first show
+that the unlabelled copies of a complete graph `K[s]` are just the `s`-cliques.
 Automorphisms then explain the difference between labelled and unlabelled copies: we
 derive the basic fact that (for finite graphs) the number of labelled copies of `A`
 in `B` is equal to the number of unlabelled copies of `A` in `B`, multiplied by the
 number of automorphisms of `A`. (Mathlib has the inequality
 `copyCount_le_labelledCopyCount`, but not this identity.) We then apply it to cycles.
 
-The following maps
-([Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph))
+The following maps ([Which Notion of Subgraph?](#section-which-notion-of-subgraph))
 pass between the two kinds of copy.
 -/
 section copies
@@ -1561,10 +1557,11 @@ reference labelling is needed for this step, since the copy itself provides one.
 Rather than prove `right_inv` directly, we show that `invFun` is injective and deduce
 `right_inv` using `Function.LeftInverse.rightInverse_of_injective`. This avoids
 comparing labellings of two subgraphs that are equal but not definitionally equal
-([Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
-and so have different types. (This is essentially the difficulty we met for walks,
-which `Walk.copy` handles: the type `G.Walk u v` records the endpoints of a walk,
-just as the type of a labelling records the subgraph it labels.)
+([Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities)), and so have
+different types. (This is essentially the difficulty we met for walks, which
+`Walk.copy` handles: the type `G.Walk u v` records the endpoints of a walk, just as
+the type of a labelling records the subgraph it labels.)
 -/
 #check Function.LeftInverse.rightInverse_of_injective
 

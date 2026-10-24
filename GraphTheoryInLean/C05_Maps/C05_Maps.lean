@@ -83,8 +83,8 @@ Given embeddings `V ↪ W` and `W ↪ V` the Cantor–Schröder–Bernstein theo
 there exists an equivalence `V ≃ W`. Its proof is non-constructive, so Mathlib states
 it as `Nonempty (V ≃ W)`, a proposition saying that an equivalence exists, rather
 than as a definition producing the equivalence itself, which would be data. (Compare
-`Finite` and `Fintype` in
-[Finiteness Without Data: the Finite Typeclass](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-finiteness-without-data-the-finite-typeclass).)
+`Finite` and `Fintype` in [Finiteness Without Data: the Finite
+Typeclass](#section-finiteness-without-data-the-finite-typeclass).)
 -/
 example (f : V ↪ W) (g : W ↪ V) : Nonempty (V ≃ W) :=
   Function.Embedding.antisymm f g
@@ -100,8 +100,7 @@ Given a function `f : V → W`, we can push a graph `G : SimpleGraph V` forwards
 Of these, `SimpleGraph.comap` is used frequently in constructions of concrete graphs,
 so we start with it. The `SimpleGraph.map` construction is less frequently used for
 constructing concrete graphs, but appears often in proofs; we return to it in
-[Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps), once we have
-met graph homomorphisms.
+[Maps](#section-maps), once we have met graph homomorphisms.
 
 Given `f : V → W` and `G : SimpleGraph W`, `G.comap f` is the `SimpleGraph V` where
 two vertices are adjacent iff their images under `f` are adjacent in `G`.
@@ -114,10 +113,10 @@ example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
 
 /-!
 Two examples of graphs defined using `comap` are the complete multipartite and
-blow-up graphs. (If you read the starred section
-[Complete Multipartite Graphs and Blow-ups*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-complete-multipartite-graphs-and-blow-ups),
-you have already seen them.) Two vertices are adjacent in a complete multipartite
-graph iff they are in different parts.
+blow-up graphs. (If you read the starred section [Complete Multipartite Graphs and
+Blow-ups*](#section-complete-multipartite-graphs-and-blow-ups), you have already seen
+them.) Two vertices are adjacent in a complete multipartite graph iff they are in
+different parts.
 -/
 #source completeMultipartiteGraph    -- SimpleGraph (Σ i, V i) := .comap Sigma.fst ⊤
 example {ι : Type*} (V : ι → Type*) {u v : Σ i, V i} :
@@ -186,9 +185,7 @@ example {a b : ℕ} :
 /-!
 If you want a subgraph whose vertices have type `V` but containing only the vertices
 in `s` (which is often a more useful definition of an induced subgraph) then you need
-to use the `Subgraph` type (see
-[Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#chapter-subgraphs)
-for details).
+to use the `Subgraph` type (see [Subgraphs](#chapter-subgraphs) for details).
 -/
 variable {G : SimpleGraph V}
 #check ((⊤ : G.Subgraph).induce s)
@@ -262,8 +259,7 @@ Any graph homomorphism from the complete graph `⊤` is injective.
 Homomorphisms into a complete graph are also important. A homomorphism
 `G →g (⊤ : SimpleGraph γ)` sends adjacent vertices of `G` to distinct elements of
 `γ`, so it is exactly a proper colouring of `G` with colours from `γ`. Indeed this is
-how Mathlib defines `G.Coloring γ` (see
-[Colorings](https://jt496.github.io/GraphTheoryInLean/Colorings/#chapter-colorings)).
+how Mathlib defines `G.Coloring γ` (see [Colorings](#chapter-colorings)).
 Composing with a homomorphism `G →g H` turns colourings of `H` into colourings of
 `G`, so if `H` is `n`-colourable then so is `G`.
 -/
@@ -363,7 +359,7 @@ Note that the copies are *labelled*: an element of `Copy A B` records where each
 vertex of `A` goes. So if `A` has nontrivial automorphisms then a single subgraph of
 `B` isomorphic to `A` is the image of several elements of `Copy A B`, one for each
 automorphism of `A`. We return to this distinction in
-[Counting Copies*](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-counting-copies).
+[Counting Copies*](#section-counting-copies).
 
 An induced copy of `A` in `B` (i.e. `f : A ↪g B`) gives rise to a copy of `A` in
 `B`.
@@ -387,8 +383,7 @@ If `B` contains no copy of `A` then we say that `B` is `A`-*free*, written
 means containing no copy of `A` at all (as in "triangle-free"). Beware that
 structural graph theory often uses "`A`-free" to mean containing no *induced* copy of
 `A` (as in "claw-free"). For that notion we need a separate definition, which we give
-in
-[Claw-Free Graphs*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-claw-free-graphs).
+in [Claw-Free Graphs*](#section-claw-free-graphs).
 -/
 #source Free -- abbrev Free (A : SimpleGraph α) (B : SimpleGraph β) := ¬A ⊑ B
 
@@ -611,15 +606,12 @@ example {s : Set V} {G : SimpleGraph V} :
 end spanningcoe
 /-!
 We have now met three ways of describing a subgraph of `G : SimpleGraph V`: a graph
-`H ≤ G` with the same vertex type `V`
-([Order](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-order)), such
-as `(G.induce s).spanningCoe`; an induced subgraph `G.induce s : SimpleGraph ↑s`,
-whose vertex type is the subtype `↑s` of `V`; and a copy `Copy A G` of a graph `A`
-whose vertices may have any type
-([Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies)). Mathlib
-has a fourth, `G.Subgraph`, in which the vertex set can vary inside `V`. We compare
-all four in
-[Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph).
+`H ≤ G` with the same vertex type `V` ([Order](#section-order)), such as
+`(G.induce s).spanningCoe`; an induced subgraph `G.induce s : SimpleGraph ↑s`, whose
+vertex type is the subtype `↑s` of `V`; and a copy `Copy A G` of a graph `A` whose
+vertices may have any type ([Copies](#section-copies)). Mathlib has a fourth,
+`G.Subgraph`, in which the vertex set can vary inside `V`. We compare all four in
+[Which Notion of Subgraph?](#section-which-notion-of-subgraph).
 -/
 
 /-!
@@ -727,8 +719,7 @@ def Iso.mapMycielskian {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
 
 An *automorphism* of a graph `G` is an isomorphism `G ≃g G` from `G` to itself. The
 automorphisms of `G` form a group under composition, the *automorphism group* of `G`,
-which we study in
-[Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory).
+which we study in [Algebraic Graph Theory](#chapter-algebraic-graph-theory).
 In this section we use automorphisms to define vertex-transitivity, and show that
 complete graphs, cycles and hypercubes are vertex-transitive (empty graphs are left
 to the exercises), while the Mycielskian of a finite nonempty graph `G` is
@@ -789,10 +780,10 @@ The cycle graph `C[n]` is vertex-transitive. To prove this we define an automorp
 of `C[n]` by rotating the vertices modulo `n`: the rotation `cycleGraph.rotate d` is
 the one sending the vertex `d` to `0`, i.e. `x ↦ x - d`. (Rotating in this direction
 rather than `x ↦ x + d` makes the rotations match Mathlib's conventions for dihedral
-groups, as we shall see in
-[Automorphisms of Cycle Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-automorphisms-of-cycle-graphs).)
-The definition makes sense for every `n`, with the cases `n = 0, 1` trivial since
-`C[n]` is `⊥` there; only the proofs need to treat the degenerate cases separately.
+groups, as we shall see in [Automorphisms of Cycle
+Graphs](#section-automorphisms-of-cycle-graphs).) The definition makes sense for
+every `n`, with the cases `n = 0, 1` trivial since `C[n]` is `⊥` there; only the
+proofs need to treat the degenerate cases separately.
 -/
 /-- The automorphism of the cycle graph `C[n]` given by rotating the vertices
 modulo `n`, sending the vertex `d : Fin n` to `0`. -/
@@ -895,7 +886,7 @@ product `ℤ/2 ≀ Sₙ`, generated by the translations above together with perm
 the coordinates. While our construction of the hypercube using the vertices
 `HypercubeVert n` is very convenient for inductive proofs, to talk about the
 "coordinates" of a vertex it is better to use `Fin n → Bool`. We return to this in
-[The Hypercube and the Hamming Cube](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-hypercube-and-the-hamming-cube),
+[The Hypercube and the Hamming Cube](#section-the-hypercube-and-the-hamming-cube),
 where we give a graph isomorphism `Q[n] ≃g hypercubeHamming n` between our hypercube
 and the Hamming cube on `Fin n → Bool`, and then use it to identify the automorphism
 group of `Q[n]` as `ℤ/2 ≀ Sₙ`.
@@ -1136,9 +1127,8 @@ instance {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
 
 /-!
 The analogues for the indexed tensor product of the maps in
-[Maps of Tensor Products](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps-of-tensor-products)
-are in the exercises
-([Exercises](https://jt496.github.io/GraphTheoryInLean/Maps/#section-exercises-maps)).
+[Maps of Tensor Products](#section-maps-of-tensor-products) are in the exercises
+([Exercises](#section-exercises-maps)).
 
 # Claw-Free Graphs *
 

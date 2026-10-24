@@ -341,9 +341,8 @@ example : K[1000].edgeFinset.card = 499500 := by native_decide
 
 /-!
 The following table summarizes the differences. (The final row previews a subtlety
-that we will meet in
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)
-below.)
+that we will meet in [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction) below.)
 
 | Command/tactic | `#eval` | `decide` | `native_decide` |
 | :--- | :--- | :--- | :---|
@@ -485,9 +484,8 @@ adjacency of `pathNat₁`.
 Here we transfer the decidability instance from `pathNat₁` to `pathNat₃` using
 `decidable_of_iff`. (Defining it by rewriting directly with
 `pathNat₁_adj_iff_pathNat₃` would also type-check and work with `#eval`, but it would
-leave `decide` permanently stuck: see
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)
-for an explanation.)
+leave `decide` permanently stuck: see [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction) for an explanation.)
 -/
 instance : DecidableRel (pathNat₃.Adj) := fun u v =>
   decidable_of_iff (pathNat₁.Adj u v) pathNat₁_adj_iff_pathNat₃
@@ -498,11 +496,9 @@ example : pathNat₃.Adj 42 43 := by decide
 ### Decidability and Kernel Reduction *
 
 We already provided decidable adjacency instances for several of the graphs
-constructed in
-[Constructions](https://jt496.github.io/GraphTheoryInLean/Constructions/#chapter-constructions).
-We now provide two more, for the box product `G □ H` and the path graph `P[n]`, and
-use them to explain why `rw` can be harmless or harmful inside a `Decidable`
-instance.
+constructed in [Constructions](#chapter-constructions). We now provide two more, for
+the box product `G □ H` and the path graph `P[n]`, and use them to explain why `rw`
+can be harmless or harmful inside a `Decidable` instance.
 
 In order to decide if `(g₁, h₁)` is adjacent to `(g₂, h₂)` in `G □ H` we need to
 check if either `g₁ = g₂` and `H.Adj h₁ h₂` in `H`, or `h₁ = h₂` and `G.Adj g₁ g₂` in
@@ -768,7 +764,7 @@ The plain set-builder `{x | p x}` can also produce a `Finset`: it is the special
 of `{x ∈ s | p x}` in which `s` is `Finset.univ`, the `Finset` of *all* elements of
 the ambient type. This only makes sense when there is a `[Fintype α]` instance.
 (`Fintype` instances and `Finset.univ` are introduced properly in
-[Fintypes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-fintypes).)
+[Fintypes](#section-fintypes).)
 
 Left to its own devices `{x | p x}` defaults to producing a `Set α`, but when the
 expected type is `Finset α` and Lean can find a `Fintype α` instance (so that
@@ -800,11 +796,9 @@ A `Fintype V` instance is a `Finset V`, called `elems`, together with a proof th
 `elems` contains every element of `V`. Since `Finset` already guarantees a lack of
 duplicates, this ensures that `elems` contains each element of `V` *exactly* once.
 
-Later in this chapter (see
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality))
-we will see examples of other finiteness assumptions: in particular `Finite`, but for
-now we only consider `Fintype` since it is the most common and also the most
-problematic!
+Later in this chapter (see [Cardinality](#section-cardinality)) we will see examples
+of other finiteness assumptions: in particular `Finite`, but for now we only consider
+`Fintype` since it is the most common and also the most problematic!
 -/
 #source Fintype -- class Fintype (α : Type*) where
                 --    /- The `Finset` containing all elements of a `Fintype` -/
@@ -969,7 +963,7 @@ example : ∃ n, (⊥ : SimpleGraph ℕ).edgeFinset.card = n := good_card_edgeFi
 Overly strong instance arguments don't make a theorem wrong, they just make it less
 useful. (When you don't need to *compute* at all, the cleanest choice is often to
 drop `Fintype` data entirely in favour of `Finite`/`Nat.card`; see
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality).)
+[Cardinality](#section-cardinality).)
 
 ### Building `Fintype` Instances
 
@@ -1021,7 +1015,7 @@ instance (n : ℕ) : Fintype (pathNat₁.neighborSet n) :=
 
 /-!
 We will explore finite neighbourhoods in more detail in
-[Finite Neighbourhoods](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-finite-neighbourhoods).
+[Finite Neighbourhoods](#section-finite-neighbourhoods).
 
 ## Cardinality
 
@@ -1048,10 +1042,9 @@ open Finset
 
 end finset
 /-!
-In particular, the degree of a vertex (see
-[Finite Neighbourhoods](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-finite-neighbourhoods)
-below) is literally `#(G.neighborFinset v)`, and `#G.edgeFinset` is the number of
-edges of `G`.
+In particular, the degree of a vertex (see [Finite
+Neighbourhoods](#section-finite-neighbourhoods) below) is literally
+`#(G.neighborFinset v)`, and `#G.edgeFinset` is the number of edges of `G`.
 
 ### Counting a Type: `Fintype.card`
 
@@ -1114,8 +1107,7 @@ instance for use in proofs, but `#eval` cannot run it.
 One final remark about `Fintype` instances is that because two instances for the same
 type need not be *definitionally equal*, they can be the source of *diamonds* in
 typeclass inference. This can make proofs fail in mysterious ways. We will see a
-simple example of one below in
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
+simple example of one below in [The Handshake Lemma](#section-the-handshake-lemma).
 
 ### Counting with Only `Finite`: `Nat.card`
 
@@ -1273,7 +1265,7 @@ Notice that, unlike the instance built from `Fintype V`, this does not require
 We make this a `def` rather than an `instance`. As an instance it would give a second
 route to `Fintype (G.neighborSet v)`, alongside the one through `Fintype V` and
 `DecidableRel G.Adj`: a *diamond* of the kind we will meet in
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
+[The Handshake Lemma](#section-the-handshake-lemma).
 -/
 /-- A graph with finitely many edges is locally finite. -/
 @[instance_reducible]
@@ -1303,10 +1295,9 @@ right parts of a `Sum` type to describe the neighbourhoods. The neighbourhood of
 left vertex is the image of `Finset.univ : Finset (Fin t)` under `Sum.inr`, which we
 form with `Finset.map`. This maps a `Finset` along an *embedding* `f : α ↪ β`, that
 is, an injective function bundled with a proof that it is injective (we study
-embeddings properly in
-[Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps)). Since `f` is
-injective there are no duplicates to remove, so unlike `Finset.image` it needs no
-`DecidableEq β`, and `Finset.card_map` says that it preserves cardinality.
+embeddings properly in [Maps](#chapter-maps)). Since `f` is injective there
+are no duplicates to remove, so unlike `Finset.image` it needs no `DecidableEq β`,
+and `Finset.card_map` says that it preserves cardinality.
 -/
 #check Finset.card_map -- (s.map f).card = s.card
 
@@ -1348,8 +1339,7 @@ Lean can't infer this automatically so we need to provide an instance. We hand t
 bijection (or more precisely the `Equiv`) to `Fintype.ofEquiv` which then returns the
 instance. An `Equiv` `α ≃ β` is a structure bundling a function `toFun : α → β`, its
 inverse `invFun : β → α`, and proofs `left_inv` and `right_inv` that the two are
-mutually inverse (see
-[Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#chapter-maps)).
+mutually inverse (see [Maps](#chapter-maps)).
 -/
 /-- A vertex `w` in the `n`-uniform blow-up `G[n]` has a finite neighbourhood in
 `G[n]` assuming `w.fst` has a finite neighbourhood in `G`. -/
@@ -1373,9 +1363,9 @@ of any locally finite graph, and relate them to the degrees in the original grap
 
 If `v` has a finite neighbourhood in `G` then each vertex `⟨v, i⟩` of `G[n]` has
 degree `G.degree v * n`. (The statement takes both neighbourhood instances as
-arguments, as recommended in
-[Instance Arguments in Statements](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-instance-arguments-in-statements);
-the instance above is what supplies the second one whenever the lemma is used.)
+arguments, as recommended in [Instance Arguments in
+Statements](#section-instance-arguments-in-statements); the instance above is what
+supplies the second one whenever the lemma is used.)
 -/
 lemma degree_blowUpN {V : Type*} (G : SimpleGraph V) (n : ℕ) (v : V) (i : Fin n)
     [Fintype (G.neighborSet v)] [Fintype (G[n].neighborSet ⟨v, i⟩)] :
@@ -1516,11 +1506,11 @@ The error is caused by `Fintype` instance *diamonds*. The `degree` function take
 `G.LocallyFinite` instance, but the original lemma `sum_degrees_eq_twice_card_edges`
 uses a different route: namely `Fintype V` + `DecidableRel G.Adj` to synthesize a
 `Fintype (G.neighborSet v)` instance. Since these are not definitionally equal (see
-[Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
-Lean refuses to unify them, and the proof fails. The same happens with
-`G.edgeFinset`: the lemma builds its `Fintype G.edgeSet` instance from `Fintype V`
-and `DecidableRel G.Adj`, while we supplied one directly. The error message only
-reports the first mismatch.
+[Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities)), Lean refuses to
+unify them, and the proof fails. The same happens with `G.edgeFinset`: the lemma
+builds its `Fintype G.edgeSet` instance from `Fintype V` and `DecidableRel G.Adj`,
+while we supplied one directly. The error message only reports the first mismatch.
 
 However any two `Fintype` instances `inst₁` and `inst₂` for the same type are
 propositionally equal. Each instance consists of a `Finset` together with a proof
@@ -1632,12 +1622,9 @@ finite set `s`. We call this number `G.degIn s v`. We define it as the size of
 `s.bipartiteAbove G.Adj v`, which is Mathlib's name for `{w ∈ s | G.Adj v w}`. It
 comes from Mathlib's double-counting library, so facts about `degIn` can be fed
 straight into Mathlib's double-counting lemmas. We prove a few simple lemmas about
-`degIn`, which we will use in
-[Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem),
-for the
-[Moore and Cage Bounds](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-and-cage-bounds),
-and in the proof of
-[Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem).
+`degIn`, which we will use in [Brooks' Theorem*](#section-brooks-theorem), for the
+[Moore and Cage Bounds](#section-moore-and-cage-bounds), and in the proof of
+[Füredi's Stability Theorem](#section-f-redi-s-stability-theorem).
 -/
 section degIn
 open Finset
@@ -1768,7 +1755,7 @@ instance hypercubeDecidableEq (n : ℕ) : DecidableEq (HypercubeVert n) := by
 /-!
 Since we used the box product to define the hypercube, decidability of adjacency in
 `Q[n]` follows from the box product instance `boxProdDecidableRelAdj` (see
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction)).
+[Decidability and Kernel Reduction*](#section-decidability-and-kernel-reduction)).
 -/
 /-- Decidability of the adjacency relation for the hypercube. -/
 instance hypercubeDecidableRelAdj (n : ℕ) : DecidableRel Q[n].Adj := by
@@ -1911,11 +1898,9 @@ We have just created a `Fintype` *diamond*: `Q[n].neighborSet v` now has two
 instances, the one Lean synthesized by filtering all `2 ^ n` vertices and the
 efficient one we built through the box product, `hypercubeFintypeNeighborSet`. This
 is the situation we warned about in
-[Instance Arguments in Statements](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-instance-arguments-in-statements)
-and
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality),
-and explored in the proof of `sum_degrees_eq_twice_card_edges'`, so how much trouble
-does it actually cause?
+[Instance Arguments in Statements](#section-instance-arguments-in-statements) and
+[Cardinality](#section-cardinality), and explored in the proof of
+`sum_degrees_eq_twice_card_edges'`, so how much trouble does it actually cause?
 
 Mathlib has the same diamond, since `boxProdFintypeNeighborSet` is a global instance,
 and nothing in Mathlib breaks because of it. The reason is visible in
@@ -2118,20 +2103,20 @@ results about their vertex degrees and the size of their edge sets. We prove one
 result below and leave the rest as exercises.
 
 Note that we give no custom `Fintype` instances for the neighbourhoods of vertices in
-the Mycielskian. As
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond)
-explained, a second instance would do no harm as long as our statements do not name
-one, but here there is no reason to write one. Unlike the hypercube, the default
-instance is fast enough: it filters only the `2 * Fintype.card V + 1` vertices of
-`Option (V ⊕ V)`, so the `#eval`s above run without difficulty.
+the Mycielskian. As [Stating Results Across a
+Diamond*](#section-stating-results-across-a-diamond) explained, a second instance
+would do no harm as long as our statements do not name one, but here there is no
+reason to write one. Unlike the hypercube, the default instance is fast enough: it
+filters only the `2 * Fintype.card V + 1` vertices of `Option (V ⊕ V)`, so the
+`#eval`s above run without difficulty.
 
 The statement below mentions `G.degree v` and `mμ[G].degree v ₗ`, so, following the
-rule from
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond),
-it takes the `Fintype` instances for these two neighbourhoods as arguments. It needs
-nothing else; in particular it holds whether or not `V` is finite. The proof begins
-with the `classical` tactic, which supplies the `DecidableEq V` needed to form the
-images and the union of finsets below.
+rule from [Stating Results Across a
+Diamond*](#section-stating-results-across-a-diamond), it takes the `Fintype`
+instances for these two neighbourhoods as arguments. It needs nothing else; in
+particular it holds whether or not `V` is finite. The proof begins with the
+`classical` tactic, which supplies the `DecidableEq V` needed to form the images and
+the union of finsets below.
 -/
 open Finset in
 @[simp]
@@ -2197,9 +2182,9 @@ finite graph.
 
 We start with the `Finset.univ` of all vertices of a `SimpleGraph V` and then take
 its underlying `Multiset` (`univ.val`) and map it to the `Multiset` of degrees. We
-will call this the `degreeMultiset` of the graph. (In
-[The Laplacian](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-the-laplacian)
-we meet the *degree matrix*, the diagonal matrix whose entries are these degrees.)
+will call this the `degreeMultiset` of the graph. (In [The
+Laplacian](#section-the-laplacian) we meet the *degree matrix*, the diagonal matrix
+whose entries are these degrees.)
 -/
 /-- The multiset of degrees of a finite graph. -/
 def degreeMultiset [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
@@ -2424,13 +2409,13 @@ local instance : DecidablePred Graphic := fun m =>
 /-!
 Since this instance relies on the `sorry` in the proof of `havel_hakimi`, `#eval`
 will refuse to evaluate it, but we can still use it with `#eval!`, and the answers it
-gives are still meaningful. As we saw in
-[Decidability and Kernel Reduction*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-decidability-and-kernel-reduction),
-the verdict of `decidable_of_iff` comes entirely from the `Decidable` instance for
-its left-hand side, here `havelHakimi m = true`; the proof of the `Iff` is used only
-to build the accompanying proof terms, and compiled code erases those. So `#eval!`
-genuinely runs `havelHakimi`. What the `sorry` leaves unverified is *only* the claim
-that its verdict agrees with `Graphic`.
+gives are still meaningful. As we saw in [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction), the verdict of
+`decidable_of_iff` comes entirely from the `Decidable` instance for its left-hand
+side, here `havelHakimi m = true`; the proof of the `Iff` is used only to build the
+accompanying proof terms, and compiled code erases those. So `#eval!` genuinely runs
+`havelHakimi`. What the `sorry` leaves unverified is *only* the claim that its
+verdict agrees with `Graphic`.
 -/
 #eval! Graphic (mμ^3 C[5]).degreeMultiset -- true
 #eval! Graphic [6, 5, 4, 3, 2, 1, 1] -- false

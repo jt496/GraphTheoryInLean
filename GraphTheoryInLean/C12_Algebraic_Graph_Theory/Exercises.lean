@@ -40,8 +40,8 @@ def autComplMulEquiv' : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) :=
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
 has even degree. (Hint: such a graph is regular by
 `IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
-form `sum_degrees_eq_twice_card_edges'` of
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).)
+form `sum_degrees_eq_twice_card_edges'` of [The Handshake
+Lemma](#section-the-handshake-lemma).)
 -/
 lemma even_degree_of_isVertexTransitive' [Fintype V] [G.LocallyFinite]
     (h : G.IsVertexTransitive) (hodd : Odd (Fintype.card V)) (v : V) :
@@ -259,8 +259,8 @@ def autComplMulEquiv : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) where
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
 has even degree. (Hint: such a graph is regular by
 `IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
-form `sum_degrees_eq_twice_card_edges'` of
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).)
+form `sum_degrees_eq_twice_card_edges'` of [The Handshake
+Lemma](#section-the-handshake-lemma).)
 
 If `G` is `d`-regular then the handshake lemma says that `|V| * d` is twice the
 number of edges, hence even, and since `|V|` is odd `d` must be even.

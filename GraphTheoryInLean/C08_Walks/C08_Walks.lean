@@ -37,12 +37,12 @@ type but a *family* of types, one for each pair of endpoints, and walks with
 different endpoints live in different types. In many respects this is an advantage,
 but it does mean that we sometimes need to deal with type mismatches that have no
 counterpart in informal graph theory. We look at this in detail in
-[Plumbing: Fixing Type Mismatches](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-fixing-type-mismatches).
+[Plumbing: Fixing Type Mismatches](#section-plumbing-fixing-type-mismatches).
 
 Notice also that `G.Walk u v` is a `Type`, not a `Prop`: two walks with the same
 endpoints can be different, and we can compute with them. The proposition that there
 is *some* walk from `u` to `v` is `G.Reachable u v`, which we meet in
-[Reachability](https://jt496.github.io/GraphTheoryInLean/Walks/#section-reachability).
+[Reachability](#section-reachability).
 -/
 open Walk
 section basics
@@ -396,7 +396,7 @@ their type so, when there is a choice, the `takeUntil`, `dropUntil` or `rotate` 
 may be easier to work with. A vertex such as `p.getVert n` is often only
 *propositionally* (not definitionally) equal to the vertex we want, and the resulting
 type mismatches are the subject of
-[Plumbing: Fixing Type Mismatches](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-fixing-type-mismatches).
+[Plumbing: Fixing Type Mismatches](#section-plumbing-fixing-type-mismatches).
 -/
 
 /-!
@@ -547,7 +547,7 @@ reachable vertices.
 
 /-!
 We study reachability and connectivity in detail in
-[Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#chapter-connectivity).
+[Connectivity](#chapter-connectivity).
 -/
 
 /-!
@@ -620,8 +620,7 @@ In fact the only way that the path `p` could already contain this edge is if `p`
 the walk consisting of the single edge `h.symm`. This gives the following variant of
 `cons_isCycle_iff`, which we will need later: `cons h p` is a cycle iff `p` is a path
 of length not equal to 1. (The `simp only` call in the proof uses `tail_cons` and
-`isPath_copy`, which involve `Walk.copy`: see
-[Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy).)
+`isPath_copy`, which involve `Walk.copy`: see [Copy](#section-copy).)
 -/
 lemma Walk.cons_isCycle_iff_length_ne_one {u v : V} (p : G.Walk v u)
     (h : G.Adj u v) : (cons h p).IsCycle ↔ p.IsPath ∧ p.length ≠ 1 := by
@@ -649,14 +648,13 @@ path closed up by an edge is a cycle, unless the path is just that edge.
 
 We show first that any walk can be replaced by a path between the same endpoints
 whose length has the same parity, unless the graph has an odd cycle. The proof is by
-induction on the walk, mimicking `Walk.bypass`
-([Trails and Paths](https://jt496.github.io/GraphTheoryInLean/Walks/#section-trails-and-paths))
-while keeping track of parity. Given an edge `h : G.Adj a d` and a path `q` from `d`
-to `b` with the same parity as the rest of the walk, either `a` is not on `q` and
-`cons h q` is a path of the correct parity, or we split `q` at `a`. In this second
-case `Walk.bypass` would discard the closed walk `cons h (q.takeUntil a)` and keep
-`q.dropUntil a`. This preserves parity only if the closed walk has even length; if it
-has odd length then it is an odd cycle.
+induction on the walk, mimicking `Walk.bypass` ([Trails and
+Paths](#section-trails-and-paths)) while keeping track of parity. Given an edge
+`h : G.Adj a d` and a path `q` from `d` to `b` with the same parity as the rest of
+the walk, either `a` is not on `q` and `cons h q` is a path of the correct parity, or
+we split `q` at `a`. In this second case `Walk.bypass` would discard the closed walk
+`cons h (q.takeUntil a)` and keep `q.dropUntil a`. This preserves parity only if the
+closed walk has even length; if it has odd length then it is an odd cycle.
 
 [Figure: Left: skipping an even detour leaves a path from $a$ to $b$ of the same parity. Right: an odd detour is an odd cycle](https://jt496.github.io/GraphTheoryInLean/figures/odd_cycle_bypass.svg)
 -/
@@ -809,8 +807,7 @@ example {x} {p : G.Walk u u} [DecidableEq V] [Fintype (G.neighborSet x)]
 
 /-!
 We will revisit the more interesting question of which graphs admit Eulerian trails
-in
-[Eulerian Circuits and Trails](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-eulerian-circuits-and-trails).
+in [Eulerian Circuits and Trails](#section-eulerian-circuits-and-trails).
 -/
 /-!
 ## Hamiltonian Paths and Cycles
@@ -885,13 +882,13 @@ they are vital when working with walks in Lean. The common theme they share is t
 they allow us to fix type mismatches.
 
 All of these mismatches come from the difference between definitional and
-propositional equality, which we met in
-[Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities):
-for a variable `n : ℕ`, `n + 0` computes to `n`, so the two are defeq, while `0 + n`
-is stuck on the variable `n` and is only propositionally equal to `n`. Lean
-identifies two types when they are defeq, but not when they are merely
-propositionally equal. So a walk of type `G.Walk u (n + 0)` is also a walk of type
-`G.Walk u n`, but a walk of type `G.Walk u (0 + n)` is not.
+propositional equality, which we met in [Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities): for a variable
+`n : ℕ`, `n + 0` computes to `n`, so the two are defeq, while `0 + n` is stuck on the
+variable `n` and is only propositionally equal to `n`. Lean identifies two types when
+they are defeq, but not when they are merely propositionally equal. So a walk of type
+`G.Walk u (n + 0)` is also a walk of type `G.Walk u n`, but a walk of type
+`G.Walk u (0 + n)` is not.
 -/
 example {G : SimpleGraph ℕ} {u n : ℕ} (p : G.Walk u (n + 0)) : G.Walk u n := p
 
@@ -948,7 +945,7 @@ The solution is to use the predicate `¬ p.Nil` instead.
                  --   | nil {u : V} : Nil (nil : G.Walk u u)
 /-!
 To understand how this all works, read on. Otherwise feel free to skip to the next
-subsection [Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy).
+subsection [Copy](#section-copy).
 
 Recall that `Walk` is an inductive type with two constructors: `nil` (whose type
 forces its two endpoints to coincide) and `cons` (which does not). Now suppose we
@@ -1474,11 +1471,10 @@ lemma HypercubeVert.isPath_hammingPath {n} (u v : HypercubeVert n) :
       exact h (congrArg Prod.snd hw)
 
 /-!
-We will use Hamming paths to show that the hypercube is connected in
-[Connected Graphs](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-connected-graphs),
-and in
-[Distance in the Hypercube](https://jt496.github.io/GraphTheoryInLean/Distance/#section-distance-in-the-hypercube)
-we will see that the Hamming distance is the graph distance in `Q[n]`.
+We will use Hamming paths to show that the hypercube is connected in [Connected
+Graphs](#section-connected-graphs), and in [Distance in the
+Hypercube](#section-distance-in-the-hypercube) we will see that the Hamming distance
+is the graph distance in `Q[n]`.
 -/
 /-!
 ### Gray Code
@@ -1575,9 +1571,7 @@ end hypercube
 
 /-!
 From here it is a short step to getting a Hamiltonian cycle in `Q[n]` (for `n > 1`);
-see the
-[Exercises](https://jt496.github.io/GraphTheoryInLean/Walks/#section-exercises-walks)
-for details.
+see the [Exercises](#section-exercises-walks) for details.
 
 ## Walks in the Mycielskian
 
@@ -1832,10 +1826,8 @@ The weaker assumption is exactly what we need for one application of the result.
 back, so it is not a cycle. But it is not nil, and the tail `[v, u]` of its support
 has no repeated vertices, so its image `u ᵣ — v ₗ — u ₗ — v ᵣ — none — u ᵣ` is a
 `5`-cycle. Hence every edge of `G` gives a `5`-cycle in `mμ[G]`. We will use this to
-find the bridges of `mμ[G]` in
-[Bridges](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-bridges)
-and to compute its girth in
-[The Girth of the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Distance/#section-the-girth-of-the-mycielskian).
+find the bridges of `mμ[G]` in [Bridges](#section-bridges) and to compute its girth
+in [The Girth of the Mycielskian](#section-the-girth-of-the-mycielskian).
 -/
 lemma isCycle_mycielskianClosed_of_adj {u v : V} (h : G.Adj u v) :
     (mycielskianClosed (cons h (cons h.symm nil))).IsCycle :=

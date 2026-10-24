@@ -32,10 +32,8 @@ In Mathlib connectedness is defined in two steps: a graph is *preconnected* if t
 is a walk between every pair of vertices, and a graph is *connected* if it is
 preconnected and nonempty.
 
-Recall from
-[Reachability](https://jt496.github.io/GraphTheoryInLean/Walks/#section-reachability)
-that, for a single pair of vertices `u v : V`, `G.Reachable u v` means that there is
-a walk from `u` to `v`.
+Recall from [Reachability](#section-reachability) that, for a single pair of vertices
+`u v : V`, `G.Reachable u v` means that there is a walk from `u` to `v`.
 -/
 open Walk
 variable {V : Type*} {G : SimpleGraph V}
@@ -77,15 +75,15 @@ lemma connected_hypercube (n : ℕ) : Q[n].Connected where
 
 /-!
 For a concrete finite graph with decidable adjacency, connectivity is decidable, so
-`decide` can check it (see
-[Evaluating and Deciding](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-evaluating-and-deciding)).
+`decide` can check it (see [Evaluating and
+Deciding](#section-evaluating-and-deciding)).
 -/
 example : C[5].Connected := by decide
 
 /-!
 We have already met one source of connected graphs: a Hamiltonian graph is connected,
 since a Hamiltonian cycle passes through every vertex
-([Hamiltonian Paths and Cycles](https://jt496.github.io/GraphTheoryInLean/Walks/#section-hamiltonian-paths-and-cycles)).
+([Hamiltonian Paths and Cycles](#section-hamiltonian-paths-and-cycles)).
 -/
 #check IsHamiltonian.connected
 
@@ -214,9 +212,8 @@ The `SimpleGraph` and `Subgraph` given by a component are `C.toSimpleGraph` and
 /-!
 Connectivity of a `G.Subgraph` is a separate notion, defined via the coercion of the
 subgraph to a `SimpleGraph` on its vertex set. This is one of the duplications
-discussed in
-[Duplication](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-duplication);
-we will use it in the proof of Brooks' theorem.
+discussed in [Duplication](#section-duplication); we will use it in the proof of
+Brooks' theorem.
 
 The subgraph of a connected component is connected.
 -/
@@ -480,9 +477,8 @@ a copy of any cycle graph of order at least 3.
 
 Our running example `pathNat₁` is a tree. It is connected, since every vertex `n` can
 be reached from `0` along the walk `pathNat₁.path 0 n`. This walk ends at `0 + n`,
-which is not definitionally `n`, so we use `Walk.copy`
-([Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy)) to change its
-endpoint.
+which is not definitionally `n`, so we use `Walk.copy` ([Copy](#section-copy)) to
+change its endpoint.
 -/
 lemma connected_pathNat₁ : pathNat₁.Connected :=
   (connected_iff_exists_forall_reachable _).2
@@ -563,7 +559,7 @@ example {n : ℕ} : pathNat₁.IsBridge s(n, n + 1) :=
 A *spanning tree* of a connected graph `G` is a spanning subgraph that is a tree.
 Every connected graph has a spanning tree. Since `T` and `G` are both of type
 `SimpleGraph V`, the subgraph `T ≤ G` is automatically spanning (see
-[Spanning Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-spanning-subgraphs)).
+[Spanning Subgraphs](#section-spanning-subgraphs)).
 
 [Figure: A spanning tree in the Grötzsch graph](https://jt496.github.io/GraphTheoryInLean/figures/spanning_tree.svg)
 -/
@@ -597,13 +593,13 @@ would definitely be possible in Lean, but somehow more complicated than necessar
 Instead we prove the open case directly, reusing code from the circuit case.
 
 Euler's theorem is often stated for connected graphs, but, as we saw in
-[Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails),
-`IsEulerian` ignores isolated vertices (`IsEulerian.mem_support_iff`). The analogous
-necessary condition is that all the edges of `G` lie in a single connected component.
-We make this a definition `EdgesInOneComponent`. This is the weakest hypothesis under
-which the Eulerian existence theorems below hold, strictly weaker than `Connected`,
-which also forbids isolated vertices (when there are at least two vertices) and the
-graph with no vertices.
+[Eulerian Trails](#section-eulerian-trails), `IsEulerian` ignores isolated vertices
+(`IsEulerian.mem_support_iff`). The analogous necessary condition is that all the
+edges of `G` lie in a single connected component. We make this a definition
+`EdgesInOneComponent`. This is the weakest hypothesis under which the Eulerian
+existence theorems below hold, strictly weaker than `Connected`, which also forbids
+isolated vertices (when there are at least two vertices) and the graph with no
+vertices.
 -/
 section EulerExistence
 
@@ -640,10 +636,9 @@ and no isolated vertices, then `G` is connected.
 #check Walk.IsEulerian.connected_of_forall_not_isIsolated
 
 /-!
-As we saw in
-[Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails),
-an Eulerian walk forces the edge set to be finite (`IsEulerian.fintypeEdgeSet`). So
-for any `G` with `[Nonempty V]`, `G` has an Eulerian walk iff
+As we saw in [Eulerian Trails](#section-eulerian-trails), an Eulerian walk forces the
+edge set to be finite (`IsEulerian.fintypeEdgeSet`). So for any `G` with
+`[Nonempty V]`, `G` has an Eulerian walk iff
 
 * `G.edgeSet.Finite`,
 * `G.EdgesInOneComponent`, and
@@ -654,11 +649,11 @@ We prove the existence direction in this generality, assuming only
 characterization we assume `[Finite V]`, as Mathlib's half of it does.
 
 Our statements assume `[G.LocallyFinite]` rather than `[DecidableRel G.Adj]`, since
-what they mention are degrees (see
-[Instance Arguments in Statements](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-instance-arguments-in-statements)),
-so they apply whichever instance a graph's neighbourhoods carry. The proofs also talk
-about degrees in the graphs `G.deleteEdges s` obtained by deleting edges, so we first
-give these graphs a `LocallyFinite` instance of their own.
+what they mention are degrees (see [Instance Arguments in
+Statements](#section-instance-arguments-in-statements)), so they apply whichever
+instance a graph's neighbourhoods carry. The proofs also talk about degrees in the
+graphs `G.deleteEdges s` obtained by deleting edges, so we first give these graphs a
+`LocallyFinite` instance of their own.
 -/
 /-- Neighbourhoods in `G.deleteEdges s` are finite whenever those in `G` are. -/
 @[instance_reducible]
@@ -667,12 +662,11 @@ def locallyFiniteDeleteEdges [G.LocallyFinite] (s : Set (Sym2 V))
   Fintype.ofFinset ((G.neighborFinset v).filter fun w => s(v, w) ∉ s) fun w => by
     simp
 /-!
-As with `locallyFiniteOfFintypeEdgeSet` in
-[Finite Neighbourhoods](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-finite-neighbourhoods),
-we make this a `def` rather than an `instance`. As a global instance it would create
-a diamond: when `V` is a `Fintype` and `G.Adj` is decidable, Mathlib already gives
-the neighbourhoods of `G.deleteEdges s` a `Fintype` instance, and ours would be a
-second, different one.
+As with `locallyFiniteOfFintypeEdgeSet` in [Finite
+Neighbourhoods](#section-finite-neighbourhoods), we make this a `def` rather than an
+`instance`. As a global instance it would create a diamond: when `V` is a `Fintype`
+and `G.Adj` is decidable, Mathlib already gives the neighbourhoods of
+`G.deleteEdges s` a `Fintype` instance, and ours would be a second, different one.
 
 Instead we use the `attribute` command, which attaches an attribute to a declaration
 that already exists: `attribute [simp] foo` has the same effect as writing `@[simp]`
@@ -1552,12 +1546,11 @@ From now on we assume that `Δ ≥ 3`. The classical greedy colouring proof due 
 Lovász
 [Lovász 1975](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-lovasz-1975)
 uses the *blocks* of a graph, its maximal connected subgraphs without a cut vertex,
-which we study in the next section,
-[Cut Vertices and Blocks*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-cut-vertices-and-blocks).
-Instead, the proof we give is a variation of Lovász's approach that avoids blocks: it
-uses partial colourings and the idea behind greedy colouring, but replaces the need
-for `2`-connected blocks with strong induction on vertex subsets and a gluing step
-across a pair of non-adjacent vertices.
+which we study in the next section, [Cut Vertices and
+Blocks*](#section-cut-vertices-and-blocks). Instead, the proof we give is a variation
+of Lovász's approach that avoids blocks: it uses partial colourings and the idea
+behind greedy colouring, but replaces the need for `2`-connected blocks with strong
+induction on vertex subsets and a gluing step across a pair of non-adjacent vertices.
 
 The basic idea is to colour vertices greedily but in an order chosen so that we never
 reach an uncoloured vertex with `Δ` distinctly coloured neighbours, hence the greedy
@@ -1721,9 +1714,8 @@ We express "`A` is connected" as connectedness of the subgraph
 `(⊤ : G.Subgraph).induce A` (`Subgraph.induce`). Mathlib characterizes this by walks
 in `G` itself (`Subgraph.connected_iff_forall_exists_walk_subgraph`): any two
 vertices are joined by a walk `p` with `p.toSubgraph ≤ (⊤ : G.Subgraph).induce A`. As
-we saw in
-[Vertex Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-vertex-connectivity),
-for an induced subgraph this just says that every vertex of `p` lies in `A`
+we saw in [Vertex Connectivity](#section-vertex-connectivity), for an induced
+subgraph this just says that every vertex of `p` lies in `A`
 (`Walk.toSubgraph_le_induce_top_iff`).
 
 If the subgraph induced by `W` is connected, and `S ⊂ W` is a set of settled
@@ -2258,13 +2250,12 @@ def IsCutVertex (G : SimpleGraph V) (x : V) : Prop :=
   ∃ u v, u ≠ x ∧ v ≠ x ∧ G.Reachable u v ∧ ∀ p : G.Walk u v, x ∈ p.support
 
 /-!
-This ties cut vertices to the vertex connectivity of
-[Vertex Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-vertex-connectivity).
-In the definition of `IsVertexConnected 2` the deleted set `S` has at most one
-vertex. When `S` is empty the condition says that `G` is connected, and when
-`S = {x}` it says (for connected `G`) that `x` is not a cut vertex. So a graph is
-`2`-vertex-connected iff it has at least three vertices, is connected and has no cut
-vertex.
+This ties cut vertices to the vertex connectivity of [Vertex
+Connectivity](#section-vertex-connectivity). In the definition of
+`IsVertexConnected 2` the deleted set `S` has at most one vertex. When `S` is empty
+the condition says that `G` is connected, and when `S = {x}` it says (for connected
+`G`) that `x` is not a cut vertex. So a graph is `2`-vertex-connected iff it has at
+least three vertices, is connected and has no cut vertex.
 -/
 lemma isVertexConnected_two_iff : G.IsVertexConnected 2 ↔
     3 ≤ ENat.card V ∧ G.Connected ∧ ∀ x, ¬ G.IsCutVertex x := by
@@ -2311,11 +2302,10 @@ are (vacuously) `0`-colourable, but `K[1]` is not `0`-colourable.)
 
 Like the deleted sets in `IsEdgeReachable`, cycle-equivalence is most conveniently
 defined on all of `Sym2 V`, not just on `G.edgeSet`. So until we restrict to
-`G.edgeSet` in
-[Blocks as a Quotient of Edges](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-blocks-as-a-quotient-of-edges),
-*edge* means any element `s(u, v)` of `Sym2 V`, and we say *edge of `G`* for an
-element of `G.edgeSet`. An edge that is not an edge of `G` lies on no cycles, so it
-is cycle-equivalent only to itself.
+`G.edgeSet` in [Blocks as a Quotient of
+Edges](#section-blocks-as-a-quotient-of-edges), *edge* means any element `s(u, v)` of
+`Sym2 V`, and we say *edge of `G`* for an element of `G.edgeSet`. An edge that is not
+an edge of `G` lies on no cycles, so it is cycle-equivalent only to itself.
 -/
 /-- *Cycle-equivalence*, a relation on `Sym2 V`: two edges are related if they are
 equal or lie on a common cycle. -/

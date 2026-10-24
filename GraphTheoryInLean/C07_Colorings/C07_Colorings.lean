@@ -188,11 +188,10 @@ appears on the clique.
 #check Coloring.surjOn_of_card_le_isClique
 
 /-!
-A proper colouring is injective on any clique: two distinct vertices of a clique are
-adjacent, so they receive different colours. Since a colouring is a homomorphism,
+A proper colouring is injective on any clique: two distinct vertices of a clique
+are adjacent, so they receive different colours. Since a colouring is a homomorphism,
 this is a special case of `Hom.injOn_of_isClique` from
-[Finite Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-finite-cliques),
-which dot notation finds for us.
+[Finite Cliques](#section-finite-cliques), which dot notation finds for us.
 -/
 example {α : Type*} (c : G.Coloring α) {s : Set V} (hs : G.IsClique s) :
     Set.InjOn c s :=
@@ -247,7 +246,7 @@ Taking `k = χ G` shows that a finite graph has at most `χ G * ⍺ G` vertices.
 before, the Lean statement needs no finiteness assumption, since it holds trivially
 when `V` is infinite. Since `χ G` takes values in `ℕ∞`, the statement lives in `ℕ∞`:
 the natural numbers `Nat.card V` and `⍺ G` are silently cast to `ℕ∞` (compare
-[Counting in ℕ∞ : ENat.card](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-counting-in-enat-card)).
+[Counting in ℕ∞ : ENat.card](#section-counting-in-enat-card)).
 
 For finite `V` we cannot apply `Colorable.natCard_le_mul_indepNum` with `k = χ G`
 directly, since `k` must be a natural number. This is a job for the `lift` tactic,
@@ -329,10 +328,10 @@ theorem Colorable.sup_of_subsingleton_inter {G₁ G₂ : SimpleGraph V}
   exact Colorable.sup_of_isClique_inter (hsub.pairwise _) (hsub.pairwise _) h₁ h₂
 
 /-!
-This last result is the key step in colouring a graph block by block: in
-[Colouring a Graph from its Blocks](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-colouring-a-graph-from-its-blocks)
-we use it to show that if `n ≥ 1` and every block of a finite graph `G` is
-`n`-colourable, then so is `G`.
+This last result is the key step in colouring a graph block by block: in [Colouring a
+Graph from its Blocks](#section-colouring-a-graph-from-its-blocks) we use it to show
+that if `n ≥ 1` and every block of a finite graph `G` is `n`-colourable, then so is
+`G`.
 
 # Bipartite Graphs
 
@@ -398,7 +397,7 @@ example : (completeBipartiteGraph V W).IsBipartiteWith
 Mathlib also shows that acyclic graphs (`IsAcyclic`), and in particular trees
 (`IsTree`), are bipartite. The classical characterization, that a graph is bipartite
 iff it has no odd cycles, is the subject of
-[Odd Cycles and Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Walks/#section-odd-cycles-and-bipartite-graphs).
+[Odd Cycles and Bipartite Graphs](#section-odd-cycles-and-bipartite-graphs).
 -/
 #check IsAcyclic.colorable_two -- (hG : G.IsAcyclic) : G.Colorable 2
 #check IsTree.colorable_two -- (hG : G.IsTree) : G.Colorable 2
@@ -844,9 +843,8 @@ def degreeLT (v : V) [Fintype (G.neighborLTSet v)] : ℕ :=
 end degreeLT
 
 /-!
-Recall from
-[Finite Neighbourhoods](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-finite-neighbourhoods)
-that `G.LocallyFinite` is an abbreviation for `∀ v, Fintype (G.neighborSet v)`: the
+Recall from [Finite Neighbourhoods](#section-finite-neighbourhoods) that
+`G.LocallyFinite` is an abbreviation for `∀ v, Fintype (G.neighborSet v)`: the
 assumption that every vertex in a graph `G` has finitely many neighbours. We now need
 its `LT` analogue: every vertex in `G` has finitely many *earlier* neighbours.
 -/
@@ -1046,10 +1044,8 @@ This is stronger than the familiar bound `χ G ≤ Δ(G) + 1` in terms of the ma
 degree, since only *earlier* neighbours count. A finite graph whose vertices can be
 ordered so that each has at most `d` earlier neighbours is called `d`-*degenerate*,
 so this is the *degeneracy bound* `χ G ≤ d + 1`. As for the maximum degree bound,
-Brooks' theorem
-([Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem))
-shows that a connected graph needs all `Δ(G) + 1` colours only if it is a complete
-graph or an odd cycle.
+Brooks' theorem ([Brooks' Theorem*](#section-brooks-theorem)) shows that a connected
+graph needs all `Δ(G) + 1` colours only if it is a complete graph or an odd cycle.
 
 Our greedy colouring construction allows us to colour graphs on `ℕ`, for example
 `pathNat₁`, the infinite path graph on `ℕ`, and `⊤`, the complete graph on `ℕ`.
@@ -1153,8 +1149,7 @@ by first encoding its vertices in `ℕ` and then applying the greedy colouring
 algorithm to `G` as a graph on `ℕ`.
 
 One way to build the encoded graph is to push `G` forward along `Encodable.encode`
-using `SimpleGraph.map`
-([Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps)).
+using `SimpleGraph.map` ([Maps](#section-maps)).
 -/
 /-- The encoded graph defined via `SimpleGraph.map`. -/
 @[simps!]
@@ -1280,8 +1275,7 @@ theorem colorable_of_degree_le_of_countable {V : Type*} {G : SimpleGraph V} {Δ 
   exact ⟨greedyColoringFin hdeg⟩
 
 /-!
-Later we will use the
-[*De Bruijn–Erdős theorem*](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-de-bruijn-erd-s-theorem)
+Later we will use the [*De Bruijn–Erdős theorem*](#section-de-bruijn-erd-s-theorem)
 to show that the countable assumption is also superfluous, but for this we need to
 understand `Subgraph`s.
 
@@ -1290,10 +1284,10 @@ understand `Subgraph`s.
 Our definition of `greedy` has allowed us to prove the greedy colouring bound, but
 how good is `greedy` as an *algorithm*? As promised, we now investigate why
 evaluating it on dense graphs is so slow, and what to do about this. If you have no
-interest in efficient algorithms or debugging, skip to
-[Computing Colourings of Encodable Graphs](https://jt496.github.io/GraphTheoryInLean/Colorings/#section-computing-colourings-of-encodable-graphs):
-all it needs from this section is that, by the end of it, `#eval` runs a fast
-implementation of `greedy`.
+interest in efficient algorithms or debugging, skip to [Computing Colourings of
+Encodable Graphs](#section-computing-colourings-of-encodable-graphs): all it needs
+from this section is that, by the end of it, `#eval` runs a fast implementation of
+`greedy`.
 -/
 section evaluating
 variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
@@ -1575,9 +1569,8 @@ colouring above is optimal. For instance the colouring of `mμ^4 C[5]` uses the
 colours `0, ..., 6`, and since `χ C[5] = 3`, `chromaticNumber_iterMycielskian` shows
 that `7` colours are needed. Similarly the `6` colours used for
 `paleyGraph (ZMod 17)` are optimal: its independence number is `3` (see the exercises
-of [Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques)), so
-`natCard_le_chromaticNumber_mul_indepNum` gives `17 ≤ χ (paleyGraph (ZMod 17)) * 3`,
-forcing at least `6` colours.
+of [Cliques](#chapter-cliques)), so `natCard_le_chromaticNumber_mul_indepNum` gives
+`17 ≤ χ (paleyGraph (ZMod 17)) * 3`, forcing at least `6` colours.
 
 Now that `greedy` is faster we can also evaluate it much further along the crown
 graph.

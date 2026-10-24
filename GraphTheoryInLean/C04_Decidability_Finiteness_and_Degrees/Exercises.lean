@@ -88,8 +88,7 @@ example [Fintype V] [Fintype G.edgeSet] :
 /-!
 11. Show that `k` times the number of vertices of degree at least `k` is at most
 twice the number of edges. (The set of such vertices is a `Finset` written with the
-set-builder notation of
-[Set-Builder Notation](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-set-builder-notation).
+set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
 Compare it with the handshake lemma.)
 -/
 example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
@@ -100,7 +99,7 @@ example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
 12. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
 (Hint: `IsRegularOfDegree.compl` takes `[DecidableRel G.Adj]`, so it needs `Q[n]` to
 be regular with respect to the filtering instance for its neighbourhoods; see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).)
+[Stating Results Across a Diamond*](#section-stating-results-across-a-diamond).)
 -/
 example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
   sorry
@@ -396,8 +395,7 @@ example [Fintype V] [Fintype G.edgeSet] :
 /-!
 11. Show that `k` times the number of vertices of degree at least `k` is at most
 twice the number of edges. (The set of such vertices is a `Finset` written with the
-set-builder notation of
-[Set-Builder Notation](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-set-builder-notation).
+set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
 Compare it with the handshake lemma.)
 -/
 example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
@@ -413,7 +411,7 @@ example [Fintype V] [DecidableRel G.Adj] (k : ℕ) :
 12. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
 (Hint: `IsRegularOfDegree.compl` takes `[DecidableRel G.Adj]`, so it needs `Q[n]` to
 be regular with respect to the filtering instance for its neighbourhoods; see
-[Stating Results Across a Diamond*](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-stating-results-across-a-diamond).)
+[Stating Results Across a Diamond*](#section-stating-results-across-a-diamond).)
 -/
 example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
   -- put the filtering instance in scope, so that `IsRegularOfDegree.hypercube`

@@ -75,8 +75,8 @@ def hypercube.embedding' (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k] := sorry
 
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
-[Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-we use it to identify the automorphism group of the `2`-dimensional hypercube.
+[Algebraic Graph Theory](#chapter-algebraic-graph-theory) we use it to
+identify the automorphism group of the `2`-dimensional hypercube.
 
 11. Show that `Q[2]` is isomorphic to the cycle `C[4]`. Both graphs are concrete
 finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` is
@@ -125,8 +125,7 @@ lemma isEmpty_iso_completeGraph_two_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) 
 
 /-!
 Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
-from the starred section
-[Tensor Products*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-tensor-products).
+from the starred section [Tensor Products*](#section-tensor-products).
 
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.
@@ -296,8 +295,8 @@ def hypercube.embedding (n : ℕ) : (k : ℕ) → Q[n] ↪g Q[n + k]
 
 /-!
 The next question asks for an isomorphism `Q[2] ≃g C[4]`. In
-[Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#chapter-algebraic-graph-theory)
-we use it to identify the automorphism group of the `2`-dimensional hypercube.
+[Algebraic Graph Theory](#chapter-algebraic-graph-theory) we use it to
+identify the automorphism group of the `2`-dimensional hypercube.
 
 11. Show that `Q[2]` is isomorphic to the cycle `C[4]`. Both graphs are concrete
 finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` is
@@ -358,8 +357,7 @@ lemma isEmpty_iso_completeGraph_two_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
 
 /-!
 Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
-from the starred section
-[Tensor Products*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-tensor-products).
+from the starred section [Tensor Products*](#section-tensor-products).
 
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.

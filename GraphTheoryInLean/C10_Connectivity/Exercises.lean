@@ -76,8 +76,8 @@ Hint: every vertex `u ≠ v` has degree at least one
 (`Preconnected.degree_pos_of_nontrivial`), so
 `degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
 vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
-form `sum_degrees_eq_twice_card_edges'` from
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
+form `sum_degrees_eq_twice_card_edges'` from [The Handshake
+Lemma](#section-the-handshake-lemma).
 -/
 open Finset in
 lemma IsTree.degree_le_card_leaves' [Fintype V] [G.LocallyFinite] (h : G.IsTree)
@@ -98,9 +98,8 @@ example [Finite V] [Nontrivial V] (h : G.Connected) :
 
 /-!
 11. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
-Hint: search Mathlib (see
-[Finding Lemmas](https://jt496.github.io/GraphTheoryInLean/Introduction/#section-finding-lemmas))
-for a lemma about `induce` and a vertex of degree one.
+Hint: search Mathlib (see [Finding Lemmas](#section-finding-lemmas)) for a lemma
+about `induce` and a vertex of degree one.
 -/
 example [G.LocallyFinite] (hT : G.IsTree) {v : V}
     (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree := by
@@ -477,8 +476,8 @@ Hint: every vertex `u ≠ v` has degree at least one
 (`Preconnected.degree_pos_of_nontrivial`), so
 `degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
 vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
-form `sum_degrees_eq_twice_card_edges'` from
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
+form `sum_degrees_eq_twice_card_edges'` from [The Handshake
+Lemma](#section-the-handshake-lemma).
 -/
 open Finset in
 lemma IsTree.degree_le_card_leaves [Fintype V] [G.LocallyFinite] (h : G.IsTree)
@@ -526,9 +525,8 @@ example [Finite V] [Nontrivial V] (h : G.Connected) :
 
 /-!
 11. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
-Hint: search Mathlib (see
-[Finding Lemmas](https://jt496.github.io/GraphTheoryInLean/Introduction/#section-finding-lemmas))
-for a lemma about `induce` and a vertex of degree one.
+Hint: search Mathlib (see [Finding Lemmas](#section-finding-lemmas)) for a lemma
+about `induce` and a vertex of degree one.
 -/
 example [G.LocallyFinite] (hT : G.IsTree) {v : V}
     (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree :=

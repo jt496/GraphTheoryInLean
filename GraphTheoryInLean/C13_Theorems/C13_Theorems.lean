@@ -48,8 +48,7 @@ these are proved in this guide: the simplest case `R(3, 3) = 6` of Ramsey's theo
 (`not_cliqueFree_three_and_indepSetFree_three`), Euler's theorem on Eulerian trails
 (`Walk.exists_isEulerian_iff`), the theorems of Dirac
 (`isHamiltonian_of_card_le_two_mul_minDegree`) and Ore (`IsOreGraph.isHamiltonian`),
-Brooks' theorem (`brooks`) and
-[Kőnig's theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)
+Brooks' theorem (`brooks`) and [Kőnig's theorem](#section-k-nig-s-theorem)
 (`IsBipartite.matchingNum_eq_vertexCoverNum`).)
 
 # Matchings
@@ -437,8 +436,8 @@ single vertex `x`, which forms one odd component.
 Extremal graph theory asks how many edges a graph on `n` vertices can have while
 avoiding a given subgraph. The foundational result is *Turán's theorem*, which
 answers this question when the forbidden subgraph is a complete graph. Recall from
-[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques) that
-`G.CliqueFree (r + 1)` says that `G` has no clique of size `r + 1`.
+[Cliques](#chapter-cliques) that `G.CliqueFree (r + 1)` says that `G` has no
+clique of size `r + 1`.
 
 ## Turán Graphs
 
@@ -574,8 +573,7 @@ needs three properties of a Turán-maximal graph: it is complete multipartite, i
 parts are balanced, and it has an `r`-clique as soon as two distinct vertices are
 non-adjacent. Below we reprove Mathlib's lemmas for any complete multipartite graph
 with these properties, following Mathlib's proofs very closely (often verbatim). We
-will need this for Zykov's theorem
-([Zykov's Theorem*](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-zykov-s-theorem)).
+will need this for Zykov's theorem ([Zykov's Theorem*](#section-zykov-s-theorem)).
 
 The parts of a finite complete multipartite graph form a `Finpartition` of its
 vertices, whose parts are the equivalence classes of non-adjacency
@@ -1542,14 +1540,14 @@ lemma IsCompleteMultipartite.exists_transfer [Fintype V] [DecidableRel G.Adj]
 /-!
 Now let `t` be an `s`-clique containing `w`. It lies in the closed neighbourhood of
 `w`, so `t.image σ` is again an `s`-clique, by `IsNClique.image_of_adj` from
-[Cliques](https://jt496.github.io/GraphTheoryInLean/Cliques/#chapter-cliques). It
-contains `v` but neither `w` nor `a`. Different cliques have different images, since
-`σ` is injective on the whole closed neighbourhood and not just on each clique. So
-`t ↦ t.image σ` is an injection from the `s`-cliques containing `w` to those
-containing `v` that avoid `w` and `a`: this is the inequality below. Avoiding `a` is
-exactly what we need in `IsNCliqueMaximal.card_le_card_add_one`, where we find an
-`s`-clique containing `v` and `a` but not `w`. It contains `a`, so the injection
-misses it and the change is strictly positive.
+[Cliques](#chapter-cliques). It contains `v` but neither `w` nor `a`.
+Different cliques have different images, since `σ` is injective on the whole closed
+neighbourhood and not just on each clique. So `t ↦ t.image σ` is an injection from
+the `s`-cliques containing `w` to those containing `v` that avoid `w` and `a`: this
+is the inequality below. Avoiding `a` is exactly what we need in
+`IsNCliqueMaximal.card_le_card_add_one`, where we find an `s`-clique containing `v`
+and `a` but not `w`. It contains `a`, so the injection misses it and the change is
+strictly positive.
 -/
 lemma IsCompleteMultipartite.card_filter_mem_cliqueFinset_le [Fintype V]
     [DecidableEq V] [DecidableRel G.Adj] (hc : G.IsCompleteMultipartite) {v w a : V}
@@ -1631,7 +1629,7 @@ We have shown that, for `2 ≤ s`, an `s`-clique-maximal graph with an `s`-cliqu
 complete multipartite, that its parts are balanced, and that it has an `r`-clique
 unless it is complete. So it is a Turán graph, by
 `IsCompleteMultipartite.nonempty_iso_turanGraph`
-([Proof of Turán's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-proof-of-tur-n-s-theorem)).
+([Proof of Turán's Theorem](#section-proof-of-tur-n-s-theorem)).
 -/
 /-- For `2 ≤ s`, an `s`-clique-maximal graph with an `s`-clique is a Turán graph. -/
 theorem IsNCliqueMaximal.nonempty_iso_turanGraph [Fintype V] {s r : ℕ}
@@ -1863,9 +1861,8 @@ abbrev paleyGraph₉ : SimpleGraph (ZMod 3 × ZMod 3) :=
   circulantGraph {d | d.1 = 0 ∨ d.2 = 0}
 
 /-!
-By the parameters in
-[Strongly Regular Graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#section-strongly-regular-graphs),
-it is strongly regular with `ℓ = (9 - 5) / 4 = 1`: two adjacent vertices have exactly
+By the parameters in [Strongly Regular Graphs](#section-strongly-regular-graphs), it
+is strongly regular with `ℓ = (9 - 5) / 4 = 1`: two adjacent vertices have exactly
 one common neighbour, the third vertex of their row or column. So each edge lies in
 exactly one triangle, and `paleyGraph₉` is locally linear. It has `18` edges and `6`
 triangles. (We use `decide +kernel` since it can handle the recursion depth here.)

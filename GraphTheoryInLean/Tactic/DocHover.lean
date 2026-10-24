@@ -21,9 +21,10 @@ go-to-definition falls back to the elaborator of the command around the link, an
 Ctrl-click first opens `elabModuleDoc` (say) in Lean's sources.
 
 In a chapter of a guide (a file `C01_Introduction/X.lean`, say), each cross-reference
-`<REF>tag</REF>` or `<REF tag>text</REF>` goes to the heading of the guide with that
-tag on Ctrl-click, and shows the heading's title on hover, even when the heading is
-in a chapter the file does not import. A tag that names no heading gets a warning.
+`<REF>tag</REF>` or `<REF tag>text</REF>`, or `[text](#tag)` as the plain export
+writes one, goes to the heading of the guide with that tag on Ctrl-click, and shows
+the heading's title on hover, even when the heading is in a chapter the file does not
+import. A tag that names no heading gets a warning.
 
 Turn it off with `set_option linter.docHover false`. The guide's generated Verso
 files do, since Verso highlights their code from the info trees the linter adds to.
@@ -156,7 +157,8 @@ def startsAt (cs : Array Char) (i : Nat) (t : String) : Bool :=
 /-- The cross-references in the text `s`, as triples of the byte offsets of the start
 and the end of each `<REF>tag</REF>` or `<REF tag>text</REF>`, and its tag. The text
 may run across lines, as may the space after `<REF`; the placeholder `<REF />` is
-skipped. -/
+skipped. A Markdown link to a fragment, `[text](#tag)`, which is how the plain export
+of a guide writes a `<REF>`, is a cross-reference too. -/
 def refs (s : String) : Array (Nat × Nat × String) := Id.run do
   let cs := s.toList.toArray
   -- The byte offset of each character in `s`.
@@ -166,6 +168,16 @@ def refs (s : String) : Array (Nat × Nat × String) := Id.run do
   let mut out := #[]
   let mut i := 0
   while i < cs.size do
+    -- A link `[text](#tag)`: the `]` that ends the text comes before any other `[`.
+    if cs[i]! == '[' then
+      if let some j := find (i + 1) (cs[·]? ∈ [some '[', some ']']) then
+        if cs[j]! == ']' && startsAt cs (j + 1) "(#" then
+          if let some k := find (j + 3) (cs[·]? == some ')') then
+            let tag := String.ofList (cs.extract (j + 3) k).toList
+            if !tag.isEmpty && !tag.any Char.isWhitespace then
+              out := out.push (offs[i]!, offs[k + 1]!, tag)
+              i := k + 1
+              continue
     unless startsAt cs i "<REF" do
       i := i + 1
       continue

@@ -29,8 +29,7 @@ compute it for the hypercube and the Mycielskian.
 
 The final section is more advanced: we introduce *partial colourings*, colourings
 that need only be valid on a given set of vertices. These are the main tool in our
-proof of *Brooks' theorem* in
-[Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem).
+proof of *Brooks' theorem* in [Brooks' Theorem*](#section-brooks-theorem).
 
 # Subgraphs
 
@@ -196,14 +195,12 @@ example (p : G.Walk u v) (h : ¬ p.Nil) :
 
 /-!
 Recall that `Set.ncard` is essentially `Nat.card` for sets: both take the junk value
-`0` for infinite types/sets (see
-[Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality)).
+`0` for infinite types/sets (see [Cardinality](#section-cardinality)).
 
 If `c : G.Walk u u` is a cycle and `v` is a vertex in `c` then the set of neighbours
 of `v` in the subgraph corresponding to `c` has cardinality two. (Here
 `Subgraph.neighborSet` is the set of neighbours *within* the subgraph; we meet it
-properly in
-[Duplication](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-duplication).)
+properly in [Duplication](#section-duplication).)
 -/
 example {c : G.Walk u u} (hpc : c.IsCycle) (h : v ∈ c.support) :
   (c.toSubgraph.neighborSet v).ncard = 2 := hpc.ncard_neighborSet_toSubgraph_eq_two h
@@ -359,9 +356,8 @@ single-vertex subgraph `G.singletonSubgraph v` is also `⊥`; see the exercises.
 #check Subgraph.spanningCoe_inj -- H₁.spanningCoe = H₂.spanningCoe ↔ H₁.Adj = H₂.Adj
 /-!
 The two coercions are related through `SimpleGraph.spanningCoe` from
-[SpanningCoe](https://jt496.github.io/GraphTheoryInLean/Maps/#section-spanningcoe):
-if we take the graph `H.coe` on `↑H.verts` and then add back the missing vertices of
-`V`, we get `H.spanningCoe`.
+[SpanningCoe](#section-spanningcoe): if we take the graph `H.coe` on `↑H.verts` and
+then add back the missing vertices of `V`, we get `H.spanningCoe`.
 -/
 #check Subgraph.spanningCoe_coe -- H.coe.spanningCoe = H.spanningCoe
 /-!
@@ -470,13 +466,10 @@ we choose can make a big difference to how easy a proof is.
 | `H : G.Subgraph` | `V` | the vertex set varies, e.g. matchings |
 | `Copy A G`, `A ⊑ G` | any type | `A` is a fixed graph, e.g. `A`-free graphs |
 
-* `H ≤ G` with `H : SimpleGraph V`
-  ([Order](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-order))
-  keeps the vertex type, so the whole `SimpleGraph` API applies and these subgraphs
-  form a Boolean algebra. It is the right choice when all vertices are kept, as for
-  `G.deleteEdges s`.
-* `G.induce s`
-  ([Induced Subgraphs via Comap](https://jt496.github.io/GraphTheoryInLean/Maps/#section-induced-subgraphs-via-comap))
+* `H ≤ G` with `H : SimpleGraph V` ([Order](#section-order)) keeps the vertex type,
+  so the whole `SimpleGraph` API applies and these subgraphs form a Boolean algebra.
+  It is the right choice when all vertices are kept, as for `G.deleteEdges s`.
+* `G.induce s` ([Induced Subgraphs via Comap](#section-induced-subgraphs-via-comap))
   and `H.coe` are genuine `SimpleGraph`s, so every theorem about `SimpleGraph`
   applies to them, but their vertices live in a subtype. We pay for this whenever we
   pass between `v : V` and `⟨v, hv⟩ : ↑s`. The De Bruijn–Erdős theorem below is a
@@ -500,10 +493,9 @@ following three definitions.
 #source Subgraph.coeCopy -- (H : G.Subgraph) : Copy H.coe G
 /-!
 Finally there are useful hybrids. When we define partial colourings in
-[Partial Colourings*](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-partial-colourings)
-we will use the graph `((⊤ : G.Subgraph).induce s).spanningCoe` whose edges are those
-of `G` induced by `s`. Since it is a `SimpleGraph V`, we can use the
-`SimpleGraph.Coloring` API.
+[Partial Colourings*](#section-partial-colourings) we will use the graph
+`((⊤ : G.Subgraph).induce s).spanningCoe` whose edges are those of `G` induced by
+`s`. Since it is a `SimpleGraph V`, we can use the `SimpleGraph.Coloring` API.
 
 ## De Bruijn–Erdős Theorem
 
@@ -636,10 +628,8 @@ It is defined on `Jᵒᵖ` because restriction goes from larger to smaller subgr
 between `G : SimpleGraph V` and `K : SimpleGraph W`, and a subgraph `H : G.Subgraph`,
 `H.map f` is the subgraph of `K` whose vertex set is `f '' H.verts` and whose edges
 are the images `f u — f v` of edges `u — v` of `H`. Note the contrast with
-`SimpleGraph.map`
-([Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps)), which takes a
-plain function: here `f` must be a homomorphism, since the image has to be a subgraph
-of the given graph `K`.
+`SimpleGraph.map` ([Maps](#section-maps)), which takes a plain function: here `f`
+must be a homomorphism, since the image has to be a subgraph of the given graph `K`.
 -/
 #source Subgraph.map
 
@@ -749,15 +739,14 @@ then simply a spanning matching. (This is why matchings must be `G.Subgraph`s.)
 [Figure: Left: a matching $M$, which leaves $c$ and $f$ unmatched. Right: a perfect matching](https://jt496.github.io/GraphTheoryInLean/figures/matching.svg)
 
 Mathlib has the classical existence theorems (Hall's marriage theorem and Tutte's
-theorem) which we will discuss in
-[Matchings](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-matchings).
-But it does not (yet) define the *matching number* `ν G`: the maximum number of edges
-in a matching of `G`. Following Mathlib's `SimpleGraph.vertexCoverNum`, we define it
-as an indexed supremum in the extended naturals `ℕ∞`, measuring each matching with
-`Set.encard`. So a graph with arbitrarily large matchings has matching number `⊤`. In
-the definition below, the second binder `(_ : M.IsMatching)` ranges over proofs that
-`M` is a matching, so a subgraph that is not a matching contributes an empty
-supremum, `⊥ = 0`, and only matchings count.
+theorem) which we will discuss in [Matchings](#section-matchings). But it does not
+(yet) define the *matching number* `ν G`: the maximum number of edges in a matching
+of `G`. Following Mathlib's `SimpleGraph.vertexCoverNum`, we define it as an indexed
+supremum in the extended naturals `ℕ∞`, measuring each matching with `Set.encard`. So
+a graph with arbitrarily large matchings has matching number `⊤`. In the definition
+below, the second binder `(_ : M.IsMatching)` ranges over proofs that `M` is a
+matching, so a subgraph that is not a matching contributes an empty supremum,
+`⊥ = 0`, and only matchings count.
 -/
 #check Set.encard
 #source vertexCoverNum
@@ -913,7 +902,7 @@ lemma Subgraph.IsMatching.ncard_inter_le_of_isIndepSet {p₁ : Set V}
 In particular, if `G` is bipartite with parts `p₁` and `p₂` (`IsBipartiteWith`) then
 `p₁` is independent, so a matching with finitely many edges has at least as many
 edges as it has vertices in `p₁`. We use this later in the proof of
-[Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem).
+[Kőnig's Theorem](#section-k-nig-s-theorem).
 -/
 lemma Subgraph.IsMatching.ncard_inter_le {p₁ p₂ : Set V}
     (h₁ : G.IsBipartiteWith p₁ p₂) {M : G.Subgraph} [Finite M.edgeSet]
@@ -953,9 +942,9 @@ where `τ G` is the minimum size of a *vertex cover*, a set of vertices meeting 
 edge: the edges of a matching are pairwise disjoint, so a vertex cover must contain a
 distinct vertex from each of them. For *bipartite* graphs this is an equality
 (*Kőnig's theorem*, which is not in Mathlib; we prove it in
-[Kőnig's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)),
-but it can be strict: the odd cycle `C[2 * k + 3]` has `ν = k + 1` and `τ = k + 2`.
-(The exercises check the smallest case, `K[3]`.)
+[Kőnig's Theorem](#section-k-nig-s-theorem)), but it can be strict: the odd cycle
+`C[2 * k + 3]` has `ν = k + 1` and `τ = k + 2`. (The exercises check the smallest
+case, `K[3]`.)
 
 [Figure: Left: in $C_5$ a maximum matching (red) has $2$ edges, but a minimum vertex cover (green) needs $3$ vertices, so $\nu = 2 < 3 = \tau$. Right: in the bipartite graph $C_6$ the two are equal, $\nu = \tau = 3$](https://jt496.github.io/GraphTheoryInLean/figures/matching_cover.svg)
 
@@ -1201,8 +1190,7 @@ means something like `∀ a b ∈ s, G.Adj a b → C a ≠ C b`.
 
 There is currently no definition of partial colourings in Mathlib. However they arise
 in many situations, such as the proof of Brooks' theorem. (Indeed we will use them
-for exactly this; see
-[Brooks' Theorem*](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem).)
+for exactly this; see [Brooks' Theorem*](#section-brooks-theorem).)
 
 Below we discuss a possible implementation making use of the existing
 `SimpleGraph.Coloring` API where possible.
@@ -1211,15 +1199,14 @@ We want a partial colouring `C` to be a total function on `V` and we also want t
 reuse the `SimpleGraph.Coloring` API. The natural way to implement this is as a
 colouring of the subgraph of `G` induced by `s` but with all vertices of `V`
 retained: i.e. a colouring of `(G.induce s).spanningCoe`, where `spanningCoe` is
-`SimpleGraph.spanningCoe` from
-[SpanningCoe](https://jt496.github.io/GraphTheoryInLean/Maps/#section-spanningcoe).
-Alternatively we could ask for `C` to be a colouring of
-`((⊤ : G.Subgraph).induce s).spanningCoe`, using `Subgraph.spanningCoe` instead.
+`SimpleGraph.spanningCoe` from [SpanningCoe](#section-spanningcoe). Alternatively we
+could ask for `C` to be a colouring of `((⊤ : G.Subgraph).induce s).spanningCoe`,
+using `Subgraph.spanningCoe` instead.
 
 These are the same graph (this is Mathlib's `spanningCoe_induce_top`), but they are
-not *definitionally* equal
-([Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
-and the latter is much easier to work with. Its adjacency relation is definitionally
+not *definitionally* equal ([Definitional and Propositional
+Equalities](#section-definitional-and-propositional-equalities)), and the latter is
+much easier to work with. Its adjacency relation is definitionally
 `a ∈ s ∧ b ∈ s ∧ G.Adj a b`. While in `(G.induce s).spanningCoe`, adjacency unfolds
 to an existential over vertices of the subtype `↑s`, coming from `SimpleGraph.map`:
 `a ≠ b ∧ ∃ u v : ↑s, (G.induce s).Adj u v ∧ ↑u = a ∧ ↑v = b`.
@@ -1284,12 +1271,12 @@ In practice the most common use of `restrict` is the trivial one where the subse
 equal to the original set. `ColoringOn` is a type that encodes data, and just as with
 `Walk.copy` we frequently need to change the set on which a colouring is valid to one
 that is equal but not definitionally equal to it, for example `↑(insert a s)` versus
-`insert a ↑s`. This is the idea behind the *range copy pattern* from
-[Plumbing Elsewhere in the API](https://jt496.github.io/GraphTheoryInLean/Walks/#section-plumbing-elsewhere-in-the-api),
-applied, as for `Walk.copy`, to data in the type rather than in a field, and it is
-just restriction along `h.ge : t ⊆ s`. We call this `ColoringOn.copy`. (Mathlib's
-`Subgraph.copy` is an instance of the pattern itself: it replaces the `verts` and
-`Adj` fields of a subgraph by propositionally equal ones.)
+`insert a ↑s`. This is the idea behind the *range copy pattern* from [Plumbing
+Elsewhere in the API](#section-plumbing-elsewhere-in-the-api), applied, as for
+`Walk.copy`, to data in the type rather than in a field, and it is just restriction
+along `h.ge : t ⊆ s`. We call this `ColoringOn.copy`. (Mathlib's `Subgraph.copy` is
+an instance of the pattern itself: it replaces the `verts` and `Adj` fields of a
+subgraph by propositionally equal ones.)
 -/
 #check Subgraph.copy
 
