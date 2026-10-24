@@ -23,8 +23,8 @@ example (n k : ℕ) : (P[n]) ↪g (P[n + k]) where
 with nonempty parts.
 -/
 def Embedding.mapBlowUp' {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
-    (e : G ↪g H) (W : ι → Type*) (f : ∀ (i : ι), W i) :
-    G ↪g H.blowUpGraph W := by
+    (e : G ↪g H) (U : ι → Type*) (f : ∀ (i : ι), U i) :
+    G ↪g H.blowUpGraph U := by
   sorry
 
 /-!
@@ -131,7 +131,7 @@ from the starred section
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.
 -/
-example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) :
+example {ι : Type*} {U : ι → Type*} (G : ∀ i, SimpleGraph (U i)) (j : ι) :
     ⨂g i, G i →g G j := sorry
 
 /-!
@@ -140,15 +140,15 @@ Given graph homomorphisms from `K` to each `G i`, there is a homomorphism from `
 the indexed tensor product `⨂g i, G i` (provided `ι` is nonempty, which here follows
 from the existence of `i₀`; the next exercise looks at the case when `ι` is empty).
 -/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i := sorry
+example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (U i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i := sorry
 
 /-!
 16. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
 to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
 -/
-example {ι : Type*} [IsEmpty ι] {V : ι → Type*} {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) : Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
+example {ι : Type*} [IsEmpty ι] {U : ι → Type*} {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (U i)) : Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
   sorry
 
 /-!
@@ -157,8 +157,8 @@ its components. The neighbour set is the `Fintype.piFinset` of the componentwise
 neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
 automatic.
 -/
-example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
-    {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
+    {f : (i : ι) → U i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     [∀ i, Fintype ((G i).neighborSet (f i))] :
     (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
   sorry
@@ -170,8 +170,8 @@ graph embedding, we have a graph embedding of `K` into the indexed tensor produc
 allow the original homomorphism to be upgraded: injectivity `inj` and adjacency
 reflection `reflect`.)
 -/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i)
+example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (U i)) (f : ∀ i, K →g G i)
     (inj : Function.Injective (f i₀))
     (reflect : ∀ {x y}, (G i₀).Adj (f i₀ x) (f i₀ y) → K.Adj x y) :
     K ↪g ⨂g i, G i where
@@ -180,8 +180,7 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
   map_rel_iff' := sorry
 
 /-!
-The last exercise is about the starred section
-[Claw-Free Graphs*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-claw-free-graphs).
+The last exercise is about `ClawFree`, from a starred section.
 
 19. Show that `K[4]` is claw-free, but contains a non-induced copy of the claw
 `K[1, 3]`.
@@ -220,9 +219,9 @@ with nonempty parts.
 /-- An embedding `e : G ↪g H` gives an embedding of `G` into any blow-up of `H` with
 nonempty parts: compose `e` with `Embedding.blowUp`. -/
 def Embedding.mapBlowUp {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
-    (e : G ↪g H) (W : ι → Type*) (f : ∀ (i : ι), W i) :
-    G ↪g H.blowUpGraph W :=
-  (Embedding.blowUp H W f).comp e
+    (e : G ↪g H) (U : ι → Type*) (f : ∀ (i : ι), U i) :
+    G ↪g H.blowUpGraph U :=
+  (Embedding.blowUp H U f).comp e
 
 /-!
 4. Show that if `G ≤ H` are graphs on the same vertex type then `G ⊑ H`.
@@ -365,7 +364,7 @@ from the starred section
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.
 -/
-example {ι : Type*} {V : ι → Type*} (G : ∀ i, SimpleGraph (V i)) (j : ι) :
+example {ι : Type*} {U : ι → Type*} (G : ∀ i, SimpleGraph (U i)) (j : ι) :
     ⨂g i, G i →g G j where
   toFun f := f j
   map_rel' h := (piTensorProd_adj.1 h).1 j
@@ -376,8 +375,8 @@ Given graph homomorphisms from `K` to each `G i`, there is a homomorphism from `
 the indexed tensor product `⨂g i, G i` (provided `ι` is nonempty, which here follows
 from the existence of `i₀`; the next exercise looks at the case when `ι` is empty).
 -/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i where
+example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (U i)) (f : ∀ i, K →g G i) : K →g ⨂g i, G i where
   toFun x i := f i x
   map_rel' h := by
     have : Nonempty ι := ⟨i₀⟩
@@ -389,7 +388,7 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
 to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
 -/
 lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
-    {V : ι → Type*} {K : SimpleGraph X} (G : ∀ i, SimpleGraph (V i)) :
+    {U : ι → Type*} {K : SimpleGraph X} (G : ∀ i, SimpleGraph (U i)) :
     Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
   constructor
   · rintro ⟨f⟩
@@ -400,15 +399,15 @@ lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
     -- The goal is now `⊢ f a = f b`
     -- Note that `f.toFun` is a map from `X` to the vertex type
     -- of the indexed tensor product
-    have _ : X → (i : ι) → V i := f.toFun
-    -- So `f a` and `f b` are both elements of `(i : ι) → V i`.
-    have _ : (i : ι) → V i := f a
-    have _ : (i : ι) → V i := f b
-    -- Since `ι` is empty, `(i : ι) → V i` contains a unique element
+    have _ : X → (i : ι) → U i := f.toFun
+    -- So `f a` and `f b` are both elements of `(i : ι) → U i`.
+    have _ : (i : ι) → U i := f a
+    have _ : (i : ι) → U i := f b
+    -- Since `ι` is empty, `(i : ι) → U i` contains a unique element
     -- (you can define it by `fun i => isEmptyElim i`)
-    have : Unique ((i : ι) → V i) := inferInstance
+    have : Unique ((i : ι) → U i) := inferInstance
     -- Lean has the `Subsingleton` typeclass for types with at most one element.
-    have : Subsingleton ((i : ι) → V i) := inferInstance
+    have : Subsingleton ((i : ι) → U i) := inferInstance
     -- So `f a = f b` since they are both elements of a `Subsingleton` type.
     apply Subsingleton.elim
     -- Note: none of the `have` statements above are needed; they are for exposition.
@@ -424,8 +423,8 @@ its components. The neighbour set is the `Fintype.piFinset` of the componentwise
 neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
 automatic.
 -/
-example {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
-    {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
+    {f : (i : ι) → U i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     [∀ i, Fintype ((G i).neighborSet (f i))] :
     (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
   simp_rw [← card_neighborFinset_eq_degree, ← Fintype.card_piFinset]
@@ -439,8 +438,8 @@ graph embedding, we have a graph embedding of `K` into the indexed tensor produc
 allow the original homomorphism to be upgraded: injectivity `inj` and adjacency
 reflection `reflect`.)
 -/
-example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (V i)) (f : ∀ i, K →g G i)
+example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
+    (G : ∀ i, SimpleGraph (U i)) (f : ∀ i, K →g G i)
     (inj : Function.Injective (f i₀))
     (reflect : ∀ {x y}, (G i₀).Adj (f i₀ x) (f i₀ y) → K.Adj x y) :
     K ↪g ⨂g i, G i where
@@ -453,8 +452,7 @@ example {ι : Type*} {V : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     exact ⟨fun h => reflect (h i₀), fun hk i => (f i).map_adj hk⟩
 
 /-!
-The last exercise is about the starred section
-[Claw-Free Graphs*](https://jt496.github.io/GraphTheoryInLean/Maps/#section-claw-free-graphs).
+The last exercise is about `ClawFree`, from a starred section.
 
 19. Show that `K[4]` is claw-free, but contains a non-induced copy of the claw
 `K[1, 3]`.

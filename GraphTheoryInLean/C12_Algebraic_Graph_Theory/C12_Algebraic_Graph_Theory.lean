@@ -326,11 +326,10 @@ with zero diagonal.
 
 /-!
 The `(u, v)` entry of the `n`-th power of the adjacency matrix counts the walks of
-length `n` from `u` to `v`
-([Walks](https://jt496.github.io/GraphTheoryInLean/Walks/#chapter-walks)). The walks
-of a given length between two vertices form a `Finset`, `finsetWalkLength`, so both
-sides can be computed. (Defining `G.adjMatrix R` only needs `DecidableRel G.Adj`, but
-a matrix product sums over all of `V`, so from here on we assume `[Fintype V]`.
+length `n` from `u` to `v` (`adjMatrix_pow_apply_eq_card_walk`). The walks of a given
+length between two vertices form a `Finset`, `finsetWalkLength`, so both sides can
+be computed. (Defining `G.adjMatrix R` only needs `DecidableRel G.Adj`, but a
+matrix product sums over all of `V`, so from here on we assume `[Fintype V]`.
 `[G.LocallyFinite]` is not enough: the entries of powers of the adjacency matrix
 count walks and so are finite, but Mathlib's matrix product needs a finite index
 type.)
@@ -879,11 +878,10 @@ matrix and `J - 1 - A` is the adjacency matrix of the complement.
 /-!
 This quadratic equation forces `A` to have at most three distinct eigenvalues. It is
 the starting point of the Hoffman–Singleton theorem: a Moore graph of diameter `2`
-([Moore Graphs](https://jt496.github.io/GraphTheoryInLean/Distance/#section-moore-graphs))
-must have girth `5` and be strongly regular with `ℓ = 0` and `μ = 1`. For such a
-graph the equation reads `A ^ 2 + A - (k - 1) • 1 = J`, and a linear-algebra argument
-then shows that its degree `k` must be `2`, `3`, `7` or `57`. (Existence of such a
-graph with `k = 57` is currently an open problem.)
+(attaining `moore_bound`) must have girth `5` and be strongly regular with `ℓ = 0`
+and `μ = 1`. For such a graph the equation reads `A ^ 2 + A - (k - 1) • 1 = J`, and a
+linear-algebra argument then shows that its degree `k` must be `2`, `3`, `7` or `57`.
+(Existence of such a graph with `k = 57` is currently an open problem.)
 
 # The Hypercube and the Hamming Cube
 
@@ -1406,20 +1404,20 @@ lemma card_aut_hypercube (n : ℕ) :
 /-!
 # Counting Copies *
 
-In this section we count the *labelled* and *unlabelled* copies of a graph that we
-met in [Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies). We
-first show that the unlabelled copies of a complete graph `K[s]` are just the
-`s`-cliques. Automorphisms then explain the difference between labelled and
-unlabelled copies: we derive the basic fact that (for finite graphs) the number of
-labelled copies of a graph `A` in a graph `B` is equal to the number of unlabelled
-copies of `A` in `B`, multiplied by the number of automorphisms of `A`. (Mathlib has
-the inequality `copyCount_le_labelledCopyCount`, but not this identity.) We then
-apply it to cycles.
+In this section we count copies of a graph `A` in a graph `B`, in two senses: the
+*labelled* copies are the elements of `Copy A B` from
+[Copies](https://jt496.github.io/GraphTheoryInLean/Maps/#section-copies), and the
+*unlabelled* copies are the subgraphs of `B` isomorphic to `A`. We first show that
+the unlabelled copies of a complete graph `K[s]` are just the `s`-cliques.
+Automorphisms then explain the difference between labelled and unlabelled copies: we
+derive the basic fact that (for finite graphs) the number of labelled copies of `A`
+in `B` is equal to the number of unlabelled copies of `A` in `B`, multiplied by the
+number of automorphisms of `A`. (Mathlib has the inequality
+`copyCount_le_labelledCopyCount`, but not this identity.) We then apply it to cycles.
 
-Recall that `Copy A B` is the type of injective graph homomorphisms from `A` to `B`,
-and that the following maps
+The following maps
 ([Which Notion of Subgraph?](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-which-notion-of-subgraph))
-pass between copies of `A` in `B` and subgraphs of `B` isomorphic to `A`.
+pass between the two kinds of copy.
 -/
 section copies
 open Subgraph
@@ -1564,10 +1562,9 @@ Rather than prove `right_inv` directly, we show that `invFun` is injective and d
 `right_inv` using `Function.LeftInverse.rightInverse_of_injective`. This avoids
 comparing labellings of two subgraphs that are equal but not definitionally equal
 ([Definitional and Propositional Equalities](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-definitional-and-propositional-equalities)),
-and so have different types. (This is essentially the difficulty we met for walks in
-[Copy](https://jt496.github.io/GraphTheoryInLean/Walks/#section-copy): the type
-`G.Walk u v` records the endpoints of a walk, just as the type of a labelling records
-the subgraph it labels.)
+and so have different types. (This is essentially the difficulty we met for walks,
+which `Walk.copy` handles: the type `G.Walk u v` records the endpoints of a walk,
+just as the type of a labelling records the subgraph it labels.)
 -/
 #check Function.LeftInverse.rightInverse_of_injective
 

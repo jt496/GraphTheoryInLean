@@ -176,7 +176,7 @@ Given two walks `p` and `q` and an edge `h` from the end of `p` to the start of 
 we can form a new walk, `p.append (q.cons h)`, which has length
 `p.length + q.length + 1`.
 -/
-example {u v w z} {h : G.Adj v w} {p : G.Walk u v} {q : G.Walk w z} :
+example {z} {h : G.Adj v w} {p : G.Walk u v} {q : G.Walk w z} :
     (p.append <| q.cons h).length = p.length + q.length + 1 := by
   simp [add_assoc]
 
@@ -803,7 +803,7 @@ theorem Walk.IsEulerian.even_degree_iff' {x u v : V} {p : G.Walk u v} [Decidable
 /-!
 So every vertex of a graph with an Eulerian circuit has even degree.
 -/
-example {x u : V} {p : G.Walk u u} [DecidableEq V] [Fintype (G.neighborSet x)]
+example {x} {p : G.Walk u u} [DecidableEq V] [Fintype (G.neighborSet x)]
     (h : p.IsEulerian) : Even (G.degree x) := by
   simp [h.even_degree_iff']
 
@@ -1088,7 +1088,7 @@ even the length of a copied walk can be computed, and `rfl` fails.
 is not definitionally equal to the right-hand side
   p.length -/
 #guard_msgs (substring := true) in
-example {u u' v v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
+example {u' v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
     (p.copy hu hv).length = p.length := by rfl
 
 /-!
@@ -1096,7 +1096,7 @@ Substituting identifies `u'` with `u` and `v'` with `v`, so both casts are now a
 definitional equations and disappear, after which `rfl` succeeds. (For the same
 reason `copy_rfl_rfl`, which copies along `rfl` proofs, is itself proved by `rfl`.)
 -/
-example {u u' v v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
+example {u' v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
     (p.copy hu hv).length = p.length := by
   subst_vars
   rfl
@@ -1166,7 +1166,7 @@ that `u = b`, `v = x` and `y = c`. Making heavy use of `Walk.copy` we can constr
 walk `G.Walk a d` that is essentially the incorrectly typed walk
 `(cons h₁ (p ++ q)).concat h₂`. This walk has length `p.length + q.length + 2`.
 -/
-example {a b c d u v x y} (hub : u = b) (hvx : v = x) (hyc : y = c)
+example {a b c d x y} (hub : u = b) (hvx : v = x) (hyc : y = c)
     (p : G.Walk u v) (q : G.Walk v y) (h₁ : G.Adj a b) (h₂ : G.Adj c d) :
     ((cons h₁ ((p.copy hub hvx).append (q.copy hvx hyc))).concat h₂).length
       = p.length + q.length + 2 := by

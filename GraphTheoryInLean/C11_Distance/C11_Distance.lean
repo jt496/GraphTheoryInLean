@@ -315,8 +315,7 @@ Diameters add under box products (`ediam_boxProd`) and the complete graph on `Bo
 has diameter `1` (`ediam_top`), so by induction the diameter of `Q[n]` is `n`. The
 base case is the one-vertex graph `Q[0]`, whose diameter is `0`
 (`ediam_eq_zero_of_subsingleton`); we gave `HypercubeVert 0` a `Subsingleton`
-instance back in
-[Computations with Hypercubes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-computations-with-hypercubes).
+instance, `hypercubeZeroSubsingleton`.
 -/
 lemma ediam_hypercube {n : ℕ} : Q[n].ediam = n := by
   induction n with

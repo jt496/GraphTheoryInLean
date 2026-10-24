@@ -25,7 +25,7 @@ example (s t : ℕ) : K[s + 1, t + 1].Connected := by
 its vertex type. Hint: `ConnectedComponent.lift` and `ConnectedComponent.ind`; what
 does a walk in `⊥` look like?
 -/
-def botComponentEquiv' (V : Type*) : (⊥ : SimpleGraph V).ConnectedComponent ≃ V :=
+def botComponentEquiv' : (⊥ : SimpleGraph V).ConnectedComponent ≃ V :=
   sorry
 
 /-!
@@ -377,7 +377,7 @@ does a walk in `⊥` look like?
 Any walk in `⊥` is `nil`, so reachability in `⊥` is equality and
 `connectedComponentMk` is a bijection.
 -/
-def botComponentEquiv (V : Type*) : (⊥ : SimpleGraph V).ConnectedComponent ≃ V where
+def botComponentEquiv : (⊥ : SimpleGraph V).ConnectedComponent ≃ V where
   toFun := ConnectedComponent.lift id fun v w p _ => by
     cases p with
     | nil => rfl

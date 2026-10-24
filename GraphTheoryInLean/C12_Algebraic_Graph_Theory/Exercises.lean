@@ -33,7 +33,7 @@ lemma card_aut_completeGraph' (n : ℕ) : Nat.card (K[n] ≃g K[n]) = n.factoria
 3. Show that a graph and its complement have the same automorphisms. (Hint: for the
 inverse map, treat the pairs of vertices `a = b` and `a ≠ b` separately.)
 -/
-def autComplMulEquiv' (G : SimpleGraph V) : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) :=
+def autComplMulEquiv' : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) :=
   sorry
 
 /-!
@@ -121,7 +121,7 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
 /-!
 12. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
-example {V : Type} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
+example [Fintype V] [DecidableRel G.Adj] :
     ¬ G.IsSRGWith 10 4 0 1 := by
   sorry
 
@@ -244,7 +244,7 @@ shows that it is an automorphism of `Gᶜ`. Conversely, if `e` is an automorphis
 negating gives the adjacencies in `G`; for `a = b` both sides are false.
 -/
 /-- A graph and its complement have the same automorphisms. -/
-def autComplMulEquiv (G : SimpleGraph V) : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) where
+def autComplMulEquiv : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) where
   toFun e := ⟨e.toEquiv, by simp [e.map_adj_iff]⟩
   invFun e := ⟨e.toEquiv, fun {a b} => by
     have h := e.map_adj_iff (v := a) (w := b)
@@ -412,7 +412,7 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
 /-!
 12. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
-example {V : Type} [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
+example [Fintype V] [DecidableRel G.Adj] :
     ¬ G.IsSRGWith 10 4 0 1 := fun h => by
   have := h.param_eq G (by norm_num)
   norm_num at this

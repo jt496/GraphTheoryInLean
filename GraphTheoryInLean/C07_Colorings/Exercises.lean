@@ -111,7 +111,7 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
 11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
 `[Encodable V]` as a `SimpleGraph ℕ` agree.
 -/
-example [Encodable V] {G : SimpleGraph V} : G.encode = G.encodeMap := by
+example [Encodable V] : G.encode = G.encodeMap := by
   sorry
 
 /-! SOLUTIONS -/
@@ -290,7 +290,7 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
 11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
 `[Encodable V]` as a `SimpleGraph ℕ` agree.
 -/
-example [Encodable V] {G : SimpleGraph V} : G.encode = G.encodeMap := by
+example [Encodable V] : G.encode = G.encodeMap := by
   ext a b
   simp only [encode_adj, encodeMap_adj]
   constructor

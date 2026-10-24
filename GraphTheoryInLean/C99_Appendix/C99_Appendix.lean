@@ -177,7 +177,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 * `pathGraph.embedding`: embedding of a path graph `P[n]` into a longer path
   `P[n + k]`.
-* `Embedding.mapBlowUp`: embedding of `G` into the blow-up `H.blowUpGraph W` given
+* `Embedding.mapBlowUp`: embedding of `G` into the blow-up `H.blowUpGraph U` given
   `G ↪g H` and nonempty parts.
 * `hypercube.embedding`: embedding of `Q[n]` into `Q[n + k]` by iterating
   `hypercube.embedFalse`.

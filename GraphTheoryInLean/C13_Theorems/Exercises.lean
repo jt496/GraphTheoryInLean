@@ -97,7 +97,7 @@ example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r := by
 10. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
 triangle-free graph.
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
+example [Fintype V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
     #mμ[G].edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
   sorry
 
@@ -157,7 +157,7 @@ lemma card_cliqueFinset_two' [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 17. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
 Zykov's theorem with `s = 2`.
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
+example [Fintype V] [DecidableRel G.Adj] {r : ℕ}
     (h : G.CliqueFree (r + 1)) : #G.edgeFinset ≤ turanNumber (Fintype.card V) r := by
   sorry
 
@@ -177,8 +177,7 @@ double-counting argument like those in this chapter. Show that the degrees of an
 `∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
 degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
 part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
-`sum_degIn_comm`, as in the proof of Füredi's theorem
-([Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem)).
+`sum_degIn_comm`, as in the proof of Füredi's theorem (`furedi_step`).
 -/
 theorem sum_degree_le_erdosGallai' [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (S : Finset V) :
@@ -434,7 +433,7 @@ example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r :=
 10. Use Mantel's theorem to bound the number of edges of the Mycielskian of a
 triangle-free graph.
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
+example [Fintype V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
     #mμ[G].edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
   have := (CliqueFree.mycielskian h).card_edgeFinset_le (r := 2)
   rwa [turanNumber_two, Fintype.card_option, Fintype.card_sum, ← two_mul]
@@ -524,8 +523,9 @@ lemma card_cliqueFinset_two [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 17. Deduce the edge bound of Turán's theorem, `CliqueFree.card_edgeFinset_le`, from
 Zykov's theorem with `s = 2`.
 -/
-example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] {r : ℕ}
+example [Fintype V] [DecidableRel G.Adj] {r : ℕ}
     (h : G.CliqueFree (r + 1)) : #G.edgeFinset ≤ turanNumber (Fintype.card V) r := by
+  classical
   have := h.card_cliqueFinset_le 2
   rwa [card_cliqueFinset_two, card_cliqueFinset_two] at this
 
@@ -545,8 +545,7 @@ double-counting argument like those in this chapter. Show that the degrees of an
 `∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
 degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
 part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
-`sum_degIn_comm`, as in the proof of Füredi's theorem
-([Füredi's Stability Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-f-redi-s-stability-theorem)).
+`sum_degIn_comm`, as in the proof of Füredi's theorem (`furedi_step`).
 -/
 theorem sum_degree_le_erdosGallai [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (S : Finset V) :

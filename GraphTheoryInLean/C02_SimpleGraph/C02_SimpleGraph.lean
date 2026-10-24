@@ -1,5 +1,7 @@
 import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.DeleteEdges
+import Mathlib.Combinatorics.Graph.Basic
+import Mathlib.Combinatorics.Digraph.Basic
 namespace SimpleGraph
 /-!
 In this chapter we introduce the basics of `SimpleGraph`, Mathlib's definition of a

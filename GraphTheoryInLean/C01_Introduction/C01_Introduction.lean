@@ -138,6 +138,8 @@ material. Sections or subsections whose titles are marked with a star are more
 advanced. Later sections sometimes use their results, and recall what they need when
 they do.
 
+[Figure: A route through the guide](https://jt496.github.io/GraphTheoryInLean/figures/reading_routes.svg)
+
 We use three running examples throughout: the `n`-dimensional hypercube `Q[n]`
 ([Hypercube](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-hypercube)),
 the Mycielskian `mμ[G]` of a graph `G`

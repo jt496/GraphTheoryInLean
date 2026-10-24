@@ -44,15 +44,13 @@ Euler's circuit theorem, Euler's formula
 and planarity, Menger's theorem, Brooks' theorem, Vizing's theorem, Berge's theorem
 [Berge 1957](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-berge-1957),
 Kőnig's theorem on bipartite matchings and the theorems of Dirac and Ore. (Some of
-these are proved in this guide:
-[the simplest case](https://jt496.github.io/GraphTheoryInLean/Cliques/#section-triangles-and-independent-sets)
-of Ramsey's theorem, `R(3, 3) = 6`,
-[Euler's theorem](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-euler-s-theorem)
-on Eulerian trails, the theorems of
-[Dirac and Ore](https://jt496.github.io/GraphTheoryInLean/Walks/#section-hamiltonian-graphs-ore-dirac-and-bondy-chv-tal),
-[Brooks' theorem](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-brooks-theorem)
-and
-[Kőnig's theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem).)
+these are proved in this guide: the simplest case `R(3, 3) = 6` of Ramsey's theorem
+(`not_cliqueFree_three_and_indepSetFree_three`), Euler's theorem on Eulerian trails
+(`Walk.exists_isEulerian_iff`), the theorems of Dirac
+(`isHamiltonian_of_card_le_two_mul_minDegree`) and Ore (`IsOreGraph.isHamiltonian`),
+Brooks' theorem (`brooks`) and
+[Kőnig's theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)
+(`IsBipartite.matchingNum_eq_vertexCoverNum`).)
 
 # Matchings
 
@@ -366,11 +364,10 @@ are first converted with `spanningCoe`.
 /-!
 This is the machinery behind Mathlib's proof of Tutte's theorem below.
 
-In
-[Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-cycles-in-graphs-of-maximum-degree-two)
-we showed that in a graph of maximum degree at most `2` every cycle is a whole
-connected component. This applies to `M ∆ N`, since a graph satisfying `IsCycles` has
-maximum degree at most `2`: each vertex has either no neighbours or exactly two.
+By `Walk.IsCycle.toSubgraph_eq_of_degree_le_two`, in a graph of maximum degree at
+most `2` every cycle is a whole connected component. This applies to `M ∆ N`, since a
+graph satisfying `IsCycles` has maximum degree at most `2`: each vertex has either no
+neighbours or exactly two.
 -/
 /-- A graph satisfying `IsCycles` has maximum degree at most `2`. -/
 lemma IsCycles.degree_le_two [G.LocallyFinite] (h : G.IsCycles) (v : V) :
@@ -1101,9 +1098,8 @@ Fix `s ≥ 2` and let `G` have the most `s`-cliques among the `(r + 1)`-clique-f
 graphs on `V`. We show in turn that `G` is complete multipartite, that its parts are
 balanced, and that it has an `r`-clique unless it is complete. Then, as in Mathlib,
 such a graph is isomorphic to `T[n, r]`
-([Proof of Turán's Theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-proof-of-tur-n-s-theorem)).
-For edges, Mathlib settles each of the first two steps by comparing degrees; for
-cliques each needs a new idea.
+(`IsCompleteMultipartite.nonempty_iso_turanGraph`). For edges, Mathlib settles each
+of the first two steps by comparing degrees; for cliques each needs a new idea.
 
 We first make "the most `s`-cliques" precise. Mathlib defines `IsTuranMaximal r` as
 `IsExtremal (CliqueFree · (r + 1))`, where `IsExtremal p` says that a graph has
@@ -1971,8 +1967,7 @@ finite parts. We end with two results about the infinite structure of a graph.
 
 *Kőnig's lemma*
 [Kőnig 1927](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-konig-1927)
-(not to be confused with
-[Kőnig's theorem](https://jt496.github.io/GraphTheoryInLean/Theorems/#section-k-nig-s-theorem)
+(not to be confused with Kőnig's theorem `IsBipartite.matchingNum_eq_vertexCoverNum`
 on matchings) says that an infinite, connected, locally finite graph contains an
 infinite path. Mathlib has the order-theoretic form of this result: in a (strongly
 atomic) partial order in which each element is covered by finitely many elements, an

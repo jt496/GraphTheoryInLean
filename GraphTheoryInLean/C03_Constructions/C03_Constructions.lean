@@ -393,9 +393,9 @@ scoped notation "L[" G "]" => lineGraph G
 The edge set `G.edgeSet` is a `Set (Sym2 V)`, so to use it as the vertex type of
 `L[G]`, Lean coerces it to the subtype `{e : Sym2 V // e ∈ G.edgeSet}`, written
 `↑G.edgeSet`. A vertex of `L[G]` is therefore an edge bundled with a proof that it
-belongs to `G`: a term `⟨s(u, v), h⟩` with `h : s(u, v) ∈ G.edgeSet`. As we saw in
-[Edges](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-edges), this
-membership is the same as `G.Adj u v`. For a concrete graph, `decide` can supply `h`.
+belongs to `G`: a term `⟨s(u, v), h⟩` with `h : s(u, v) ∈ G.edgeSet`. This membership
+is the same as `G.Adj u v` (`mem_edgeSet`). For a concrete graph, `decide` can supply
+`h`.
 -/
 #check L[K[4]] -- SimpleGraph ↑K[4].edgeSet
 #check (⟨s(0, 1), by decide⟩ : K[4].edgeSet)
@@ -951,8 +951,7 @@ classes. The definition in Mathlib looks rather forbidding at first glance:
 /-!
 We start with an index type `ι` (the labels of the vertex classes) and a function
 `V : ι → Type*`. The vertex type of the graph is `Σ i, V i`, the dependent pair or
-`Sigma` type that we met in
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs).
+`Sigma` type that we met in the definition of `SimpleGraph.sigma`.
 -/
 #source Sigma
 /-!
@@ -960,12 +959,12 @@ Recall that a vertex `v : Σ i, V i` is a pair `⟨i, w⟩` consisting of an ind
 `i : ι` and an element `w : V i`; the class labelled by `i` is then the set of
 vertices whose first component is `i`.
 
-The `Sigma` type plays the same role here that the `Sum` type played for
-[complete bipartite graphs](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-complete-bipartite-graphs).
-Just as a vertex of a sum type knows which of the two sides it came from, since it is
-either a `Sum.inl` or a `Sum.inr`, a vertex of `Σ i, V i` knows which class it lies
-in, since it carries its index. The two alternatives `Sum.inl` and `Sum.inr` have
-simply been replaced by one alternative for each `i : ι`.
+The `Sigma` type plays the same role here that the `Sum` type played in
+`completeBipartiteGraph`. Just as a vertex of a sum type knows which of the two sides
+it came from, since it is either a `Sum.inl` or a `Sum.inr`, a vertex of `Σ i, V i`
+knows which class it lies in, since it carries its index. The two alternatives
+`Sum.inl` and `Sum.inr` have simply been replaced by one alternative for each
+`i : ι`.
 -/
 #check Sigma.fst -- The first component of a dependent pair `⟨i, w⟩`.
 /-!

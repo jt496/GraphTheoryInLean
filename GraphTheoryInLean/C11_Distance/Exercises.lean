@@ -103,7 +103,7 @@ example : grotzschGraph.egirth = 4 := by
 12. Use the Moore bound to show that a `3`-regular graph of diameter at most `2` has
 at most `10` vertices. (The Petersen graph shows that this is best possible.)
 -/
-example [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+example [Fintype V] [DecidableRel G.Adj]
     (h : G.IsRegularOfDegree 3) (hd : G.ediam ≤ 2) : Fintype.card V ≤ 10 := by
   sorry
 
@@ -113,7 +113,7 @@ assumption: a locally finite graph with maximum degree at most `d + 1` and diame
 at most `k` is finite, and has at most `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))`
 vertices. Hint: `finite_of_eccent_le` and `moore_bound`.
 -/
-example (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
+example [G.LocallyFinite] (d k : ℕ)
     (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
     Finite V ∧ Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
   sorry
@@ -123,7 +123,7 @@ example (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
 girth at least `5` has at least `10` vertices. (The Petersen graph shows that this
 is best possible.)
 -/
-example [Fintype V] [Nonempty V] (G : SimpleGraph V) [DecidableRel G.Adj]
+example [Fintype V] [Nonempty V] [DecidableRel G.Adj]
     (h : ∀ v, 3 ≤ G.degree v) (hg : 5 ≤ G.egirth) : 10 ≤ Fintype.card V := by
   sorry
 
@@ -307,7 +307,7 @@ example : grotzschGraph.egirth = 4 := by
 12. Use the Moore bound to show that a `3`-regular graph of diameter at most `2` has
 at most `10` vertices. (The Petersen graph shows that this is best possible.)
 -/
-example [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]
+example [Fintype V] [DecidableRel G.Adj]
     (h : G.IsRegularOfDegree 3) (hd : G.ediam ≤ 2) : Fintype.card V ≤ 10 := by
   simpa [Finset.sum_range_succ] using moore_bound G 2 2 (fun v => (h v).le) hd
 
@@ -322,7 +322,7 @@ A graph with no vertices is finite. Otherwise any vertex `r` has eccentricity at
 the diameter, so `V` is finite by `finite_of_eccent_le`, and we can apply
 `moore_bound`.
 -/
-example (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
+example [G.LocallyFinite] (d k : ℕ)
     (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
     Finite V ∧ Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
   rcases isEmpty_or_nonempty V with hV | ⟨⟨r⟩⟩
@@ -335,7 +335,7 @@ example (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
 girth at least `5` has at least `10` vertices. (The Petersen graph shows that this
 is best possible.)
 -/
-example [Fintype V] [Nonempty V] (G : SimpleGraph V) [DecidableRel G.Adj]
+example [Fintype V] [Nonempty V] [DecidableRel G.Adj]
     (h : ∀ v, 3 ≤ G.degree v) (hg : 5 ≤ G.egirth) : 10 ≤ Fintype.card V := by
   simpa [Finset.sum_range_succ, ENat.card_eq_coe_fintype_card] using
     cage_bound_odd G 2 2 (fun v => h v) hg

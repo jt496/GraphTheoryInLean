@@ -187,7 +187,7 @@ example (p : G.Walk u v) (h : p.Nil) : p.toSubgraph.support = ∅ := by
 For non-nil walks the `Walk.toSubgraph.support` is the same as the set of vertices in
 the `List` `Walk.support`.
 -/
-example (p : G.Walk u v) (h : ¬ p.Nil) [DecidableEq V] :
+example (p : G.Walk u v) (h : ¬ p.Nil) :
   p.toSubgraph.support = {w | w ∈ p.support} := by
   ext x
   simp only [Subgraph.mem_support, Walk.adj_toSubgraph_iff_mem_edges,
@@ -217,7 +217,7 @@ by `s`, and also has type `G.Subgraph`.
 -/
 #source Subgraph.induce  -- G'.induce s : G.Subgraph (for G' : G.Subgraph)
 
-example {u v : V} (s : Set V) (H : G.Subgraph) :
+example {u v : V} (s : Set V) :
     (H.induce s).Adj u v ↔ u ∈ s ∧ v ∈ s ∧ H.Adj u v := by rfl
 
 /-!
@@ -292,7 +292,7 @@ set of vertices `s : Set V` from a subgraph `H : G.Subgraph` if and only if they
 are not in `s` and are adjacent in `H`. (Mathlib's `Subgraph.deleteVerts_adj` states
 this with the redundant conditions `v ∈ H.verts` and `w ∈ H.verts` included.)
 -/
-example {v w : V} (s : Set V) {H : G.Subgraph} :
+example {v w : V} (s : Set V) :
     (H.deleteVerts s).Adj v w ↔ v ∉ s ∧ w ∉ s ∧ H.Adj v w := by
   grind [Subgraph.induce_adj, H.edge_vert, Subgraph.Adj.symm]
 
@@ -302,7 +302,7 @@ the vertex set unchanged).
 -/
 #source Subgraph.deleteEdges -- G'.deleteEdges s : G.Subgraph
 
-example {v w : V} (s : Set (Sym2 V)) {H : G.Subgraph} :
+example {v w : V} (s : Set (Sym2 V)) :
     (H.deleteEdges s).Adj v w ↔ H.Adj v w ∧ s(v, w) ∉ s := by rfl
 
 #check Subgraph.deleteEdges_verts -- (G'.deleteEdges s).verts = G'.verts
@@ -483,13 +483,12 @@ we choose can make a big difference to how easy a proof is.
   typical use: Mathlib states it for the graphs `H.coe` of finite subgraphs `H`.
 * `H : G.Subgraph` lets the vertex set vary inside `V`, and the subgraphs form a
   lattice. Use it when Mathlib defines the notion you need for subgraphs, such as
-  `Walk.toSubgraph` or matchings
-  ([Matching Number](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-matching-number)).
-  A matching must be a `G.Subgraph`: its vertex set is the set of matched vertices,
-  and a *perfect* matching is one that is spanning.
-* `Copy A G` is a labelled copy of a graph `A` whose
-  vertices may have any type, and `A ⊑ G` says that such a copy exists. Use it to
-  talk about containment (or non-containment) of a fixed graph, as in `A.Free G`.
+  `Walk.toSubgraph` or matchings (`Subgraph.IsMatching`). A matching must be a
+  `G.Subgraph`: its vertex set is the set of matched vertices, and a *perfect*
+  matching is one that is spanning.
+* `Copy A G` is a labelled copy of a graph `A` whose vertices may have any type, and
+  `A ⊑ G` says that such a copy exists. Use it to talk about containment (or
+  non-containment) of a fixed graph, as in `A.Free G`.
 
 We have already met most of the conversions between these: `toSubgraph H h` turns
 `h : H ≤ G` into a `G.Subgraph`, while `H.spanningCoe` and `H.coe` turn
@@ -653,11 +652,10 @@ vertex set is the preimage `f⁻¹' H.verts` and whose edges are those edges `u 
 #source Subgraph.comap
 
 /-!
-As for simple graphs
-([Maps](https://jt496.github.io/GraphTheoryInLean/Maps/#section-maps)), `map f` and
-`comap f` form a Galois connection. Here this holds for every homomorphism `f`, not
-just for embeddings: a homomorphism never sends two adjacent vertices to the same
-vertex, so no edge is lost when we map forwards.
+As for simple graphs (`SimpleGraph.map_le_iff_le_comap`), `map f` and `comap f` form
+a Galois connection. Here this holds for every homomorphism `f`, not just for
+embeddings: a homomorphism never sends two adjacent vertices to the same vertex, so
+no edge is lost when we map forwards.
 -/
 #check Subgraph.map_le_iff_le_comap -- H.map f ≤ H' ↔ H ≤ H'.comap f
 
@@ -1384,14 +1382,14 @@ def ColoringOn.empty (c : γ) : G.ColoringOn γ ∅ :=
 
 /-- The partial colouring of the singleton set `{a}` by a colour `c`. -/
 @[simps]
-def ColoringOn.singleton {γ : Type*} (a : V) (c : γ) :
+def ColoringOn.singleton (a : V) (c : γ) :
     G.ColoringOn γ {a} where
   toFun := fun _ ↦ c
   map_rel' := by simp
 
 /-- The partial colouring of a pair of non-adjacent vertices by a colour `c`. -/
 @[simps]
-def ColoringOn.ofNotAdj {γ : Type*} {a b : V} (h : ¬ G.Adj a b) (c : γ) :
+def ColoringOn.ofNotAdj {a b : V} (h : ¬ G.Adj a b) (c : γ) :
     G.ColoringOn γ {a, b} where
   toFun := fun _ ↦ c
   map_rel' := by

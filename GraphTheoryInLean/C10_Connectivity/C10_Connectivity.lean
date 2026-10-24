@@ -582,12 +582,10 @@ argument via Zorn's lemma.
 
 Mathlib has the necessary conditions in Euler's theorem
 [Euler 1741](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-euler-1741)
-(see
-[Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails)),
-but not the existence direction: a connected graph with all degrees even has an
-Eulerian circuit, and a connected graph with exactly two vertices of odd degree has
-an Eulerian trail. We prove these here with a splicing argument in the style of
-*Hierholzer's algorithm*
+(`IsEulerian.even_degree_iff` and `IsEulerian.card_odd_degree`), but not the
+existence direction: a connected graph with all degrees even has an Eulerian circuit,
+and a connected graph with exactly two vertices of odd degree has an Eulerian trail.
+We prove these here with a splicing argument in the style of *Hierholzer's algorithm*
 [Hierholzer 1873](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hierholzer-1873).
 Rather than running the algorithm we take a longest trail and show that, if it were
 not Eulerian, we could splice a circuit into it to make it longer.
@@ -600,12 +598,12 @@ Instead we prove the open case directly, reusing code from the circuit case.
 
 Euler's theorem is often stated for connected graphs, but, as we saw in
 [Eulerian Trails](https://jt496.github.io/GraphTheoryInLean/Walks/#section-eulerian-trails),
-`IsEulerian` ignores isolated vertices. The analogous necessary condition is that all
-the edges of `G` lie in a single connected component. We make this a definition
-`EdgesInOneComponent`. This is the weakest hypothesis under which the Eulerian
-existence theorems below hold, strictly weaker than `Connected`, which also forbids
-isolated vertices (when there are at least two vertices) and the graph with no
-vertices.
+`IsEulerian` ignores isolated vertices (`IsEulerian.mem_support_iff`). The analogous
+necessary condition is that all the edges of `G` lie in a single connected component.
+We make this a definition `EdgesInOneComponent`. This is the weakest hypothesis under
+which the Eulerian existence theorems below hold, strictly weaker than `Connected`,
+which also forbids isolated vertices (when there are at least two vertices) and the
+graph with no vertices.
 -/
 section EulerExistence
 
@@ -1140,9 +1138,8 @@ subtype `↑Sᶜ`, so its walks run between vertices `⟨u, hu⟩` that carry pr
 `u ∉ S`. Walks in `G` that avoid `S` are much easier to construct and combine.
 
 The two formulations agree. To see this we pass through Mathlib's `Subgraph` API
-([Induced Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-induced-subgraphs)):
-`preconnected_induce_iff` turns preconnectedness of `G.induce Sᶜ` into
-preconnectedness of the subgraph `(⊤ : G.Subgraph).induce Sᶜ`, and
+(`Subgraph.induce`): `preconnected_induce_iff` turns preconnectedness of
+`G.induce Sᶜ` into preconnectedness of the subgraph `(⊤ : G.Subgraph).induce Sᶜ`, and
 `Subgraph.preconnected_iff_forall_exists_walk_subgraph` characterizes the latter by
 walks `p` in `G` with `p.toSubgraph ≤ (⊤ : G.Subgraph).induce Sᶜ`. For an induced
 subgraph this just says that every vertex of `p` lies in `Sᶜ`.
@@ -1521,9 +1518,7 @@ but it is `3`-colourable.
 The cases `Δ = 2` and `Δ ≥ 3` are very different. The case `Δ = 2` follows quickly
 from our characterization of bipartite graphs, `isBipartite_iff_forall_isCycle_even`,
 while the case `Δ ≥ 3` needs a real argument, for which we use the partial colourings
-of
-[Partial Colourings*](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-partial-colourings).
-At the end we combine the cases into a single statement for every `Δ`.
+`ColoringOn`. At the end we combine the cases into a single statement for every `Δ`.
 
 ## Maximum Degree Two
 
@@ -1723,11 +1718,10 @@ lemma _root_.Finset.card_image_lt_card_of_ne_map_eq {W : Type*} [DecidableEq W]
 ### Step 1: Colouring in Reverse Search Order
 
 We express "`A` is connected" as connectedness of the subgraph
-`(⊤ : G.Subgraph).induce A`
-([Induced Subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#section-induced-subgraphs)).
-Mathlib characterizes this by walks in `G` itself
-(`Subgraph.connected_iff_forall_exists_walk_subgraph`): any two vertices are joined
-by a walk `p` with `p.toSubgraph ≤ (⊤ : G.Subgraph).induce A`. As we saw in
+`(⊤ : G.Subgraph).induce A` (`Subgraph.induce`). Mathlib characterizes this by walks
+in `G` itself (`Subgraph.connected_iff_forall_exists_walk_subgraph`): any two
+vertices are joined by a walk `p` with `p.toSubgraph ≤ (⊤ : G.Subgraph).induce A`. As
+we saw in
 [Vertex Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-vertex-connectivity),
 for an induced subgraph this just says that every vertex of `p` lies in `A`
 (`Walk.toSubgraph_le_induce_top_iff`).

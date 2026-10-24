@@ -1,5 +1,4 @@
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidability_Finiteness_and_Degrees
-set_option linter.unusedFintypeInType false
 namespace SimpleGraph
 variable {V : Type*} {G : SimpleGraph V}
 
@@ -132,13 +131,12 @@ lemma card_mycielskianVert' (n : ℕ) [Fintype V] :
 /-!
 The next few exercises are on the degrees of vertices in the Mycielskian.
 
-As in
-[Mycielskian Degrees](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-mycielskian-degrees),
-statements about degrees and edge sets take the `Fintype` instances they mention as
-arguments. Those about `δ`, `Δ` and `degreeMultiset` take `[Fintype V]` and
-`[DecidableRel G.Adj]` instead, since these definitions build their own instances
-from them. Use the `classical` tactic for any further instances a proof needs. (We
-also `open Finset` since we will need quite a few lemmas about `Finset`.)
+As in `degree_mycielskian_left`, statements about degrees and edge sets take the
+`Fintype` instances they mention as arguments. Those about `δ`, `Δ` and
+`degreeMultiset` take `[Fintype V]` and `[DecidableRel G.Adj]` instead, since these
+definitions build their own instances from them. Use the `classical` tactic for
+any further instances a proof needs. (We also `open Finset` since we will need quite
+a few lemmas about `Finset`.)
 
 15. The degree of the new vertex `none` in the Mycielskian is the number of vertices
 in the original graph.
@@ -274,7 +272,7 @@ Recursion on `Sym2` is only allowed when the result cannot depend on the order o
 two endpoints; `recOnSubsingleton` ensures this by requiring the result to lie in a
 `Subsingleton` (a type with at most one element), which `Decidable p` is.)
 -/
-example {V : Type*} (G : SimpleGraph V) [DecidableEq V] : DecidableRel L[G].Adj :=
+example [DecidableEq V] : DecidableRel L[G].Adj :=
   sorry
 
 /-!
@@ -662,8 +660,7 @@ two endpoints; `recOnSubsingleton` ensures this by requiring the result to lie i
 `Subsingleton` (a type with at most one element), which `Decidable p` is.)
 -/
 /-- Decidability of the adjacency relation for the line graph. -/
-instance {V : Type*} (G : SimpleGraph V) [DecidableEq V] :
-    DecidableRel L[G].Adj := by
+instance [DecidableEq V] : DecidableRel L[G].Adj := by
   intro e₁ e₂
   -- Two edges share a vertex iff one of the four endpoint pairs is equal
   have : Decidable (∃ v ∈ (e₁ : Sym2 V), v ∈ (e₂ : Sym2 V)) :=

@@ -439,10 +439,7 @@ Informally, "isomorphic graphs have the same properties" is a single meta-theore
 that we use without comment. In Lean there is no such meta-theorem: every invariant
 needs its own transfer lemma, which is why Mathlib contains many lemmas of the form
 `Iso.*_eq` and `Iso.*_iff`. Here are some for notions we meet later: connectedness
-and acyclicity
-([Connectivity](https://jt496.github.io/GraphTheoryInLean/Connectivity/#chapter-connectivity))
-and the chromatic number
-([Colorings](https://jt496.github.io/GraphTheoryInLean/Colorings/#chapter-colorings)).
+(`Connected`), acyclicity (`IsAcyclic`) and the chromatic number (`chromaticNumber`).
 -/
 #check Iso.connected_iff  -- G ≃g H → (G.Connected ↔ H.Connected)
 
@@ -461,9 +458,9 @@ The analogous fact for empty graphs is also true, but not supplied by Mathlib, s
 give it here.
 -/
 /-- Equivalences of types induce isomorphisms of empty graphs on those types. -/
-protected def Iso.emptyGraph {α β : Type*} (f : α ≃ β) :
+protected def Iso.emptyGraph {α β : Type*} (e : α ≃ β) :
     emptyGraph α ≃g emptyGraph β where
-  __ := f
+  __ := e
   map_rel_iff' := by simp
 
 end iso
@@ -523,17 +520,19 @@ would otherwise become a loop.
 
 [Figure: $G$ (left) pushed forward along $f : V \to W$ (dashed arrows), to give `G.map f` (right)](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
 -/
+section maps
 variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
+
 #source SimpleGraph.map
 
-example (f : V → W) {w₁ w₂ : W} (G : SimpleGraph V) :
+example (f : V → W) {w₁ w₂ : W} :
     (G.map f).Adj w₁ w₂ ↔ w₁ ≠ w₂ ∧ ∃ v₁ v₂, G.Adj v₁ v₂ ∧ f v₁ = w₁ ∧ f v₂ = w₂ :=
   Iff.rfl
 /-!
 When `f : V ↪ W` is an embedding the distinctness condition is automatic, and
 Mathlib's `map_adj` omits it.
 -/
-example (f : V ↪ W) {w₁ w₂ : W} (G : SimpleGraph V) :
+example (f : V ↪ W) {w₁ w₂ : W} :
   (G.map f).Adj w₁ w₂ ↔ ∃ v₁ v₂, G.Adj v₁ v₂ ∧ f v₁ = w₁ ∧ f v₂ = w₂ := map_adj ..
 /-!
 Either way, the adjacency relation of `G.map f` contains an existential quantifier:
@@ -558,8 +557,8 @@ In the language of order theory, `map_le_iff_le_comap` says that `map f` and
 graph, while pulling back and then mapping forwards only gives a subgraph. (See the
 exercises for an example where this inequality is strict.)
 -/
-example (f : V ↪ W) (G : SimpleGraph V) : (G.map f).comap f = G := comap_map_eq ..
-example (f : V ↪ W) (H : SimpleGraph W) : (H.comap f).map f ≤ H := map_comap_le ..
+example (f : V ↪ W) : (G.map f).comap f = G := comap_map_eq ..
+example (f : V ↪ W) : (H.comap f).map f ≤ H := map_comap_le ..
 /-!
 Mathlib also packages `map` as morphisms: an embedding `f : V ↪ W` gives a graph
 embedding `G ↪g G.map f`, and an equivalence `e : V ≃ W` gives a graph isomorphism
@@ -568,6 +567,7 @@ embedding `G ↪g G.map f`, and an equivalence `e : V ≃ W` gives a graph isomo
 #check Embedding.map -- (f : V ↪ W) (G : SimpleGraph V) : G ↪g G.map f
 #check Iso.map       -- (f : V ≃ W) (G : SimpleGraph V) : G ≃g G.map f
 
+end maps
 /-!
 ## SpanningCoe
 
@@ -577,6 +577,9 @@ and `Subtype s ↪ V` to get a `SimpleGraph V` whose edges are exactly those of 
 Since this graph contains all vertices of `V` but is otherwise the same as `G`, it is
 called the `spanningCoe` of `G`.
 -/
+section spanningcoe
+variable {V : Type*}
+
 #source spanningCoe -- spanningCoe {s : Set V} (G : SimpleGraph s) :
                     --    SimpleGraph V := G.map (Function.Embedding.subtype _)
 /-!
@@ -605,6 +608,7 @@ inducing on.
 example {s : Set V} {G : SimpleGraph V} :
   (G.induce s).spanningCoe = G ↔ G.support ⊆ s := spanningCoe_induce_eq_self ..
 
+end spanningcoe
 /-!
 We have now met three ways of describing a subgraph of `G : SimpleGraph V`: a graph
 `H ≤ G` with the same vertex type `V`

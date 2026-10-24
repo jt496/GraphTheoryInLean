@@ -384,10 +384,9 @@ equality itself is undecidable.
 #check SimpleGraph.Bot.adjDecidable -- no assumption on `V` is required
 
 /-!
-If we revisit the three definitions of the path graph on `ℕ` from
-[SimpleGraph](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#chapter-simplegraph)
-we can ask two obvious questions: do they have decidable adjacency and if so will
-Lean automatically synthesize the required instance in each case?
+If we revisit the three definitions `pathNat₁`, `pathNat₂` and `pathNat₃` of the path
+graph on `ℕ` we can ask two obvious questions: do they have decidable adjacency and
+if so will Lean automatically synthesize the required instance in each case?
 
 The answer to the first question should be independent of which definition we use: as
 we already proved they all define the same graph! So what would a method for deciding
@@ -635,9 +634,8 @@ covering relation of a locally finite order, is left to the exercises.
 
 ### More Decidable Adjacency Instances *
 
-We give two more instances of decidable adjacency, for the disjoint unions of graphs
-introduced in
-[Sum and Sigma Graphs*](https://jt496.github.io/GraphTheoryInLean/Constructions/#section-sum-and-sigma-graphs).
+We give two more instances of decidable adjacency, for the disjoint unions
+`SimpleGraph.sigma` and `SimpleGraph.sum`.
 
 Recall `Σg G`, the `SimpleGraph.sigma` disjoint union of an indexed family of graphs.
 -/
@@ -1285,9 +1283,7 @@ def locallyFiniteOfFintypeEdgeSet {V : Type*}
 
 /-!
 The same equivalence shows that the degree of `v` is also the number of edges at `v`,
-i.e. the size of `G.incidenceFinset v`, the `Finset` version of the incidence set
-from
-[Neighbours](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-neighbours).
+i.e. the size of `G.incidenceFinset v`, the `Finset` version of `incidenceSet`.
 -/
 #check card_incidenceFinset_eq_degree -- #(G.incidenceFinset v) = G.degree v
 
@@ -1465,11 +1461,10 @@ In a finite graph the sum of all vertex degrees equals twice the number of edges
 #check sum_degrees_eq_twice_card_edges -- ∑ v, G.degree v = 2 * G.edgeFinset.card
 
 /-!
-The proof counts the darts of `G` (see
-[Darts](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#section-darts)) in two
-ways. Each vertex `v` is the first entry of exactly `G.degree v` darts, so the number
-of darts is the sum of the degrees. Each edge gives exactly two darts, one in each
-direction, so the number of darts is also twice the number of edges.
+The proof counts the darts of `G` (`Dart`) in two ways. Each vertex `v` is the first
+entry of exactly `G.degree v` darts, so the number of darts is the sum of the
+degrees. Each edge gives exactly two darts, one in each direction, so the number of
+darts is also twice the number of edges.
 -/
 #check dart_card_eq_sum_degrees      -- Fintype.card G.Dart = ∑ v, G.degree v
 #check dart_card_eq_twice_card_edges -- Fintype.card G.Dart = 2 * #G.edgeFinset
@@ -1586,8 +1581,7 @@ a graph is complete iff every vertex is universal.
 A graph is regular of degree `Fintype.card V - 1` iff it is complete. (Mathlib's
 `degree_eq_card_sub_one` uses the `Fintype` instance for neighbourhoods coming from
 `DecidableRel G.Adj`, while ours comes from `G.LocallyFinite`; `convert` bridges the
-two, just as it did in
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).)
+two, just as it did in the proof of `sum_degrees_eq_twice_card_edges'`.)
 -/
 theorem isRegularOfDegree_card_sub_one_iff_eq_top {V : Type*} (G : SimpleGraph V)
     [Fintype V] [G.LocallyFinite] :
@@ -1920,9 +1914,8 @@ is the situation we warned about in
 [Instance Arguments in Statements](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-instance-arguments-in-statements)
 and
 [Cardinality](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-cardinality),
-and explored in
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma),
-so how much trouble does it actually cause?
+and explored in the proof of `sum_degrees_eq_twice_card_edges'`, so how much trouble
+does it actually cause?
 
 Mathlib has the same diamond, since `boxProdFintypeNeighborSet` is a global instance,
 and nothing in Mathlib breaks because of it. The reason is visible in
@@ -1948,12 +1941,10 @@ the efficient instance in the local context, where typeclass inference looks fir
 (It must be a `let`, not a `have`: an instance is data, and `change` needs to see its
 value.) Then `convert_to` restates the goal, so that its instance is synthesized as
 the local one, and closes the gap between the two instances using the `Subsingleton`
-argument from
-[The Handshake Lemma](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-the-handshake-lemma).
-In the InfoView the goal looks the same before and after, since instance arguments
-are not displayed; hovering over `IsRegularOfDegree` in the goal shows that `inst✝`
-has become `this`. Because the switch happens inside the proof, no caller ever needs
-a `convert`.
+argument from the proof of `sum_degrees_eq_twice_card_edges'`. In the InfoView the
+goal looks the same before and after, since instance arguments are not displayed;
+hovering over `IsRegularOfDegree` in the goal shows that `inst✝` has become `this`.
+Because the switch happens inside the proof, no caller ever needs a `convert`.
 -/
 lemma IsRegularOfDegree.hypercube (n : ℕ) [Q[n].LocallyFinite] :
     Q[n].IsRegularOfDegree n := by
@@ -2179,7 +2170,7 @@ Mycielskian. We make it a `scoped instance`: it is active inside
 print Mycielskian vertices this way, but other code using `Option (α ⊕ α)` is
 unaffected.
 -/
-scoped instance mycielskianRepr {V : Type*} [Repr V] :
+scoped instance mycielskianRepr [Repr V] :
     Repr (Option (V ⊕ V)) where
   reprPrec x _ := match x with
     | none => "∗"
@@ -2191,7 +2182,7 @@ scoped instance mycielskianRepr {V : Type*} [Repr V] :
 /-!
 We can extend this to the vertices of the iterated Mycielskian.
 -/
-scoped instance iterMycielskianRepr {V : Type*} [Repr V] (n : ℕ) :
+scoped instance iterMycielskianRepr [Repr V] (n : ℕ) :
     Repr (mμᵥ^n V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 

@@ -1,5 +1,6 @@
 import GraphTheoryInLean.Tactic.Source
 import GraphTheoryInLean.Tactic.DocHover
+import GraphTheoryInLean.Tactic.PropExample
 import Mathlib.Data.Fintype.Basic
 /-
 Shared helpers for the chapters: `Repr` instances for finite functions and

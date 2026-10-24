@@ -358,7 +358,7 @@ alias completeBipartiteGraph.bicoloring := CompleteBipartiteGraph.bicoloring
 By `Coloring.colorable`, this colouring shows that the complete bipartite graph is
 bipartite. (Mathlib also has this as `IsBipartite.completeBipartiteGraph`.)
 -/
-example (V W : Type*) : (completeBipartiteGraph V W).IsBipartite :=
+example : (completeBipartiteGraph V W).IsBipartite :=
   (completeBipartiteGraph.bicoloring V W).colorable
 
 /-!
@@ -389,16 +389,15 @@ either or neither of the parts.)
 For example, the complete bipartite graph is bipartite with parts the left and right
 copies. (Mathlib also has this as `IsBipartiteWith.completeBipartiteGraph`.)
 -/
-example (V W : Type*) : (completeBipartiteGraph V W).IsBipartiteWith
+example : (completeBipartiteGraph V W).IsBipartiteWith
     (Set.range Sum.inl) (Set.range Sum.inr) where
   disjoint := by grind
   mem_of_adj {u v} h := by grind
 
 /-!
-Mathlib also shows that acyclic graphs, and in particular trees (see
-[Acyclic Graphs, Trees and Forests](https://jt496.github.io/GraphTheoryInLean/Connectivity/#section-acyclic-graphs-trees-and-forests)),
-are bipartite. The classical characterization, that a graph is bipartite iff it has
-no odd cycles, is the subject of
+Mathlib also shows that acyclic graphs (`IsAcyclic`), and in particular trees
+(`IsTree`), are bipartite. The classical characterization, that a graph is bipartite
+iff it has no odd cycles, is the subject of
 [Odd Cycles and Bipartite Graphs](https://jt496.github.io/GraphTheoryInLean/Walks/#section-odd-cycles-and-bipartite-graphs).
 -/
 #check IsAcyclic.colorable_two -- (hG : G.IsAcyclic) : G.Colorable 2
@@ -1539,8 +1538,8 @@ for `ZMod n` and our Mycielskian and hypercube vertex types we need to provide t
 ourselves. Each of these types is defined by cases or recursion on `n` (`ZMod 0` is
 `ℤ` and `ZMod (n + 1)` is `Fin (n + 1)`), and instance search does not unfold such
 definitions. So we unfold them by hand and let `infer_instance` handle each case: the
-same pattern as the `DecidableEq` and `Fintype` instances for `HypercubeVert n` in
-[Computations with Hypercubes](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#section-computations-with-hypercubes).
+same pattern as the instances `hypercubeDecidableEq` and `hypercubeFintype` for
+`HypercubeVert n`.
 -/
 instance (n : ℕ) : Encodable (ZMod n) := by
   cases n <;> unfold ZMod <;> infer_instance
