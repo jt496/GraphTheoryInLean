@@ -9224,120 +9224,120 @@
  "<code>SimpleGraph.Walk.takeUntil.{u} {V : Type u} {G : SimpleGraph V} [DecidableEq V] {v w : V} (p : G.Walk v w) (u : V) :\n  u ∈ p.support → G.Walk v u</code><span class=\"sep\"></span><code class=\"docstring\">Given a vertex in the support of a path, give the path up until (and including) that vertex.</code>",
  "2955":
  "<code>SimpleGraph.Walk.length_reverse.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) :\n  p.reverse.length = p.length</code>",
- "2954":
- "<code>SimpleGraph.Walk.reverse.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (w : G.Walk u v) : G.Walk v u</code><span class=\"sep\"></span><code class=\"docstring\">The walk in reverse.</code>",
- "2953": "<code>G.Walk v u</code>",
- "2952":
+ "2954": "<code>G.Walk v u</code>",
+ "2953":
  "<code>SimpleGraph.Walk.edgeSet.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : Set (Sym2 V)</code><span class=\"sep\"></span><code class=\"docstring\">The `Set` of edges of a walk.</code>",
- "2951":
+ "2952":
  "<code>SimpleGraph.Walk.edges_append.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (p : G.Walk u v) (p' : G.Walk v w) :\n  (p.append p').edges = p.edges ++ p'.edges</code>",
- "2950":
+ "2951":
  "<code>List.append.{u_1} {α : Type u_1} (xs ys : List α) : List α</code><span class=\"sep\"></span><code class=\"docstring\">Appends two lists. Normally used via the `++` operator.\n\nAppending lists takes time proportional to the length of the first list: `O(|xs|)`.\n\nExamples:\n* `[1, 2, 3] ++ [4, 5] = [1, 2, 3, 4, 5]`.\n* `[] ++ [4, 5] = [4, 5]`.\n* `[1, 2, 3] ++ [] = [1, 2, 3]`.</code>",
+ "2950":
+ "<code>SimpleGraph.Walk.edges_cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) :\n  (cons h p).edges = s(u, v) :: p.edges</code>",
  "295": "<code>SimpleGraph W</code>",
  "2949":
- "<code>SimpleGraph.Walk.edges_cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) :\n  (cons h p).edges = s(u, v) :: p.edges</code>",
- "2948":
  "<code>SimpleGraph.Walk.edges.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : List (Sym2 V)</code><span class=\"sep\"></span><code class=\"docstring\">The `edges` of a walk is the list of edges it visits in order.\nThis is defined to be the list of edges underlying `SimpleGraph.Walk.darts`.</code>",
- "2947": "<code>d ∈ p.darts</code>",
- "2946":
+ "2948": "<code>d ∈ p.darts</code>",
+ "2947":
  "<code>SimpleGraph.Walk.dart_snd_mem_support_of_mem_darts.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v)\n  {d : G.Dart} (h : d ∈ p.darts) : d.toProd.2 ∈ p.support</code>",
- "2945":
+ "2946":
  "<code>SimpleGraph.Walk.darts_cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) :\n  (cons h p).darts = { fst := u, snd := v, adj := h } :: p.darts</code>",
- "2944":
+ "2945":
  "<code>SimpleGraph.Dart.mk.{u_1} {V : Type u_1} {G : SimpleGraph V} (toProd : V × V) (adj : G.Adj toProd.1 toProd.2) : G.Dart</code>",
- "2943":
+ "2944":
  "<code>SimpleGraph.Walk.darts.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → List G.Dart</code><span class=\"sep\"></span><code class=\"docstring\">The `darts` of a walk is the list of darts it visits in order.</code>",
- "2942":
+ "2943":
  "<code>SimpleGraph.Walk.penultimate.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : V</code><span class=\"sep\"></span><code class=\"docstring\">The penultimate vertex of a walk, or the only vertex in a nil walk.</code>",
- "2941":
+ "2942":
  "<code>SimpleGraph.Walk.snd.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : V</code><span class=\"sep\"></span><code class=\"docstring\">The second vertex of a walk, or the only vertex in a nil walk.</code>",
- "2940":
+ "2941":
  "<code>SimpleGraph.Walk.adj_getVert_succ.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (w : G.Walk u v) {i : ℕ}\n  (hi : i &lt; w.length) : G.Adj (w.getVert i) (w.getVert (i + 1))</code>",
+ "2940": "<code>i &lt; p.length</code>",
  "294": "<code>Type u_5</code>",
- "2939": "<code>i &lt; p.length</code>",
- "2938":
+ "2939":
  "<code>SimpleGraph.Walk.getVert_of_length_le.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (w : G.Walk u v) {i : ℕ}\n  (hi : w.length ≤ i) : w.getVert i = v</code>",
- "2937":
+ "2938":
  "<code>SimpleGraph.Walk.getVert_cons_succ.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} {n : ℕ} (p : G.Walk v w)\n  (h : G.Adj u v) : (cons h p).getVert (n + 1) = p.getVert n</code>",
- "2936":
+ "2937":
  "<code>SimpleGraph.Walk.getVert_nil.{u} {V : Type u} {G : SimpleGraph V} (u : V) {i : ℕ} : nil.getVert i = u</code>",
- "2935":
+ "2936":
  "<code>SimpleGraph.Walk.getVert_zero.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (w : G.Walk u v) : w.getVert 0 = u</code>",
- "2934":
+ "2935":
  "<code>SimpleGraph.Walk.getVert.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → ℕ → V</code><span class=\"sep\"></span><code class=\"docstring\">Get the `n`th vertex from a walk, where `n` is generally expected to be\nbetween `0` and `p.length`, inclusive.\nIf `n` is greater than or equal to `p.length`, the result is the path's endpoint.</code>",
- "2933":
+ "2934":
  "<code>List.range'_1_concat {s n : ℕ} : List.range' s (n + 1) = List.range' s n ++ [s + n]</code>",
- "2932":
+ "2933":
  "<code>SimpleGraph.Walk.support_concat.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (p : G.Walk u v) (h : G.Adj v w) :\n  (p.concat h).support = p.support ++ [w]</code>",
- "2931": "<code>(path i n).support = List.range' i (n + 1)</code>",
- "2930":
+ "2932": "<code>(path i n).support = List.range' i (n + 1)</code>",
+ "2931":
  "<code>SimpleGraph.pathNat₁.support_path (i j : ℕ) : (path i j).support = List.range' i (j + 1)</code>",
+ "2930": "<code>optParam ℕ 1</code>",
  "293": "<code>Type u_3</code>",
- "2929": "<code>optParam ℕ 1</code>",
- "2928":
+ "2929":
  "<code>List.range' (start len : ℕ) (step : ℕ := 1) : List ℕ</code><span class=\"sep\"></span><code class=\"docstring\">Returns a list of the numbers with the given length `len`, starting at `start` and increasing by\n`step` at each element.\n\nIn other words, `List.range' start len step` is `[start, start+step, ..., start+(len-1)*step]`.\n\nExamples:\n * `List.range' 0 3 (step := 1) = [0, 1, 2]`\n * `List.range' 0 3 (step := 2) = [0, 2, 4]`\n * `List.range' 0 4 (step := 2) = [0, 2, 4, 6]`\n * `List.range' 3 4 (step := 2) = [3, 5, 7, 9]`</code>",
- "2927":
+ "2928":
  "<code>SimpleGraph.Walk.end_mem_support.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : v ∈ p.support</code>",
- "2926":
+ "2927":
  "<code>SimpleGraph.Walk.start_mem_support.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) : u ∈ p.support</code>",
- "2925": "<code>p.support = q.support</code>",
- "2924":
+ "2926": "<code>p.support = q.support</code>",
+ "2925":
  "<code>SimpleGraph.Walk.ext_support.{u} {V : Type u} {G : SimpleGraph V} {u v : V} {p q : G.Walk u v}\n  (h : p.support = q.support) : p = q</code>",
- "2923":
+ "2924":
  "<code>SimpleGraph.Walk.support_cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) :\n  (cons h p).support = u :: p.support</code>",
- "2922":
- "<code>SimpleGraph.Walk.support.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → List V</code><span class=\"sep\"></span><code class=\"docstring\">The `support` of a walk is the list of vertices it visits in order.</code>",
- "2921":
+ "2923":
  "<code>SimpleGraph.Walk.length_concat.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (p : G.Walk u v) (h : G.Adj v w) :\n  (p.concat h).length = p.length + 1</code>",
- "2920": "<code>(path i j).length = j</code>",
+ "2922": "<code>(path i j).length = j</code>",
+ "2921":
+ "<code>SimpleGraph.pathNat₁.length_path (i j : ℕ) : (path i j).length = j</code>",
+ "2920":
+ "<code>SimpleGraph.pathNat₁.path (i j : ℕ) : pathNat₁.Walk i (i + j)</code><span class=\"sep\"></span><code class=\"docstring\">The walk from i to i + j in pathNat₁.</code>",
  "292":
  "<code>SimpleGraph.sum_adj_inl.{u_3, u_5} {V : Type u_3} {W : Type u_5} {G : SimpleGraph V} {H : SimpleGraph W} {v v' : V} :\n  (G ⊕g H).Adj (Sum.inl v) (Sum.inl v') ↔ G.Adj v v'</code>",
  "2919":
- "<code>SimpleGraph.pathNat₁.length_path (i j : ℕ) : (path i j).length = j</code>",
- "2918":
- "<code>SimpleGraph.pathNat₁.path (i j : ℕ) : pathNat₁.Walk i (i + j)</code><span class=\"sep\"></span><code class=\"docstring\">The walk from i to i + j in pathNat₁.</code>",
- "2917":
  "<code>SimpleGraph.Walk.concat.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (p : G.Walk u v) (h : G.Adj v w) : G.Walk u w</code><span class=\"sep\"></span><code class=\"docstring\">The reversed version of `SimpleGraph.Walk.cons`, concatenating an edge to\nthe end of a walk.</code>",
- "2916": "<code>G.Walk w z</code>",
- "2915":
+ "2918": "<code>G.Walk w z</code>",
+ "2917":
  "<code>add_right_comm.{u_3} {G : Type u_3} [AddCommSemigroup G] (a b c : G) : a + b + c = a + c + b</code>",
- "2914":
+ "2916":
  "<code>SimpleGraph.Walk.length_cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) :\n  (cons h p).length = p.length + 1</code>",
- "2913":
+ "2915":
  "<code>SimpleGraph.Walk.cons_append.{u} {V : Type u} {G : SimpleGraph V} {u v w x : V} (h : G.Adj u v) (p : G.Walk v w)\n  (q : G.Walk w x) : (cons h p).append q = cons h (p.append q)</code>",
- "2912": "<code>G.Walk w✝ w</code>",
- "2911":
+ "2914": "<code>G.Walk w✝ w</code>",
+ "2913":
  "<code>∀ (q : G.Walk w✝ w), (p.append q).length = p.length + q.length</code>",
- "2910": "<code>G.Walk v✝ w✝</code>",
+ "2912": "<code>G.Walk v✝ w✝</code>",
+ "2911": "<code>G.Adj u✝ v✝</code>",
+ "2910": "<code>G.Walk u✝ w</code>",
  "291":
  "<code>SimpleGraph.sum.{u_3, u_5} {V : Type u_3} {W : Type u_5} (G : SimpleGraph V) (H : SimpleGraph W) : SimpleGraph (V ⊕ W)</code><span class=\"sep\"></span><code class=\"docstring\">Disjoint sum of `G` and `H`.</code>",
- "2909": "<code>G.Adj u✝ v✝</code>",
- "2908": "<code>G.Walk u✝ w</code>",
- "2907": "<code>G.Walk u v</code>",
- "2906":
- "<code>SimpleGraph.Walk.length.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → ℕ</code><span class=\"sep\"></span><code class=\"docstring\">The length of a walk is the number of edges/darts along it.</code>",
- "2905":
- "<code>SimpleGraph.Walk.append.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} : G.Walk u v → G.Walk v w → G.Walk u w</code><span class=\"sep\"></span><code class=\"docstring\">The concatenation of two compatible walks.</code>",
- "2904": "<code>SimpleGraph.pathNat₁35 : pathNat₁.Walk 3 5</code>",
- "2903":
+ "2909": "<code>G.Walk u v</code>",
+ "2908": "<code>SimpleGraph.pathNat₁35 : pathNat₁.Walk 3 5</code>",
+ "2907":
  "<code>SimpleGraph.Walk.cons'.{u} {V : Type u} {G : SimpleGraph V} (u v w : V) (h : G.Adj u v) (p : G.Walk v w) : G.Walk u w</code><span class=\"sep\"></span><code class=\"docstring\">Pattern to get `Walk.cons` with the vertices as explicit arguments.</code>",
- "2902": "<code>G.Walk v w</code>",
- "2901":
+ "2906": "<code>G.Walk v w</code>",
+ "2905":
  "<code>SimpleGraph.Walk.cons.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} (h : G.Adj u v) (p : G.Walk v w) : G.Walk u w</code>",
- "2900":
+ "2904":
  "<code>SimpleGraph.Walk.nil.{u} {V : Type u} {G : SimpleGraph V} {u : V} : G.Walk u u</code>",
+ "2903":
+ "<code>SimpleGraph.Walk.{u} {V : Type u} (G : SimpleGraph V) : V → V → Type u</code><span class=\"sep\"></span><code class=\"docstring\">A walk is a sequence of adjacent vertices.  For vertices `u v : V`,\nthe type `walk u v` consists of all walks starting at `u` and ending at `v`.\n\nWe say that a walk *visits* the vertices it contains.  The set of vertices a\nwalk visits is `SimpleGraph.Walk.support`.\n\nSee `SimpleGraph.Walk.nil'` and `SimpleGraph.Walk.cons'` for patterns that\ncan be useful in definitions since they make the vertices explicit.</code>",
+ "2902":
+ "<code>SimpleGraph.Walk.transfer.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) (H : SimpleGraph V)\n  (h : ∀ e ∈ p.edges, e ∈ H.edgeSet) : H.Walk u v</code><span class=\"sep\"></span><code class=\"docstring\">The walk `p` transferred to lie in `H`, given that `H` contains its edges.</code>",
+ "2901":
+ "<code>SimpleGraph.Walk.copy.{u} {V : Type u} {G : SimpleGraph V} {u v u' v' : V} (p : G.Walk u v) (hu : u = u')\n  (hv : v = v') : G.Walk u' v'</code><span class=\"sep\"></span><code class=\"docstring\">Change the endpoints of a walk using equalities. This is helpful for relaxing\ndefinitional equality constraints and to be able to state otherwise difficult-to-state\nlemmas. While this is a simple wrapper around `Eq.rec`, it gives a canonical way to write it.\n\nThe simp-normal form is for the `copy` to be pushed outward. That way calculations can\noccur within the \"copy context.\"</code>",
+ "2900":
+ "<code>SimpleGraph.Walk.Nil.{u} {V : Type u} {G : SimpleGraph V} {v w : V} : G.Walk v w → Prop</code><span class=\"sep\"></span><code class=\"docstring\">Predicate for the empty walk.\n\nSolves the dependent type problem where `p = G.Walk.nil` typechecks\nonly if `p` has defeq endpoints.</code>",
  "290":
  "<code>SimpleGraph.pathGraph_adj {n : ℕ} {u v : Fin n} : P[n].Adj u v ↔ ↑u + 1 = ↑v ∨ ↑v + 1 = ↑u</code>",
  "29":
  "<code class=\"docstring\">A type universe. `Type ≡ Type 0`, `Type u ≡ Sort (u + 1)`.</code>",
  "2899":
- "<code>SimpleGraph.Walk.{u} {V : Type u} (G : SimpleGraph V) : V → V → Type u</code><span class=\"sep\"></span><code class=\"docstring\">A walk is a sequence of adjacent vertices.  For vertices `u v : V`,\nthe type `walk u v` consists of all walks starting at `u` and ending at `v`.\n\nWe say that a walk *visits* the vertices it contains.  The set of vertices a\nwalk visits is `SimpleGraph.Walk.support`.\n\nSee `SimpleGraph.Walk.nil'` and `SimpleGraph.Walk.cons'` for patterns that\ncan be useful in definitions since they make the vertices explicit.</code>",
+ "<code>SimpleGraph.Walk.support.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → List V</code><span class=\"sep\"></span><code class=\"docstring\">The `support` of a walk is the list of vertices it visits in order.</code>",
  "2898":
- "<code>SimpleGraph.Walk.transfer.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (p : G.Walk u v) (H : SimpleGraph V)\n  (h : ∀ e ∈ p.edges, e ∈ H.edgeSet) : H.Walk u v</code><span class=\"sep\"></span><code class=\"docstring\">The walk `p` transferred to lie in `H`, given that `H` contains its edges.</code>",
+ "<code>SimpleGraph.Walk.length.{u} {V : Type u} {G : SimpleGraph V} {u v : V} : G.Walk u v → ℕ</code><span class=\"sep\"></span><code class=\"docstring\">The length of a walk is the number of edges/darts along it.</code>",
  "2897":
- "<code>SimpleGraph.Walk.copy.{u} {V : Type u} {G : SimpleGraph V} {u v u' v' : V} (p : G.Walk u v) (hu : u = u')\n  (hv : v = v') : G.Walk u' v'</code><span class=\"sep\"></span><code class=\"docstring\">Change the endpoints of a walk using equalities. This is helpful for relaxing\ndefinitional equality constraints and to be able to state otherwise difficult-to-state\nlemmas. While this is a simple wrapper around `Eq.rec`, it gives a canonical way to write it.\n\nThe simp-normal form is for the `copy` to be pushed outward. That way calculations can\noccur within the \"copy context.\"</code>",
+ "<code>SimpleGraph.Walk.reverse.{u} {V : Type u} {G : SimpleGraph V} {u v : V} (w : G.Walk u v) : G.Walk v u</code><span class=\"sep\"></span><code class=\"docstring\">The walk in reverse.</code>",
  "2896":
- "<code>SimpleGraph.Walk.Nil.{u} {V : Type u} {G : SimpleGraph V} {v w : V} : G.Walk v w → Prop</code><span class=\"sep\"></span><code class=\"docstring\">Predicate for the empty walk.\n\nSolves the dependent type problem where `p = G.Walk.nil` typechecks\nonly if `p` has defeq endpoints.</code>",
+ "<code>SimpleGraph.Walk.append.{u} {V : Type u} {G : SimpleGraph V} {u v w : V} : G.Walk u v → G.Walk v w → G.Walk u w</code><span class=\"sep\"></span><code class=\"docstring\">The concatenation of two compatible walks.</code>",
  "2895": "<code>¬Encodable.encode u = Encodable.encode v</code>",
  "2894": "<code>¬a = b</code>",
  "2893": "<code>Encodable.decode₂ V b = x✝</code>",

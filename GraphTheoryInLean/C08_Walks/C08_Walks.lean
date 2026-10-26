@@ -13,11 +13,11 @@ namespace SimpleGraph
 /-!
 Walks are a fundamental concept in graph theory. In this chapter we look at how they
 are defined in Mathlib. We will consider operations on walks such as concatenation
-(`append`) and reversal (`reverse`), as well as the `length` (number of edges) and
-`support` (list of vertices visited) of walks. We then meet the kinds of walks that
-arise most frequently in graph theory: trails, paths, circuits and cycles, together
-with Eulerian trails and Hamiltonian paths and cycles. Along the way we show that a
-graph is bipartite iff it has no odd cycle.
+(`Walk.append`) and reversal (`Walk.reverse`), as well as the `Walk.length` (number
+of edges) and `Walk.support` (list of vertices visited) of walks. We then meet the
+kinds of walks that arise most frequently in graph theory: trails, paths, circuits
+and cycles, together with Eulerian trails and Hamiltonian paths and cycles. Along the
+way we show that a graph is bipartite iff it has no odd cycle.
 
 The type of a walk records its endpoints, and this makes some plumbing necessary that
 has no counterpart in informal graph theory: `Walk.Nil`, `Walk.copy` and

@@ -103,10 +103,35 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
 
+    // A tap on a proof-state lozenge pins the state under the tactic, but the
+    // tap's emulated hover would first float a copy of it for a moment, and
+    // Verso floats one again when the state is unpinned. So on touch the
+    // tactic's hover never shows: its onShow is wrapped when the tactic is first
+    // touched (Verso only creates the hovers once its docs have loaded).
+    function guardTactic(tactic) {
+        var tip = tactic && tactic._tippy;
+        if (!tip || tip.stilGuarded) return;
+        tip.stilGuarded = true;
+        var onShow = tip.props.onShow;
+        tip.setProps({
+            onShow: function (inst) {
+                return touchLike(lastPointer) ? false : onShow(inst);
+            }
+        });
+    }
+
+    // pointerover as well as pointerdown, so that a mouse moved on a touch
+    // laptop counts as the pointer in use again before it clicks anything.
+    document.addEventListener('pointerover', function (e) {
+        lastPointer = e.pointerType;
+    }, true);
+
     document.addEventListener('pointerdown', function (e) {
         lastPointer = e.pointerType;
         yAtPress = window.scrollY;
-        var link = e.target.closest && e.target.closest('a[href]');
+        if (!e.target.closest) return;
+        if (touchLike(e.pointerType)) guardTactic(e.target.closest('.hl.lean .tactic'));
+        var link = e.target.closest('a[href]');
         var ref = link && hoverRef(e.target, link);
         openAtPress = ref && ref._tippy.state.isVisible ? ref : null;
     }, true);
@@ -137,15 +162,6 @@ document.addEventListener('DOMContentLoaded', function () {
         addLink(ref._tippy, link);
         ref._tippy.show();
     }, true);
-
-    // A tap on a proof-state lozenge pins the state under the tactic, but the
-    // tap's emulated hover also floats a copy of it, and Verso floats one again
-    // when the state is unpinned. Close them. This listener runs after Verso's
-    // own one on the checkbox, so its timeout runs after Verso's re-show.
-    document.addEventListener('change', function (e) {
-        if (!touchLike(lastPointer) || !e.target.classList.contains('tactic-toggle')) return;
-        setTimeout(closeHovers, 0);
-    });
 
     // A hover stays open on a touch screen until the next tap, so one left open
     // scrolls up the page with the text, over the header. Close hovers once the
