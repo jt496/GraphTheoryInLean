@@ -738,9 +738,9 @@ A trail repeats no edges, so its length is at most the number of edges in the gr
 /-!
 In an all-even-degree graph, any trail `p` starting at `v` can be extended to a
 closed trail from `v` of length at least `p.length`, by repeatedly applying
-`exists_unused_edge_of_even` until it returns to `v`. The proof applies
-`exists_closed_isTrail_length_le` recursively to longer trails. It isn't obvious to
-Lean that this is well-founded so we need to give a termination argument.
+`IsTrail.exists_unused_edge_of_even` until it returns to `v`. The proof applies
+`IsTrail.exists_closed_isTrail_length_le` recursively to longer trails. It isn't
+obvious to Lean that this is well-founded so we need to give a termination argument.
 
 We know that no trail is longer than the number of edges in the graph
 (`IsTrail.length_le_card_edgeFinset`), and the trail in the recursive call is
