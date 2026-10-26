@@ -208,6 +208,48 @@ figure.stil-figure img {
     border-radius: 0;
 }
 
+/* Tactic proof states (see the matching handler in guide.js): the text of each
+   tactic is moved out of Verso's toggle <label> into `.stil-tactic-text`, and
+   wrapped with the `.tactic` in `.stil-tactic`, so the label holds only the
+   lozenge. Hovering the lozenge highlights the tactic whose state it shows. */
+.hl.lean .tactic > label {
+    cursor: pointer;
+}
+@media (hover: hover) {
+    .hl.lean .stil-tactic:has(> .tactic > label:hover + .tactic-toggle:not(:checked)) > .stil-tactic-text {
+        background-color: var(--verso-code-hover-bg-color, #eeeeee);
+    }
+}
+
+/* A pinned proof state goes under the tactic text, not under the lozenge: the
+   wrapper becomes the inline grid that Verso makes of `.tactic` (text and
+   lozenge in row 1, the state across row 2), and `.tactic` drops out of the box
+   tree so that its label and state are the grid's items. The wrapper must also
+   take over `.tactic`'s `position: relative`: the hidden checkbox is placed
+   absolutely, and clicking the lozenge focuses it, so a checkbox placed against
+   some distant ancestor makes the click scroll the page there. */
+.hl.lean .stil-tactic:has(> .tactic > .tactic-toggle:checked) {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: auto 1fr;
+    vertical-align: top;
+}
+.hl.lean .stil-tactic > .tactic:has(> .tactic-toggle:checked) {
+    display: contents;
+}
+.hl.lean .stil-tactic > .stil-tactic-text {
+    grid-row: 1;
+    grid-column: 1;
+}
+.hl.lean .stil-tactic > .tactic > label {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+}
+.hl.lean .stil-tactic > .tactic > .tactic-toggle:checked ~ .tactic-state {
+    grid-column: 1 / -1;
+}
+
 /* ============================================================
    Sidebar TOC: emphasise the current chapter's sub-section list
    so the section structure of the chapter you're reading is
@@ -688,6 +730,9 @@ html[data-theme="dark"] {
     --verso-code-keyword-color: #bb9af7;
     --verso-code-var-color: #9ece6a;
     --stil-sorry-color: #f7768e;
+    /* Hovered identifiers, their other occurrences, and a tactic whose proof-state
+       lozenge is hovered (Verso's default is a light grey) */
+    --verso-code-hover-bg-color: #2f3347;
 
     /* #guard_msgs info/warning/error message text */
     --verso-info-color: #c0caf5;
@@ -842,9 +887,6 @@ html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="top"] 
 html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="bottom"] > .tippy-arrow::before { border-bottom-color: #24283b; }
 html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="left"] > .tippy-arrow::before { border-left-color: #24283b; }
 html[data-theme="dark"] .tippy-box[data-theme~="tactic"][data-placement^="right"] > .tippy-arrow::before { border-right-color: #24283b; }
-html[data-theme="dark"] .hl.lean .tactic:has(.tactic-toggle:not(:checked)) > label:hover {
-    background-color: #2f3347;
-}
 
 /* #command output hovers (#check / #eval / #synth / #print, and message/error/
    warning/info outputs) are shown by tippy in a popup with a LIGHT (#e5e5e5)

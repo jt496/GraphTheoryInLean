@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import Lean
 
 /-!
@@ -13,12 +18,27 @@ so in `completeGraph (Fin n)` both `completeGraph` and `Fin` become hoverable wh
 `n` does not. Identifiers that do not name a unique constant are left alone, and so
 are the names of tactics in tactic code (so that `decide` in `decide +revert` or `by
 decide` does not show `Decidable.decide`, while the `decide` of `decide p` does),
-identifiers right after a `.` (as in `.inl`) and fenced code blocks.
+identifiers right after a `.` (as in `.inl`), shell commands (so that `get` in `lake
+exe cache get` does not show `MonadState.get`) and fenced code blocks.
 
-It also covers each web link in a doc comment with an info node that names no
-declaration, so that Ctrl-click on the link just opens it. Without one,
-go-to-definition falls back to the elaborator of the command around the link, and
-Ctrl-click first opens `elabModuleDoc` (say) in Lean's sources.
+A span that is a single keyword, such as `#eval`, `simp` or `def`, shows the
+docstring of its syntax instead, and Ctrl-click goes to the declaration of the
+syntax: the span is treated as the guide's `{smart}` role renders it, using the same
+functions. So a word that names a constant, such as `rfl`, shows the constant, except
+for `decide`, which is the tactic unless the prose calls it "the Boolean `decide`" or
+"the `decide` field", and a word that is a term on its own, such as `sorry`, is left
+alone. A command whose name starts with `#`, such as `#check` or `#eval`, also shows
+a short description from `commandDescriptions` above the docstring (many such
+commands have none), since a span with just the command talks about the command
+itself; so does `#command`, which stands for any of them. A `#` command without a
+description gets a warning.
+
+It also covers the rest of each doc comment, and each web link in it, with info nodes
+that have an empty hover and name no declaration. Without them, hovering anywhere in
+the comment shows the docstring of the doc-comment syntax itself ("`/-! <text> -/`
+defines a *module docstring* …"), and go-to-definition falls back to the elaborator
+of the command around the comment, so that Ctrl-click on a link first opens
+`elabModuleDoc` (say) in Lean's sources.
 
 In a chapter of a guide (a file `C01_Introduction/X.lean`, say), each cross-reference
 `<REF>tag</REF>` or `<REF tag>text</REF>`, or `[text](#tag)` as the plain export
@@ -37,8 +57,9 @@ namespace STIL.DocHover
 
 register_option linter.docHover : Bool := {
   defValue := true
-  descr := "make the names in the code spans of doc comments hoverable, and their \
-    links open on Ctrl-click without going to the comment's elaborator"
+  descr := "make the names in the code spans of doc comments hoverable, hide the \
+    hover of the doc-comment syntax elsewhere in them, and let their links open on \
+    Ctrl-click without going to the comment's elaborator"
 }
 
 /-- The length of the run of backticks starting at `i`. -/
@@ -405,6 +426,136 @@ def tacticWords : CommandElabM (Std.HashSet String) := do
 def isTacticCode (env : Environment) (s : String) : Bool :=
   s.trimAsciiStart.startsWith "by " || (Parser.runParserCategory env `tactic s).isOk
 
+/-- Whether the code `s` is a shell command such as `lake exe cache get`, rather than
+Lean: it starts with `lake`, `git`, `make` or `elan`, as in the guide's converter. -/
+def isShellCommand (s : String) : Bool :=
+  ["lake ", "git ", "make ", "elan "].any (s.trimAsciiStart.startsWith ·)
+
+/-- Whether `s` is a word, possibly with a leading `#` or a trailing `?` or `!`. -/
+def isKeywordWord (s : String) : Bool :=
+  let core := (s.dropWhile (· == '#')).dropEndWhile (fun c => c == '?' || c == '!')
+  !core.isEmpty && core.any Char.isAlpha &&
+    core.all (fun c => c.isAlphanum || c == '_')
+
+/-- The letters and digits of `s`, lowercased, for matching a keyword loosely against
+the names of syntax node kinds (`native_decide` against `nativeDecide`). -/
+def normalizeKeyword (s : String) : String :=
+  String.ofList (s.toList.filter Char.isAlphanum |>.map Char.toLower)
+
+/-- Short descriptions of the commands whose names start with `#`. A code span with
+just such a command shows its description on hover, above the docstring of its syntax
+if it has one: the prose talks about the command itself there, while code that uses
+the command shows only the docstring. `#command` stands for any of them. -/
+def commandDescriptions : Std.HashMap String String := .ofList [
+  ("#command", "A command whose name starts with `#`, such as `#check` or `#eval`, \
+    asks Lean for information instead of adding a declaration, and shows the answer \
+    as a message."),
+  ("#check", "`#check e` elaborates the term `e` and shows its type. For a constant \
+    `c`, `#check c` shows the signature of `c`."),
+  ("#eval", "`#eval e` computes the value of the term `e` by running compiled code, \
+    and shows it. So `e` must be computable: `#eval` cannot run a noncomputable \
+    definition, and it evaluates a proposition through its `Decidable` instance."),
+  ("#eval!", "`#eval! e` is `#eval e`, except that it also evaluates terms that \
+    depend on `sorry`, which `#eval` refuses to run."),
+  ("#guard_msgs", "`#guard_msgs in cmd` checks that the messages of the command \
+    `cmd` are those written in the doc comment just before `#guard_msgs`, and then \
+    hides them; if they differ, it reports an error."),
+  ("#print", "`#print c` shows the declaration of the constant `c`, including its \
+    value: the body of a definition or the proof of a theorem. `#print axioms c` \
+    lists the axioms that `c` depends on."),
+  ("#source", "`#source c` shows the source code of the declaration `c`, without \
+    its docstring. It is a command of this guide, not of Lean or Mathlib."),
+  ("#synth", "`#synth C` searches for an instance of the type class `C`, and shows \
+    the instance that it finds or reports that there is none.")]
+
+/-- The syntax node kind of the keyword `tok`, if `tok` is the leading token of a
+production in the `command`, `term`, `tactic` or `doElem` category: that of the
+best-matching production, or `none` if no production is best. A kind whose name
+matches `tok` (`rw` ↦ `Lean.Parser.Tactic.rwSeq`) is preferred, then a top-level
+production, then one with a docstring, then the categories in the order listed. A
+word with a description in `commandDescriptions` counts as a keyword even if no
+syntax starts with it (`#command`). The guide's `{smart}` role uses this too. -/
+def keywordKind? (env : Environment) (tok : String) :
+    IO (Option (Option SyntaxNodeKind)) := do
+  unless isKeywordWord tok do return none
+  let norm := normalizeKeyword tok
+  let mut found := false
+  let mut topLevel : Array SyntaxNodeKind := #[]
+  let mut best : Option (Nat × SyntaxNodeKind) := none
+  for (cat, rank) in [(`command, 3), (`term, 2), (`tactic, 1), (`doElem, 0)] do
+    let some c := Parser.getParserCategory? env cat | continue
+    for (p, _) in c.tables.leadingTable.getD (.mkSimple tok) [] do
+      found := true
+      for (k, _) in (p.info.collectKinds {}).toList do
+        let isTop := c.kinds.contains k
+        if isTop && !topLevel.contains k then topLevel := topLevel.push k
+        let last := normalizeKeyword (match k with | .str _ s => s | _ => "")
+        let nameMatch := if last == norm then 2
+          else if last.startsWith norm || last.endsWith norm then 1 else 0
+        if nameMatch == 0 then continue
+        let hasDoc := (← findDocString? env k).isSome
+        let score := 1000 * nameMatch + 100 * isTop.toNat + 10 * hasDoc.toNat + rank
+        if best.all (·.1 < score) then best := some (score, k)
+  unless found do
+    return if commandDescriptions.contains tok then some none else none
+  return some (best.map (·.2) <|> if topLevel.size == 1 then topLevel[0]? else none)
+
+/-- The hover text of the keyword `tok`, whose syntax node kind is `kind?`: the
+docstring of `kind?`, below the description of `tok` in `commandDescriptions` if it
+has one. The guide's `{smart}` role uses this too. -/
+def keywordDoc? (env : Environment) (tok : String) (kind? : Option SyntaxNodeKind) :
+    IO (Option String) := do
+  let doc? ← match kind? with
+    | some k => findDocString? env k
+    | none => pure none
+  return match commandDescriptions[tok]?, doc? with
+    | some d, some doc => some s!"{d}\n\n***\n\n{doc}"
+    | some d, none => some d
+    | none, doc? => doc?
+
+/-- Tactic names that are also constants, but that prose almost always uses for the
+tactic: `decide` is also the function `Decidable.decide`. Such a word is the tactic,
+unless it is applied to an argument (`decide p`) or the prose calls it a Boolean or a
+field (see `meansFunction`). -/
+def proseTacticWords : List String := ["decide"]
+
+/-- Whether the prose `before` and `after` a code span says that the span means the
+function rather than the tactic, as in "the Boolean `decide`" or "its `decide`
+field". -/
+def meansFunction (before after : String) : Bool :=
+  let words (s : String) :=
+    (s.splitToList (fun c => c.isWhitespace || c == '`')).filter (!·.isEmpty)
+  (words before).getLast? == some "Boolean" ||
+    ((words after).head?.map (·.takeWhile Char.isAlpha |>.toString)) == some "field"
+
+/-- If the code span `code`, from byte `b` to byte `e` of the comment text `s`, is a
+single keyword: its syntax node kind, if it has one (`#command` has none). A word
+that names a constant is the constant instead (unless it is one of
+`proseTacticWords` and the prose does not call it a function), and so is left to the
+caller; a word that is a term on its own (`sorry`) is left alone, as `{smart}`
+renders it as a term. -/
+def keywordSpan? (s code : String) (b e : Nat) :
+    TermElabM (Option (Option SyntaxNodeKind)) := do
+  unless isKeywordWord code do return none
+  let env ← getEnv
+  if commandDescriptions.contains code then
+    return ← keywordKind? env code
+  if proseTacticWords.contains code then
+    if meansFunction (String.Pos.Raw.extract s 0 ⟨b⟩)
+        (String.Pos.Raw.extract s ⟨e⟩ ⟨s.utf8ByteSize⟩) then
+      return none
+  else
+    let isConst ← try
+        discard <| resolveGlobalConstNoOverload (mkIdent code.toName)
+        pure true
+      catch _ => pure false
+    if isConst then
+      return none
+    if let .ok stx := Parser.runParserCategory env `term code then
+      unless stx.isIdent do return none
+  let some (some kind) ← keywordKind? env code | return none
+  return some (some kind)
+
 /-- Runs `k` on the command inside the `set_option … in` and `open … in` prefixes of
 `stx`, in the scope they set up. -/
 partial def withInPrefixes (k : Syntax → CommandElabM Unit) (stx : Syntax) :
@@ -417,6 +568,33 @@ partial def withInPrefixes (k : Syntax → CommandElabM Unit) (stx : Syntax) :
     if stx[0].isOfKind ``Parser.Command.set_option then
       return ← withSetOptionIn (withInPrefixes k) stx
   k stx
+
+/-- Records an info node over `ref` with an empty hover and nothing to go to. As the
+innermost node at `ref`, it hides the docstring of the `moduleDoc` or `docComment`
+parser, which the server otherwise shows anywhere in a doc comment, and makes
+go-to-definition find nothing there rather than the comment's elaborator. -/
+def pushBlankInfo (ref : Syntax) : TermElabM Unit := do
+  pushInfoLeaf <| .ofDelabTermInfo {
+    elaborator := .anonymous, stx := ref, lctx := ← getLCtx
+    expectedType? := none, expr := mkStrLit ""
+    mkDocString? := some fun _ => pure "" }
+
+/-- Records an info node over the keyword `ref`, whose syntax node kind is `kind?`,
+that shows its hover text (see `keywordDoc?`) and goes to the declaration of `kind?`
+on Ctrl-click. -/
+def pushKeywordInfo (ref : Syntax) (kind? : Option SyntaxNodeKind) :
+    TermElabM Unit := do
+  let env ← getEnv
+  let doc := (← keywordDoc? env ref.getAtomVal kind?).getD ""
+  let location? : Option DeclarationLocation ← match kind? with
+    | none => pure none
+    | some kind => do
+      let some ranges ← findDeclarationRanges? kind | pure none
+      pure (some ⟨(← findModuleOf? kind).getD env.mainModule, ranges.selectionRange⟩)
+  pushInfoLeaf <| .ofDelabTermInfo {
+    elaborator := .anonymous, stx := ref, lctx := ← getLCtx
+    expectedType? := none, expr := mkStrLit ref.getAtomVal, location?
+    mkDocString? := some fun _ => pure doc }
 
 /-- See the module docstring. -/
 def docHoverLinter : Linter where
@@ -435,12 +613,29 @@ def docHoverLinter : Linter where
     -- `liftTermElabM` records the info nodes with the context the server needs.
     liftTermElabM do
       for doc in docs do
+        -- The opening delimiter, and the text with the closing one.
+        pushBlankInfo doc[0]
+        pushBlankInfo doc[1]
         let body := commentBody doc
         let some start := body.getPos?
           | continue
         for (spanOff, code) in codeSpans body.getAtomVal do
+          if isShellCommand code then
+            continue
+          if let some kind? ← keywordSpan? body.getAtomVal code spanOff
+              (spanOff + code.utf8ByteSize) then
+            let b : String.Pos.Raw := ⟨start.byteIdx + spanOff⟩
+            let e : String.Pos.Raw := ⟨b.byteIdx + code.utf8ByteSize⟩
+            let ref := Syntax.atom (.synthetic b e (canonical := true)) code
+            if code.startsWith "#" && !commandDescriptions.contains code then
+              Linter.logLint linter.docHover ref
+                m!"no description of `{code}` in `STIL.DocHover.commandDescriptions`"
+            pushKeywordInfo ref kind?
+            continue
           let ids := identifiers code
-          let tacticCode := ids.any (tactics.contains ·.2) && isTacticCode env code
+          -- A single word that is no keyword span names a constant, if anything.
+          let tacticCode := code.any Char.isWhitespace &&
+            ids.any (tactics.contains ·.2) && isTacticCode env code
           for (off, name) in ids do
             if tacticCode && tactics.contains name then
               continue
@@ -451,14 +646,11 @@ def docHoverLinter : Linter where
               discard <| realizeGlobalConstNoOverloadWithInfo
                 (mkIdentFrom ref name.toName (canonical := true))
             catch _ => pure ()
-        -- An info node whose elaborator is no declaration, which go-to-definition
-        -- picks over the command's own node as the innermost one.
         for (off, len) in links body.getAtomVal do
           let b : String.Pos.Raw := ⟨start.byteIdx + off⟩
           let e : String.Pos.Raw := ⟨b.byteIdx + len⟩
-          let ref := Syntax.atom (.synthetic b e (canonical := true))
+          pushBlankInfo <| Syntax.atom (.synthetic b e (canonical := true))
             (String.Pos.Raw.extract body.getAtomVal ⟨off⟩ ⟨off + len⟩)
-          pushInfoLeaf <| .ofCommandInfo { elaborator := .anonymous, stx := ref }
         -- An info node with the heading's position for go-to-definition and its
         -- title for hover, which the server reads without the heading's module
         -- imported.

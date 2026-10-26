@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C11_Distance.C11_Distance
 import Mathlib.Algebra.Order.Group.End
 import Mathlib.GroupTheory.SpecificGroups.Dihedral

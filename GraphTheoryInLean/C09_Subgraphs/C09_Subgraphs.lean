@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C06_Cliques.Exercises
 import GraphTheoryInLean.C07_Colorings.C07_Colorings
 import GraphTheoryInLean.C08_Walks.Exercises

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C13_Theorems.C13_Theorems
 namespace SimpleGraph
 variable {V : Type*} {G : SimpleGraph V}

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.C04_Decidability_Finiteness_and_Degrees
 import GraphTheoryInLean.C05_Maps.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Clique
@@ -710,7 +715,7 @@ given finset `s` (here `s = {i}`).
 The hypothesis `[NeZero k]` is needed. For `k = 0` the only `0`-element subset of
 `β` is `∅`, which does not contain `i`, so the count is `0`. But natural-number
 subtraction gives `k - 1 = 0`, so the formula evaluates to `1`. (`NeZero k` is a
-typeclass recording that `k ≠ 0`; as an instance argument it can be found
+type class recording that `k ≠ 0`; as an instance argument it can be found
 automatically, for example when `k` is `n + 1`.)
 -/
 lemma card_filter_mem_eq_choose_sub_one [Fintype β] [DecidableEq β]

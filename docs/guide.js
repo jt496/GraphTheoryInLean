@@ -38,6 +38,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Proof states on the lozenges only. Verso wraps the whole text of a tactic
+// (`exact foo bar`, `have h : … := by …`, each `rw` rule) in the <label> that
+// toggles its proof state, and its hover script lets that region's proof state
+// win over every identifier inside it, so no docstring or signature hover
+// appears anywhere in a tactic proof. Move the text out of the label into a
+// sibling span; the label keeps just the lozenge (its ::after), which now alone
+// shows and pins the proof state, while the identifiers get their own hovers as
+// in the rest of the code. The wrapper lets guide.css lay a pinned proof state
+// out under the tactic text, as before. This must run before Verso's
+// window.onload handler attaches the tooltips, which DOMContentLoaded does.
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.hl.lean .tactic').forEach(function (tactic) {
+        var label = tactic.querySelector(':scope > label');
+        if (!label || !label.firstChild) return;
+        var wrapper = document.createElement('span');
+        wrapper.className = 'stil-tactic';
+        var text = document.createElement('span');
+        text.className = 'stil-tactic-text';
+        while (label.firstChild) text.appendChild(label.firstChild);
+        tactic.parentNode.insertBefore(wrapper, tactic);
+        wrapper.appendChild(text);
+        wrapper.appendChild(tactic);
+    });
+});
+
 // Theme toggle button + dark/light figure swapping. The pre-paint IIFE above
 // has already set data-theme; here we add the floating button, align the figure
 // images with the current theme, and let the reader flip it. A flip away from

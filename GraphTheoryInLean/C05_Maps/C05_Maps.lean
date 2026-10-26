@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C04_Decidability_Finiteness_and_Degrees.Exercises
 import Mathlib.Combinatorics.SimpleGraph.Acyclic -- also supplies `IsAcyclic` to C07 and C10
 namespace SimpleGraph
@@ -83,8 +88,8 @@ Given embeddings `V ↪ W` and `W ↪ V` the Cantor–Schröder–Bernstein theo
 there exists an equivalence `V ≃ W`. Its proof is non-constructive, so Mathlib states
 it as `Nonempty (V ≃ W)`, a proposition saying that an equivalence exists, rather
 than as a definition producing the equivalence itself, which would be data. (Compare
-`Finite` and `Fintype` in [Finiteness Without Data: the Finite
-Typeclass](#section-finiteness-without-data-the-finite-typeclass).)
+`Finite` and `Fintype` in [Finiteness Without Data: the Finite Type
+Class](#section-finiteness-without-data-the-finite-type-class).)
 -/
 example (f : V ↪ W) (g : W ↪ V) : Nonempty (V ≃ W) :=
   Function.Embedding.antisymm f g

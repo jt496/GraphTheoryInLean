@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C02_SimpleGraph.C02_SimpleGraph
 import GraphTheoryInLean.C03_Constructions.C03_Constructions
 import Mathlib.Combinatorics.SimpleGraph.Finite
@@ -7,7 +12,7 @@ import Mathlib.Combinatorics.SimpleGraph.DegreeSum
 import Mathlib.Combinatorics.Enumerative.DoubleCounting
 namespace SimpleGraph
 /-!
-This chapter is about *computing* with graphs in Lean, and about the typeclass
+This chapter is about *computing* with graphs in Lean, and about the type class
 machinery that makes computation possible. We begin with decidability: the contrast
 between `Bool` and `Prop`, the `Decidable` class, the commands and tactics that use
 it (`#eval`, `decide` and `native_decide`), and the `DecidableRel G.Adj` instances
@@ -16,7 +21,7 @@ required to decide adjacency. We then turn to finiteness, starting from the hier
 `Finite`, which is a proposition. Along the way we compare the ways Mathlib has of
 counting the elements of a finite type or set. A point we return to more than once is
 that because `Fintype` instances are data, the same type can receive two different
-instances by two different routes of typeclass inference. This is known as a
+instances by two different routes of type class inference. This is known as a
 *diamond*, after the shape of the two routes meeting at one type. Such a diamond is a
 nuisance rather than a feature: the two instances are always equal, but not
 *by definition*, so a theorem stated using one instance will not apply to a goal that
@@ -86,7 +91,7 @@ Going from `Bool` to `Prop` is easy: Lean coerces `b : Bool` to the proposition
 
 /-!
 Going from `Prop` to `Bool` is the hard direction, and this is exactly what the
-decidability typeclass provides.
+decidability type class provides.
 
 ## The Decidable Class
 
@@ -98,7 +103,7 @@ proposition holds. For one fixed proposition this notion is vacuous, since one o
 two algorithms "answer true" and "answer false" is always correct, even if we do not
 know which.
 
-In Lean, decidability is expressed by the typeclass `Decidable`. An instance of
+In Lean, decidability is expressed by the type class `Decidable`. An instance of
 `Decidable p` is not the claim that `p` is decidable but a piece of *data*: a Boolean
 `decide p` giving the answer, packaged with a proof that this answer is correct.
 -/
@@ -132,7 +137,7 @@ explain.
 for us. Each `instance` declaration, in Mathlib or in our own files, registers a way
 of building one, possibly from other instances. When a definition or theorem has an
 argument in square brackets, an *instance argument* such as the `[Add α]` in `Even`
-above, the caller does not supply it. Lean finds it by *typeclass inference*: it
+above, the caller does not supply it. Lean finds it by *type class inference*: it
 searches the hypotheses in the local context first and then the registered instances,
 combining instances as needed. (We also say that Lean *synthesizes* the instance, and
 call this process *instance search*.) The term `inferInstance` and the tactic
@@ -199,7 +204,7 @@ without saying which: it contains no algorithm and cannot be evaluated.
 
 /-!
 The `classical` tactic makes this instance available for the rest of a proof or
-definition, but only as a fallback: if typeclass inference finds a genuine
+definition, but only as a fallback: if type class inference finds a genuine
 `Decidable p` instance, that is used instead. In `myClassicalIfThenElse` below, `p`
 is an arbitrary proposition with no `Decidable p` instance, so the `if-then-else`
 uses `Classical.propDecidable`, and Lean refuses to compile the definition unless we
@@ -360,7 +365,7 @@ All three of `#eval`, `decide`, and `native_decide` rely on having computable
 ## Deciding Adjacency
 
 Where does an instance of `DecidableRel G.Adj` used by `#eval` and `decide` come
-from? Usually we would like Lean to synthesize these automatically by typeclass
+from? Usually we would like Lean to synthesize these automatically by type class
 inference.
 
 To see which instance is synthesized for a particular graph we can use the `#synth`
@@ -814,7 +819,7 @@ it as `Finset.univ` (it is after all the `Finset` version of `Set.univ`).
 
 /-!
 As with `Decidable` instances, `Fintype` instances are usually constructed
-automatically by typeclass inference.
+automatically by type class inference.
 
 For example, for any `n : ℕ`, there is a `Fintype` instance for `Fin n`.
 -/
@@ -1067,11 +1072,11 @@ a `Finset.card`, but it equals `Fintype.card ↑(G.neighborSet v)`.
 #check card_neighborSet_eq_degree -- Fintype.card ↑(G.neighborSet v) = G.degree v
 
 /-!
-### Finiteness Without Data: the `Finite` Typeclass
+### Finiteness Without Data: the `Finite` Type Class
 
 Sometimes we know a type is finite but have no canonical enumeration of it, or we
 simply don't want to drag `Fintype` data, and the `Decidable` instances it forces,
-through a proof. For this Mathlib provides the `Finite` typeclass. It tells us that
+through a proof. For this Mathlib provides the `Finite` type class. It tells us that
 there exist a natural number `n` and a bijection between the type and `Fin n`, the
 canonical type of cardinality `n`.
 -/
@@ -1106,7 +1111,7 @@ instance for use in proofs, but `#eval` cannot run it.
 
 One final remark about `Fintype` instances is that because two instances for the same
 type need not be *definitionally equal*, they can be the source of *diamonds* in
-typeclass inference. This can make proofs fail in mysterious ways. We will see a
+type class inference. This can make proofs fail in mysterious ways. We will see a
 simple example of one below in [The Handshake Lemma](#section-the-handshake-lemma).
 
 ### Counting with Only `Finite`: `Nat.card`
@@ -1808,7 +1813,7 @@ def hypercubeVertToBin : (n : ℕ) → HypercubeVert n → String
   | n + 1, (v, b) => hypercubeVertToBin n v ++ if b then "1" else "0"
 
 /-!
-Lean has the `Repr` typeclass for types that can be pretty printed. We can now use
+Lean has the `Repr` type class for types that can be pretty printed. We can now use
 `hypercubeVertToBin` to give a `Repr` instance for `HypercubeVert n`.
 -/
 /-- A `Repr` instance for hypercube vertices to allow pretty printing. -/
@@ -1922,7 +1927,7 @@ The proof, however, needs the efficient instance: because it is built through th
 product, `change` can restate a degree in `Q[n + 1]` as a degree in `Q[n] □ ⊤`, ready
 for `degree_boxProd`. Since the instance is now an argument, the proof has to switch
 to the efficient one itself, and this is what its first two lines do. The `let` puts
-the efficient instance in the local context, where typeclass inference looks first.
+the efficient instance in the local context, where type class inference looks first.
 (It must be a `let`, not a `have`: an instance is data, and `change` needs to see its
 value.) Then `convert_to` restates the goal, so that its instance is synthesized as
 the local one, and closes the gap between the two instances using the `Subsingleton`
@@ -1948,7 +1953,7 @@ lemma IsRegularOfDegree.hypercube (n : ℕ) [Q[n].LocallyFinite] :
     simp
 
 /-!
-The lemma now applies with whatever instance typeclass inference finds where it is
+The lemma now applies with whatever instance type class inference finds where it is
 used. In the first example below, that is the global instance
 `hypercubeFintypeNeighborSet`. In the second, it is the instance argument
 `[Q[n].LocallyFinite]`, about which nothing is known; inference finds it because

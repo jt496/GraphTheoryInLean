@@ -34,3 +34,8 @@ The HTML is in `docs/`, served by GitHub Pages.
 
 This repository is generated from the guide's sources; edit those rather than
 these files.
+
+## License
+
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.

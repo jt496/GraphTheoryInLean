@@ -196,6 +196,18 @@
         "number": "4"},
        {"title": "Vertex Connectivity", "shortTitle": null, "number": "2"}]},
      "address": "/Connectivity/"}],
+   "section-use-of-ai":
+   [{"id": "section-use-of-ai",
+     "data":
+     {"title": "Use of AI",
+      "shortTitle": null,
+      "sectionNum": "1.6.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Introduction", "shortTitle": null, "number": "1"},
+       {"title": "Use of AI", "shortTitle": null, "number": "6"}]},
+     "address": "/Introduction/"}],
    "section-two-fixes-finset-min-and-memoization":
    [{"id": "section-two-fixes-finset-min-and-memoization",
      "data":
@@ -2404,10 +2416,10 @@
        {"title": "Finite Types", "shortTitle": null, "number": "2"},
        {"title": "Fintypes", "shortTitle": null, "number": "3"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "section-finiteness-without-data-the-finite-typeclass":
-   [{"id": "section-finiteness-without-data-the-finite-typeclass",
+   "section-finiteness-without-data-the-finite-type-class":
+   [{"id": "section-finiteness-without-data-the-finite-type-class",
      "data":
-     {"title": "Finiteness Without Data: the  Finite  Typeclass",
+     {"title": "Finiteness Without Data: the  Finite  Type Class",
       "shortTitle": null,
       "sectionNum": "4.2.4.3.",
       "searchPriority": 50,
@@ -2418,7 +2430,7 @@
         "number": "4"},
        {"title": "Finite Types", "shortTitle": null, "number": "2"},
        {"title": "Cardinality", "shortTitle": null, "number": "4"},
-       {"title": "Finiteness Without Data: the  Finite  Typeclass",
+       {"title": "Finiteness Without Data: the  Finite  Type Class",
         "shortTitle": null,
         "number": "3"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
@@ -4806,6 +4818,18 @@
         "shortTitle": null,
         "number": "1"}]},
      "address": "/Connectivity/"}],
+   "section-acknowledgements":
+   [{"id": "section-acknowledgements",
+     "data":
+     {"title": "Acknowledgements",
+      "shortTitle": null,
+      "sectionNum": "1.5.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Introduction", "shortTitle": null, "number": "1"},
+       {"title": "Acknowledgements", "shortTitle": null, "number": "5"}]},
+     "address": "/Introduction/"}],
    "section-a-single-edge":
    [{"id": "section-a-single-edge",
      "data":

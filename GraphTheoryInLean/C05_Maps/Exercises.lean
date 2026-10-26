@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C05_Maps.C05_Maps
 namespace SimpleGraph
 variable {V W X : Type*}
@@ -404,7 +409,7 @@ lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
     -- Since `ι` is empty, `(i : ι) → U i` contains a unique element
     -- (you can define it by `fun i => isEmptyElim i`)
     have : Unique ((i : ι) → U i) := inferInstance
-    -- Lean has the `Subsingleton` typeclass for types with at most one element.
+    -- Lean has the `Subsingleton` type class for types with at most one element.
     have : Subsingleton ((i : ι) → U i) := inferInstance
     -- So `f a = f b` since they are both elements of a `Subsingleton` type.
     apply Subsingleton.elim

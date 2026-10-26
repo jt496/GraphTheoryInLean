@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C07_Colorings.C07_Colorings
 import GraphTheoryInLean.C08_Walks.C08_Walks
 import GraphTheoryInLean.C09_Subgraphs.C09_Subgraphs
@@ -530,7 +535,7 @@ nothing useful: `Nat.card` of an infinite type is the junk value `0`, so for
 
 /-!
 Any nontrivial finite tree has at least two leaves (vertices of degree one), and so
-its minimum degree is `1`. (Note `Nontrivial V` is the typeclass saying that `V`
+its minimum degree is `1`. (Note `Nontrivial V` is the type class saying that `V`
 contains at least two elements.)
 -/
 #check IsTree.exists_ne_and_degree_eq_one
@@ -671,7 +676,7 @@ and `G.Adj` is decidable, Mathlib already gives the neighbourhoods of
 Instead we use the `attribute` command, which attaches an attribute to a declaration
 that already exists: `attribute [simp] foo` has the same effect as writing `@[simp]`
 in front of the declaration of `foo`. The keyword `local` limits the effect to the
-current `section` or `namespace`. So after the line below, typeclass inference uses
+current `section` or `namespace`. So after the line below, type class inference uses
 `locallyFiniteDeleteEdges` until the end of this section and nowhere else.
 -/
 attribute [local instance] locallyFiniteDeleteEdges

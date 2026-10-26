@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.C06_Cliques.C06_Cliques
 import Mathlib.Combinatorics.SimpleGraph.Coloring.Constructions
 import Mathlib.Combinatorics.SimpleGraph.Partition
@@ -1137,10 +1142,10 @@ have a graph `G : SimpleGraph V`, where `V` is countable. Informally we might sa
 "let the vertices of `G` be `v₀, v₁, v₂,…`", implicitly thinking of `G` as a
 `SimpleGraph ℕ`. How can we formalize this in Lean?
 
-Mathlib has the `Encodable` typeclass for constructively countable types (both finite
-and infinite). It provides an `Encodable.encode` function that is an injection from
-`V` to `ℕ` together with a partial inverse `Encodable.decode : ℕ → Option V`, which
-satisfies `decode (encode v) = some v` for all `v : V`.
+Mathlib has the `Encodable` type class for constructively countable types (both
+finite and infinite). It provides an `Encodable.encode` function that is an injection
+from `V` to `ℕ` together with a partial inverse `Encodable.decode : ℕ → Option V`,
+which satisfies `decode (encode v) = some v` for all `v : V`.
 -/
 #source Encodable
 /-!

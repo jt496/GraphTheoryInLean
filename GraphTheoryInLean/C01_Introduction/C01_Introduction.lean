@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 John Talbot. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: John Talbot
+-/
 import GraphTheoryInLean.Common
 import Mathlib.Combinatorics.SimpleGraph.DegreeSum
 import Mathlib.Combinatorics.Digraph.Basic
@@ -26,7 +31,7 @@ course in logic and proof using Lean)
 (interactive games such as the Natural Number Game)
 
 A first course in graph theory is assumed, as is a basic level of Lean proficiency
-(for example the first few chapters of
+(for example chapters 1 to 8 of
 [Mathematics in Lean](https://leanprover-community.github.io/mathematics_in_lean/)).
 
 Our aim is to give graph theorists an idea of how formalizing their work might look
@@ -52,7 +57,9 @@ interactive features of Lean such as InfoView messages and `#command` outputs.
 To see the actual output of a `#command` you need to hover over the `#command` itself
 with your cursor (the `#command` will have wavy underlining). Many terms also have
 associated doc-strings which you can see by hovering over them; click on them to view
-the full documentation. Types of terms are also shown.
+the full documentation. Types of terms are also shown. In tactic proofs, hover over
+the small lozenge after a tactic to see the proof state at that point, and click it
+to keep the proof state open (click again to close it).
 
 For example, below you should be able to hover over the `#source` command to see the
 verbatim source code of the definition of `SimpleGraph` in Mathlib. While if you
@@ -177,5 +184,35 @@ exercises is given first with `sorry`, and the solutions follow.
 Since we want to develop results for our running examples some of these exercises are
 named lemmas or theorems rather than anonymous examples. To avoid naming clashes we
 add a prime (`foo'`) to the versions with `sorry`.
+
+# Acknowledgements
+
+This guide could not exist without the work of all the contributors to Lean and
+Mathlib.
+
+We gratefully acknowledge support from the AI for Math Fund, a program of
+Renaissance Philanthropy and founding donor XTX Markets.
+
+Access to AI tools was provided through Anthropic's Claude for Scientists Team Plan
+and OpenAI's ChatGPT for Academic Researchers.
+
+# Use of AI
+
+We used AI tools (Claude and ChatGPT) in the later stages of this project for:
+
+* Lean code: drafting some definitions and proofs, which we then reviewed and
+  revised.
+* Writing: copy-editing, editorial review (suggesting cuts, reorganization and
+  naming), preparing the bibliography.
+* Figures: creating most of the TikZ diagrams.
+* Tooling: the Lean and Verso customization, together with Python scripts to simplify
+  our conversion process.
+
+The choice of topics and the mathematical exposition are our own.
+
+All proofs in this guide are checked by Lean, but it cannot check that our
+definitions and statements mean what we claim they mean, or that the prose is
+correct. We have reviewed everything and take full responsibility for all of it,
+especially the errors.
 -/
 end SimpleGraph
