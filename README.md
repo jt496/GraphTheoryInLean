@@ -4,7 +4,8 @@ The Lean sources of *Graph Theory in Lean*: one directory per chapter under
 `GraphTheoryInLean/`, each holding the chapter (`CNN_Name.lean`) and, for most chapters, its
 exercises with solutions (`Exercises.lean`).
 
-Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>.
+Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>,
+or as a PDF: [`docs/GraphTheoryInLean.pdf`](docs/GraphTheoryInLean.pdf).
 The HTML is in `docs/`, served by GitHub Pages.
 
 ## Building
