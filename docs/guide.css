@@ -223,9 +223,23 @@ figure.stil-figure img {
 
 /* Touch screens (see the matching handler in guide.js): a tap on a linked token
    opens its hover and a second tap follows the link. No double-tap zoom on these
-   links, so that a quick double tap arrives as the two taps. */
+   links, so that a quick double tap arrives as the two taps. The hover repeats
+   the link at its foot, set off from the docstring by a rule. The hover box is
+   light in both themes, so the link keeps a dark blue rather than the page's
+   (pale, in the dark theme) link colour. */
 .hl.lean a {
     touch-action: manipulation;
+}
+.tippy-content > .stil-tap-link {
+    margin-top: 0.5em;
+    padding-top: 0.4em;
+    border-top: 1px solid #c8c8c8;
+    font-family: var(--verso-text-font-family, sans-serif);
+}
+.tippy-content > .stil-tap-link > a {
+    display: inline-block;
+    padding: 0.2em 0;
+    color: #0645ad;
 }
 
 /* A pinned proof state goes under the tactic text, not under the lozenge: the

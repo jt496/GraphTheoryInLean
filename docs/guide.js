@@ -63,17 +63,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Touch screens: tap a linked token to open its hover, tap it again (or double
-// tap) to follow the link. Verso wraps each documented token in a link (to the
-// Mathlib docs, or to the definition in this guide), so on a phone the tap that
-// opens the hover is also a click on the link, and the reader lands on the docs
-// without seeing the hover. A touch tap on a token whose hover was not already
-// open when the finger came down therefore only opens the hover, first removing
-// any other open hover at once: Verso's script will not show a hover while an
-// unrelated one is still fading out, which would cost the reader a second tap.
-// Mouse clicks and keyboard activation (detail 0) follow the link as before.
-// Browsers whose click events carry no pointerType fall back to the last
-// pointerdown's.
+// Touch screens: tap a linked token to open its hover, then tap the link this
+// adds at the foot of the hover, or the token again (or double tap), to follow
+// it. Verso wraps each documented token in a link (to the Mathlib docs, or to
+// the definition in this guide), so on a phone the tap that opens the hover is
+// also a click on the link, and the reader lands on the docs without seeing the
+// hover. A finger or pen tap on a token whose hover was not already open when
+// it came down therefore only opens the hover, first removing any other open
+// hover at once: Verso's script will not show a hover while an unrelated one is
+// still fading out, which would cost the reader a second tap. A pen that can
+// hover has opened the hover before it touches down, so its tap follows the
+// link. Mouse clicks and keyboard activation (detail 0) follow the link as
+// before. Browsers whose click events carry no pointerType fall back to the
+// last pointerdown's.
 (function () {
     var lastPointer = '';
     var openAtPress = null;
@@ -95,8 +97,25 @@ document.addEventListener('DOMContentLoaded', function () {
         openAtPress = ref && ref._tippy.state.isVisible ? ref : null;
     }, true);
 
+    // The token's link, repeated at the foot of its hover (below the part that
+    // scrolls), so that following it does not depend on knowing about the second
+    // tap. Added on the first tap; the hover keeps it from then on.
+    function addLink(tip, link) {
+        var box = tip.popper.querySelector('.tippy-content');
+        if (!box || box.querySelector('.stil-tap-link')) return;
+        var a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.hostname === location.hostname
+            ? 'Go to definition' : 'Mathlib docs ↗';
+        var foot = document.createElement('div');
+        foot.className = 'stil-tap-link';
+        foot.appendChild(a);
+        box.appendChild(foot);
+    }
+
     document.addEventListener('click', function (e) {
-        if (e.detail === 0 || (e.pointerType || lastPointer) !== 'touch') return;
+        var type = e.pointerType || lastPointer;
+        if (e.detail === 0 || (type !== 'touch' && type !== 'pen')) return;
         var link = e.target.closest && e.target.closest('a[href]');
         var ref = link && hoverRef(e.target, link);
         if (!ref || ref === openAtPress) return;
@@ -104,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-tippy-root]').forEach(function (popper) {
             if (popper._tippy && popper._tippy !== ref._tippy) popper._tippy.unmount();
         });
+        addLink(ref._tippy, link);
         ref._tippy.show();
     }, true);
 })();
