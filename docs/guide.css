@@ -215,6 +215,17 @@ figure.stil-figure img {
 .hl.lean .tactic > label {
     cursor: pointer;
 }
+/* Touch screens: the lozenge is a small target for a finger, so widen the area
+   that toggles it, using the label's free ::before (Verso draws the lozenge with
+   ::after). It grows mostly rightwards and vertically, to stay clear of the
+   tactic text just before it. */
+@media (pointer: coarse) {
+    .hl.lean .tactic > label::before {
+        content: "";
+        position: absolute;
+        inset: -0.6em -0.6em -0.6em -0.15em;
+    }
+}
 @media (hover: hover) {
     .hl.lean .stil-tactic:has(> .tactic > label:hover + .tactic-toggle:not(:checked)) > .stil-tactic-text {
         background-color: var(--verso-code-hover-bg-color, #eeeeee);
@@ -550,6 +561,84 @@ ol.section-toc > li.part-sep {
 }
 
 /* ============================================================
+   Narrow screens (phones)
+   Below Verso's 700px breakpoint the sidebar slides in over the page.
+   See also the theme toggle further down, and the touch handlers in
+   guide.js.
+   ============================================================ */
+
+@media screen and (max-width: 700px) {
+    /* A table wider than the screen scrolls inside its own box, as code blocks
+       do, instead of widening the whole page. */
+    main table.tabular {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Likewise a long URL or identifier in the text (the repository link in
+       the Introduction, `two_le_length_of_isMaximumPath`) breaks where it must
+       rather than sticking out past the edge of a small phone. */
+    main p {
+        overflow-wrap: break-word;
+    }
+
+    /* Footnotes and citations open as a panel along the bottom of the screen:
+       placed at the marker, as on wider screens, a note from mid-line runs off
+       the right edge. (`body` outranks the footnote styles that
+       STIL/Tactic/Directives.lean puts in the page.) */
+    body span.stil-footnote-content {
+        position: fixed;
+        top: auto;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        min-width: 0;
+        max-width: none;
+        max-height: 40vh;
+        overflow-y: auto;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    body span.stil-footnote-content::before {
+        display: none;
+    }
+
+    /* Header: Verso lays the search box over the right end of the title, which
+       at full size showed only "Graph The". Use a narrower box, and a smaller
+       title that stops short of it, ending in an ellipsis if it still does not
+       fit. The box's drop-down list keeps nearly the full screen width. */
+    :root {
+        --search-bar-width: 7rem;
+    }
+    .header-title {
+        font-size: 1.2rem;
+        margin-right: calc(var(--search-bar-width) + 1.5rem);
+    }
+    .header-title h1 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #search-wrapper ul[role="listbox"] {
+        left: auto;
+        right: 0;
+        width: calc(100vw - 2rem);
+    }
+}
+
+/* Touch screens: a tap on a footnote marker leaves the note's :hover and
+   :focus-within behind, so the second tap, which only clears
+   .stil-footnote-open, would not close it. Show the note only while open. */
+@media (hover: none) {
+    body span.stil-footnote:hover span.stil-footnote-content,
+    body span.stil-footnote:focus-within span.stil-footnote-content {
+        display: none;
+    }
+    body span.stil-footnote.stil-footnote-open span.stil-footnote-content {
+        display: block;
+    }
+}
+
+/* ============================================================
    Print styles
    Hide the TOC sidebar and navigation chrome so body text
    fills the page. Footnotes are rendered as numbered endnotes
@@ -735,6 +824,25 @@ html { color-scheme: light; }
     justify-content: center;
 }
 .theme-toggle:hover { box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4); }
+
+/* Narrow screens: no floating button over the text. It appears only in the open
+   sidebar, to the right of its "Table of Contents" heading, once the sidebar has
+   slid in. Until a reader picks a theme, it follows the system setting anyway. */
+@media screen and (max-width: 700px) {
+    .theme-toggle {
+        top: calc(var(--verso-header-height) + 0.6rem);
+        bottom: auto;
+        left: calc(var(--verso-toc-width) - 3.4rem);
+        right: auto;
+        visibility: hidden;
+        opacity: 0;
+    }
+    body:has(#toggle-toc:checked) .theme-toggle {
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.15s ease var(--verso-toc-transition-time);
+    }
+}
 
 html[data-theme="dark"] {
     color-scheme: dark;

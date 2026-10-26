@@ -1,4 +1,5 @@
-// Persist the TOC collapsed/expanded state across page navigation using localStorage.
+// Persist the TOC collapsed/expanded state across page navigation using localStorage
+// (wide screens only; see the DOMContentLoaded handler below).
 //
 // The IIFE runs immediately (before body paint) to set data-toc="collapsed" on <html>
 // so the CSS suppresses the TOC without a visible flash.  The DOMContentLoaded handler
@@ -75,10 +76,22 @@ document.addEventListener('DOMContentLoaded', function () {
 // hover has opened the hover before it touches down, so its tap follows the
 // link. Mouse clicks and keyboard activation (detail 0) follow the link as
 // before. Browsers whose click events carry no pointerType fall back to the
-// last pointerdown's.
+// last pointerdown's. Two more touch fixes for hovers follow at the end.
 (function () {
     var lastPointer = '';
     var openAtPress = null;
+    var yAtPress = 0;
+
+    function touchLike(type) {
+        return type === 'touch' || type === 'pen';
+    }
+
+    // Close every open hover but `except` at once (no fade-out).
+    function closeHovers(except) {
+        document.querySelectorAll('[data-tippy-root]').forEach(function (popper) {
+            if (popper._tippy && popper._tippy !== except) popper._tippy.unmount();
+        });
+    }
 
     // The innermost element from `el` up to (not including) `link` with a hover
     // that has something to show, as in Verso's hover script.
@@ -92,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('pointerdown', function (e) {
         lastPointer = e.pointerType;
+        yAtPress = window.scrollY;
         var link = e.target.closest && e.target.closest('a[href]');
         var ref = link && hoverRef(e.target, link);
         openAtPress = ref && ref._tippy.state.isVisible ? ref : null;
@@ -114,18 +128,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.addEventListener('click', function (e) {
-        var type = e.pointerType || lastPointer;
-        if (e.detail === 0 || (type !== 'touch' && type !== 'pen')) return;
+        if (e.detail === 0 || !touchLike(e.pointerType || lastPointer)) return;
         var link = e.target.closest && e.target.closest('a[href]');
         var ref = link && hoverRef(e.target, link);
         if (!ref || ref === openAtPress) return;
         e.preventDefault();
-        document.querySelectorAll('[data-tippy-root]').forEach(function (popper) {
-            if (popper._tippy && popper._tippy !== ref._tippy) popper._tippy.unmount();
-        });
+        closeHovers(ref._tippy);
         addLink(ref._tippy, link);
         ref._tippy.show();
     }, true);
+
+    // A tap on a proof-state lozenge pins the state under the tactic, but the
+    // tap's emulated hover also floats a copy of it, and Verso floats one again
+    // when the state is unpinned. Close them. This listener runs after Verso's
+    // own one on the checkbox, so its timeout runs after Verso's re-show.
+    document.addEventListener('change', function (e) {
+        if (!touchLike(lastPointer) || !e.target.classList.contains('tactic-toggle')) return;
+        setTimeout(closeHovers, 0);
+    });
+
+    // A hover stays open on a touch screen until the next tap, so one left open
+    // scrolls up the page with the text, over the header. Close hovers once the
+    // page has moved a little since the last tap.
+    window.addEventListener('scroll', function () {
+        if (touchLike(lastPointer) && Math.abs(window.scrollY - yAtPress) > 10) closeHovers();
+    }, { passive: true });
 })();
 
 // Theme toggle button + dark/light figure swapping. The pre-paint IIFE above
@@ -225,12 +252,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var checkbox = document.getElementById('toggle-toc');
     if (!checkbox) return;
 
-    // Sync checkbox with stored state
-    if (localStorage.getItem(KEY) === 'true') {
-        checkbox.checked = true;
+    // Verso's checkbox means opposite things on either side of its 700px
+    // breakpoint: on a wide screen guide.css makes a ticked box collapse the
+    // sidebar, while on a narrow one Verso makes it slide the sidebar in over the
+    // page (and stop the page scrolling). Only the wide-screen meaning is
+    // remembered; on a narrow screen every page opens with the sidebar closed.
+    var narrow = window.matchMedia('screen and (max-width: 700px)');
+    function remembered() {
+        return !narrow.matches && localStorage.getItem(KEY) === 'true';
     }
 
+    // Sync checkbox with stored state
+    checkbox.checked = remembered();
+
     checkbox.addEventListener('change', function () {
+        if (narrow.matches) return;
         if (this.checked) {
             localStorage.setItem(KEY, 'true');
             document.documentElement.setAttribute('data-toc', 'collapsed');
@@ -238,6 +274,21 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.removeItem(KEY);
             document.documentElement.removeAttribute('data-toc');
         }
+    });
+
+    // Crossing the breakpoint (rotating a tablet, resizing a window) gives the
+    // box its other meaning, so reset it: closed when narrow, the remembered
+    // state when wide.
+    narrow.addEventListener('change', function () {
+        checkbox.checked = remembered();
+    });
+
+    // On a narrow screen, a tap on a link in the sidebar closes it; a link to
+    // another part of the same page would otherwise scroll the page underneath
+    // the still-open sidebar.
+    var toc = document.getElementById('toc');
+    if (toc) toc.addEventListener('click', function (e) {
+        if (narrow.matches && e.target.closest('a[href]')) checkbox.checked = false;
     });
 
     // In single-page mode, the sidebar TOC only shows chapter titles. Augment it
