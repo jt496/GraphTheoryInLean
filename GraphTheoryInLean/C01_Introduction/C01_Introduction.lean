@@ -210,7 +210,7 @@ We used AI tools (Claude and ChatGPT) in the later stages of this project for:
 
 The choice of topics and the mathematical exposition are our own.
 
-All proofs in this guide are checked by Lean, but it cannot check that our
+All the proofs in this guide are checked by Lean, but it can't check that our
 definitions and statements mean what we claim they mean, or that the prose is
 correct. We have reviewed everything and take full responsibility for all of it,
 especially the errors.

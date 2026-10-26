@@ -221,6 +221,13 @@ figure.stil-figure img {
     }
 }
 
+/* Touch screens (see the matching handler in guide.js): a tap on a linked token
+   opens its hover and a second tap follows the link. No double-tap zoom on these
+   links, so that a quick double tap arrives as the two taps. */
+.hl.lean a {
+    touch-action: manipulation;
+}
+
 /* A pinned proof state goes under the tactic text, not under the lozenge: the
    wrapper becomes the inline grid that Verso makes of `.tactic` (text and
    lozenge in row 1, the state across row 2), and `.tactic` drops out of the box

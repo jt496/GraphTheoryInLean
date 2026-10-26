@@ -63,6 +63,51 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Touch screens: tap a linked token to open its hover, tap it again (or double
+// tap) to follow the link. Verso wraps each documented token in a link (to the
+// Mathlib docs, or to the definition in this guide), so on a phone the tap that
+// opens the hover is also a click on the link, and the reader lands on the docs
+// without seeing the hover. A touch tap on a token whose hover was not already
+// open when the finger came down therefore only opens the hover, first removing
+// any other open hover at once: Verso's script will not show a hover while an
+// unrelated one is still fading out, which would cost the reader a second tap.
+// Mouse clicks and keyboard activation (detail 0) follow the link as before.
+// Browsers whose click events carry no pointerType fall back to the last
+// pointerdown's.
+(function () {
+    var lastPointer = '';
+    var openAtPress = null;
+
+    // The innermost element from `el` up to (not including) `link` with a hover
+    // that has something to show, as in Verso's hover script.
+    function hoverRef(el, link) {
+        for (; el && el !== link; el = el.parentElement) {
+            if (el._tippy && ('versoHover' in el.dataset || el.querySelector('.hover-info')))
+                return el;
+        }
+        return null;
+    }
+
+    document.addEventListener('pointerdown', function (e) {
+        lastPointer = e.pointerType;
+        var link = e.target.closest && e.target.closest('a[href]');
+        var ref = link && hoverRef(e.target, link);
+        openAtPress = ref && ref._tippy.state.isVisible ? ref : null;
+    }, true);
+
+    document.addEventListener('click', function (e) {
+        if (e.detail === 0 || (e.pointerType || lastPointer) !== 'touch') return;
+        var link = e.target.closest && e.target.closest('a[href]');
+        var ref = link && hoverRef(e.target, link);
+        if (!ref || ref === openAtPress) return;
+        e.preventDefault();
+        document.querySelectorAll('[data-tippy-root]').forEach(function (popper) {
+            if (popper._tippy && popper._tippy !== ref._tippy) popper._tippy.unmount();
+        });
+        ref._tippy.show();
+    }, true);
+})();
+
 // Theme toggle button + dark/light figure swapping. The pre-paint IIFE above
 // has already set data-theme; here we add the floating button, align the figure
 // images with the current theme, and let the reader flip it. A flip away from
