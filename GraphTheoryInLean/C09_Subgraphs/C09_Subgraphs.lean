@@ -28,13 +28,14 @@ discuss when to use each. As a first application we use the *De Bruijn–Erdős 
 to extend our greedy colouring bound to infinite graphs. We then introduce maps and
 comaps of subgraphs, with subgraphs of the Mycielskian as a worked example.
 
-Matchings are subgraphs, so we next define the *matching number* `ν G` of a graph,
-compare it with the *vertex cover number* `τ G` (weak duality `ν G ≤ τ G`), and
-compute it for the hypercube and the Mycielskian.
+Matchings are subgraphs, so we next define the *matching number* `ν G` of a graph and
+prove weak duality `ν G ≤ τ G`, where `τ G` is the *vertex cover number*. We then
+compute the matching number of the hypercube and bound that of the Mycielskian.
 
 The final section is more advanced: we introduce *partial colourings*, colourings
 that need only be valid on a given set of vertices. These are the main tool in our
-proof of *Brooks' theorem* in [Brooks' Theorem*](#section-brooks-theorem).
+proof of *Brooks' theorem* in the next chapter [Brooks'
+Theorem*](#section-brooks-theorem).
 
 # Subgraphs
 

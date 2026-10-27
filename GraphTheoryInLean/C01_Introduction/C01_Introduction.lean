@@ -57,9 +57,10 @@ interactive features of Lean such as InfoView messages and `#command` outputs.
 To see the actual output of a `#command` you need to hover over the `#command` itself
 with your cursor (the `#command` will have wavy underlining). Many terms also have
 associated doc-strings which you can see by hovering over them; click on them to view
-the full documentation. Types of terms are also shown. In tactic proofs, hover over
-the small lozenge after a tactic to see the proof state at that point, and click it
-to keep the proof state open (click again to close it).
+their full documentation. Types of terms are also shown. In tactic proofs (i.e.
+proofs that start with `:= by`) hover over the small lozenge after a tactic to see
+the proof state at that point, and click it to keep the proof state open (click again
+to close it).
 
 For example, below you should be able to hover over the `#source` command to see the
 verbatim source code of the definition of `SimpleGraph` in Mathlib. While if you

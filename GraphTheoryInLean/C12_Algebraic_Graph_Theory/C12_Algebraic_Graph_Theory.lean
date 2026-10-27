@@ -20,28 +20,33 @@ namespace SimpleGraph
 /-!
 *Algebraic graph theory* studies a graph via algebraic objects attached to it, above
 all its *automorphism group*, which measures how symmetric the graph is, and its
-*adjacency matrix*, whose powers count walks. The two interact: a permutation of the
-vertices is an automorphism iff it preserves the adjacency matrix.
+*adjacency matrix*, whose powers count walks in the graph. The two are related in an
+obvious way: a permutation of the vertices is an automorphism iff it preserves the
+adjacency matrix.
 
 In this chapter we start from Mathlib's group structure on the automorphisms `G ≃g G`
-of a graph, show that isomorphic graphs have isomorphic automorphism groups, and
-compute the automorphism groups of the infinite path `pathNat₁` (trivial) and of the
-cycle graph `C[n]` (dihedral). We then introduce the adjacency matrix, and show that
-every vertex of a vertex-transitive graph lies on the same number of closed walks of
-each length, and that isomorphic graphs have the same eigenvalues, though not
-conversely. We also find eigenvalues of Mycielskians, where the golden ratio appears.
-We survey Mathlib's results on the Laplacian, whose kernel has dimension equal to the
-number of connected components, and on strongly regular graphs such as the Petersen
-graph. We then show that the Hamming cube model `hypercubeHamming` of the hypercube
-is isomorphic to our recursive box product construction.
+of a graph, and show that isomorphic graphs have isomorphic automorphism groups. We
+compute the automorphism groups of the infinite path `pathNat₁` (it is trivial) and
+of the cycle graph `C[n]` (for `n ≥ 3` it is the dihedral group).
+
+Next we introduce the adjacency matrix. We show that every vertex of a
+vertex-transitive graph lies on the same number of closed walks of each length, and
+that isomorphic graphs have the same characteristic polynomial, although
+non-isomorphic graphs can share one. We then show that eigenvalues of `G` give
+eigenvalues of its Mycielskian, scaled by the golden ratio. We also survey Mathlib's
+results on the Laplacian, whose kernel has dimension equal to the number of connected
+components, and on strongly regular graphs such as the Petersen graph. To prepare for
+the advanced sections, we show that the Hamming cube model `hypercubeHamming` of the
+hypercube is isomorphic to our recursive box product construction.
+
 
 The final three sections are more advanced. Using the Hamming cube model of `Q[n]`,
 we prove that its automorphism group is the hyperoctahedral group `ℤ/2 ≀ Sₙ`, of
-order `2 ^ n * n!`. We then count copies of one graph in another: the unlabelled
-copies of `K[s]` are the `s`-cliques, and in general the number of labelled copies is
-the number of unlabelled copies times the number of automorphisms, which we apply to
-cycles. Finally we show that every copy of `Q[k]` in `Q[n]` is an induced subcube,
-and count these copies.
+order `2 ^ n * n!`. We then count copies of one graph in another. The unlabelled
+copies of `K[s]` are just the `s`-cliques, and in general the number of labelled
+copies is the number of unlabelled copies times the number of automorphisms. Finally
+we show that every copy of `Q[k]` in `Q[n]` is an induced subcube, and count these
+copies.
 
 # Automorphism Groups
 

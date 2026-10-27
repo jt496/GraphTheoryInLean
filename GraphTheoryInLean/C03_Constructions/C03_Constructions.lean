@@ -847,9 +847,9 @@ lemma mycielskian.disjoint_image_right_none (s : Set V) :
 end mycielskian_section
 /-!
 As mentioned above we will be interested in iterating the Mycielskian construction,
-but in order to do this we first need to define the iterated vertex type. (Below
-we use `Type _` which means that the universe level is inferred (it will be the same
-as the universe level of `V`). If you replaced `Type _` with `Type*`, the definition
+but in order to do this we first need to define the iterated vertex type. (Below we
+use `Type _` which means that the universe level is inferred (it will be the same as
+the universe level of `V`). If you replaced `Type _` with `Type*`, the definition
 would need to change.)
 
 As with `HypercubeVert`, the `@[implicit_reducible]` attribute lets Lean unfold

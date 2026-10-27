@@ -32,12 +32,12 @@ We begin with matchings: Hall's marriage theorem and its deficiency version (whi
 gives Kőnig's theorem), symmetric differences of perfect matchings, and Tutte's
 theorem. We then turn to extremal graph theory: Turán's theorem (with Mantel's
 theorem as a special case), Füredi's stability theorem, the Andrásfai–Erdős–Sós
-theorem and the extremal numbers, together with their asymptotic behaviour (Turán
-density and the Erdős–Stone theorem). The last three sections are more advanced: two
-further extremal results, Zykov's theorem on the number of cliques and Szemerédi's
-regularity lemma with the triangle removal lemma (and Roth's theorem on arithmetic
-progressions as an application), and two results about infinite graphs, Kőnig's lemma
-and the existence of ends.
+theorem and extremal numbers, together with their asymptotic behaviour (Turán density
+and the Erdős–Stone theorem). The last three sections are more advanced: two further
+extremal results, Zykov's theorem on the number of cliques and Szemerédi's regularity
+lemma with the triangle removal lemma (and Roth's theorem on arithmetic progressions
+as an application), and two results about infinite graphs, Kőnig's lemma and the
+existence of ends.
 
 Many famous theorems are not (yet) in Mathlib. These include Ramsey's theorem for
 graphs, the Kővári–Sós–Turán theorem, Kirchhoff's matrix-tree theorem

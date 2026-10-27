@@ -27,10 +27,10 @@ has a well-developed API and many results can be formalized with relative ease.)
 The definition of `SimpleGraph` in Mathlib says that, for a fixed vertex type `V`, a
 term of `SimpleGraph V` is a structure consisting of a binary relation `Adj` on `V`
 that tells us which pairs of vertices are adjacent, and two proofs `symm` and
-`loopless` that this relation is symmetric and irreflexive. Note that `V` is a
-parameter of the structure rather than one of its fields: graphs on different vertex
-types have different types. (We can omit proofs of `symm` and `loopless` and
-Lean will try to fill them in using the automated `aesop_graph` tactic.)
+`loopless` that this relation is symmetric and irreflexive. (We can omit proofs
+of `symm` and `loopless` and Lean will try to fill them in using the automated
+`aesop_graph` tactic.) Note that `V` is a parameter of the structure rather
+than one of its fields: graphs on different vertex types have different types.
 -/
 section basics
 variable {V : Type*} (G : SimpleGraph V)
@@ -229,25 +229,25 @@ end darts
 # Naming Conventions
 
 We have now met a few Mathlib names, and they follow fixed patterns. Knowing the
-rules will help us guess a lemma's name. The full rules are in Mathlib's
+rules will help us guess a lemma's name. The full rules can be found in Mathlib's
 [naming conventions](https://leanprover-community.github.io/contribute/naming.html).
 The key points are:
 
 * Theorems are named in `snake_case`, predicates and structures in `UpperCamelCase`
   (`IsIsolated`, `Dart`) and other definitions in `lowerCamelCase` (`neighborSet`).
 * A theorem's name describes its statement, with the conclusion first and any
-  hypotheses after `of`. Symbols have standard names: `∈` is `mem`, `⊆` is `subset`,
-  `≠` is `ne`, `¬` is `not` and `⊤` is `top`. So `not_isDiag_of_mem_edgeSet` says
-  that an edge `e ∈ G.edgeSet` is not a loop, and `neighborSet_subset_support` says
-  that `G.neighborSet u ⊆ G.support`.
-* An equivalence that characterises membership of a set, such as `mem_edgeSet` or
-  `mem_support`, is named after its left-hand side alone. Other equivalences often
+  hypotheses after `of`. Symbols have standard names: `¬` is `not`, `∈` is `mem`,
+  `⊆` is `subset`, `≠` is `ne`, `∉` is `notMem` and `⊤` is `top`. So
+  `not_isDiag_of_mem_edgeSet` says that an edge `e ∈ G.edgeSet` is not a loop, and
+  `neighborSet_subset_support` says that `G.neighborSet u ⊆ G.support`.
+* An equivalence (`↔`) that characterises membership of a set, such as `mem_edgeSet`
+  or `mem_support`, is named after its left-hand side alone. Other equivalences often
   end in `_iff`, such as `Sym2.mk_isDiag_iff`.
 * A theorem about `h : G.Adj u v` lives in the namespace `SimpleGraph.Adj`, so we can
   use it with dot notation, as with `h.ne` and `h.left_mem_support`. A prime marks a
-  minor variant, so `h.ne'` proves `v ≠ u`.
+  minor variant, so `h.ne` proves `u ≠ v` while `h.ne'` proves `v ≠ u`.
 
-When the rules don't give us the name, we can search for it as described in
+When the rules don't allow us to guess the name, we can search for it as described in
 [Finding Lemmas](#section-finding-lemmas).
 
 # Order
@@ -258,18 +258,18 @@ There is a partial order on `SimpleGraph V` given by `G ≤ H` iff `G` is a subg
 see [Subgraphs](#chapter-subgraphs).)
 
 This gives `SimpleGraph V` the structure of a *complete atomic Boolean algebra*, with
-operations `sup`, `inf`, `compl` and `sdiff`, and elements `top` and `bot`. This
-terminology comes from order theory rather than graph theory, but it is very natural
-in the context of formalization. Here *complete* means that every set of graphs in
-`SimpleGraph V` has a supremum (the graph whose edges are those present in at least
-one graph in the set) and an infimum (the graph whose edges are those present in
-every graph in the set). The *atoms* of `SimpleGraph V` are the graphs with exactly
-one edge, and *atomic* means that every graph is the supremum of the atoms below it,
-i.e. the union of its single-edge subgraphs. Mathlib registers this structure as an
-*instance*, which Lean supplies automatically wherever it is needed. The command
-`#synth` asks Lean to find (synthesize) an instance and shows it; we say more about
-instances in [Decidability, Finiteness and
-Degrees](#chapter-decidability-finiteness-and-degrees).
+operations `sup` (`⊔`), `inf` (`⊓`), `compl` (`ᶜ`) and `sdiff` (`\`), and elements
+`top` (`⊤`) and `bot` (`⊥`). This terminology comes from order theory rather than
+graph theory, but it is very natural in the context of formalization. Here *complete*
+means that every set of graphs in `SimpleGraph V` has a supremum (the graph whose
+edges are those present in at least one graph in the set) and an infimum (the graph
+whose edges are those present in every graph in the set). The *atoms* of
+`SimpleGraph V` are the graphs with exactly one edge, and *atomic* means that every
+graph is the supremum of the atoms below it, i.e. the union of its single-edge
+subgraphs. Mathlib registers this structure as an *instance*, which Lean supplies
+automatically wherever it is needed. The command `#synth` asks Lean to find
+(synthesize) an instance and shows it; we will say more about instances in
+[Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees).
 -/
 section order
 
@@ -394,9 +394,9 @@ and the InfoView will tell you.)
 
 /-!
 Another way to construct the same graph is to use the `SimpleGraph.fromRel`
-constructor which symmetrizes any given relation and removes loops (The
+constructor which symmetrizes any given relation and removes loops. (The
 expression `(· + 1 = ·)` below is shorthand for the relation
-`fun x y => x + 1 = y`.).
+`fun x y => x + 1 = y`.)
 -/
 #source SimpleGraph.fromRel
 
@@ -408,34 +408,35 @@ def pathNat₂ : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
 This time we used `@[simps!]` rather than `@[simps]`. Plain `@[simps]` reads its
 lemmas straight off a definition written as a structure, as `pathNat₁` was (using
 `where`), since the value of each field is written out explicitly. The body of
-`pathNat₂` is instead an application of `fromRel`, so to find `Adj` the attribute
-must first unfold `fromRel` and then tidy up the result with `simp`. The `!` asks for
-both. (If we wrote `@[simps]` here, a linter warning would suggest `@[simps!]`.)
+`pathNat₂` is instead an application of `fromRel`, so to find `Adj` it must first
+unfold `fromRel` and then tidy up the result with `simp`. The `!` asks for both. (If
+we wrote `@[simps]` here, a linter warning would suggest `@[simps!]`.)
 -/
 #check pathNat₂_adj -- pathNat₂.Adj a b = (¬a = b ∧ (a + 1 = b ∨ b + 1 = a))
 
 /-!
 Also notice that `pathNat₂` is a `def`, whereas `pathNat₁` (and `pathNat₃` below) are
-`abbrev`s, definitions that Lean unfolds automatically when it needs to. This is
-deliberate: we will see in [Decidability, Finiteness and
-Degrees](#chapter-decidability-finiteness-and-degrees) how this choice affects Lean's
-ability to compute with these graphs.
+`abbrev`s. The difference is that an `abbrev` is a definition that Lean unfolds
+automatically when it needs to. This is deliberate: we will see in [Decidability,
+Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees) how this choice
+affects Lean's ability to compute with these graphs.
 
-These two graphs are equal, but not *definitionally* equal: `rfl` does not prove the
-equality. We explain this important distinction in [Definitional and Propositional
+The two graphs `pathNat₁` and `pathNat₂` are equal, but not *definitionally* equal:
+`rfl` does not prove the equality. We explain this important distinction in
+[Definitional and Propositional
 Equalities](#section-definitional-and-propositional-equalities) below.
 
-In order to prove that two `SimpleGraph`s are equal, we need to show that they have
-the same adjacency relation (i.e. the same edges). We *don't* need to check that they
-have the same vertex sets since this is done automatically by the type system: both
-`pathNat₁` and `pathNat₂` are `SimpleGraph ℕ`.
+In order to prove this we need to show that they have the same adjacency relation
+(i.e. the same edges). We *don't* need to check that they have the same vertex sets
+since this is done automatically by the type system: both `pathNat₁` and `pathNat₂`
+are `SimpleGraph ℕ`.
 
 Lean's type checker ensures that we can't even state a theorem saying that two graphs
 with different vertex sets are equal. For example if `G : SimpleGraph V` then the
 expression `G = pathNat₁` is not well-typed since `pathNat₁` has vertex type `ℕ` and
-`G` has vertex type `V`. (The actual error is suppressed in the Lean source file
-by the `#guard_msgs` command and only shown in the HTML version. Delete the
-`#guard_msgs` line to see the error message in VS Code.)
+`G` has vertex type `V`. (The actual error is suppressed in the Lean source
+file by the `#guard_msgs` command and only shown in the HTML version. Delete the
+`#guard_msgs` below line to see the error message in VS Code.)
 -/
 /-- error: Type mismatch
   pathNat₁
@@ -447,7 +448,7 @@ example {V : Type*} (G : SimpleGraph V) : G = pathNat₁ := by
 
 /-!
 Any two graphs on the same vertex type with the same edges are equal by
-extensionality, and we can use the `ext` tactic to prove that `pathNat₁` and
+*extensionality*, and we can use the `ext` tactic to prove that `pathNat₁` and
 `pathNat₂` are equal. The definition of `SimpleGraph` is tagged with the `@[ext]`
 attribute which gives us the following `ext` lemmas for free.
 -/

@@ -15,18 +15,19 @@ sizes of the largest ones, the *clique number* and the *independence number*, ar
 of the most studied graph parameters. The archetypal question in extremal graph
 theory asks how many edges a graph can have without containing a large clique, and,
 as we will see in the next chapter, the clique number is a natural lower bound for
-the chromatic number. The Mycielskian is important precisely because it shows how
-bad this bound can be: it raises the chromatic number while leaving the clique
-number unchanged.
+the chromatic number. The Mycielskian is important precisely because it shows how bad
+this bound can be: it allows us to construct triangle-free graphs with arbitrarily
+large chromatic number.
 
 In this chapter we introduce Mathlib's cliques (`IsClique`, `IsNClique`) and
 clique-free graphs (`CliqueFree`), and show that graph homomorphisms map cliques to
 cliques. Mathlib has no `Decidable` instance for `CliqueFree`, so we build one from
-the finset of all `n`-cliques. We then introduce the clique number (`cliqueNum`),
-independent sets (`IsIndepSet`) and the independence number (`indepNum`), and compute
-the independence number of the Kneser graph using the Erdős–Ko–Rado theorem. Finally
-we prove the well-known result that the Mycielskian preserves the clique number, and
-give a formula for the independence number of the Mycielskian.
+the finset of all `n`-cliques (`cliqueFinset`). We then introduce the clique number
+(`cliqueNum`), independent sets (`IsIndepSet`) and the independence number
+(`indepNum`), and compute the independence number of the Kneser graph using the
+Erdős–Ko–Rado theorem. Finally we prove the well-known result that the Mycielskian
+preserves the clique number, and give a formula for the independence number of the
+Mycielskian.
 
 # Cliques
 

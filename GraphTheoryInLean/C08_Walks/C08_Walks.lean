@@ -19,8 +19,9 @@ kinds of walks that arise most frequently in graph theory: trails, paths, circui
 and cycles, together with Eulerian trails and Hamiltonian paths and cycles. Along the
 way we show that a graph is bipartite iff it has no odd cycle.
 
-The type of a walk records its endpoints, and this makes some plumbing necessary that
-has no counterpart in informal graph theory: `Walk.Nil`, `Walk.copy` and
+The type of a walk records its endpoints, which in many situations is very useful.
+But it is also where dependent types show their less appealing side: we need some
+plumbing with no informal analogue, namely `Walk.Nil`, `Walk.copy` and
 `Walk.transfer`. We then map walks along graph homomorphisms, and return to our
 running examples: Hamming paths and the Gray code in the hypercube, and walks in the
 Mycielskian. Finally we look at Hamiltonian graphs: we define Pósa rotations and

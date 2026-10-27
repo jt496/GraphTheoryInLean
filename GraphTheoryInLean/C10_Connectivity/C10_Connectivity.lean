@@ -13,16 +13,16 @@ namespace SimpleGraph
 /-!
 In this chapter we study graph connectivity. Building on the reachability relation
 `Reachable`, we start with Mathlib's notions `Preconnected` and `Connected`,
-connected components and bridges, and show that the Mycielskian `mμ[G]` is connected
-iff `G` has no isolated vertices, and that in a graph of maximum degree at most `2`
-every cycle is its own connected component. We then look at trees, and show that the
-infinite path `pathNat₁` is one. We prove *Euler's theorem*: a finite graph has an
-Eulerian trail iff all its edges lie in one component and it has either no vertex of
-odd degree or exactly two. Next we introduce Mathlib's edge connectivity
-(`IsEdgeConnected`), and give our own definition of vertex connectivity
-(`IsVertexConnected`). We show that `k`-vertex-connectivity implies
-`k`-edge-connectivity. We also define the edge and vertex connectivity of a graph as
-numbers in `ℕ∞` and prove Whitney's inequalities.
+connected components (`ConnectedComponent`) and bridges (`IsBridge`), and show that
+the Mycielskian `mμ[G]` is connected iff `G` has no isolated vertices, and that in a
+graph of maximum degree at most `2` every cycle is its own connected component. We
+then look at trees, and show that the infinite path `pathNat₁` is one. We prove
+*Euler's theorem*: a finite graph has an Eulerian trail iff all its edges lie in one
+component and it has either no vertex of odd degree or exactly two. Next we introduce
+Mathlib's edge connectivity (`IsEdgeConnected`), and give our own definition of
+vertex connectivity (`IsVertexConnected`). We show that `k`-vertex-connectivity
+implies `k`-edge-connectivity. We also define the edge and vertex connectivity of a
+graph as numbers in `ℕ∞` and prove Whitney's inequalities.
 
 The final two sections are more advanced. We prove *Brooks' theorem*: a locally
 finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it contains a

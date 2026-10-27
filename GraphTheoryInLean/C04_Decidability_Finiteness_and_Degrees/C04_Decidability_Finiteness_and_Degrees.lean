@@ -24,18 +24,19 @@ that because `Fintype` instances are data, the same type can receive two differe
 instances by two different routes of type class inference. This is known as a
 *diamond*, after the shape of the two routes meeting at one type. Such a diamond is a
 nuisance rather than a feature: the two instances are always equal, but not
-*by definition*, so a theorem stated using one instance will not apply to a goal that
-uses the other. We will see how to state theorems so that this does not happen.
+necessarily *by definition*, so a theorem stated using one instance will not apply to
+a goal that uses the other. We will see how to deal with such a mismatch when it
+arises, and how to state theorems so that it does not arise in the first place.
 
 The second half applies all this to graphs. We study finite neighbourhoods and vertex
 degrees (including minimum and maximum degree, the handshake lemma and regular
-graphs). We then compute with two families of graphs, hypercubes and Mycielskians,
-building the `DecidableRel` and `Fintype` instances needed both to evaluate and to
-prove facts about their degrees and edge counts.
+graphs). We then do computations with two families of graphs, hypercubes and
+Mycielskians, building the `DecidableRel` and `Fintype` instances needed both to
+evaluate and to prove facts about their degrees and edge counts.
 
 Finally, an advanced section on degree sequences defines the degree multiset of a
 graph, asks which multisets are *graphic*, states, without proof, the Erdős–Gallai
-and Havel–Hakimi characterizations, and turns the latter into a function that
+and Havel–Hakimi characterizations, and uses the latter to give a function that
 computes the edges of a graph with a given graphic degree sequence.
 
 # Decidability
@@ -2225,10 +2226,10 @@ graph.
 
 Since `G.degreeMultiset` requires `Fintype V` and `DecidableRel G.Adj` instances, we
 will quantify over an arbitrary finite vertex type `V : Type` and carry the `Fintype`
-and `DecidableRel` instances as existential witnesses that `degreeMultiset`
-requires. (Every finite type, in any universe, is equivalent to a type in `Type`
-(indeed to `Fin n` for some `n`), and transporting a graph along such an equivalence
-leaves its degree multiset unchanged, so restricting to `Type` here loses no
+and `DecidableRel` instances as existential witnesses that `degreeMultiset` requires.
+ (Every finite type, in any universe, is equivalent to a type in `Type` (indeed
+to `Fin n` for some `n`), and transporting a graph along such an equivalence leaves
+its degree multiset unchanged, so restricting to `Type` here loses no
 generality.)
 -/
 /-- A multiset of degrees is *graphic* if it is the degree multiset of some finite

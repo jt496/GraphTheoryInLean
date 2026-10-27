@@ -15,8 +15,7 @@ A *proper colouring* of a graph assigns a colour to each vertex so that adjacent
 vertices receive different colours, and the *chromatic number* is the least number of
 colours that suffice. Colourings are among the most studied topics in graph theory.
 Any clique needs as many colours as it has vertices, so the clique number is a lower
-bound for the chromatic number, and the Mycielskian shows that this bound can be
-arbitrarily bad.
+bound for the chromatic number.
 
 In this chapter we study graph colourings (`Coloring`), colourability (`Colorable`),
 the chromatic number (`chromaticNumber`) and bipartite graphs (`IsBipartite`). We
