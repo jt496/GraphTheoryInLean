@@ -62,7 +62,7 @@ use the `top` and `bot` names, as in `top_adj` and `bot_adj`.
 
 [Figure: The complete graphs $K_3$ and $K_5$](https://jt496.github.io/GraphTheoryInLean/figures/complete.svg)
 
-Recall that `Fin n` is the type of natural numbers less than `n` with addition mod
+Given `n : ℕ`, `Fin n` is the type of natural numbers less than `n` with addition mod
 `n`. (In particular `Fin 0` is the empty type.)
 
 We can construct the complete graph on `Fin n` as follows.
@@ -70,24 +70,26 @@ We can construct the complete graph on `Fin n` as follows.
 example (n : ℕ) : SimpleGraph (Fin n) := completeGraph (Fin n)
 
 /-!
-We can introduce the notation `K[n]` for the complete graph on `Fin n` as follows.
-(The keyword `scoped` makes the notation available only inside
-`namespace SimpleGraph`, or wherever `SimpleGraph` is opened.)
+We introduce notation for the complete graph on `Fin n`. (The keyword `scoped` makes
+the notation available only inside `namespace SimpleGraph`, or wherever `SimpleGraph`
+is opened.)
 -/
-/-- The complete graph on `Fin n` is denoted `K[n]`. -/
+/-- `K[n]` is the complete graph on `Fin n`. -/
 scoped notation "K[" n "]" => completeGraph (Fin n)
+
 /-!
 Since `Fin n` has decidable equality, `K[n]` has decidable adjacency: if we have a
 procedure for deciding whether two vertices are equal then we can decide whether
-they are adjacent in the complete graph, since adjacency is simply not-equal-to `≠`.
+they are adjacent in the complete graph, since adjacency is precisely not-equal-to
+`≠`. For example, `10` and `111` are adjacent in `K[417]`.
+-/
+example : K[417].Adj 10 111 := by
+  decide
 
-For example, `10` and `111` are adjacent in `K[417]`.
--/
-example : K[417].Adj 10 111 := by decide
 /-!
-We can similarly introduce the notation `E[n]` for the empty graph on `Fin n`.
+We also introduce notation for the empty graph on `Fin n`.
 -/
-/-- The empty graph on `Fin n` is denoted `E[n]`. -/
+/-- `E[n]` is the empty graph on `Fin n`. -/
 scoped notation "E[" n "]" => emptyGraph (Fin n)
 
 /-!
@@ -137,6 +139,7 @@ example : (2 : Fin 4) + 2 = 0 := rfl
 So when describing adjacency in this graph we need to use the underlying `ℕ` values.
 -/
 #source pathGraph
+
 example (n : ℕ) (a b : Fin n) :
     (pathGraph n).Adj a b ↔ a.val + 1 = b.val ∨ b.val + 1 = a.val := pathGraph_adj
 
@@ -144,31 +147,31 @@ example (n : ℕ) (a b : Fin n) :
 [Figure: The path graphs $P_2$, $P_4$ and $P_7$](https://jt496.github.io/GraphTheoryInLean/figures/paths.svg)
 
 
-We introduce the notation `P[n]` for path graphs as follows:
+We introduce notation for the path graph on `Fin n`.
 -/
-@[inherit_doc pathGraph]
+/-- `P[n]` is the path graph `pathGraph n` on `Fin n`. -/
 scoped notation "P[" n "]" => pathGraph n
 
 /-!
-Mathlib has no decidability instance for adjacency in `hasse` or `pathGraph`, so we
-will need to provide our own if we want to do computations with these graphs. This
-is a bit more work than the instances we give in this chapter, so we defer it until
+Mathlib has no decidability instance for adjacency in `hasse` or `P[n]`, so we will
+need to provide our own if we want to do computations with these graphs. This is a
+bit more work than the instances we give in this chapter, so we defer it until
 [Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees).
 
 ## Cycle Graphs
 
 For any `n : ℕ` we can define the *cycle graph* on `n` vertices as the graph with
 vertex set `Fin n` and edges between vertices that differ by `1` modulo `n`. Although
-we usually think of cycles as always containing at least 3 vertices, in Mathlib we
-also have cycle graphs on 0, 1, and 2 vertices. This is a common pattern in Mathlib:
-rather than add side conditions to the definition, we will instead need to check when
-using `cycleGraph` whether or not it is in fact a cycle!
+we usually think of cycles as always containing at least `3` vertices, in Mathlib we
+also have cycle graphs on `0`, `1`, and `2` vertices. This is a common pattern in
+Mathlib: rather than add side conditions to the definition, we will instead need to
+check when using `cycleGraph` whether or not it is in fact a cycle!
 
 For `3 ≤ n` the definition of adjacency is obvious:
 `Adj a b := a - b = 1 ∨ b - a = 1`. This also makes sense for `n = 2` but gives us
 the graph on `Fin 2` with a single edge.
 
-The cases `n = 0` and `n = 1` need a bit more care: for `a b : Fin 0` we can't
+The cases `n = 0` and `n = 1` need a bit more care: for `a b : Fin 0` we can't even
 write `a - b = 1 ∨ b - a = 1` since there is no `1 : Fin 0`. While for `a b : Fin 1`
 we can write `a - b = 1 ∨ b - a = 1` but `1 = 0` in `Fin 1` so this would define a
 graph with loops, which is not allowed.
@@ -186,9 +189,9 @@ The solution is to define `cycleGraph n` to be the empty graph for `n = 0` and
 /-!
 [Figure: The cycle graphs $C_3$ and $C_6$](https://jt496.github.io/GraphTheoryInLean/figures/cycles.svg)
 
-We introduce the notation `C[n]` for cycle graphs.
+We introduce notation for cycle graphs.
 -/
-@[inherit_doc cycleGraph]
+/-- `C[n]` is the cycle graph `cycleGraph n` on `Fin n`. -/
 scoped notation "C[" n "]" => cycleGraph n
 
 #check C[5]   -- C[5] : SimpleGraph (Fin 5)
@@ -200,8 +203,9 @@ As we saw above, for `n = 0` and `n = 1`, `C[n]` is the empty graph on `Fin n`, 
 for `n = 2` it is the complete graph `K[2]`. The first two of these are
 *definitional* equalities (in the sense of [Definitional and Propositional
 Equalities](#section-definitional-and-propositional-equalities)), while the last is
-not. `C[2].Adj a b` is `a - b = 1 ∨ b - a = 1` while `K[2].Adj a b` is `a ≠ b`. We
-can prove that these are equivalent, but they are not definitionally equal.
+not. The adjacency relation `C[2].Adj a b` is `a - b = 1 ∨ b - a = 1`, while
+`K[2].Adj a b` is `a ≠ b`. We can prove that these are equivalent, but they are not
+definitionally equal.
 -/
 example : C[0] = E[0] := rfl
 example : C[1] = E[1] := rfl
@@ -232,19 +236,16 @@ This gives a natural way to define *complete bipartite* graphs.
 /-!
 [Figure: The complete bipartite graph $K_{4,5}$](https://jt496.github.io/GraphTheoryInLean/figures/completebipartite.svg)
 
-We introduce the notation `K[s, t]` for the canonical complete bipartite graph with
-parts `Fin s` and `Fin t`.
+We introduce notation for the canonical complete bipartite graph with parts `Fin s`
+and `Fin t`.
 -/
-/-- The complete bipartite graph on `Fin s ⊕ Fin t` is denoted `K[s, t]`. -/
+/-- `K[s, t]` is the complete bipartite graph on `Fin s ⊕ Fin t`. -/
 scoped notation "K[" s ", " t "]" => completeBipartiteGraph (Fin s) (Fin t)
 
 #check K[4, 5]  -- K[4, 5] : SimpleGraph (Fin 4 ⊕ Fin 5)
 
 /-!
-If we try to check adjacency of two vertices in `K[4, 5]` we get an error. (The
-actual error is suppressed in the Lean source file by the `#guard_msgs` command and
-only shown in the HTML version. Delete the `#guard_msgs` line to see the error
-message in VS Code.)
+If we try to check adjacency of two vertices in `K[4, 5]` we get an error.
 -/
 /-- error: failed to synthesize
   Decidable (K[4, 5].Adj (Sum.inl 0) (Sum.inr 3)) -/
@@ -258,8 +259,8 @@ missing instance ourselves. (Don't worry if this is unfamiliar; we will look at
 decidability in *much* more detail in [Decidability, Finiteness and
 Degrees](#chapter-decidability-finiteness-and-degrees).)
 -/
-instance (V W : Type*) : DecidableRel (completeBipartiteGraph V W).Adj :=
-    fun v w => by
+instance (V W : Type*) : DecidableRel (completeBipartiteGraph V W).Adj := by
+  intro v w
   unfold completeBipartiteGraph
   infer_instance
 
@@ -275,7 +276,7 @@ with adjacency defined using the group operation.
 
 If `G` is an additive group and `s ⊆ G`, the associated *circulant graph* has vertex
 set `G` with edges between vertices whose difference belongs to `s` (suitably
-symmetrized so that the resulting graph is undirected and without loops).
+symmetrized so that the resulting graph is undirected and loopless).
 -/
 
 #source circulantGraph -- def circulantGraph {G : Type*} [AddGroup G] (s : Set G) :
@@ -327,7 +328,7 @@ example : SimpleGraph (ZMod 17) := paleyGraph (ZMod 17)
 
 Cayley graphs
 [Cayley 1878](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-cayley-1878)
-are also defined in Mathlib. They are defined for any vertex type with a
+can also be found in Mathlib. They are defined for any vertex type with a
 multiplication or addition operation, not just for groups.
 
 If you look at the definition you will see the use of the `@[to_additive]` attribute
@@ -385,10 +386,12 @@ this is defined as follows.
                   --    symm.symm e₁ e₂ hadj := by rwa [ne_comm, Set.inter_comm]
 
 /-!
-We introduce the notation `L[G]` for the line graph of `G`.
+We introduce notation for the line graph of `G`.
 -/
-@[inherit_doc lineGraph]
+/-- `L[G]` is the line graph of `G`: its vertices are the edges of `G`, and two are
+adjacent if they share a vertex. -/
 scoped notation "L[" G "]" => lineGraph G
+
 /-!
 The edge set `G.edgeSet` is a `Set (Sym2 V)`, so to use it as the vertex type of
 `L[G]`, Lean coerces it to the subtype `{e : Sym2 V // e ∈ G.edgeSet}`, written
@@ -406,15 +409,16 @@ edge shares a vertex with itself, and simple graphs have no loops. The condition
 edge is coerced twice: first from `↑G.edgeSet` to `Sym2 V`, and then from `Sym2 V` to
 `Set V`, the set of its endpoints.
 
-For example, `s(0, 1)` and `s(0, 2)` are adjacent in `L[K[4]]`. After
-`constructor`, the first goal says that they are distinct and the second that they
-share a vertex, for which `0` is a witness.
-
 [Figure: Left: $K_4$. Right: its line graph, the octahedron](https://jt496.github.io/GraphTheoryInLean/figures/lineGraph.svg)
+
+For example, `s(0, 1)` and `s(0, 2)` are adjacent in `L[K[4]]`. In the proof below,
+the first goal is that they are distinct and the second that they share a vertex, for
+which `0` is a witness.
 -/
 example : L[K[4]].Adj ⟨s(0, 1), by decide⟩ ⟨s(0, 2), by decide⟩ := by
   constructor
-  · grind
+  · -- ⊢ ⟨s(0, 1), ⋯⟩ ≠ ⟨s(0, 2), ⋯⟩
+    grind
   · -- After the double coercion we need to check that the `Set (Fin 4)`
     -- `{0, 1}` and `{0, 2}` have nonempty intersection.
     -- ⊢ (↑↑⟨s(0, 1), ⋯⟩ ∩ ↑↑⟨s(0, 2), ⋯⟩).Nonempty
@@ -432,18 +436,16 @@ pairs `(g, h)`; for `x : V × W` the two components are `x.1` and `x.2` (also wr
 of `G` in `G □ H`, the *`G`-fibre* at `h`; similarly each vertex `g` of `G` gives a
 copy of `H`, the *`H`-fibre* at `g`.
 
-[Figure: The box product of $P_3$ and $K_3$](https://jt496.github.io/GraphTheoryInLean/figures/boxprod.svg)
+[Figure: The box product of $P_3$ and $K_3$, with the $K_3$-fibre at $1$ (orange) and the $P_3$-fibre at $0$ (green).](https://jt496.github.io/GraphTheoryInLean/figures/boxprod.svg)
 -/
 #source boxProd
+
 /-!
-Adjacency in the box product of a path and a cycle. (We use `n + 2` because
-Mathlib's `cycleGraph_adj` is stated for `cycleGraph (n + 2)`; the more awkward
-`cycleGraph_adj'` covers every `n`.)
+Adjacency in the box product of the path graph `P[m]` with the complete graph `K[n]`.
 -/
-example {n : ℕ} {a b c d : Fin (n + 2)} : (P[n + 2] □ C[n + 2]).Adj (a, b) (c, d) ↔
-    ((a.val + 1 = c.val ∨ c.val + 1 = a.val) ∧ b = d) ∨
-        ((b - d = 1 ∨ d - b = 1) ∧ a = c) := by
-  simp [pathGraph_adj, cycleGraph_adj]
+example {m n : ℕ} {a b : Fin m} {i j : Fin n} : (P[m] □ K[n]).Adj (a, i) (b, j) ↔
+    ((a.val + 1 = b.val ∨ b.val + 1 = a.val) ∧ i = j) ∨ (i ≠ j ∧ a = b) := by
+  simp [pathGraph_adj]
 
 /-!
 ## Sum and Sigma Graphs *
@@ -482,8 +484,8 @@ own, because Lean only identifies types that are equal by definition, and `V i` 
 `h ▸ v : V i`.
 
 We mark the definition `protected`, so that even inside `namespace SimpleGraph` it
-must be called `SimpleGraph.sigma` (or `Σg`). This stops the short name `sigma` from
-clashing with other functions of that name, such as `Finset.sigma`.
+must be called `SimpleGraph.sigma`. This stops the short name `sigma` from clashing
+with other functions of that name, such as `Finset.sigma`.
 -/
 /-- The disjoint union of an indexed family of graphs. Given an index type `ι` and,
 for each `i : ι`, a graph `G i` on the vertex type `V i`, the disjoint union `Σg G`
@@ -497,6 +499,7 @@ protected def sigma {ι : Type*} {V : ι → Type*} (G : (i : ι) → SimpleGrap
     constructor
     rintro ⟨i, u⟩ ⟨j, v⟩ ⟨rfl, hadj⟩
     exact ⟨rfl, hadj.symm⟩
+
 /-!
 In the proof of `symm` above, `rintro ⟨i, u⟩ ⟨j, v⟩ ⟨rfl, hadj⟩` introduces the two
 vertices and splits the adjacency proof into its two parts. The pattern `rfl`
@@ -511,20 +514,22 @@ gets past it to `v`. We will meet this issue again in [Decidability and Kernel
 Reduction*](#section-decidability-and-kernel-reduction) and when we need to change
 the endpoints of walks in [Copy](#section-copy).
 
-The `@[simps!]` attribute generates `sigma_adj`, in which the `⋯` hides the proof
-of `i = j` used by `▸`. We write `Σg G` for `SimpleGraph.sigma G`.
+The `@[simps!]` attribute generates `sigma_adj`, in which the `⋯` hides the proof `h`
+that the two first components agree.
 -/
 #check SimpleGraph.sigma_adj
-
+/-!
+We write `Σg G` for `SimpleGraph.sigma G`.
+-/
 @[inherit_doc] scoped prefix:60 "Σg " => SimpleGraph.sigma
 
 /-- The disjoint union of the complete graphs `K[0]`, `K[1]`, `K[2]`, …. -/
-abbrev natDisjointComplete : SimpleGraph (Σ i, Fin i) :=
-  Σg (fun (i : ℕ) => K[i])
+abbrev sigmaCompleteNat : SimpleGraph (Σ i, Fin i) :=
+  Σg fun i : ℕ => K[i]
 
 /-!
 In our next example we show that two vertices `⟨i, a⟩` and `⟨j, b⟩` of
-`natDisjointComplete` are adjacent iff they lie in the same complete graph (`i = j`)
+`sigmaCompleteNat` are adjacent iff they lie in the same complete graph (`i = j`)
 and are distinct. We cannot write `a ≠ b` here, since `a : Fin i` and `b : Fin j`
 have different types; this is the same problem as above. Comparing the underlying
 natural numbers `(a : ℕ)` and `(b : ℕ)` avoids it.
@@ -534,7 +539,7 @@ In the proof, `t₁ <;> t₂` runs the tactic `t₂` on every goal produced by `
 introduces the hypotheses in both, substituting as in the `sigma` proof above.
 -/
 example {i j : ℕ} {a : Fin i} {b : Fin j} :
-    natDisjointComplete.Adj ⟨i, a⟩ ⟨j, b⟩ ↔ i = j ∧ (a : ℕ) ≠ b := by
+    sigmaCompleteNat.Adj ⟨i, a⟩ ⟨j, b⟩ ↔ i = j ∧ (a : ℕ) ≠ b := by
   constructor <;> rintro ⟨rfl, h⟩
   · exact ⟨rfl, Fin.val_ne_of_ne h⟩
   · exact ⟨rfl, fun hab => h (congrArg Fin.val hab)⟩
@@ -632,7 +637,8 @@ We will use `Q[n]` as notation for the `n`-dimensional hypercube.
 
 [Figure: The 4-dimensional hypercube $Q_4$](https://jt496.github.io/GraphTheoryInLean/figures/hypercube.svg)
 -/
-@[inherit_doc hypercube]
+/-- `Q[n]` is the `n`-dimensional hypercube `hypercube n`, the box product of `n`
+copies of `K₂`. -/
 scoped notation "Q[" n "]" => hypercube n
 
 @[simp]
@@ -721,7 +727,7 @@ def mycielskian (G : SimpleGraph V) : SimpleGraph (Option (V ⊕ V)) where
 /-!
 We introduce the notation `mμ[G]` for the Mycielskian of a graph `G`.
 -/
-@[inherit_doc mycielskian]
+/-- `mμ[G]` is the Mycielskian `mycielskian G` of `G`. -/
 scoped notation "mμ[" G "]" => mycielskian G
 /-!
 As mentioned above if we iterate the Mycielskian construction starting with a
@@ -764,9 +770,9 @@ end mycielskian
 We can introduce notation for these as follows. The left copy of `v : V` is denoted
 `v ₗ` and the right copy is denoted `v ᵣ`.
 -/
-@[inherit_doc mycielskian.left]
+/-- `v ₗ` is the copy of the vertex `v` in the "left" part of the Mycielskian. -/
 scoped postfix:max "ₗ" => mycielskian.left
-@[inherit_doc mycielskian.right]
+/-- `v ᵣ` is the copy of the vertex `v` in the "right" part of the Mycielskian. -/
 scoped postfix:max "ᵣ" => mycielskian.right
 
 /-!
@@ -776,9 +782,9 @@ definition. Once both vertices are named, as in `v ₗ`, `w ᵣ` or `none`, `sim
 reduces the `match`, so it (and tactics such as `aesop` that call it) can decide any
 adjacency between named vertices.
 -/
-example {G : SimpleGraph V} (v w : V) : mμ[G].Adj (v ₗ) (w ᵣ) ↔ G.Adj v w := by simp
+example {G : SimpleGraph V} (v w : V) : mμ[G].Adj v ₗ w ᵣ ↔ G.Adj v w := by simp
 
-example {G : SimpleGraph V} (v w : V) : ¬ mμ[G].Adj (v ᵣ) (w ᵣ) := by simp
+example {G : SimpleGraph V} (v w : V) : ¬ mμ[G].Adj v ᵣ w ᵣ := by simp
 
 /-!
 We now prove a few lemmas about the Mycielskian construction that will be useful
@@ -788,10 +794,10 @@ The maps `v ↦ v ₗ` and `v ↦ v ᵣ` are injective. (In the proofs, `e |>.co
 `(e).comp f`: the `|>.` lets us use dot notation on the result of
 `Option.some_injective _` without extra brackets.)
 -/
-lemma mycielskian.left_injective : Function.Injective (fun v : V => v ₗ) :=
+lemma mycielskian.left_injective : Function.Injective fun v : V => v ₗ :=
   Option.some_injective _ |>.comp Sum.inl_injective
 
-lemma mycielskian.right_injective : Function.Injective (fun v : V => v ᵣ) :=
+lemma mycielskian.right_injective : Function.Injective fun v : V => v ᵣ :=
   Option.some_injective _ |>.comp Sum.inr_injective
 
 /-!
@@ -802,7 +808,7 @@ in `G`.
 -/
 @[simp]
 lemma neighborSet_mycielskian_left {G : SimpleGraph V} (v : V) :
-    mμ[G].neighborSet (v ₗ) = (G.neighborSet v).image (· ₗ) ∪
+    mμ[G].neighborSet v ₗ = (G.neighborSet v).image (· ₗ) ∪
       (G.neighborSet v).image (· ᵣ) := by
   ext x
   grind [mem_neighborSet, mycielskian_adj]
@@ -813,7 +819,7 @@ and to `none`.
 -/
 @[simp]
 lemma neighborSet_mycielskian_right {G : SimpleGraph V} (v : V) :
-    mμ[G].neighborSet (v ᵣ) = insert none ((G.neighborSet v).image (· ₗ)) := by
+    mμ[G].neighborSet v ᵣ = insert none ((G.neighborSet v).image (· ₗ)) := by
   ext x
   grind [mem_neighborSet, mycielskian_adj]
 
@@ -876,7 +882,8 @@ declaration only tells Lean how to *parse* `mμᵥ^n V`. For Lean to also *print
 `MycielskianVert V n` as `mμᵥ^n V` (in goals, hovers and `#check` output) we add an
 *unexpander*, which turns the application back into the notation.
 -/
-@[inherit_doc MycielskianVert]
+/-- `mμᵥ^n V` is the vertex type of the `n`-th iterated Mycielskian of a
+`SimpleGraph V`. -/
 scoped syntax "mμᵥ^" term:max ppSpace term:max : term
 scoped macro_rules
   | `(mμᵥ^ $n $V) => `(MycielskianVert $V $n)
@@ -903,7 +910,7 @@ lemma iterMycielskian_succ {V : Type*} (G : SimpleGraph V) (n : ℕ) :
 Notation for the iterated Mycielskian, again with an unexpander so that Lean prints
 `iterMycielskian G n` as `mμ^n G`.
 -/
-@[inherit_doc iterMycielskian]
+/-- `mμ^n G` is the `n`-th iterated Mycielskian of `G`. -/
 scoped syntax "mμ^" term:max ppSpace term:max : term
 scoped macro_rules
   | `(mμ^ $n $G) => `(iterMycielskian $G $n)
@@ -986,10 +993,10 @@ a copy of `ℕ` can be defined as follows.
 /-- The complete multipartite graph with `n` classes, where each class is a copy of
 `ℕ`. -/
 @[simps!]
-abbrev multiNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
+abbrev completeEquipartiteNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
   completeMultipartiteGraph fun (_ : Fin n) => ℕ
 
-#check multiNat_adj -- produced by the `@[simps!]` attribute on `multiNat`
+#check completeEquipartiteNat_adj -- produced by the `@[simps!]` attribute
 
 /-!
 We can also define the complete multipartite graph with classes indexed by `ℕ`, where
@@ -998,21 +1005,21 @@ the `n`-th class is `Fin n`.
 /-- The complete multipartite graph with classes indexed by `ℕ`, where the `n`-th
 class is `Fin n`. -/
 @[simps!]
-abbrev natFinMulti : SimpleGraph (Σ n : ℕ, Fin n) :=
-  completeMultipartiteGraph (fun n => Fin n)
+abbrev completeMultipartiteNat : SimpleGraph (Σ n : ℕ, Fin n) :=
+  completeMultipartiteGraph fun n => Fin n
 
-#check natFinMulti_adj
+#check completeMultipartiteNat_adj
 
 /-!
 Deciding whether two vertices are adjacent in a complete multipartite graph is easy:
 they are adjacent if and only if their first components are different. So
 decidability of adjacency follows from decidability of equality on their index type.
-Since `Fin n` and `ℕ` have decidable equality, `multiNat` and `natFinMulti` have
-decidable adjacency.
+Since `Fin n` and `ℕ` have decidable equality, `completeEquipartiteNat` and
+`completeMultipartiteNat` have decidable adjacency.
 -/
-example : (multiNat 3).Adj ⟨0, 12⟩ ⟨2, 10⟩ := by decide
+example : (completeEquipartiteNat 3).Adj ⟨0, 12⟩ ⟨2, 10⟩ := by decide
 
-example : ¬ natFinMulti.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
+example : ¬ completeMultipartiteNat.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
 
 /-!
 ## Blow-ups
@@ -1039,12 +1046,13 @@ replaced by a class of size `n`.
 `n` vertices (`Fin n`), denoted `G[n]`. -/
 @[simps!]
 abbrev blowUpN {ι : Type*} (G : SimpleGraph ι) (n : ℕ) :
-    SimpleGraph (Σ _ : ι, Fin n) := G.blowUpGraph (fun _ => Fin n)
+    SimpleGraph (Σ _ : ι, Fin n) := G.blowUpGraph fun _ => Fin n
 
 /-!
 We introduce the notation `G[n]` for the `n`-uniform blow-up of `G`.
 -/
-@[inherit_doc blowUpN]
+/-- `G[n]` is the `n`-uniform blow-up of `G`, which replaces each vertex of `G` with
+`n` vertices (`Fin n`). -/
 scoped notation:max G "[" n "]" => blowUpN G n
 
 #check C[4][3] -- the blow-up of `C[4]` replacing each vertex by a class of size `3`
@@ -1105,14 +1113,14 @@ def kneserGraph (β : Type*) (k : ℕ) :
 #check kneserGraph_adj -- (kneserGraph β k).Adj u v = (Disjoint ↑u ↑v ∧ u ≠ v)
 
 instance (β : Type*) (k : ℕ) [DecidableEq β] :
-    DecidableRel ((kneserGraph β k).Adj) := fun u v => by
+    DecidableRel (kneserGraph β k).Adj := fun u v => by
   unfold kneserGraph; infer_instance
 
 /-!
 We introduce the notation `Kn[n, k]` for the `k`-th Kneser graph on `Fin n`.
 -/
-/-- The `k`-th Kneser graph on `Fin n`: vertices are `k`-element subsets of `Fin n`,
-and edges join disjoint, distinct subsets. -/
+/-- `Kn[n, k]` is the Kneser graph `kneserGraph (Fin n) k`: its vertices are the
+`k`-element subsets of `Fin n`, and edges join disjoint, distinct subsets. -/
 scoped notation "Kn[" n ", " k "]" => kneserGraph (Fin n) k
 
 /-!

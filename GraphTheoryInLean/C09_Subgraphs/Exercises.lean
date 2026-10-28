@@ -118,22 +118,22 @@ lemma colorable_of_forall_finite_induce_colorable' {n : ℕ}
 
 /-!
 13. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
-dropped. Recall the sigma graph `natDisjointComplete`, the disjoint union
+dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
-`natDisjointComplete`, but `⊤` itself does not. Hint: for the first, number the
+`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first, number the
 vertices of `H` using `Finite.equivFin` and send them into `K[m]`, where `m` is the
 number of vertices. For the second, show that adjacent vertices of
-`natDisjointComplete` lie in the same `K[i]` and have distinct labels, as in the
+`sigmaCompleteNat` lie in the same `K[i]` and have distinct labels, as in the
 example following its definition. Every vertex of `⊤` is adjacent to `0` or equal to
 it, so a homomorphism `f` sends every vertex into the `K[i]` containing `f 0`, and
 reading off the labels gives an injection `ℕ → Fin i`.
 -/
 example (H : (⊤ : SimpleGraph ℕ).Subgraph) (hH : H.verts.Finite) :
-    Nonempty (H.coe →g natDisjointComplete) := by
+    Nonempty (H.coe →g sigmaCompleteNat) := by
   sorry
 
-example : IsEmpty ((⊤ : SimpleGraph ℕ) →g natDisjointComplete) := by
+example : IsEmpty ((⊤ : SimpleGraph ℕ) →g sigmaCompleteNat) := by
   sorry
 
 /-!
@@ -162,11 +162,11 @@ example : τ K[3] = 2 := by
 
 /-!
 16. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
-`pathNat₁` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
-relation is as `pathNat₁.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
+`pathNat` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
+relation is as `pathNat.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
 show that its edge set is infinite (`Set.infinite_of_injective_forall_mem`).
 -/
-lemma matchingNum_pathNat₁' : ν pathNat₁ = ⊤ := by
+lemma matchingNum_pathNat' : ν pathNat = ⊤ := by
   sorry
 
 /-!
@@ -460,19 +460,19 @@ lemma colorable_of_forall_finite_induce_colorable {n : ℕ}
 
 /-!
 13. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
-dropped. Recall the sigma graph `natDisjointComplete`, the disjoint union
+dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
-`natDisjointComplete`, but `⊤` itself does not. Hint: for the first, number the
+`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first, number the
 vertices of `H` using `Finite.equivFin` and send them into `K[m]`, where `m` is the
 number of vertices. For the second, show that adjacent vertices of
-`natDisjointComplete` lie in the same `K[i]` and have distinct labels, as in the
+`sigmaCompleteNat` lie in the same `K[i]` and have distinct labels, as in the
 example following its definition. Every vertex of `⊤` is adjacent to `0` or equal to
 it, so a homomorphism `f` sends every vertex into the `K[i]` containing `f 0`, and
 reading off the labels gives an injection `ℕ → Fin i`.
 -/
 example (H : (⊤ : SimpleGraph ℕ).Subgraph) (hH : H.verts.Finite) :
-    Nonempty (H.coe →g natDisjointComplete) := by
+    Nonempty (H.coe →g sigmaCompleteNat) := by
   have := hH.to_subtype
   -- Number the `m` vertices of `H` as `0, 1, …, m - 1` and send them into `K[m]`.
   let e := Finite.equivFin H.verts
@@ -480,11 +480,11 @@ example (H : (⊤ : SimpleGraph ℕ).Subgraph) (hH : H.verts.Finite) :
   -- Adjacent vertices are distinct, so their labels are distinct.
   exact e.injective.ne huv.ne
 
-example : IsEmpty ((⊤ : SimpleGraph ℕ) →g natDisjointComplete) := by
+example : IsEmpty ((⊤ : SimpleGraph ℕ) →g sigmaCompleteNat) := by
   refine ⟨fun f => ?_⟩
-  -- Adjacent vertices of `natDisjointComplete` lie in the same `K[i]` and have
+  -- Adjacent vertices of `sigmaCompleteNat` lie in the same `K[i]` and have
   -- distinct labels.
-  have key : ∀ {p q : Σ i, Fin i}, natDisjointComplete.Adj p q →
+  have key : ∀ {p q : Σ i, Fin i}, sigmaCompleteNat.Adj p q →
       p.1 = q.1 ∧ (p.2 : ℕ) ≠ q.2 := by
     rintro ⟨i, a⟩ ⟨j, b⟩ ⟨rfl, h⟩
     exact ⟨rfl, Fin.val_ne_of_ne h⟩
@@ -539,15 +539,15 @@ example : τ K[3] = 2 := by
 
 /-!
 16. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
-`pathNat₁` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
-relation is as `pathNat₁.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
+`pathNat` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
+relation is as `pathNat.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
 show that its edge set is infinite (`Set.infinite_of_injective_forall_mem`).
 -/
-lemma matchingNum_pathNat₁ : ν pathNat₁ = ⊤ := by
+lemma matchingNum_pathNat : ν pathNat = ⊤ := by
   -- Pair `2 * k` with `2 * k + 1`.
-  let M : pathNat₁.Subgraph :=
+  let M : pathNat.Subgraph :=
     { verts := Set.univ
-      Adj m n := pathNat₁.Adj m n ∧ m / 2 = n / 2
+      Adj m n := pathNat.Adj m n ∧ m / 2 = n / 2
       adj_sub h := h.1
       edge_vert _ := trivial
       symm := ⟨fun _ _ h => ⟨h.1.symm, h.2.symm⟩⟩ }

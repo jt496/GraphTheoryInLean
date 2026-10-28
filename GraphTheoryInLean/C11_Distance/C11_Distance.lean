@@ -172,17 +172,17 @@ lemma IsAcyclic.edist_eq_length (hG : G.IsAcyclic) {u v : V} {p : G.Walk u v}
   rw [← p.reachable.coe_dist_eq_edist, hql]
 
 /-!
-For example, the infinite path `pathNat₁` is a tree (`isTree_pathNat₁`). In
+For example, the infinite path `pathNat` is a tree (`isTree_pathNat`). In
 [Constructing Walks](#section-constructing-walks) we built the walk
-`pathNat₁.path i j` of length `j`, and `pathNat₁.isPath_path` shows that it is a
-path. Hence the distance from `i` to `i + j` is `j`.
+`pathNat.path i j` of length `j`, and `pathNat.isPath_path` shows that it is a path.
+Hence the distance from `i` to `i + j` is `j`.
 -/
-#check pathNat₁.length_path -- (pathNat₁.path i j).length = j
-#check pathNat₁.isPath_path -- (pathNat₁.path i j).IsPath
+#check pathNat.length_path -- (pathNat.path i j).length = j
+#check pathNat.isPath_path -- (pathNat.path i j).IsPath
 
-lemma edist_pathNat₁ (i j : ℕ) : pathNat₁.edist i (i + j) = j := by
-  rw [isAcyclic_pathNat₁.edist_eq_length (pathNat₁.isPath_path i j),
-    pathNat₁.length_path]
+lemma edist_pathNat (i j : ℕ) : pathNat.edist i (i + j) = j := by
+  rw [isAcyclic_pathNat.edist_eq_length (pathNat.isPath_path i j),
+    pathNat.length_path]
 
 /-!
 # Eccentricity, Diameter and Radius
@@ -219,21 +219,21 @@ which case the diameter is attained by some pair of vertices.
 #check SimpleGraph.exists_edist_eq_ediam_of_ne_top
 
 /-!
-The finiteness hypothesis cannot be dropped. The infinite path `pathNat₁` is
-connected (`connected_pathNat₁`), but the distance from `0` to `n` is `n`
-(`edist_pathNat₁`), so its diameter is `⊤`. Its `ℕ`-valued diameter is therefore the
+The finiteness hypothesis cannot be dropped. The infinite path `pathNat` is
+connected (`connected_pathNat`), but the distance from `0` to `n` is `n`
+(`edist_pathNat`), so its diameter is `⊤`. Its `ℕ`-valued diameter is therefore the
 junk value `0`.
 
 In the proof, `ediam_eq_top` gives us some `n : ℕ∞` with `n < ⊤`, which we `lift`
 to `ℕ`.
 -/
-lemma ediam_pathNat₁ : pathNat₁.ediam = ⊤ := by
+lemma ediam_pathNat : pathNat.ediam = ⊤ := by
   refine ediam_eq_top.mpr fun n hn => ?_
   lift n to ℕ using hn.ne
-  exact ⟨0, n + 1, by rw [← zero_add (n + 1), edist_pathNat₁]; norm_cast; grind⟩
+  exact ⟨0, n + 1, by rw [← zero_add (n + 1), edist_pathNat]; norm_cast; grind⟩
 
-lemma diam_pathNat₁ : pathNat₁.diam = 0 :=
-  diam_eq_zero_of_ediam_eq_top ediam_pathNat₁
+lemma diam_pathNat : pathNat.diam = 0 :=
+  diam_eq_zero_of_ediam_eq_top ediam_pathNat
 
 /-!
 The radius is at most the diameter, provided that there is at least one vertex: a
@@ -358,7 +358,7 @@ theorem radius_mycielskian_le_two (h : ∀ v : V, ¬ G.IsIsolated v) :
   refine radius_le_eccent.trans ((eccent_le_iff none _).mpr ?_)
   rintro (_ | ⟨v | v⟩)
   · simp
-  · obtain ⟨u, hu⟩ := (exists_adj_iff_not_isIsolated.2 (h v))
+  · obtain ⟨u, hu⟩ := exists_adj_iff_not_isIsolated.2 (h v)
     exact edist_mycielskian_none_left_le_two hu.symm
   · simp
 
@@ -385,7 +385,7 @@ theorem diam_mycielskian_le_four : mμ[G].diam ≤ 4 := by
   · -- an isolated vertex `v` of `G` makes `v ₗ` isolated in `mμ[G]`
     obtain ⟨v, hv⟩ := h
     refine (diam_eq_zero_of_not_connected fun hc => ?_).trans_le (by norm_num)
-    obtain ⟨p⟩ := hc.preconnected (v ₗ) none
+    obtain ⟨p⟩ := hc.preconnected v ₗ none
     cases p with
     | @cons _ x _ ha _ =>
       rcases x with _ | x | x <;> simp_all [IsIsolated]
@@ -618,14 +618,15 @@ lemma egirth_hypercube {n : ℕ} : egirth Q[n + 2] = 4 := by
 
 The Mycielskian of a triangle-free graph is triangle-free, so its girth is at least
 `4`. Whether it is exactly `4` depends on whether `G` has two edges sharing an
-endpoint: if it does, the two edges give a `4`-cycle through the apex; if not, `G` is
-a matching plus isolated vertices, and then the girth of `mμ[G]` is `5` provided `G`
-has an edge. (If `G` has no edges then `mμ[G]` is a star centred at the apex plus
-isolated vertices, so it is acyclic.)
+endpoint: if it does, the two edges give a `4`-cycle through the apex; if not, the
+edges of `G` form a matching (so `G` is a matching plus isolated vertices), and then
+the girth of `mμ[G]` is `5` provided `G` has an edge. (If `G` has no edges then
+`mμ[G]` is a star centred at the apex plus isolated vertices, so it is acyclic.)
 -/
-/-- If no two edges share a common endpoint, that is, every vertex has at most one
-neighbour, then `G` is a matching plus isolated vertices. -/
-abbrev IsMatchingAndIsolated (G : SimpleGraph V) : Prop :=
+/-- The edges of `G` form a matching: no two edges share an endpoint, that is,
+every vertex has at most one neighbour (so `G` is a matching plus isolated
+vertices). -/
+abbrev EdgesFormMatching (G : SimpleGraph V) : Prop :=
   ∀ x y z : V, G.Adj x y → G.Adj x z → y = z
 
 /-- A pair of edges with a common endpoint, `u — v` and `u — w`, gives rise to a walk
@@ -644,25 +645,25 @@ lemma length_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w) 
     (mycielskianFourCycle h1 h2).length = 4 := rfl
 
 /-!
-If `G` is triangle-free and is not a matching plus isolated vertices, then `mμ[G]`
-has girth `4`.
+If `G` is triangle-free and its edges do not form a matching, then `mμ[G]` has
+girth `4`.
 -/
 lemma egirth_mycielskian_eq_four (h3 : G.CliqueFree 3)
-    (hnm : ¬G.IsMatchingAndIsolated) : egirth mμ[G] = 4 := by
+    (hnm : ¬G.EdgesFormMatching) : egirth mμ[G] = 4 := by
   obtain ⟨x, y, z, h1, h2, hvw⟩ : ∃ x y z, G.Adj x y ∧ G.Adj x z ∧ y ≠ z := by grind
   refine le_antisymm ?_ (four_le_egirth_of_cliqueFree_three h3.mycielskian)
   simpa [length_mycielskianFourCycle] using
     (isCycle_mycielskianFourCycle h1 h2 hvw).egirth_le_length
 
 /-!
-If `G` is a matching plus isolated vertices then `mμ[G]` contains no copy of `C[4]`.
+If the edges of `G` form a matching then `mμ[G]` contains no copy of `C[4]`.
 We use `cycleGraph_four_free_iff_common_neighbor_unique`: given distinct vertices `x`
 and `y` with common neighbours `u` and `v`, we split into cases according to whether
 each of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy. The adjacency
 rules of the Mycielskian dispose of most of the `81` cases, and `grind` finishes the
 rest.
 -/
-lemma cycleGraph_four_free_mycielskian (hmatch : G.IsMatchingAndIsolated) :
+lemma cycleGraph_four_free_mycielskian (hmatch : G.EdgesFormMatching) :
     C[4].Free mμ[G] := by
   apply cycleGraph_four_free_iff_common_neighbor_unique.mpr
   rintro (_ | (a | a)) (_ | (b | b)) (_ | (u | u)) (_ | (v | v)) h1 h2 h3 h4 hne
@@ -671,18 +672,17 @@ lemma cycleGraph_four_free_mycielskian (hmatch : G.IsMatchingAndIsolated) :
 /-!
 A graph in which no two edges share a common endpoint is triangle-free.
 -/
-lemma IsMatchingAndIsolated.cliqueFree_three (hmatch : G.IsMatchingAndIsolated) :
+lemma EdgesFormMatching.cliqueFree_three (hmatch : G.EdgesFormMatching) :
     G.CliqueFree 3 := fun t ht => by
   classical
   obtain ⟨a, b, c, hab, hac, hbc, -⟩ := is3Clique_iff.1 ht
   exact hbc.ne (hmatch a b c hab hac)
 
 /-!
-If `G` has an edge and is a matching plus isolated vertices, then `mμ[G]` has girth
-`5`.
+If `G` has an edge and its edges form a matching, then `mμ[G]` has girth `5`.
 -/
 lemma egirth_mycielskian_eq_five {u v : V} (hadj : G.Adj u v)
-    (hmatch : G.IsMatchingAndIsolated) : egirth mμ[G] = 5 := by
+    (hmatch : G.EdgesFormMatching) : egirth mμ[G] = 5 := by
   refine le_antisymm ?_ (five_le_egirth_of_cliqueFree_three_of_free
     hmatch.cliqueFree_three.mycielskian (cycleGraph_four_free_mycielskian hmatch))
   simpa [mycielskianClosed] using

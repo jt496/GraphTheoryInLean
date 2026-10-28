@@ -454,7 +454,8 @@ introduce the notation `T[n, r]`.
 -/
 #source turanGraph
 
-@[inherit_doc turanGraph]
+/-- `T[n, r]` is the Turán graph `turanGraph n r`, the canonical
+`(r + 1)`-clique-free graph on `n` vertices. -/
 scoped notation "T[" n ", " r "]" => turanGraph n r
 
 /-!
@@ -680,7 +681,7 @@ theorem nonempty_iso_turanGraph {r : ℕ} (hc : G.IsCompleteMultipartite)
     (hcf : G.CliqueFree (r + 1))
     (hbal : ∀ v w, #{x | ¬G.Adj w x} ≤ #{x | ¬G.Adj v x} + 1)
     (hsat : ∀ x y, x ≠ y → ¬G.Adj x y → ¬G.CliqueFree r) :
-    Nonempty (G ≃g T[(Fintype.card V), r]) := by
+    Nonempty (G ≃g T[Fintype.card V, r]) := by
   classical
   -- number the vertices so that the parts are the residue classes
   obtain ⟨zm, zp⟩ := (hc.isEquipartition hbal).exists_partPreservingEquiv
@@ -1640,7 +1641,7 @@ unless it is complete. So it is a Turán graph, by
 theorem IsNCliqueMaximal.nonempty_iso_turanGraph [Fintype V] {s r : ℕ}
     (h : G.IsNCliqueMaximal s r) (hs : 2 ≤ s)
     {t : Finset V} (ht : G.IsNClique s t) :
-    Nonempty (G ≃g T[(Fintype.card V), r]) := by
+    Nonempty (G ≃g T[Fintype.card V, r]) := by
   classical
   exact (h.isCompleteMultipartite hs ht).nonempty_iso_turanGraph h.1
     (h.card_le_card_add_one hs ht) fun _ _ => h.not_cliqueFree_of_not_adj hs ht
@@ -1682,7 +1683,7 @@ with an empty graph, using `cliqueFinset_eq_of_le_one`.
 as many `s`-cliques as the Turán graph `T[n, r]`. -/
 theorem CliqueFree.card_cliqueFinset_le [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] {r : ℕ} (h : G.CliqueFree (r + 1)) (s : ℕ) :
-    #(G.cliqueFinset s) ≤ #((T[(Fintype.card V), r]).cliqueFinset s) := by
+    #(G.cliqueFinset s) ≤ #(T[Fintype.card V, r].cliqueFinset s) := by
   rcases lt_or_ge s 2 with hs | hs
   · -- for `s ≤ 1` compare the empty graphs on `V` and `Fin (card V)`
     let e := Iso.emptyGraph (Fintype.equivFin V)
@@ -1724,10 +1725,10 @@ and it is a Turán graph.
 theorem CliqueFree.card_cliqueFinset_eq_iff_nonempty_iso_turanGraph [Fintype V]
     [DecidableEq V] [DecidableRel G.Adj] {r s : ℕ} (h : G.CliqueFree (r + 1))
     (hs : 2 ≤ s) (hsr : s ≤ r) (hsn : s ≤ Fintype.card V) :
-    #(G.cliqueFinset s) = #((T[(Fintype.card V), r]).cliqueFinset s) ↔
-      Nonempty (G ≃g T[(Fintype.card V), r]) := by
+    #(G.cliqueFinset s) = #(T[Fintype.card V, r].cliqueFinset s) ↔
+      Nonempty (G ≃g T[Fintype.card V, r]) := by
   refine ⟨fun hk => ?_, fun ⟨e⟩ => e.card_cliqueFinset_eq s⟩
-  have hT : (T[(Fintype.card V), r]).IsNClique s
+  have hT : T[Fintype.card V, r].IsNClique s
       (univ.map (Fin.castLEEmb hsn)) := by
     refine ⟨?_, by simp⟩
     simp only [coe_map, coe_univ, Set.image_univ]
@@ -2110,18 +2111,18 @@ lemma subsingleton_end_of_common_vertex {V : Type} {G : SimpleGraph V}
     hv _ (end_componentCompl_infinite _ ⟨f, hf⟩ K)⟩)
 
 /-!
-For example, `pathNat₁` has exactly one end. Given a finite set `K`, choose `N` with
-`K ⊆ [0, N]`. The translate `N + 1, N + 2, …` of `pathNat₁` avoids `K`, so it lies in
+For example, `pathNat` has exactly one end. Given a finite set `K`, choose `N` with
+`K ⊆ [0, N]`. The translate `N + 1, N + 2, …` of `pathNat` avoids `K`, so it lies in
 a single component of `G - K`. An infinite component contains some `m > N`, and
 hence contains `N + 1`. So `N + 1` lies in every infinite component of `G - K`.
-Since `pathNat₁` is infinite, connected and locally finite, it also has at least one
+Since `pathNat` is infinite, connected and locally finite, it also has at least one
 end by Kőnig's lemma (`nonempty_ends_of_infinite`).
 -/
-example : Nat.card pathNat₁.end = 1 := by
+example : Nat.card pathNat.end = 1 := by
   rw [Nat.card_eq_one_iff_unique]
   refine ⟨subsingleton_end_of_common_vertex fun K => ?_, ?_⟩
   · obtain ⟨N, hN⟩ := K.finite_toSet.bddAbove
-    let φ := (pathNat₁.translate (N + 1)).toHom
+    let φ := (pathNat.translate (N + 1)).toHom
     have hφ (n : ℕ) : φ n = n + (N + 1) := rfl
     have hK (n : ℕ) : φ n ∉ K := fun h => by
       have := hN h; rw [hφ] at this; grind
@@ -2130,9 +2131,9 @@ example : Nat.card pathNat₁.end = 1 := by
     obtain ⟨m, hmC, hm⟩ := hC.exists_gt N
     have h₁ : φ (m - (N + 1)) = m := by rw [hφ]; grind
     have h₂ : φ 0 = N + 1 := by rw [hφ]; grind
-    exact h₂ ▸ ComponentCompl.mem_of_hom connected_pathNat₁.preconnected φ hK
+    exact h₂ ▸ ComponentCompl.mem_of_hom connected_pathNat.preconnected φ hK
       (h₁ ▸ hmC) 0
-  · have : Fact pathNat₁.Preconnected := ⟨connected_pathNat₁.preconnected⟩
+  · have : Fact pathNat.Preconnected := ⟨connected_pathNat.preconnected⟩
     exact (nonempty_ends_of_infinite _).to_subtype
 
 end ends

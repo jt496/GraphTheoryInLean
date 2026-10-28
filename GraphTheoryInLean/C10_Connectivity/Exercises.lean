@@ -62,7 +62,7 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
 
 /-!
 7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `isAcyclic_pathNat₁` using `IsAcyclic.comap`.
+from `isAcyclic_pathNat` using `IsAcyclic.comap`.
 -/
 example (n : ℕ) : P[n + 1].IsTree := by
   sorry
@@ -369,7 +369,7 @@ example (s t : ℕ) : K[s + 1, t + 1].Connected := by
   match v with
   | .inl b =>
     have h : K[s + 1, t + 1].Adj (.inl 0) (.inr 0) := by simp
-    use (.cons h <| .cons (by simp) .nil)
+    use .cons h <| .cons (by simp) .nil
   | .inr b =>
     exact (by simp : K[s + 1, t + 1].Adj (.inl 0) (.inr b)).reachable
 
@@ -433,15 +433,15 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
 
 /-!
 7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `isAcyclic_pathNat₁` using `IsAcyclic.comap`.
+from `isAcyclic_pathNat` using `IsAcyclic.comap`.
 
 The path graph is connected, and `Fin.val` is an injective homomorphism from
-`P[n + 1]` into the infinite path `pathNat₁`, which is acyclic. So any cycle in
-`P[n + 1]` would map to a cycle in `pathNat₁`.
+`P[n + 1]` into the infinite path `pathNat`, which is acyclic. So any cycle in
+`P[n + 1]` would map to a cycle in `pathNat`.
 -/
 example (n : ℕ) : P[n + 1].IsTree :=
   ⟨connected_pathGraph_add_one n,
-    isAcyclic_pathNat₁.comap ⟨Fin.val, by grind [pathGraph_adj]⟩ Fin.val_injective⟩
+    isAcyclic_pathNat.comap ⟨Fin.val, by grind [pathGraph_adj]⟩ Fin.val_injective⟩
 
 /-!
 We can also prove that the path graph is a tree by showing that it has the correct
@@ -451,8 +451,8 @@ example (n : ℕ) : P[n + 1].IsTree := by
   apply isTree_iff_connected_and_card.2 ⟨connected_pathGraph_add_one _,?_⟩
   simp only [Nat.card_eq_fintype_card, card_edgeSet, Fintype.card_fin,
             Nat.add_right_cancel_iff]
-  -- show `(P[n + 1]).edgeFinset.card = n` by exhibiting a bijection from `Fin n`
-  have he : (P[n + 1]).edgeFinset = Finset.univ.image
+  -- show `P[n + 1].edgeFinset.card = n` by exhibiting a bijection from `Fin n`
+  have he : P[n + 1].edgeFinset = Finset.univ.image
       (fun i : Fin n ↦ s(⟨i.val, by grind⟩, ⟨i.val + 1, by grind⟩)) := by
     ext e
     refine e.ind fun a b ↦ ?_

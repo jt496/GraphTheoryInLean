@@ -76,7 +76,7 @@ variable {V : Type*} {G : SimpleGraph V} (u v : V)
 
 /-!
 Throughout this guide we work in the `namespace SimpleGraph`, so for example `Adj`
-means `SimpleGraph.Adj`, and our definitions get names like `SimpleGraph.pathNat₁`.
+means `SimpleGraph.Adj`, and our definitions get names like `SimpleGraph.pathNat`.
 When we want to put results or definitions in other namespaces we will do this
 explicitly.
 
@@ -136,7 +136,7 @@ they do.
 
 We use three running examples throughout: the `n`-dimensional hypercube `Q[n]`
 ([Hypercube](#section-hypercube)), the Mycielskian `mμ[G]` of a graph `G`
-([Mycielskian](#section-mycielskian)), and the infinite path `pathNat₁` on `ℕ`
+([Mycielskian](#section-mycielskian)), and the infinite path `pathNat` on `ℕ`
 ([Constructing a SimpleGraph](#section-constructing-a-simplegraph)).
 
 Examples of more advanced topics that we cover in the guide include:

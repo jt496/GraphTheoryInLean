@@ -94,7 +94,7 @@ example (h : 3 ≤ G.ediam) : Gᶜ.ediam ≤ 3 := by
 10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ[G]` the two
 copies `v ₗ` and `v ᵣ` of `v` are at distance exactly `2`. Hint: `edist_eq_two_iff`.
 -/
-example {u v : V} (h : G.Adj u v) : mμ[G].edist (v ₗ) (v ᵣ) = 2 := by
+example {u v : V} (h : G.Adj u v) : mμ[G].edist v ₗ v ᵣ = 2 := by
   sorry
 
 /-!
@@ -151,7 +151,7 @@ example (h3 : G.CliqueFree 3) {u v w : V} (huw : G.Adj u w) (hwv : G.Adj w v)
     (huv : u ≠ v) : G.edist u v = 2 := by
   classical
   exact edist_eq_two_iff.mpr ⟨huv, fun h => h3 _ (is3Clique_triple_iff.2
-    ⟨h, huw, hwv.symm⟩), w, (G.mem_commonNeighbors).2 ⟨huw, hwv.symm⟩⟩
+    ⟨h, huw, hwv.symm⟩), w, G.mem_commonNeighbors.2 ⟨huw, hwv.symm⟩⟩
 
 /-!
 3. Deduce from `Hom.edist_le` that adding edges cannot increase distances (this is
@@ -291,7 +291,7 @@ copies `v ₗ` and `v ᵣ` of `v` are at distance exactly `2`. Hint: `edist_eq_t
 The two copies of `v` are distinct and not adjacent (`v` is not adjacent to itself
 in `G`), and the left copy `u ₗ` of any neighbour `u` of `v` is a common neighbour.
 -/
-example {u v : V} (h : G.Adj u v) : mμ[G].edist (v ₗ) (v ᵣ) = 2 := by
+example {u v : V} (h : G.Adj u v) : mμ[G].edist v ₗ v ᵣ = 2 := by
   rw [edist_eq_two_iff]
   refine ⟨by simp, by simp, ⟨u ₗ, ?_⟩⟩
   rw [mem_commonNeighbors]

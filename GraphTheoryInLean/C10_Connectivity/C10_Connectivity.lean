@@ -16,7 +16,7 @@ In this chapter we study graph connectivity. Building on the reachability relati
 connected components (`ConnectedComponent`) and bridges (`IsBridge`), and show that
 the Mycielskian `mμ[G]` is connected iff `G` has no isolated vertices, and that in a
 graph of maximum degree at most `2` every cycle is its own connected component. We
-then look at trees, and show that the infinite path `pathNat₁` is one. We prove
+then look at trees, and show that the infinite path `pathNat` is one. We prove
 *Euler's theorem*: a finite graph has an Eulerian trail iff all its edges lie in one
 component and it has either no vertex of odd degree or exactly two. Next we introduce
 Mathlib's edge connectivity (`IsEdgeConnected`), and give our own definition of
@@ -351,7 +351,7 @@ lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ[G].edgeSet) :
     rw [isBridge_iff]
     -- `u` is isolated in `G`, so `none` is the only neighbour of `u ᵣ`: once the
     -- edge `none — u ᵣ` is deleted, `u ᵣ` has no neighbours at all
-    have hnb : ∀ w, ¬ (mμ[G].deleteEdges {s(none, u ᵣ)}).Adj (u ᵣ) w := by
+    have hnb : ∀ w, ¬ (mμ[G].deleteEdges {s(none, u ᵣ)}).Adj u ᵣ w := by
       rintro (_ | w | w) h <;> simp_all [Sym2.eq_swap, IsIsolated]
     -- so a walk from `u ᵣ` to `none` has nowhere to take its first step
     intro h
@@ -480,21 +480,21 @@ a copy of any cycle graph of order at least 3.
 /-!
 ## The Infinite Path is a Tree
 
-Our running example `pathNat₁` is a tree. It is connected, since every vertex `n` can
-be reached from `0` along the walk `pathNat₁.path 0 n`. This walk ends at `0 + n`,
+Our running example `pathNat` is a tree. It is connected, since every vertex `n` can
+be reached from `0` along the walk `pathNat.path 0 n`. This walk ends at `0 + n`,
 which is not definitionally `n`, so we use `Walk.copy` ([Copy](#section-copy)) to
 change its endpoint.
 -/
-lemma connected_pathNat₁ : pathNat₁.Connected :=
+lemma connected_pathNat : pathNat.Connected :=
   (connected_iff_exists_forall_reachable _).2
-    ⟨0, fun n => ⟨(pathNat₁.path 0 n).copy rfl (by simp)⟩⟩
+    ⟨0, fun n => ⟨(pathNat.path 0 n).copy rfl (by simp)⟩⟩
 
 /-!
-To see that `pathNat₁` is acyclic, consider the largest vertex `m` of a cycle. It has
+To see that `pathNat` is acyclic, consider the largest vertex `m` of a cycle. It has
 two neighbours on the cycle (`IsCycle.ncard_neighborSet_toSubgraph_eq_two`), but its
 only neighbour that is not larger than `m` is `m - 1`.
 -/
-lemma isAcyclic_pathNat₁ : pathNat₁.IsAcyclic := by
+lemma isAcyclic_pathNat : pathNat.IsAcyclic := by
   intro v c hc
   -- let `m` be the largest vertex of the cycle `c`
   obtain ⟨m, hm, hmax⟩ := c.support.toFinset.exists_max_image id ⟨v, by simp⟩
@@ -509,7 +509,7 @@ lemma isAcyclic_pathNat₁ : pathNat₁.IsAcyclic := by
   rw [hc.ncard_neighborSet_toSubgraph_eq_two hm, Set.ncard_singleton] at this
   grind
 
-lemma isTree_pathNat₁ : pathNat₁.IsTree := ⟨connected_pathNat₁, isAcyclic_pathNat₁⟩
+lemma isTree_pathNat : pathNat.IsTree := ⟨connected_pathNat, isAcyclic_pathNat⟩
 
 /-!
 ## The Edge Count Formula
@@ -529,7 +529,7 @@ Conversely, a finite connected graph with this many edges is a tree.
 More generally, a connected graph satisfies `|V| ≤ |E(G)| + 1`. This is stated with
 `Nat.card`, so it needs no finiteness assumption, but for an infinite graph it says
 nothing useful: `Nat.card` of an infinite type is the junk value `0`, so for
-`pathNat₁` it says `0 ≤ 0 + 1`.
+`pathNat` it says `0 ≤ 0 + 1`.
 -/
 #check Connected.card_vert_le_card_edgeSet_add_one
 
@@ -551,12 +551,12 @@ for proving results about finite trees by induction on the number of vertices.
 ## Trees and Bridges
 
 A graph is acyclic if and only if every edge is a bridge. For example, every edge of
-`pathNat₁` is a bridge.
+`pathNat` is a bridge.
 -/
 #check isAcyclic_iff_forall_adj_isBridge
 
-example {n : ℕ} : pathNat₁.IsBridge s(n, n + 1) :=
-  isAcyclic_iff_forall_adj_isBridge.mp isAcyclic_pathNat₁ (by simp)
+example {n : ℕ} : pathNat.IsBridge s(n, n + 1) :=
+  isAcyclic_iff_forall_adj_isBridge.mp isAcyclic_pathNat (by simp)
 
 /-!
 ## Spanning Trees
@@ -1212,7 +1212,7 @@ lemma IsVertexConnected.le_encard_neighborSet {k : ℕ∞} (hG : G.IsVertexConne
         _ < k + 1 := (ENat.add_lt_add_iff_right ENat.one_ne_top).mpr hlt
     exact lt_irrefl _ hlt'
   rw [Set.mem_insert_iff, not_or] at hu
-  obtain ⟨p, hp⟩ := hG.2 _ hlt v u (G.irrefl) hu.2
+  obtain ⟨p, hp⟩ := hG.2 _ hlt v u G.irrefl hu.2
   cases p with
   | nil => exact hu.1 rfl
   | @cons _ w _ hadj p' => exact hp w (by simp) hadj
@@ -1736,7 +1736,7 @@ private lemma exists_adj_sdiff_of_connected [DecidableEq V] {W S : Finset V}
     ((Subgraph.connected_iff_forall_exists_walk_subgraph _).mp hconn).2
       (mem_coe.mpr (hSW hv)) (mem_coe.mpr (mem_sdiff.mp hr).1)
   have hp := p.toSubgraph_le_induce_top_iff.mp hp
-  obtain ⟨d, hd, hd1, hd2⟩ := p.exists_boundary_dart (↑S) (mem_coe.mpr hv)
+  obtain ⟨d, hd, hd1, hd2⟩ := p.exists_boundary_dart ↑S (mem_coe.mpr hv)
     (by simpa using (mem_sdiff.mp hr).2)
   exact ⟨d.toProd.2, mem_sdiff.mpr
     ⟨hp _ (p.dart_snd_mem_support_of_mem_darts hd), by simpa using hd2⟩,
@@ -1846,8 +1846,8 @@ private lemma exists_two_eq [DecidableRel G.Adj] [DecidableEq V] (B : Finset V)
     (h : G.degIn B x + G.degIn B y < Δ) :
     ∃ C' : G.ColoringOn (Fin Δ) ↑(insert x (insert y B)), C' x = C' y := by
   classical
-  have hcard : #(({v ∈ B | G.Adj x v}.image (fun v => C v)) ∪
-      ({v ∈ B | G.Adj y v}.image (fun v => C v))) < Δ := by
+  have hcard : #({v ∈ B | G.Adj x v}.image (fun v => C v) ∪
+      {v ∈ B | G.Adj y v}.image (fun v => C v)) < Δ := by
     have hx : #({v ∈ B | G.Adj x v}.image (fun v => C v)) ≤ G.degIn B x :=
       card_image_le
     have hy : #({v ∈ B | G.Adj y v}.image (fun v => C v)) ≤ G.degIn B y :=
@@ -1881,8 +1881,8 @@ private lemma exists_two_ne [DecidableRel G.Adj] [DecidableEq V] (A : Finset V)
   have hCyA : ∀ v ∈ A, v ≠ y → Cy v = C v := fun v _ hv => by simp [Cy, hv]
   -- `x` is not adjacent to `y`, so it sees the same colours on `insert y A` as
   -- on `A`
-  have hximg : ({v ∈ insert y A | G.Adj x v}.image (fun v => Cy v)) =
-      (({v ∈ A | G.Adj x v}.image (fun v => C v))) := by
+  have hximg : {v ∈ insert y A | G.Adj x v}.image (fun v => Cy v) =
+      {v ∈ A | G.Adj x v}.image (fun v => C v) := by
     grind
   let F := ({v ∈ insert y A | G.Adj x v}.image fun v => Cy v) ∪ {cy}
   have hFcard : #F < Δ := by
@@ -2748,7 +2748,7 @@ theorem colorable_of_forall_block [Finite V] {n : ℕ} (hn : 1 ≤ n)
         exact hab.block.toSubgraph.colorable_of_forall_adj hn
           (fun c d hcd => blockMk_toSubgraph_adj.mpr
             ⟨hcd, blockEquivalent_of_not_splitsAt hs hab hcd⟩) (hcol _)
-      · exact ⟨Coloring.mk (fun _ => (⟨0, hn⟩)) fun {a b} hab => (he a b hab).elim⟩
+      · exact ⟨Coloring.mk (fun _ => ⟨0, hn⟩) fun {a b} hab => (he a b hab).elim⟩
 
 /-!
 In the exercises we use the *De Bruijn–Erdős theorem*

@@ -35,12 +35,12 @@ example [Fintype G.edgeSet] : G.edgeSet.encard = G.edgeFinset.card := by
   sorry
 
 /-!
-4. The infinite path `pathNat₁` has infinitely many edges. Show that the `ℕ∞`-valued
+4. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
 `encard` of its edge set is therefore `⊤`, while the `ℕ`-valued `ncard` returns the
 junk value `0`. Hint: the edges `s(n, n + 1)` are distinct for distinct `n`, so
 `Set.infinite_of_injective_forall_mem` shows that the edge set is infinite.
 -/
-example : pathNat₁.edgeSet.encard = ⊤ ∧ pathNat₁.edgeSet.ncard = 0 := by
+example : pathNat.edgeSet.encard = ⊤ ∧ pathNat.edgeSet.ncard = 0 := by
   sorry
 
 /-!
@@ -58,12 +58,12 @@ example (n : ℕ) (v : Fin n) : K[n].neighborFinset v = Finset.univ.erase v := b
   sorry
 
 /-!
-7. The infinite path `pathNat₁` has no minimum or maximum degree in the sense of
+7. The infinite path `pathNat` has no minimum or maximum degree in the sense of
 `minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
-is the least, and `2` the greatest, degree of a vertex of `pathNat₁`.
+is the least, and `2` the greatest, degree of a vertex of `pathNat`.
 -/
-example : IsLeast {d | ∃ v, pathNat₁.degree v = d} 1 ∧
-    IsGreatest {d | ∃ v, pathNat₁.degree v = d} 2 := by
+example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
+    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
   sorry
 
 /-!
@@ -155,7 +155,7 @@ lemma degree_mycielskian_none' [Fintype V] [Fintype (mμ[G].neighborSet none)] :
 degree of the vertex in the original graph.
 -/
 lemma degree_mycielskian_right' (v : V) [Fintype (G.neighborSet v)]
-    [Fintype (mμ[G].neighborSet (v ᵣ))] :
+    [Fintype (mμ[G].neighborSet v ᵣ)] :
     mμ[G].degree v ᵣ = G.degree v + 1 := by
   sorry
 
@@ -242,8 +242,8 @@ of `G` with each degree doubled, together with the degrees of the new vertices.
 `α ⊕ β`. Both facts hold by `rfl`, as in Exercise 24.)
 -/
 lemma degreeMultiset_mycielskian' [Fintype V] [DecidableRel G.Adj] :
-    mμ[G].degreeMultiset = {Fintype.card V} + (G.degreeMultiset.map (2 * · ))
-                           + (G.degreeMultiset.map (· + 1)) := by
+    mμ[G].degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * · )
+                           + G.degreeMultiset.map (· + 1) := by
   simp only [degreeMultiset]
   have h1 : (Finset.univ : Finset (Option (V ⊕ V))).val =
           none ::ₘ Multiset.map Option.some (Finset.univ : Finset (V ⊕ V)).val := rfl
@@ -331,13 +331,13 @@ example [Fintype G.edgeSet] : G.edgeSet.encard = G.edgeFinset.card := by
   rw [← coe_edgeFinset, Set.encard_coe_eq_coe_finsetCard]
 
 /-!
-4. The infinite path `pathNat₁` has infinitely many edges. Show that the `ℕ∞`-valued
+4. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
 `encard` of its edge set is therefore `⊤`, while the `ℕ`-valued `ncard` returns the
 junk value `0`. Hint: the edges `s(n, n + 1)` are distinct for distinct `n`, so
 `Set.infinite_of_injective_forall_mem` shows that the edge set is infinite.
 -/
-example : pathNat₁.edgeSet.encard = ⊤ ∧ pathNat₁.edgeSet.ncard = 0 := by
-  have h : pathNat₁.edgeSet.Infinite :=
+example : pathNat.edgeSet.encard = ⊤ ∧ pathNat.edgeSet.ncard = 0 := by
+  have h : pathNat.edgeSet.Infinite :=
     Set.infinite_of_injective_forall_mem (f := fun n : ℕ => s(n, n + 1))
       (fun a b hab => by grind [Sym2.eq_iff]) (fun n => by simp)
   exact ⟨h.encard_eq, h.ncard⟩
@@ -357,17 +357,17 @@ example (n : ℕ) (v : Fin n) : K[n].neighborFinset v = Finset.univ.erase v := b
   ext w; simp [ne_comm]
 
 /-!
-7. The infinite path `pathNat₁` has no minimum or maximum degree in the sense of
+7. The infinite path `pathNat` has no minimum or maximum degree in the sense of
 `minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
-is the least, and `2` the greatest, degree of a vertex of `pathNat₁`.
+is the least, and `2` the greatest, degree of a vertex of `pathNat`.
 -/
-example : IsLeast {d | ∃ v, pathNat₁.degree v = d} 1 ∧
-    IsGreatest {d | ∃ v, pathNat₁.degree v = d} 2 := by
+example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
+    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
   -- the degrees `1` and `2` are attained at the vertices `0` and `1`
   refine ⟨⟨⟨0, by simp⟩, ?_⟩, ⟨⟨1, by simp⟩, ?_⟩⟩
   all_goals
     rintro _ ⟨v, rfl⟩
-    simp only [degree_pathNat₁]
+    simp only [degree_pathNat]
     split_ifs <;> simp
 
 /-!
@@ -473,11 +473,11 @@ degree of the vertex in the original graph.
 -/
 @[simp]
 lemma degree_mycielskian_right (v : V) [Fintype (G.neighborSet v)]
-    [Fintype (mμ[G].neighborSet (v ᵣ))] :
+    [Fintype (mμ[G].neighborSet v ᵣ)] :
     mμ[G].degree v ᵣ = G.degree v + 1 := by
   classical
   have hnb :
-      mμ[G].neighborFinset (v ᵣ) = (G.neighborFinset v).image (· ₗ) ∪ {none} := by
+      mμ[G].neighborFinset v ᵣ = (G.neighborFinset v).image (· ₗ) ∪ {none} := by
     ext x; simp [← mem_neighborSet]
   rw [← card_neighborFinset_eq_degree, ← card_neighborFinset_eq_degree, hnb,
     card_union_of_disjoint (by simp [← Finset.disjoint_coe]),
@@ -519,7 +519,7 @@ lemma maxDegree_mycielskian [Fintype V] [DecidableRel G.Adj] :
     · apply max_le
       · obtain ⟨v, hv⟩ := G.exists_maximal_degree_vertex
         rw [hv, ← degree_mycielskian_left]
-        exact mμ[G].degree_le_maxDegree (v ₗ)
+        exact mμ[G].degree_le_maxDegree v ₗ
       · rw [← G.degree_mycielskian_none]
         exact mμ[G].degree_le_maxDegree none
 /-!
@@ -534,9 +534,9 @@ lemma minDegree_mycielskian [Fintype V] [DecidableRel G.Adj] :
   · obtain ⟨v, hv⟩ := G.exists_minimal_degree_vertex
     apply le_min
     · rw [hv, ← degree_mycielskian_left]
-      exact mμ[G].minDegree_le_degree (v ₗ)
+      exact mμ[G].minDegree_le_degree v ₗ
     · rw [hv, ← degree_mycielskian_right]
-      exact mμ[G].minDegree_le_degree (v ᵣ)
+      exact mμ[G].minDegree_le_degree v ᵣ
   · apply le_minDegree_of_forall_le_degree
     intro v
     rcases v with none | (v | v)
@@ -621,8 +621,8 @@ of `G` with each degree doubled, together with the degrees of the new vertices.
 `α ⊕ β`. Both facts hold by `rfl`, as in Exercise 24.)
 -/
 lemma degreeMultiset_mycielskian [Fintype V] [DecidableRel G.Adj] :
-    mμ[G].degreeMultiset = {Fintype.card V} + (G.degreeMultiset.map (2 * · ))
-                           + (G.degreeMultiset.map (· + 1)) := by
+    mμ[G].degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * · )
+                           + G.degreeMultiset.map (· + 1) := by
   simp only [degreeMultiset]
   -- Split the universe of `Option (V ⊕ V)` into the new vertex `none`, the left
   -- copies and the right copies.

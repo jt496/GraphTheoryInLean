@@ -22,17 +22,17 @@ example (G H : SimpleGraph V) : G ≤ H ↔ Hᶜ ≤ Gᶜ := by
   sorry
 
 /-!
-3. Show that `pathNat₁` has support `ℕ`. (Remember `ℕ` is a type not a set so we need
+3. Show that `pathNat` has support `ℕ`. (Remember `ℕ` is a type not a set so we need
 to use `Set.univ` to talk about `ℕ` as a `Set ℕ`.)
 -/
 
-example : pathNat₁.support = Set.univ := by
+example : pathNat.support = Set.univ := by
   sorry
 
 /-!
-4. Show that the neighbours of `n + 1` in `pathNat₁` are exactly `n` and `n + 2`.
+4. Show that the neighbours of `n + 1` in `pathNat` are exactly `n` and `n + 2`.
 -/
-example (n : ℕ) : (pathNat₁.neighborSet (n + 1)) = {n, n + 2} := by
+example (n : ℕ) : pathNat.neighborSet (n + 1) = {n, n + 2} := by
   sorry
 
 /-!
@@ -54,9 +54,9 @@ def shiftedPathNat' (i : ℕ) : SimpleGraph ℕ where
   loopless := sorry
 
 /-!
-6. Prove that `shiftedPathNat' 0 = pathNat₁`.
+6. Prove that `shiftedPathNat' 0 = pathNat`.
 -/
-example : shiftedPathNat' 0 = pathNat₁ := by
+example : shiftedPathNat' 0 = pathNat := by
   sorry
 
 /-!
@@ -69,9 +69,9 @@ def shortPathNat' (i : ℕ) : SimpleGraph ℕ where
   loopless := sorry
 
 /-!
-8. Prove that `shortPathNat' i ⊔ shiftedPathNat' i = pathNat₁`.
+8. Prove that `shortPathNat' i ⊔ shiftedPathNat' i = pathNat`.
 -/
-example (i : ℕ) : shortPathNat' i ⊔ shiftedPathNat' i = pathNat₁ := by
+example (i : ℕ) : shortPathNat' i ⊔ shiftedPathNat' i = pathNat := by
   sorry
 
 /-!
@@ -94,24 +94,24 @@ example (i j : ℕ) : shortPathNat' i ⊔ shortPathNat' j = shortPathNat' (max i
   sorry
 
 /-!
-12. Show that `pathNat₁ \ shortPathNat' i` is `shiftedPathNat' i`.
+12. Show that `pathNat \ shortPathNat' i` is `shiftedPathNat' i`.
 -/
-example (i : ℕ) : pathNat₁ \ shortPathNat' i = shiftedPathNat' i := by
+example (i : ℕ) : pathNat \ shortPathNat' i = shiftedPathNat' i := by
   sorry
 
 /-!
 13. `SimpleGraph` has an *indexed supremum* operation `⨆ i, G i` which is the graph
 with edges between `u` and `v` if and only if there exists an index `i` such that `u`
-and `v` are adjacent in `G i`. Prove that `pathNat₁ = ⨆ i : ℕ, shortPathNat' i`.
+and `v` are adjacent in `G i`. Prove that `pathNat = ⨆ i : ℕ, shortPathNat' i`.
 -/
-example : pathNat₁ = ⨆ i : ℕ, shortPathNat' i := by
+example : pathNat = ⨆ i : ℕ, shortPathNat' i := by
   sorry
 
 /-!
-14. Show that the edge set of `pathNat₁` is `{e | ∃ n, e = s(n, n + 1)}`. (Hint: use
+14. Show that the edge set of `pathNat` is `{e | ∃ n, e = s(n, n + 1)}`. (Hint: use
 `induction e using Sym2.ind`.)
 -/
-example : pathNat₁.edgeSet = {e | ∃ n, e = s(n, n + 1)} := by
+example : pathNat.edgeSet = {e | ∃ n, e = s(n, n + 1)} := by
   sorry
 
 /-!
@@ -139,19 +139,19 @@ example (G H : SimpleGraph V) : G ≤ H ↔ Hᶜ ≤ Gᶜ := by
   simp
 
 /-!
-3. Show that `pathNat₁` has support `ℕ`. (Remember `ℕ` is a type not a set so we need
+3. Show that `pathNat` has support `ℕ`. (Remember `ℕ` is a type not a set so we need
 to use `Set.univ` to talk about `ℕ` as a `Set ℕ`.)
 -/
-example : pathNat₁.support = Set.univ := by
+example : pathNat.support = Set.univ := by
   apply Set.eq_univ_of_forall
   intro n
-  use (n + 1)
+  use n + 1
   simp
 
 /-!
-4. Show that the neighbours of `n + 1` in `pathNat₁` are exactly `n` and `n + 2`.
+4. Show that the neighbours of `n + 1` in `pathNat` are exactly `n` and `n + 2`.
 -/
-example (n : ℕ) : (pathNat₁.neighborSet (n + 1)) = {n, n + 2} := by
+example (n : ℕ) : pathNat.neighborSet (n + 1) = {n, n + 2} := by
   ext a
   simp [or_comm, Eq.comm]
 
@@ -165,9 +165,9 @@ def shiftedPathNat (i : ℕ) : SimpleGraph ℕ where
   Adj n m := n + 1 = m ∧ i ≤ n ∨ m + 1 = n ∧ i ≤ m
 
 /-!
-6. Prove that `shiftedPathNat 0 = pathNat₁`.
+6. Prove that `shiftedPathNat 0 = pathNat`.
 -/
-example : shiftedPathNat 0 = pathNat₁ := by
+example : shiftedPathNat 0 = pathNat := by
   ext u v
   simp
 
@@ -180,9 +180,9 @@ def shortPathNat (i : ℕ) : SimpleGraph ℕ where
   Adj n m := n + 1 = m ∧ n < i ∨ m + 1 = n ∧ m < i
 
 /-!
-8. Prove that `shortPathNat i ⊔ shiftedPathNat i = pathNat₁`.
+8. Prove that `shortPathNat i ⊔ shiftedPathNat i = pathNat`.
 -/
-example (i : ℕ) : shortPathNat i ⊔ shiftedPathNat i = pathNat₁ := by
+example (i : ℕ) : shortPathNat i ⊔ shiftedPathNat i = pathNat := by
   ext u v
   grind [shortPathNat_adj, shiftedPathNat_adj]
 
@@ -211,18 +211,18 @@ example (i j : ℕ) : shortPathNat i ⊔ shortPathNat j = shortPathNat (max i j)
 
 
 /-!
-12. Show that `pathNat₁ \ shortPathNat i` is `shiftedPathNat i`.
+12. Show that `pathNat \ shortPathNat i` is `shiftedPathNat i`.
 -/
-example (i : ℕ) : pathNat₁ \ shortPathNat i = shiftedPathNat i := by
+example (i : ℕ) : pathNat \ shortPathNat i = shiftedPathNat i := by
   ext u v
   grind [sdiff_adj, shortPathNat_adj, shiftedPathNat_adj]
 
 /-!
 13. `SimpleGraph` has an *indexed supremum* operation `⨆ i, G i` which is the graph
 with edges between `u` and `v` if and only if there exists an index `i` such that `u`
-and `v` are adjacent in `G i`. Prove that `pathNat₁ = ⨆ i : ℕ, shortPathNat i`.
+and `v` are adjacent in `G i`. Prove that `pathNat = ⨆ i : ℕ, shortPathNat i`.
 -/
-example : pathNat₁ = ⨆ i : ℕ, shortPathNat i := by
+example : pathNat = ⨆ i : ℕ, shortPathNat i := by
   ext u v
   simp only [iSup_adj, shortPathNat_adj]
   constructor
@@ -232,10 +232,10 @@ example : pathNat₁ = ⨆ i : ℕ, shortPathNat i := by
   · grind
 
 /-!
-14. Show that the edge set of `pathNat₁` is `{e | ∃ n, e = s(n, n + 1)}`. (Hint: use
+14. Show that the edge set of `pathNat` is `{e | ∃ n, e = s(n, n + 1)}`. (Hint: use
 `induction e using Sym2.ind`.)
 -/
-example : pathNat₁.edgeSet = {e | ∃ n, e = s(n, n + 1)} := by
+example : pathNat.edgeSet = {e | ∃ n, e = s(n, n + 1)} := by
   ext e
   induction e using Sym2.ind with
   | _ x y => simp only [mem_edgeSet, Set.mem_ofPred_eq, Sym2.eq_iff]; grind

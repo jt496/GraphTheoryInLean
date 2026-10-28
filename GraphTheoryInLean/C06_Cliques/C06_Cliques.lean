@@ -604,28 +604,28 @@ exercises).
 
 ## Independence Number of the Infinite Path on ℕ
 
-The infinite path graph on `ℕ` (`pathNat₁`) has unbounded independent sets, so what
+The infinite path graph on `ℕ` (`pathNat`) has unbounded independent sets, so what
 is its independence number? Due to the `sSup` definition, it is `0`!
 
-Adjacent vertices of `pathNat₁` differ by one, so they have different parities. Hence
+Adjacent vertices of `pathNat` differ by one, so they have different parities. Hence
 any set of natural numbers that all have the same parity is independent.
 -/
-lemma isIndepSet_pathNat₁_of_mod_two_eq {s : Set ℕ}
-    (h : ∀ ⦃a b⦄, a ∈ s → b ∈ s → a % 2 = b % 2) : pathNat₁.IsIndepSet s := by
+lemma isIndepSet_pathNat_of_mod_two_eq {s : Set ℕ}
+    (h : ∀ ⦃a b⦄, a ∈ s → b ∈ s → a % 2 = b % 2) : pathNat.IsIndepSet s := by
   rw [isIndepSet_iff_forall_not_adj]
   rintro a b ha hb (rfl | rfl) <;> grind [h ha hb]
 
 /-!
 In particular, for every `n` the first `n` even numbers form an `n`-independent set.
 So the set of sizes of independent sets is not bounded above, and
-`Nat.sSup_of_not_bddAbove` gives `⍺ pathNat₁ = 0`.
+`Nat.sSup_of_not_bddAbove` gives `⍺ pathNat = 0`.
 -/
-lemma indepNum_pathNat₁ : ⍺ pathNat₁ = 0 := by
+lemma indepNum_pathNat : ⍺ pathNat = 0 := by
   apply Nat.sSup_of_not_bddAbove
   rintro ⟨N, hN⟩
-  have hs : pathNat₁.IsNIndepSet (N + 1)
+  have hs : pathNat.IsNIndepSet (N + 1)
       ((Finset.range (N + 1)).map ⟨(2 * ·), mul_right_injective₀ two_ne_zero⟩) := by
-    refine ⟨isIndepSet_pathNat₁_of_mod_two_eq ?_, by simp⟩
+    refine ⟨isIndepSet_pathNat_of_mod_two_eq ?_, by simp⟩
     simp only [Finset.coe_map, Function.Embedding.coeFn_mk, Set.mem_image]
     grind
   exact N.not_succ_le_self (hN ⟨_, hs⟩)
@@ -896,7 +896,7 @@ We first prove that the Mycielskian embedding mapping `G` into its Mycielskian s
 `k`-cliques in `G` to `k`-cliques in `mμ[G]`.
 -/
 lemma IsNClique.mycielskian {k : ℕ} {s : Finset V} (h : G.IsNClique k s) :
-    (mμ[G]).IsNClique k (s.map (Embedding.mycielskianLeft G).toEmbedding) := by
+    mμ[G].IsNClique k (s.map (Embedding.mycielskianLeft G).toEmbedding) := by
   classical
   simpa [Finset.map_eq_image] using h.image (Embedding.mycielskianLeft G).toHom
 
@@ -1165,7 +1165,7 @@ lemma le_indepNum_mycielskian [Fintype V] [DecidableEq V] [G.LocallyFinite]
     {s : Finset V} (h : G.IsIndepSet ↑s) : #s + #N(s)ᶜ ≤ ⍺ mμ[G] := by
   have hSindep : mμ[G].IsIndepSet ↑(s.image (·ₗ) ∪ N(s)ᶜ.image (·ᵣ)) := by
     simpa using h.mycielskian
-  rw [← card_image_left_union_image_right s (N(s)ᶜ)]
+  rw [← card_image_left_union_image_right s N(s)ᶜ]
   exact hSindep.card_le_indepNum
 
 /-!
@@ -1310,7 +1310,7 @@ theorem indepNum_mycielskian [Fintype V] [Nonempty V] [DecidableEq V]
   apply le_antisymm
   · -- `≤` : a maximum independent set `T` of `mμ[G]` is dominated by the value
     -- of the sup at its left part `A`.
-    obtain ⟨T, hT⟩ := (mμ[G]).exists_isNIndepSet_indepNum
+    obtain ⟨T, hT⟩ := mμ[G].exists_isNIndepSet_indepNum
     rw [← hT.card_eq]
     have hAF : T.preimage (·ₗ) left_injective.injOn ∈
         univ.filter fun s : Finset V => G.IsIndepSet ↑s :=

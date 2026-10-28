@@ -26,7 +26,7 @@ adjacency matrix.
 
 In this chapter we start from Mathlib's group structure on the automorphisms `G ≃g G`
 of a graph, and show that isomorphic graphs have isomorphic automorphism groups. We
-compute the automorphism groups of the infinite path `pathNat₁` (it is trivial) and
+compute the automorphism groups of the infinite path `pathNat` (it is trivial) and
 of the cycle graph `C[n]` (for `n ≥ 3` it is the dihedral group).
 
 Next we introduce the adjacency matrix. We show that every vertex of a
@@ -84,22 +84,22 @@ def Iso.autCongr {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} (e : G �
 
 At the opposite extreme from vertex-transitive graphs are graphs with no symmetry at
 all: a graph is *asymmetric* if its only automorphism is the identity, i.e. its
-automorphism group is trivial. A simple example is the infinite path `pathNat₁`. This
-may seem surprising since, as we saw in [Maps](#chapter-maps), `pathNat₁` has
-many embeddings into itself: for each `j : ℕ` the embedding `pathNat₁.translate j`
+automorphism group is trivial. A simple example is the infinite path `pathNat`. This
+may seem surprising since, as we saw in [Maps](#chapter-maps), `pathNat` has
+many embeddings into itself: for each `j : ℕ` the embedding `pathNat.translate j`
 sends `i` to `i + j`. However, none of these is surjective, except for the identity
-`pathNat₁.translate 0`.
+`pathNat.translate 0`.
 
-The key observation is that `0` is the only vertex of `pathNat₁` of degree one (all
+The key observation is that `0` is the only vertex of `pathNat` of degree one (all
 the other vertices have degree two), and isomorphisms preserve degrees. So every
-automorphism of `pathNat₁` fixes `0`.
+automorphism of `pathNat` fixes `0`.
 -/
-#check degree_pathNat₁ -- pathNat₁.degree n = if n = 0 then 1 else 2
-#check Iso.degree_eq   -- (f : G ≃g G') (x : V) : G'.degree (f x) = G.degree x
+#check degree_pathNat -- pathNat.degree n = if n = 0 then 1 else 2
+#check Iso.degree_eq  -- (f : G ≃g G') (x : V) : G'.degree (f x) = G.degree x
 
-lemma aut_pathNat₁_apply_zero (e : pathNat₁ ≃g pathNat₁) : e 0 = 0 := by
+lemma aut_pathNat_apply_zero (e : pathNat ≃g pathNat) : e 0 = 0 := by
   have h := e.degree_eq 0
-  rw [degree_pathNat₁, degree_pathNat₁] at h
+  rw [degree_pathNat, degree_pathNat] at h
   grind
 
 /-!
@@ -110,38 +110,38 @@ of `e 0 = 0`, `e` fixes `1`. If `e` fixes `k` and `k + 1` then `e (k + 2)` is a
 neighbour of `e (k + 1) = k + 1`, so it is either `k` or `k + 2`. It cannot be
 `k = e k` since `e` is injective, so `e` fixes `k + 2`.
 -/
-lemma aut_pathNat₁_apply (e : pathNat₁ ≃g pathNat₁) (k : ℕ) : e k = k := by
+lemma aut_pathNat_apply (e : pathNat ≃g pathNat) (k : ℕ) : e k = k := by
   induction k using Nat.twoStepInduction with
-  | zero => exact aut_pathNat₁_apply_zero e
+  | zero => exact aut_pathNat_apply_zero e
   | one =>
-    have h : pathNat₁.Adj (e 0) (e 1) := e.map_adj_iff.2 (by simp)
-    grind [aut_pathNat₁_apply_zero]
+    have h : pathNat.Adj (e 0) (e 1) := e.map_adj_iff.2 (by simp)
+    grind [aut_pathNat_apply_zero]
   | more k ih₀ ih₁ =>
-    have h : pathNat₁.Adj (e (k + 1)) (e (k + 2)) := e.map_adj_iff.2 (by simp)
+    have h : pathNat.Adj (e (k + 1)) (e (k + 2)) := e.map_adj_iff.2 (by simp)
     have hne : e (k + 2) ≠ e k := fun h => by simpa using e.injective h
     grind
 
 /-!
-So the automorphism group of `pathNat₁` is trivial: every automorphism is the
+So the automorphism group of `pathNat` is trivial: every automorphism is the
 identity `1`, and there is exactly one of them.
 -/
-lemma aut_pathNat₁_eq_one (e : pathNat₁ ≃g pathNat₁) : e = 1 := by
+lemma aut_pathNat_eq_one (e : pathNat ≃g pathNat) : e = 1 := by
   ext k
-  exact aut_pathNat₁_apply e k
+  exact aut_pathNat_apply e k
 
-lemma card_aut_pathNat₁ : Nat.card (pathNat₁ ≃g pathNat₁) = 1 :=
-  Nat.card_eq_one_iff_exists.2 ⟨1, aut_pathNat₁_eq_one⟩
+lemma card_aut_pathNat : Nat.card (pathNat ≃g pathNat) = 1 :=
+  Nat.card_eq_one_iff_exists.2 ⟨1, aut_pathNat_eq_one⟩
 
 /-!
-In particular `pathNat₁` is not vertex-transitive.
+In particular `pathNat` is not vertex-transitive.
 -/
-lemma not_isVertexTransitive_pathNat₁ : ¬ pathNat₁.IsVertexTransitive := by
+lemma not_isVertexTransitive_pathNat : ¬ pathNat.IsVertexTransitive := by
   intro h
   obtain ⟨e, he⟩ := h 0 1
-  simp [aut_pathNat₁_apply_zero] at he
+  simp [aut_pathNat_apply_zero] at he
 
 /-!
-What makes `pathNat₁` asymmetric is that it has a single endpoint (a vertex of degree
+What makes `pathNat` asymmetric is that it has a single endpoint (a vertex of degree
 one), `0`. A finite path with at least two vertices has two endpoints, and reversing
 it is a nontrivial automorphism; likewise the two-way infinite path on `ℤ` has the
 reflection `i ↦ -i` and the translations `i ↦ i + j` as automorphisms.
@@ -627,7 +627,7 @@ theorem adjMatrix_mycielskian_mulVec_mycielskianLift [Fintype V]
   -- at a left copy we need `t ^ 2 = t + 1`
   have hleft (v : V) : t * (ξ * x v) + ξ * x v = t * ξ * (t * x v) := by
     -- `linear_combination e` closes the goal if `ring` shows it is `e` rearranged
-    linear_combination (-(ξ * x v)) * ht
+    linear_combination -(ξ * x v) * ht
   ext (_ | v | v) <;> simp_all [mulVec, dotProduct, mul_assoc]
 
 /-!
@@ -638,7 +638,7 @@ lemma mycielskianLift_ne_zero {R : Type*} [Zero R] [Mul R] (t : R) {x : V → R}
     (hx : x ≠ 0) : mycielskianLift t x ≠ 0 := by
   contrapose hx
   ext v
-  simpa using congrFun hx (v ᵣ)
+  simpa using congrFun hx v ᵣ
 
 /-!
 An eigenvector gives an element of the spectrum. As in Mathlib's proof of
@@ -1387,17 +1387,17 @@ hyperoctahedral group `ℤ/2 ≀ Sₙ`.
 -/
 /-- The automorphism group of the Hamming cube is the hyperoctahedral group
 `ℤ/2 ≀ Sₙ`. -/
-noncomputable def hyperoctahedralMulEquivAutHamming (n : ℕ) :
-    HyperoctahedralGroup n ≃* (hypercubeHamming n ≃g hypercubeHamming n) :=
-  MulEquiv.ofBijective (hyperoctahedralToAut n)
-    ⟨hyperoctahedralToAut_injective n, hyperoctahedralToAut_surjective n⟩
+noncomputable def autHypercubeHammingMulEquivHyperoctahedral (n : ℕ) :
+    (hypercubeHamming n ≃g hypercubeHamming n) ≃* HyperoctahedralGroup n :=
+  (MulEquiv.ofBijective (hyperoctahedralToAut n)
+    ⟨hyperoctahedralToAut_injective n, hyperoctahedralToAut_surjective n⟩).symm
 
 /-- The automorphism group of the hypercube `Q[n]` is the hyperoctahedral group
 `ℤ/2 ≀ Sₙ`. -/
 noncomputable def autHypercubeMulEquivHyperoctahedral (n : ℕ) :
     (Q[n] ≃g Q[n]) ≃* HyperoctahedralGroup n :=
   (hypercubeIsoHamming n).autCongr.trans
-    (hyperoctahedralMulEquivAutHamming n).symm
+    (autHypercubeHammingMulEquivHyperoctahedral n)
 
 /-!
 In particular the hypercube `Q[n]` has exactly `2 ^ n * n!` automorphisms.
@@ -1405,7 +1405,7 @@ In particular the hypercube `Q[n]` has exactly `2 ^ n * n!` automorphisms.
 lemma card_aut_hypercube (n : ℕ) :
     Nat.card (Q[n] ≃g Q[n]) = 2 ^ n * n.factorial := by
   rw [Nat.card_congr (autHypercubeMulEquivHyperoctahedral n).toEquiv,
-    Nat.card_congr (SemidirectProduct.equivProd), Nat.card_prod,
+    Nat.card_congr SemidirectProduct.equivProd, Nat.card_prod,
     Nat.card_congr Multiplicative.toAdd]
   simp [Nat.card_eq_fintype_card, Fintype.card_perm]
 
@@ -1635,7 +1635,7 @@ graph, we can identify `Copy A B` with `A ≃g B`.
 /-- For finite graphs, an isomorphism `A ≃g B` witnesses that copies of `A` in `B`
 are the same as isomorphisms `A ≃g B`. -/
 noncomputable def Iso.copyEquivIso {A : SimpleGraph V} {B : SimpleGraph W}
-    (g : A ≃g B) [Finite V] : (Copy A B) ≃ (A ≃g B) where
+    (g : A ≃g B) [Finite V] : Copy A B ≃ (A ≃g B) where
   toFun f :=
     { Equiv.ofBijective f.toHom ⟨f.injective,
         (Finite.injective_iff_surjective_of_equiv g.toEquiv).1 f.injective⟩ with
@@ -1655,7 +1655,7 @@ noncomputable def Iso.copyEquivIso {A : SimpleGraph V} {B : SimpleGraph W}
 /-- Copies of a finite graph in itself are equivalent to automorphisms of the
 graph. -/
 noncomputable def copyEquivAut (A : SimpleGraph V) [Finite V] :
-    (Copy A A) ≃ (A ≃g A) := Iso.copyEquivIso .refl
+    Copy A A ≃ (A ≃g A) := Iso.copyEquivIso .refl
 
 /-- For `A` a finite graph, `A.Copy B` is equivalent to the product of the subtype of
 subgraphs of `B` that are isomorphic to `A` with copies of `A` in itself. -/
@@ -1846,7 +1846,7 @@ lemma extendEmb_injective {n k : ℕ} (d : Fin k ↪ Fin n) :
 /-- The homomorphism `hypercubeHamming k →g hypercubeHamming n` induced by an
 embedding of directions. -/
 @[simps]
-noncomputable def extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
+noncomputable def hypercubeHamming.extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
     hypercubeHamming k →g hypercubeHamming n where
   toFun := extendEmb d
   map_rel' := by
@@ -1859,7 +1859,8 @@ noncomputable def extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
 selected by `d`: the subcube `{ b + extendEmb d x | x : Fin k → Bool }`. -/
 noncomputable def subcubeCopy {n k : ℕ} (b : Fin n → Bool) (d : Fin k ↪ Fin n) :
     Copy (hypercubeHamming k) (hypercubeHamming n) where
-  toHom := (hypercubeHamming.translate b).toHom.comp (extendHom d)
+  toHom := (hypercubeHamming.translate b).toHom.comp
+    (hypercubeHamming.extendHom d)
   injective' := fun _ _ h => extendEmb_injective d (add_left_cancel h)
 
 @[simp]
@@ -2038,7 +2039,7 @@ is `2 ^ n * n`, the number of edges counted with direction.
 `(b, d)` of a base point and a direction embedding. The inverse map sends `(b, d)` to
 `subcubeCopy b d`; it is injective by `subcubeCopy_injective` and surjective by the
 rigidity theorem `exists_eq_subcubeCopy`. -/
-noncomputable def copyEquivProd (n k : ℕ) :
+noncomputable def hypercubeHamming.copyEquivProd (n k : ℕ) :
     Copy (hypercubeHamming k) (hypercubeHamming n) ≃
       (Fin n → Bool) × (Fin k ↪ Fin n) :=
   (Equiv.ofBijective (fun bd => subcubeCopy bd.1 bd.2)
@@ -2050,7 +2051,7 @@ lemma labelledCopyCount_hypercubeHamming (n k : ℕ) :
     (hypercubeHamming n).labelledCopyCount (hypercubeHamming k) =
       2 ^ n * n.descFactorial k := by
   rw [labelledCopyCount, Fintype.card_eq_nat_card,
-    Nat.card_congr (copyEquivProd n k), Nat.card_prod,
+    Nat.card_congr (hypercubeHamming.copyEquivProd n k), Nat.card_prod,
     ← Fintype.card_eq_nat_card, ← Fintype.card_eq_nat_card,
     Fintype.card_embedding_eq, Fintype.card_fun]
   simp

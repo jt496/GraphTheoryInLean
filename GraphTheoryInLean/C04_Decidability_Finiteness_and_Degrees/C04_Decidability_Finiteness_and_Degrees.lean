@@ -389,9 +389,10 @@ equality itself is undecidable.
 #check SimpleGraph.Bot.adjDecidable -- no assumption on `V` is required
 
 /-!
-If we revisit the three definitions `pathNat₁`, `pathNat₂` and `pathNat₃` of the path
-graph on `ℕ` we can ask two obvious questions: do they have decidable adjacency and
-if so will Lean automatically synthesize the required instance in each case?
+If we revisit the three definitions `pathNat`, `pathNatFromRel` and
+`pathNatFromEdgeSet` of the path graph on `ℕ` we can ask two obvious questions: do
+they have decidable adjacency and if so will Lean automatically synthesize the
+required instance in each case?
 
 The answer to the first question should be independent of which definition we use: as
 we already proved they all define the same graph! So what would a method for deciding
@@ -401,72 +402,75 @@ decidable.
 
 Turning to the second question of whether or not Lean will automatically synthesize
 the required instance we see that the exact form of our definition matters. It turns
-out that Lean can only infer the required instance for `pathNat₁`.
+out that Lean can only infer the required instance for `pathNat`.
 -/
-#source pathNat₁ -- abbrev pathNat₁ : SimpleGraph ℕ where
-                 --   Adj x y := x + 1 = y ∨ y + 1 = x
-#synth DecidableRel pathNat₁.Adj -- fun a b ↦ instDecidableOr
+#source pathNat -- abbrev pathNat : SimpleGraph ℕ where
+                --   Adj x y := x + 1 = y ∨ y + 1 = x
+#synth DecidableRel pathNat.Adj -- fun a b ↦ instDecidableOr
 
 /-!
-Since `pathNat₁` is an `abbrev` Lean can see through its definition to find
-`pathNat₁.Adj x y := x + 1 = y ∨ y + 1 = x`. Since `Or` is decidable and each of the
+Since `pathNat` is an `abbrev` Lean can see through its definition to find
+`pathNat.Adj x y := x + 1 = y ∨ y + 1 = x`. Since `Or` is decidable and each of the
 propositions `x + 1 = y` and `y + 1 = x` is decidable (using decidable equality on
-`ℕ`) Lean can infer decidability of adjacency in `pathNat₁`.
+`ℕ`) Lean can infer decidability of adjacency in `pathNat`.
 
-For `pathNat₂` our definition is a `def` rather than an `abbrev`.
+For `pathNatFromRel` our definition is a `def` rather than an `abbrev`.
 -/
-#source pathNat₂ -- def pathNat₂ : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
+#source pathNatFromRel -- def pathNatFromRel : SimpleGraph ℕ :=
+                       --   SimpleGraph.fromRel (· + 1 = ·)
 /-!
 Lean can't see through the `def` so fails to infer the required instance.
 -/
 /-- error: failed to synthesize
-  DecidableRel pathNat₂.Adj -/
+  DecidableRel pathNatFromRel.Adj -/
 #guard_msgs (substring := true) in
-#synth DecidableRel pathNat₂.Adj -- fails
+#synth DecidableRel pathNatFromRel.Adj -- fails
 
 /-!
 If we change the `def` to an `abbrev` then it works!
 -/
-abbrev pathNat₂' : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
-#synth DecidableRel pathNat₂'.Adj -- .. instDecidableRelAdjFromRelOfDecidableEq
+abbrev pathNatFromRelAbbrev : SimpleGraph ℕ := SimpleGraph.fromRel (· + 1 = ·)
+#synth DecidableRel pathNatFromRelAbbrev.Adj
+  -- .. instDecidableRelAdjFromRelOfDecidableEq
 
 /-!
 Lean sees through the `abbrev` and finds
-`pathNat₂' := SimpleGraph.fromRel (· + 1 = ·)`. It then finds the instance
+`pathNatFromRelAbbrev := SimpleGraph.fromRel (· + 1 = ·)`. It then finds the instance
 `instDecidableRelAdjFromRelOfDecidableEq` which is the instance of decidable
 adjacency for a graph defined from a decidable relation using the
 `SimpleGraph.fromRel` constructor. In our case the relation is `(· + 1 = ·)`, i.e.
 `fun x y => x + 1 = y` whose decidability can be inferred from the decidable equality
 of `ℕ`.
 
-Rather than changing the definition of `pathNat₂` to an `abbrev` we can also provide
-a decidability instance for `pathNat₂.Adj` directly in two different ways. One way is
-by `unfold`ing its definition and then calling `infer_instance`. The second way is to
-use `inferInstanceAs` to specify the type of the instance we want to find. In the
-latter case we know that Mathlib contains an instance of `DecidableRel` for the
-adjacency relation of a graph defined using `SimpleGraph.fromRel` so we tell it to
-use this.
+Rather than changing the definition of `pathNatFromRel` to an `abbrev` we can also
+provide a decidability instance for `pathNatFromRel.Adj` directly in two different
+ways. One way is by `unfold`ing its definition and then calling `infer_instance`. The
+second way is to use `inferInstanceAs` to specify the type of the instance we want to
+find. In the latter case we know that Mathlib contains an instance of `DecidableRel`
+for the adjacency relation of a graph defined using `SimpleGraph.fromRel` so we tell
+it to use this.
 -/
-instance myDecidableRelPathNat₂ : DecidableRel pathNat₂.Adj := by
-  unfold pathNat₂
+instance myDecidableRelPathNatFromRel : DecidableRel pathNatFromRel.Adj := by
+  unfold pathNatFromRel
   -- goal is now ⊢ DecidableRel (fromRel fun x1 x2 ↦ x1 + 1 = x2).Adj
   -- so Lean can use the instance `instDecidableRelAdjFromRelOfDecidableEq`
   infer_instance
 
-example : DecidableRel pathNat₂.Adj :=
+example : DecidableRel pathNatFromRel.Adj :=
   inferInstanceAs (DecidableRel (SimpleGraph.fromRel _).Adj)
 
 /-!
-Finally we have `pathNat₃` which was defined using `SimpleGraph.fromEdgeSet`. Lean
-again fails to infer the required instance (despite this being an `abbrev`).
+Finally we have `pathNatFromEdgeSet` which was defined using
+`SimpleGraph.fromEdgeSet`. Lean again fails to infer the required instance (despite
+this being an `abbrev`).
 -/
-#source pathNat₃ -- abbrev pathNat₃ : SimpleGraph ℕ := SimpleGraph.fromEdgeSet
-                 --                                       {e | ∃ n, e = s(n, n + 1)}
+#source pathNatFromEdgeSet -- abbrev pathNatFromEdgeSet : SimpleGraph ℕ :=
+                           --   SimpleGraph.fromEdgeSet {e | ∃ n, e = s(n, n + 1)}
 
 /-- error: failed to synthesize
-  DecidableRel pathNat₃.Adj -/
+  DecidableRel pathNatFromEdgeSet.Adj -/
 #guard_msgs (substring := true) in
-#synth DecidableRel pathNat₃.Adj
+#synth DecidableRel pathNatFromEdgeSet.Adj
 
 /-!
 The problem here is that although Mathlib contains an instance for the decidability
@@ -481,22 +485,22 @@ doesn't know how to decide whether or not a given edge `s(a, b)` is in the edge 
 
 /-!
 One solution in this case is to use the fact, which we already proved, that adjacency
-in `pathNat₃` is the same as in `pathNat₁` and that Lean can infer decidable
-adjacency of `pathNat₁`.
+in `pathNatFromEdgeSet` is the same as in `pathNat` and that Lean can infer decidable
+adjacency of `pathNat`.
 -/
-#check pathNat₁_adj_iff_pathNat₃
+#check pathNat_adj_iff_pathNatFromEdgeSet
 
 /-!
-Here we transfer the decidability instance from `pathNat₁` to `pathNat₃` using
-`decidable_of_iff`. (Defining it by rewriting directly with
-`pathNat₁_adj_iff_pathNat₃` would also type-check and work with `#eval`, but it would
-leave `decide` permanently stuck: see [Decidability and Kernel
+Here we transfer the decidability instance from `pathNat` to `pathNatFromEdgeSet`
+using `decidable_of_iff`. (Defining it by rewriting directly with
+`pathNat_adj_iff_pathNatFromEdgeSet` would also type-check and work with `#eval`, but
+it would leave `decide` permanently stuck: see [Decidability and Kernel
 Reduction*](#section-decidability-and-kernel-reduction) for an explanation.)
 -/
-instance : DecidableRel (pathNat₃.Adj) := fun u v =>
-  decidable_of_iff (pathNat₁.Adj u v) pathNat₁_adj_iff_pathNat₃
+instance : DecidableRel pathNatFromEdgeSet.Adj := fun u v =>
+  decidable_of_iff (pathNat.Adj u v) pathNat_adj_iff_pathNatFromEdgeSet
 
-example : pathNat₃.Adj 42 43 := by decide
+example : pathNatFromEdgeSet.Adj 42 43 := by decide
 
 /-!
 ### Decidability and Kernel Reduction *
@@ -570,7 +574,7 @@ local instance pathGraphAdjDecidableRw (n : ℕ) : DecidableRel P[n].Adj := by
 /-!
 With this instance, `#eval` works fine.
 -/
-#eval (P[17].Adj 13 14) -- true
+#eval P[17].Adj 13 14 -- true
 /-!
 But the tactic `decide` gets stuck on the cast. Note the `⋯ ▸ inferInstance` in the
 error message below: `▸` is the cast inserted by `rw`.
@@ -625,7 +629,7 @@ example : ¬ P[17].Adj 0 13 := by decide
 In practice we rarely call `decidable_of_decidable_of_iff` directly:
 `decidable_of_iff a h` is the same function with the proposition `a` given
 explicitly, and `decidable_of_iff' b h` takes `h : a ↔ b` the other way round. We
-used `decidable_of_iff` for `pathNat₃` above.
+used `decidable_of_iff` for `pathNatFromEdgeSet` above.
 -/
 #check decidable_of_iff  -- (a : Prop) (h : a ↔ b) [Decidable a] : Decidable b
 #check decidable_of_iff' -- (b : Prop) (h : a ↔ b) [Decidable b] : Decidable a
@@ -781,7 +785,7 @@ example {α : Type*} [Fintype α] (p : α → Prop) [DecidablePred p] :
     ({x | p x} : Finset α) = Finset.univ.filter (fun x => p x) := rfl
 
 #eval ({x | x < 3} : Finset (Fin 5))                 -- {0, 1, 2}
-#eval ({x ∈ ({0, 1, 2, 3, 4} : Finset ℕ) | x < 3})   -- {0, 1, 2}
+#eval {x ∈ ({0, 1, 2, 3, 4} : Finset ℕ) | x < 3}   -- {0, 1, 2}
 
 /-!
 Finally the `{x ∈ s | p x}` notation also works for `Set α` where it abbreviates
@@ -992,7 +996,7 @@ example {V : Type*} (G : SimpleGraph V) (v : V) [Fintype V]
 
 /-!
 Obviously there are plenty of graphs with finite neighbourhoods that don't have
-finite vertex sets, for example the infinite path graph `pathNat₁`. In such cases we
+finite vertex sets, for example the infinite path graph `pathNat`. In such cases we
 can provide our own `Fintype` instance for the neighbourhood of a vertex.
 
 When we need to build a `Fintype` instance by hand like this, the following
@@ -1010,11 +1014,11 @@ constructors are often the most convenient starting points.
                             -- `∀ (x : α), x ∈ s ↔ x ∈ p` we can get `Fintype ↑p`
 
 /-!
-For the neighbourhoods of `pathNat₁`, `Fintype.ofFinset` is the natural choice: we
+For the neighbourhoods of `pathNat`, `Fintype.ofFinset` is the natural choice: we
 simply hand over the `Finset` of neighbours of each vertex and let `aesop` do the
 rest.
 -/
-instance (n : ℕ) : Fintype (pathNat₁.neighborSet n) :=
+instance (n : ℕ) : Fintype (pathNat.neighborSet n) :=
   match n with
   | 0 =>  Fintype.ofFinset {1} (by aesop)
   | n + 1 =>  Fintype.ofFinset {n, n + 2} (by aesop)
@@ -1429,21 +1433,21 @@ minimum (or maximum) degree exists only when `V` is nonempty. The upper bound fo
 /-!
 One problem with the definitions of `minDegree` and `maxDegree` is that they require
 `Fintype V`, but plenty of graphs have finite minimum and maximum degree without
-having finite vertex sets. For example the infinite path graph `pathNat₁` has minimum
+having finite vertex sets. For example the infinite path graph `pathNat` has minimum
 degree `1` and maximum degree `2` but we can't state these facts using `minDegree`
-and `maxDegree` (because `pathNat₁` has infinitely many vertices).
+and `maxDegree` (because `pathNat` has infinitely many vertices).
 
-We can however characterize the neighbourhoods and degrees of vertices in `pathNat₁`.
+We can however characterize the neighbourhoods and degrees of vertices in `pathNat`.
 -/
 @[simp]
-lemma neighborFinset_pathNat₁ (n : ℕ) [Fintype (pathNat₁.neighborSet n)] :
-    pathNat₁.neighborFinset n = if n = 0 then {1} else {n - 1, n + 1} := by
+lemma neighborFinset_pathNat (n : ℕ) [Fintype (pathNat.neighborSet n)] :
+    pathNat.neighborFinset n = if n = 0 then {1} else {n - 1, n + 1} := by
   ext x; cases n <;> simp [eq_comm, or_comm]
 
 @[simp]
-lemma degree_pathNat₁ (n : ℕ) [Fintype (pathNat₁.neighborSet n)] :
-    pathNat₁.degree n = if n = 0 then 1 else 2 := by
-  rw [← card_neighborFinset_eq_degree, neighborFinset_pathNat₁]
+lemma degree_pathNat (n : ℕ) [Fintype (pathNat.neighborSet n)] :
+    pathNat.degree n = if n = 0 then 1 else 2 := by
+  rw [← card_neighborFinset_eq_degree, neighborFinset_pathNat]
   -- the `split_ifs` tactic is a convenient way to handle `if` statements
   split_ifs <;> grind
 
@@ -1802,7 +1806,7 @@ instance hypercubeNonempty {n : ℕ} : Nonempty (HypercubeVert n) := by
 There is only one vertex in `Q[0]`, so we can give a `Subsingleton` instance for it.
 -/
 instance hypercubeZeroSubsingleton : Subsingleton (HypercubeVert 0) :=
-  inferInstanceAs (Subsingleton (Unit))
+  inferInstanceAs (Subsingleton Unit)
 
 /-!
 Before we try some more interesting computations with hypercubes, we give a
@@ -2076,7 +2080,7 @@ These instances combine with those from earlier in the chapter. For example, Lea
 find a `Fintype` instance for the edge set of the 4th iterated Mycielskian of
 `C[5][2]`, the `2`-uniform blow-up of `C[5]` (see `blowUpN`).
 -/
-#synth Fintype (mμ^4 (C[5][2])).edgeSet -- (mμ^4 C[5][2]).fintypeEdgeSet
+#synth Fintype (mμ^4 C[5][2]).edgeSet -- (mμ^4 C[5][2]).fintypeEdgeSet
 
 /-!
 The 6th iterated Mycielskian of `C[5]` has 383 vertices and 7271 edges; it has
@@ -2127,9 +2131,9 @@ the union of finsets below.
 open Finset in
 @[simp]
 lemma degree_mycielskian_left (v : V) [Fintype (G.neighborSet v)]
-    [Fintype (mμ[G].neighborSet (v ₗ))] : mμ[G].degree v ₗ = 2 * G.degree v := by
+    [Fintype (mμ[G].neighborSet v ₗ)] : mμ[G].degree v ₗ = 2 * G.degree v := by
   classical
-  have hnb : mμ[G].neighborFinset (v ₗ)
+  have hnb : mμ[G].neighborFinset v ₗ
       = (G.neighborFinset v).image (· ₗ) ∪ (G.neighborFinset v).image (· ᵣ) := by
     ext x
     simp [← mem_neighborSet]
@@ -2152,7 +2156,7 @@ lemma card_mycielskianVert_one [Fintype V] :
 We can list the edges of the Mycielskian of `C[5]` as follows but the output isn't
 very readable.
 -/
-#eval (mμ[C[5]]).edgeFinset -- {s(none, some (Sum.inr 0)),...
+#eval mμ[C[5]].edgeFinset -- {s(none, some (Sum.inr 0)),...
 
 /-!
 The solution is to provide a custom `Repr` instance for the vertices of the
@@ -2168,7 +2172,7 @@ scoped instance mycielskianRepr [Repr V] :
     | v ₗ => repr v ++ "ₗ"
     | v ᵣ => repr v ++ "ᵣ"
 
-#eval (mμ[C[5]]).edgeFinset -- {s(∗, 0ᵣ), s(∗, 1ᵣ),..., s(4ₗ, 3ᵣ)}
+#eval mμ[C[5]].edgeFinset -- {s(∗, 0ᵣ), s(∗, 1ᵣ),..., s(4ₗ, 3ᵣ)}
 
 /-!
 We can extend this to the vertices of the iterated Mycielskian.
@@ -2206,7 +2210,7 @@ vertices of a finite graph as a `List ℕ`.
 def degreeSequence [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj] :
     List ℕ := G.degreeMultiset.sort (· ≥ ·)
 
-#eval (K[4, 5]).degreeSequence       -- [5, 5, 5, 5, 4, 4, 4, 4, 4]
+#eval K[4, 5].degreeSequence       -- [5, 5, 5, 5, 4, 4, 4, 4, 4]
 
 #eval (mμ^6 C[5]).degreeSequence  -- [191, 190, 188, 184, 176, 160, 128, 128, ..., 8]
 
@@ -2256,7 +2260,7 @@ finite simple graph has a graphic degree multiset is immediate: the graph itself
 the witness.
 -/
 theorem graphic_degreeMultiset {V : Type} [Fintype V] (G : SimpleGraph V)
-    [DecidableRel G.Adj] : Graphic (G.degreeMultiset) :=
+    [DecidableRel G.Adj] : Graphic G.degreeMultiset :=
   ⟨V, inferInstance, G, inferInstance, rfl⟩
 
 /-!
@@ -2267,7 +2271,7 @@ permutation relation), there is a natural coercion from `List` to `Multiset`.
 
 /-- Every finite simple graph has a graphic degree sequence. -/
 theorem graphic_degreeSequence {V : Type} [Fintype V] (G : SimpleGraph V)
-    [DecidableRel G.Adj] : Graphic (G.degreeSequence) :=
+    [DecidableRel G.Adj] : Graphic G.degreeSequence :=
   ⟨V, inferInstance, G, inferInstance, by simp [degreeSequence]⟩
 
 /-!
@@ -2521,8 +2525,9 @@ decreasing_by
 /-!
 We can check this answer by building the graph. Any relation `r` on `V` gives a graph
 `SimpleGraph.fromRel r`, which makes `r` symmetric and removes any loops. As we saw
-for `pathNat₂'`, Lean synthesizes decidable adjacency for such a graph when `r` is
-decidable, provided the graph is an `abbrev`, so we can compute its degree sequence.
+for `pathNatFromRelAbbrev`, Lean synthesizes decidable adjacency for such a graph
+when `r` is decidable, provided the graph is an `abbrev`, so we can compute its
+degree sequence.
 -/
 /-- The graph on `Fin n` whose edges are the pairs in `E`. -/
 abbrev graphOfEdgeList (n : ℕ) (E : List (ℕ × ℕ)) : SimpleGraph (Fin n) :=

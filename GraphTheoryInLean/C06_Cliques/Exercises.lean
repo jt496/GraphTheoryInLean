@@ -65,13 +65,13 @@ example : ω (paleyGraph (ZMod 17)) = 3 := by
   sorry
 
 /-!
-8. Unlike the junk value `⍺ pathNat₁ = 0` of the independence number, the clique
-number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat₁ = 2`.
-Hint: `pathNat₁` is triangle-free, since adjacent vertices have different parity. The
+8. Unlike the junk value `⍺ pathNat = 0` of the independence number, the clique
+number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat = 2`.
+Hint: `pathNat` is triangle-free, since adjacent vertices have different parity. The
 lemma `IsNClique.le_cliqueNum` needs `[Finite V]`, but
 `IsNClique.cliqueNum_eq_of_cliqueFree` needs no finiteness.
 -/
-example : ω pathNat₁ = 2 := by
+example : ω pathNat = 2 := by
   sorry
 
 /-!
@@ -395,24 +395,24 @@ example : ω (paleyGraph (ZMod 17)) = 3 := by
   exact h3.cliqueNum_eq_of_cliqueFree h4
 
 /-!
-8. Unlike the junk value `⍺ pathNat₁ = 0` of the independence number, the clique
-number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat₁ = 2`.
-Hint: `pathNat₁` is triangle-free, since adjacent vertices have different parity. The
+8. Unlike the junk value `⍺ pathNat = 0` of the independence number, the clique
+number of the infinite path on `ℕ` is what you expect. Show that `ω pathNat = 2`.
+Hint: `pathNat` is triangle-free, since adjacent vertices have different parity. The
 lemma `IsNClique.le_cliqueNum` needs `[Finite V]`, but
 `IsNClique.cliqueNum_eq_of_cliqueFree` needs no finiteness.
 -/
-example : ω pathNat₁ = 2 := by
-  -- `pathNat₁` is triangle-free: adjacent vertices have different parity
-  have h3 : pathNat₁.CliqueFree 3 := by
+example : ω pathNat = 2 := by
+  -- `pathNat` is triangle-free: adjacent vertices have different parity
+  have h3 : pathNat.CliqueFree 3 := by
     intro t ht
     obtain ⟨a, b, c, hab, hac, hbc, rfl⟩ := card_eq_three.mp ht.card_eq
-    have h1 : pathNat₁.Adj a b := ht.isClique (by grind) (by grind) hab
-    have h2 : pathNat₁.Adj a c := ht.isClique (by grind) (by grind) hac
-    have h3 : pathNat₁.Adj b c := ht.isClique (by grind) (by grind) hbc
+    have h1 : pathNat.Adj a b := ht.isClique (by grind) (by grind) hab
+    have h2 : pathNat.Adj a c := ht.isClique (by grind) (by grind) hac
+    have h3 : pathNat.Adj b c := ht.isClique (by grind) (by grind) hbc
     grind
   -- the edge `{0, 1}` is a `2`-clique, and `IsNClique.cliqueNum_eq_of_cliqueFree`
   -- needs no finiteness: `h3` bounds the size of every clique
-  have h2 : pathNat₁.IsNClique 2 {0, 1} := is2Clique_pair_iff.mpr (by decide)
+  have h2 : pathNat.IsNClique 2 {0, 1} := is2Clique_pair_iff.mpr (by decide)
   exact h2.cliqueNum_eq_of_cliqueFree h3
 
 /-!
@@ -824,14 +824,14 @@ lemma indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
   refine le_antisymm ?_ ?_
   · -- `≤` : a maximum independent set `T` of `mμ[K[a, b]]` satisfies
     -- `#T ≤ #A + #N(A)ᶜ ≤ 2 * b`, where `A` is the left part of `T`
-    obtain ⟨T, hT⟩ := (mμ[K[a, b]]).exists_isNIndepSet_indepNum
+    obtain ⟨T, hT⟩ := mμ[K[a, b]].exists_isNIndepSet_indepNum
     rw [← hT.card_eq]
     exact le_trans (mycielskian_indepSet_card_le hT.isIndepSet)
       (completeBipartiteGraph_isIndepSet_card_add_le h
         (isIndepSet_preimage_left_finset hT.isIndepSet)
         fun _ => by simp)
   · -- `≥` : the right part is an independent set `s` with `#s = b` and `s ⊆ N(s)ᶜ`
-    have hind : K[a, b].IsIndepSet (↑(univ.map .inr : Finset (Fin a ⊕ Fin b))) :=
+    have hind : K[a, b].IsIndepSet ↑(univ.map .inr : Finset (Fin a ⊕ Fin b)) :=
       isIndepSet_completeBipartiteGraph_of_subset_range_inr (by simp)
     refine le_trans ?_ (le_indepNum_mycielskian hind)
     have h1 : #(univ.map .inr : Finset (Fin a ⊕ Fin b)) = b := by simp

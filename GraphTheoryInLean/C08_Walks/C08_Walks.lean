@@ -84,7 +84,7 @@ the walk `p`.
 /-!
 Recall the path graph we defined on `ℕ`.
 -/
-#source pathNat₁
+#source pathNat
 /-!
 We give some examples of walks in this graph below. Notice that we have to specify
 very little: Lean can infer many of the details from the type of walk we are building
@@ -93,7 +93,7 @@ in each case.
 First we have the `nil` walk from `7` to `7`. (We have opened the namespace `Walk` in
 this chapter so we can use `nil` rather than `Walk.nil`.)
 -/
-example : pathNat₁.Walk 7 7 := nil
+example : pathNat.Walk 7 7 := nil
 /-!
 Here the vertex `7` was determined by the type of walk so is not an explicit argument
 to the constructor `nil`.
@@ -102,7 +102,7 @@ In our next example we are building a walk from `2` to `3`, as a `cons h nil` wa
 So the implicit `u` input to `nil` is `3` and the single edge `h` must be
 `G.Adj 2 3`, which Lean can infer (and simp can prove).
 -/
-example : pathNat₁.Walk 2 3 := cons (by simp) nil
+example : pathNat.Walk 2 3 := cons (by simp) nil
 
 /-!
 In the next example we are building a `cons h₁ (cons h₂ nil)` walk from `3` to `5`,
@@ -115,8 +115,8 @@ do this; we show two below.
 First we use type ascription notation `(by simp : ...)` which tells Lean what we want
 to prove and then gets `simp` to prove it.
 -/
-example : pathNat₁.Walk 3 5 :=
-  cons (by simp : (pathNat₁).Adj 3 4) <| cons (by simp) nil
+example : pathNat.Walk 3 5 :=
+  cons (by simp : (pathNat).Adj 3 4) <| cons (by simp) nil
 /-!
 Alternatively we can use a variant of the `cons` constructor called `cons'` that
 takes the three vertices as explicit arguments. Notice the difference in the
@@ -125,7 +125,7 @@ signatures of `cons` and `cons'` below.
 #check cons   -- .. `{u v w : V}` (h : G.Adj u v) (p : G.Walk v w) : G.Walk u w
 #check cons'  -- .. `(u v w : V)` (h : G.Adj u v) (p : G.Walk v w) : G.Walk u w
 
-example : pathNat₁.Walk 3 5 := cons' _ 4 _ (by simp) <| cons (by simp) nil
+example : pathNat.Walk 3 5 := cons' _ 4 _ (by simp) <| cons (by simp) nil
 
 /-!
 Even though `cons'` takes 3 explicit vertex arguments, we actually only need to give
@@ -135,7 +135,7 @@ are building and the edge we are using.
 Of course a walk may have repeated edges or vertices. So we can build the following
 walk from `3` to `5`, which we write informally as `3 — 2 — 3 — 4 — 5 — 6 — 5`.
 -/
-private def pathNat₁35 : pathNat₁.Walk 3 5 :=
+private def meander35 : pathNat.Walk 3 5 :=
   cons' _ 2 _ (by simp) <| cons' _ 3 _  (by simp) <| cons' _ 4 _ (by simp)
     <| cons' _ 5 _ (by simp) <| cons' _ 6 _ (by simp) <| cons (by simp) nil
 
@@ -160,9 +160,9 @@ inductive definition.
 -/
 #source Walk.length
 /-!
-The length of the meandering walk `pathNat₁35` defined above is `6`.
+The length of the meandering walk `meander35` defined above is `6`.
 -/
-#eval pathNat₁35.length  -- 6
+#eval meander35.length  -- 6
 
 /-!
 Since `Walk.append` is defined inductively on its first argument, proofs involving
@@ -193,24 +193,24 @@ If we want to add an edge at the end of a walk rather than at the start, we can 
 #source Walk.concat
 
 /-!
-To build a walk from `i` to `i + j` in `pathNat₁` we can use `concat` to define it
+To build a walk from `i` to `i + j` in `pathNat` we can use `concat` to define it
 inductively on `j`.
 -/
-/-- The walk from `i` to `i + j` in `pathNat₁`. -/
-def pathNat₁.path (i j : ℕ) : pathNat₁.Walk i (i + j) :=
+/-- The walk from `i` to `i + j` in `pathNat`. -/
+def pathNat.path (i j : ℕ) : pathNat.Walk i (i + j) :=
   match j with
   | 0 => nil
-  | j + 1 => (pathNat₁.path i j).concat (by grind)
+  | j + 1 => (pathNat.path i j).concat (by grind)
 
 /-!
-The walk `pathNat₁.path i j` has length `j` since it is built by
+The walk `pathNat.path i j` has length `j` since it is built by
 concatenating `j` edges.
 -/
 @[simp]
-lemma pathNat₁.length_path (i j : ℕ) : (pathNat₁.path i j).length = j := by
+lemma pathNat.length_path (i j : ℕ) : (pathNat.path i j).length = j := by
   induction j with
   | zero => rfl
-  | succ j ih => rw [pathNat₁.path, length_concat, ih]
+  | succ j ih => rw [pathNat.path, length_concat, ih]
 
 /-!
 # Vertices and Edges of a Walk
@@ -256,17 +256,17 @@ names for them.)
 #check Walk.end_mem_support    -- (p : G.Walk u v) : v ∈ p.support
 
 /-!
-The support of the walk `pathNat₁.path i j` from `i` to `i + j` in `pathNat₁` is
+The support of the walk `pathNat.path i j` from `i` to `i + j` in `pathNat` is
 `[i, i + 1, ..., i + j]`, which can be expressed as `List.range' i (j + 1)`.
 -/
 #check List.range'
 
 @[simp]
-lemma pathNat₁.support_path (i j : ℕ) :
-    (pathNat₁.path i j).support = List.range' i (j + 1) := by
+lemma pathNat.support_path (i j : ℕ) :
+    (pathNat.path i j).support = List.range' i (j + 1) := by
   induction j with
-  | zero => simp [pathNat₁.path]
-  | succ n ih => simp [pathNat₁.path, support_concat, ih, List.range'_1_concat]
+  | zero => simp [pathNat.path]
+  | succ n ih => simp [pathNat.path, support_concat, ih, List.range'_1_concat]
 
 /-!
 The `i`-th vertex of a walk can be obtained with `getVert`.
@@ -492,9 +492,9 @@ lemma Walk.IsPath.append_cons {u v w z} {h : G.Adj v w} {p : G.Walk u v}
   exact ⟨hp.support_nodup, hq.support_nodup, hd⟩
 
 /-!
-The walk from `i` to `i + j` in `pathNat₁` is a path.
+The walk from `i` to `i + j` in `pathNat` is a path.
 -/
-lemma pathNat₁.isPath_path (i j : ℕ) : (pathNat₁.path i j).IsPath := by
+lemma pathNat.isPath_path (i j : ℕ) : (pathNat.path i j).IsPath := by
   induction j with
   | zero => exact IsPath.nil
   | succ n ih => exact (isPath_concat _).2 ⟨ih, by simp⟩
@@ -519,10 +519,10 @@ This returns a walk from `u` to `v` that is a path.
 -/
 #check Walk.bypass_isPath
 /-!
-Recall our meandering walk `pathNat₁35` from `3` to `5` in `pathNat₁`.
+Recall our meandering walk `meander35` from `3` to `5` in `pathNat`.
 -/
-#eval pathNat₁35.support        -- [3, 2, 3, 4, 5, 6, 5]
-#eval pathNat₁35.bypass.support -- [3, 4, 5]
+#eval meander35.support        -- [3, 2, 3, 4, 5, 6, 5]
+#eval meander35.bypass.support -- [3, 4, 5]
 
 /-!
 ## Reachability
@@ -1286,7 +1286,7 @@ but proofs would be more painful. You can remove the `.copy (by simp) (by simp)`
 see what happens!)
 -/
 /-- The walk from `0` to `n` in the `pathGraph` on `Fin (n + 1)`. -/
-def pathGraph.path (n : ℕ) : (P[n + 1]).Walk 0 (Fin.last n) :=
+def pathGraph.path (n : ℕ) : P[n + 1].Walk 0 (Fin.last n) :=
   match n with
   | 0 => nil
   | n + 1 =>
@@ -1296,7 +1296,7 @@ def pathGraph.path (n : ℕ) : (P[n + 1]).Walk 0 (Fin.last n) :=
 
 /-!
 We could have defined this walk directly; indeed we previously defined walks directly
-in `pathNat₁` so why not give a direct definition here? The key difference here is
+in `pathNat` so why not give a direct definition here? The key difference here is
 that the vertex type of each `P[n]` is different so the induction would be more
 painful, and we would have fewer results to rely on in subsequent proofs. From the
 `Walk.map` definition the proof that this is a Hamiltonian path will drop out very
@@ -1588,7 +1588,7 @@ and that `mμ[G]` contains a Hamiltonian path or cycle whenever `G` does (provid
 `G` has at least two vertices).
 
 Rather than defining the walks that give the Hamiltonian path and cycle directly, we
-first define an auxiliary walk, `mycielskianAux`, that has a simple recursive
+first define a zig-zag walk, `mycielskianZigZag`, that has a simple recursive
 definition and from which it is easy to build paths and cycles in `mμ[G]` from paths
 and cycles in `G`.
 
@@ -1600,21 +1600,21 @@ example can be obtained from the first by taking the walk corresponding to the s
 edge `v — w`, reversing it and adding the edges `u ₗ — v ᵣ` and `v ₗ — u ᵣ` to the
 start and end respectively.
 
-This generalizes, and allows us to define the walk `mycielskianAux` recursively.
+This generalizes, and allows us to define the walk `mycielskianZigZag` recursively.
 Having built the walk in `mμ[G]` from `v ₗ` to `v ᵣ` corresponding to a non-nil walk
 `p : G.Walk v w`, the walk for `cons h p`, where `h : G.Adj u v`, is formed by
 prepending the edge `u ₗ — v ᵣ` to the reverse of the walk corresponding to `p` and
 then concatenating the edge `v ₗ — u ᵣ` to give
-`mycielskianAux(cons h p) = u ₗ — [mycielskianAux(p).reverse] — u ᵣ`.
+`mycielskianZigZag(cons h p) = u ₗ — [mycielskianZigZag(p).reverse] — u ᵣ`.
 
-[Figure: The two cases of the auxiliary zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianAux.svg)
+[Figure: The two cases of the zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianZigZag.svg)
 -/
 section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
 
 /-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `u ₗ`
 to `u ᵣ` in `mμ[G]`. -/
-def Walk.mycielskianAux {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
+def Walk.mycielskianZigZag {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
     mμ[G].Walk u ₗ u ᵣ :=
   match p with
   | nil => (hn .nil).elim  -- This case is ruled out by the `¬ p.Nil` hypothesis
@@ -1625,60 +1625,62 @@ def Walk.mycielskianAux {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
     | nil => cons (by simpa using h) <| cons hl nil -- `u ₗ — v ₗ — u ᵣ`
     | cons' _ x _ h' p' =>
       have hn' : ¬ (p'.cons h').Nil := nofun
-      cons (by simpa using h) ((mycielskianAux hn').reverse.concat hl)
+      cons (by simpa using h) ((mycielskianZigZag hn').reverse.concat hl)
 
 /-!
-If we had marked the definition of `mycielskianAux` with the `@[simp]` attribute
+If we had marked the definition of `mycielskianZigZag` with the `@[simp]` attribute
 then its automatically generated equational lemmas would be available for `simp` to
-use with names like `mycielskianAux.eq_1`. We instead state these as simp lemmas
+use with names like `mycielskianZigZag.eq_1`. We instead state these as simp lemmas
 that have more meaningful names.
 -/
 @[simp]
-lemma Walk.mycielskianAux_cons_nil {u v} (h : G.Adj u v) (hn : ¬ (cons h nil).Nil) :
-    mycielskianAux hn =
+lemma Walk.mycielskianZigZag_cons_nil {u v} (h : G.Adj u v)
+    (hn : ¬ (cons h nil).Nil) :
+    mycielskianZigZag hn =
       have hl : mμ[G].Adj v ₗ u ᵣ := by simpa using h.symm
       cons (by simpa using h) (cons hl nil) := rfl
 
 @[simp]
-lemma Walk.mycielskianAux_cons_cons {u v x w} (h : G.Adj u v) (h' : G.Adj v x)
+lemma Walk.mycielskianZigZag_cons_cons {u v x w} (h : G.Adj u v) (h' : G.Adj v x)
     (p' : G.Walk x w) (hn : ¬ (cons h (cons h' p')).Nil) :
-    mycielskianAux hn =
+    mycielskianZigZag hn =
       have hn' : ¬ (cons h' p').Nil := nofun
       cons (by simpa using h)
-        ((mycielskianAux hn').reverse.concat (by simpa using h.symm)) := rfl
+        ((mycielskianZigZag hn').reverse.concat (by simpa using h.symm)) := rfl
 
 /-!
-From the definition of `mycielskianAux`, Lean automatically generates a
-*functional induction* principle `mycielskianAux.induct`. It has one case for each
+From the definition of `mycielskianZigZag`, Lean automatically generates a
+*functional induction* principle `mycielskianZigZag.induct`. It has one case for each
 `match` case of the definition, named `case1` and `case2`, whose variables are the
 pattern variables of that case, together with an induction hypothesis wherever the
-definition calls itself. We use it with `induction hn using mycielskianAux.induct`:
-its cases follow the definition exactly, which plain induction on the walk does not.
+definition calls itself. We use it with
+`induction hn using mycielskianZigZag.induct`: its cases follow the definition
+exactly, which plain induction on the walk does not.
 -/
-#check mycielskianAux.induct -- slightly scary looking! (but useful)
+#check mycielskianZigZag.induct -- slightly scary looking! (but useful)
 /-!
-The auxiliary walk is twice as long as the original walk.
+The zig-zag walk is twice as long as the original walk.
 -/
 @[simp]
-lemma Walk.length_mycielskianAux {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
-    (mycielskianAux hn).length = 2 * p.length := by
-  induction hn using mycielskianAux.induct with
+lemma Walk.length_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
+    (mycielskianZigZag hn).length = 2 * p.length := by
+  induction hn using mycielskianZigZag.induct with
   | case1 => rfl
   | case2 =>
-    grind [length_cons, mycielskianAux_cons_cons, length_concat, length_reverse]
+    grind [length_cons, mycielskianZigZag_cons_cons, length_concat, length_reverse]
 
 /-!
-We can use the auxiliary walk to map any non-nil walk of length `k` in `G` to a
+We can use the zig-zag walk to map any non-nil walk of length `k` in `G` to a
 walk of length `2k + 2` in the Mycielskian. This preserves the property of being a
 path and in particular maps Hamiltonian paths to Hamiltonian paths. We simply add the
-two edges `u ᵣ — none — w ᵣ` at the end of the auxiliary walk.
+two edges `u ᵣ — none — w ᵣ` at the end of the zig-zag walk.
 -/
 /-- Given a non-nil walk from `u` to `w` in `G`, this is a walk from `u ₗ` to
 `w ᵣ` in `mμ[G]`. If the original walk was a (Hamiltonian) path then so is the new
 walk. -/
 protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
     mμ[G].Walk u ₗ w ᵣ :=
-  mycielskianAux hn|>.concat (by simp) |>.concat (by simp : mμ[G].Adj none _ )
+  mycielskianZigZag hn|>.concat (by simp) |>.concat (by simp : mμ[G].Adj none _ )
 
 /-!
 [Figure: Converting a path in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
@@ -1736,63 +1738,64 @@ lemma Walk.length_mycielskianClosed {u} {c : Walk G u u} (hn : ¬ c.Nil) :
 
 /-!
 Our next goal is to show that the `Walk.mycielskian` preserves the property of being
-a path. It will be useful to first establish some simple properties of the auxiliary
-walk `mycielskianAux`.
+a path. It will be useful to first establish some simple properties of the zig-zag
+walk `mycielskianZigZag`.
 -/
 
 /-!
-The auxiliary walk only visits left or right copies of vertices from the original
+The zig-zag walk only visits left or right copies of vertices from the original
 walk.
 -/
-lemma Walk.exists_of_mem_support_mycielskianAux {u w z} {p : G.Walk u w}
-    (hn : ¬ p.Nil) (hz : z ∈ (mycielskianAux hn).support) :
+lemma Walk.exists_of_mem_support_mycielskianZigZag {u w z} {p : G.Walk u w}
+    (hn : ¬ p.Nil) (hz : z ∈ (mycielskianZigZag hn).support) :
     ∃ y ∈ p.support, z = y ₗ ∨ z = y ᵣ := by
-  induction hn using mycielskianAux.induct <;> aesop
+  induction hn using mycielskianZigZag.induct <;> aesop
 
 /-!
-In particular, the auxiliary walk does not visit `none`.
+In particular, the zig-zag walk does not visit `none`.
 -/
 @[simp]
-lemma Walk.none_notMem_support_mycielskianAux {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
-    none ∉ (mycielskianAux hn).support := by
+lemma Walk.none_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
+    (hn : ¬ p.Nil) :
+    none ∉ (mycielskianZigZag hn).support := by
   intro h_in
-  obtain ⟨y, _, hy⟩ := exists_of_mem_support_mycielskianAux hn h_in
+  obtain ⟨y, _, hy⟩ := exists_of_mem_support_mycielskianZigZag hn h_in
   cases hy <;> contradiction
 
 /-!
-If the original walk `p : G.Walk u w` is a path, then the auxiliary walk does not
+If the original walk `p : G.Walk u w` is a path, then the zig-zag walk does not
 visit `w ᵣ`.
 -/
 @[simp]
-lemma Walk.end_right_notMem_support_mycielskianAux {u w} {p : G.Walk u w}
-    (hn : ¬ p.Nil) (hp : p.IsPath) : w ᵣ ∉ (mycielskianAux hn).support := by
-  induction hn using mycielskianAux.induct <;> aesop
+lemma Walk.end_right_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
+    (hn : ¬ p.Nil) (hp : p.IsPath) : w ᵣ ∉ (mycielskianZigZag hn).support := by
+  induction hn using mycielskianZigZag.induct <;> aesop
 
 /-!
-The second vertex of the `Walk.mycielskian` is in the auxiliary walk.
+The second vertex of the `Walk.mycielskian` is in the zig-zag walk.
 -/
 @[simp]
-lemma Walk.snd_mem_support_mycielskianAux {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
-  (p.mycielskian hn).snd ∈ (mycielskianAux hn).support := by
-  induction hn using mycielskianAux.induct
+lemma Walk.snd_mem_support_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
+  (p.mycielskian hn).snd ∈ (mycielskianZigZag hn).support := by
+  induction hn using mycielskianZigZag.induct
     <;> rw [Walk.mycielskian] <;> aesop
 
 /-!
-If the original walk `p : G.Walk u w` is a path, then the auxiliary walk is also a
+If the original walk `p : G.Walk u w` is a path, then the zig-zag walk is also a
 path.
 -/
 @[simp]
-lemma Walk.IsPath.mycielskianAux {u w} {p : G.Walk u w} (hp : p.IsPath)
-    (hn : ¬ p.Nil) : (mycielskianAux hn).IsPath := by
+lemma Walk.IsPath.mycielskianZigZag {u w} {p : G.Walk u w} (hp : p.IsPath)
+    (hn : ¬ p.Nil) : (mycielskianZigZag hn).IsPath := by
   apply IsPath.mk'
-  induction hn using mycielskianAux.induct with
+  induction hn using mycielskianZigZag.induct with
   | case1 u v h hl hn => simpa using h.ne
   | case2 u v h hl w x h' p' hn hnp' ih =>
     -- Using `simp` we can reduce this to a "simple" fact about lists
     -- of vertices that `grind` can solve
-    simp only [mycielskianAux_cons_cons, support_cons, support_concat,
+    simp only [mycielskianZigZag_cons_cons, support_cons, support_concat,
               support_reverse, List.nodup_cons]
-    grind [isPath_def, exists_of_mem_support_mycielskianAux hnp']
+    grind [isPath_def, exists_of_mem_support_mycielskianZigZag hnp']
 
 /-!
 If the original walk `p : G.Walk u w` is a path, then the `Walk.mycielskian` is a
@@ -1804,7 +1807,7 @@ lemma Walk.IsPath.mycielskian {u w} {p : G.Walk u w} (hp : p.IsPath) (hn : ¬ p.
   apply IsPath.mk'
   simp only [Walk.mycielskian, Walk.concat, support_append,
               support_cons, support_nil, List.append_assoc]
-  apply List.nodup_append.mpr ⟨(hp.mycielskianAux hn).support_nodup, ?_⟩
+  apply List.nodup_append.mpr ⟨(hp.mycielskianZigZag hn).support_nodup, ?_⟩
   aesop
 
 /-!
@@ -2221,7 +2224,7 @@ lemma Walk.IsMaximalPath.exists_cycle_spanning [Fintype V] {u v : V}
   by_cases huv : G.Adj u v
   · -- Adjacent endpoints: close `p` with `concat`.
     refine ⟨p.concat huv.symm, (concat_isCycle_iff_length_ne_one p huv.symm).mpr
-      ⟨hmax.isPath, (by grind)⟩, length_concat .., fun x => ?_⟩
+      ⟨hmax.isPath, by grind⟩, length_concat .., fun x => ?_⟩
     grind [support_concat, start_mem_support]
   · -- Non-adjacent endpoints: rotate via the crossing pair, close with `posaClosed`.
     have huv_ne : u ≠ v := by grind [isPath_iff_nil, hmax.isPath]
@@ -2573,7 +2576,7 @@ lemma isClosed_iff_closureStep_eq [Fintype V] [DecidableRel G.Adj] :
 
 lemma card_compl_edgeFinset_closureStep_lt [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] (hG : ¬G.IsClosed) :
-    #(G.closureStep)ᶜ.edgeFinset < #Gᶜ.edgeFinset := by
+    #G.closureStepᶜ.edgeFinset < #Gᶜ.edgeFinset := by
   have hlt : G < G.closureStep :=
     lt_of_le_of_ne le_closureStep fun h => hG (isClosed_iff_closureStep_eq.2 h.symm)
   exact Finset.card_lt_card

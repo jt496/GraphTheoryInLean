@@ -59,6 +59,18 @@ main .authors:has(.author) .note::before {
     color: var(--stil-sorry-color);
 }
 
+/* Set graph notation (`K[n]`, `mμ[G]`, `G ≃g H`, `δ(G)`, `χ G`) like a keyword,
+   whatever the highlighter classes its tokens as: it makes `mμ[` a keyword, since it
+   starts with a letter, but `K[`, `]`, `≃g` and `χ` punctuation. The tokens are those
+   of syntax in the `SimpleGraph` namespace (the guide's notation and Mathlib's graph
+   notation), found through `data-binding` as for `sorry` above. Inline Lean keeps
+   its single colour (see below). */
+.hl.lean .token[data-binding^="kw-occ-SimpleGraph."],
+.hl.lean .token[data-binding^="kw-occ-_private."][data-binding*=".SimpleGraph.«"] {
+    color: var(--verso-code-keyword-color);
+    font-weight: var(--verso-code-keyword-weight, bold);
+}
+
 /* Make display math have comfortable vertical spacing */
 .math-display {
     margin: 1.25rem 0;

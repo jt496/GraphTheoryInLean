@@ -46,18 +46,18 @@ example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
   sorry
 
 /-!
-6. The walk `pentagonWalk` travels once around the cycle `C[5]`. Show that it is an
+6. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
 Eulerian circuit. Hint: `decide` proves that it is Eulerian, using the `Decidable`
 instance from the chapter. For `IsCircuit`, rewrite with `isCircuit_def` and
 `isTrail_def` first.
 -/
 /-- The closed walk `0, 1, 2, 3, 4, 0` in the cycle `C[5]`. -/
-private def Walk.pentagonWalk : C[5].Walk 0 0 :=
+private def eulerC5 : C[5].Walk 0 0 :=
   cons (show C[5].Adj 0 1 by decide) <| cons (show C[5].Adj 1 2 by decide) <|
     cons (show C[5].Adj 2 3 by decide) <| cons (show C[5].Adj 3 4 by decide) <|
       cons (by decide) nil
 
-example : pentagonWalk.IsEulerian ∧ pentagonWalk.IsCircuit := by
+example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
   sorry
 
 /-!
@@ -102,16 +102,16 @@ example {W : Type*} {H : SimpleGraph W} {f : G →g H} (hf : Function.Injective 
   sorry
 
 /-!
-12. Translating the walk `pathNat₁.path 0 j` by `i`, with `Walk.map` along
-`pathNat₁.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
-compare it with `pathNat₁.path i j` we must `copy` it. Show that the two walks are
+12. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
+`pathNat.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
+compare it with `pathNat.path i j` we must `copy` it. Show that the two walks are
 then equal. Hint: compare supports with `Walk.ext_support`, then use `support_copy`,
-`Walk.support_map` and `pathNat₁.support_path`.
+`Walk.support_map` and `pathNat.support_path`.
 -/
 example (i j : ℕ) :
-    ((pathNat₁.path 0 j).map (pathNat₁.translate i).toHom).copy
-      (by simp [pathNat₁.translate]) (by simp [pathNat₁.translate, add_comm]) =
-      pathNat₁.path i j := by
+    ((pathNat.path 0 j).map (pathNat.translate i).toHom).copy
+      (by simp [pathNat.translate]) (by simp [pathNat.translate, add_comm]) =
+      pathNat.path i j := by
   sorry
 
 /-!
@@ -416,12 +416,12 @@ example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
   rw [← length_append, take_spec]
 
 /-!
-6. The walk `pentagonWalk` travels once around the cycle `C[5]`. Show that it is an
+6. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
 Eulerian circuit. Hint: `decide` proves that it is Eulerian, using the `Decidable`
 instance from the chapter. For `IsCircuit`, rewrite with `isCircuit_def` and
 `isTrail_def` first.
 -/
-example : pentagonWalk.IsEulerian ∧ pentagonWalk.IsCircuit := by
+example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
   rw [isCircuit_def, isTrail_def]
   decide
 
@@ -475,19 +475,19 @@ example {W : Type*} {H : SimpleGraph W} {f : G →g H} (hf : Function.Injective 
   exact hp.edges_nodup.map (Sym2.map.injective hf)
 
 /-!
-12. Translating the walk `pathNat₁.path 0 j` by `i`, with `Walk.map` along
-`pathNat₁.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
-compare it with `pathNat₁.path i j` we must `copy` it. Show that the two walks are
+12. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
+`pathNat.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
+compare it with `pathNat.path i j` we must `copy` it. Show that the two walks are
 then equal. Hint: compare supports with `Walk.ext_support`, then use `support_copy`,
-`Walk.support_map` and `pathNat₁.support_path`.
+`Walk.support_map` and `pathNat.support_path`.
 -/
 example (i j : ℕ) :
-    ((pathNat₁.path 0 j).map (pathNat₁.translate i).toHom).copy
-      (by simp [pathNat₁.translate]) (by simp [pathNat₁.translate, add_comm]) =
-      pathNat₁.path i j := by
+    ((pathNat.path 0 j).map (pathNat.translate i).toHom).copy
+      (by simp [pathNat.translate]) (by simp [pathNat.translate, add_comm]) =
+      pathNat.path i j := by
   apply Walk.ext_support
-  rw [support_copy, Walk.support_map, pathNat₁.support_path, pathNat₁.support_path]
-  have h : ⇑(pathNat₁.translate i).toHom = (i + ·) := funext fun k => add_comm k i
+  rw [support_copy, Walk.support_map, pathNat.support_path, pathNat.support_path]
+  have h : ⇑(pathNat.translate i).toHom = (i + ·) := funext fun k => add_comm k i
   rw [h, List.map_add_range', add_zero]
 
 /-!

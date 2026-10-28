@@ -18,7 +18,7 @@ example (n : ℕ) : IsEmpty (K[n + 1] →g K[n]) := by
 2. Define an embedding of `P[n]` into `P[n + k]` so that the image is exactly the
 last `n` vertices.
 -/
-example (n k : ℕ) : (P[n]) ↪g (P[n + k]) where
+example (n k : ℕ) : P[n] ↪g P[n + k] where
   toFun i := i.addNat k
   inj' := sorry
   map_rel_iff' := sorry
@@ -55,13 +55,13 @@ example (G : SimpleGraph V) (f : G ≃g (⊥ : SimpleGraph W)) : G = ⊥ := by
 own complement. (Hint: find a suitable permutation of the vertices; you can define it
 and its inverse using `Matrix` vector notation `![_, _, _, _]`.)
 -/
-example : P[4] ≃g (P[4])ᶜ := by
+example : P[4] ≃g P[4]ᶜ := by
   sorry
 
 /-!
 8. Show that the cycle `C[5]` is also self-complementary. (Hint: try `i ↦ 2 * i`.)
 -/
-example : C[5] ≃g (C[5])ᶜ := by
+example : C[5] ≃g C[5]ᶜ := by
   sorry
 
 /-!
@@ -207,7 +207,7 @@ last `n` vertices.
 -/
 /-- The embedding of `P[n]` into `P[n + k]` as the last `n` vertices. -/
 @[simps]
-def pathGraph.embedding (n k : ℕ) : (P[n]) ↪g (P[n + k]) where
+def pathGraph.embedding (n k : ℕ) : P[n] ↪g P[n + k] where
   toFun i := i.addNat k
   inj' := (Fin.addNatEmb k).injective
   map_rel_iff' := by
@@ -253,7 +253,7 @@ example (G : SimpleGraph V) (f : G ≃g (⊥ : SimpleGraph W)) : G = ⊥ := by
 own complement. (Hint: find a suitable permutation of the vertices; you can define it
 and its inverse using `Matrix` vector notation `![_, _, _, _]`.)
 -/
-example : P[4] ≃g (P[4])ᶜ where
+example : P[4] ≃g P[4]ᶜ where
   toFun := ![1, 3, 0, 2]
   invFun := ![2, 0, 3, 1]
   left_inv := by decide
@@ -266,7 +266,7 @@ example : P[4] ≃g (P[4])ᶜ where
 `{2 * i, 2 * i + 2}`, which are exactly the edges of the complement; its inverse is
 multiplication by `3`.)
 -/
-example : C[5] ≃g (C[5])ᶜ where
+example : C[5] ≃g C[5]ᶜ where
   toFun := ![0, 2, 4, 1, 3]
   invFun := ![0, 3, 1, 4, 2]
   left_inv := by decide

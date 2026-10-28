@@ -373,10 +373,10 @@ edge.
 
 /-!
 For example, colouring each vertex by its parity shows that the infinite path
-`pathNat₁` has chromatic number `2`: an infinite graph can have finite chromatic
+`pathNat` has chromatic number `2`: an infinite graph can have finite chromatic
 number.
 -/
-example : χ pathNat₁ = 2 :=
+example : χ pathNat = 2 :=
   chromaticNumber_eq_two_iff.2 ⟨(Coloring.mk (fun n => n % 2 == 0)
     (by rintro a b (rfl | rfl) <;> grind)).colorable,
     ne_bot_iff_exists_adj.2 ⟨0, 1, Or.inl rfl⟩⟩
@@ -529,37 +529,38 @@ Behind this proof is an explicit colouring, but we cannot compute it from the pr
 colours, addition modulo `2` is `Bool.xor`, so we colour each vertex by the parity
 of its coordinates.
 -/
-/-- The `Bool` colouring of `Q[n]` as a function. -/
-def HypercubeVert.bool : {n : ℕ} → HypercubeVert n → Bool
+/-- The parity of a hypercube vertex (the `xor` of its coordinates), used as a
+`Bool`-colouring of `Q[n]`. -/
+def HypercubeVert.parity : {n : ℕ} → HypercubeVert n → Bool
   | 0, _ => false
-  | _ + 1, (v, b) => v.bool ^^ b
+  | _ + 1, (v, b) => v.parity ^^ b
 
 /-!
 This is a valid colouring.
 -/
-lemma HypercubeVert.bool_ne_of_adj {n : ℕ} {v w : HypercubeVert n}
-    (h : Q[n].Adj v w) : HypercubeVert.bool v ≠ HypercubeVert.bool w := by
+lemma HypercubeVert.parity_ne_of_adj {n : ℕ} {v w : HypercubeVert n}
+    (h : Q[n].Adj v w) : HypercubeVert.parity v ≠ HypercubeVert.parity w := by
   induction n with
   | zero => cases h
   | succ n ih =>
     rcases v; rcases w
-    rcases h with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp_all [HypercubeVert.bool]
+    rcases h with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp_all [HypercubeVert.parity]
 
 /-- The natural `Bool`-colouring of the hypercube `Q[n]`. -/
 def hypercube.bicoloring (n : ℕ) : Q[n].Coloring Bool :=
-  ⟨HypercubeVert.bool, HypercubeVert.bool_ne_of_adj⟩
+  ⟨HypercubeVert.parity, HypercubeVert.parity_ne_of_adj⟩
 
 /-!
-The hypercube is bipartite with the two parts being the sets of vertices with `bool`
-values `true` and `false`.
+The hypercube is bipartite with the two parts being the sets of vertices with parity
+`true` and `false`.
 -/
-example (n : ℕ) : Q[n].IsBipartiteWith {v | v.bool} {v | ¬ v.bool} where
+example (n : ℕ) : Q[n].IsBipartiteWith {v | v.parity} {v | ¬ v.parity} where
   disjoint := by
     rw [Set.disjoint_iff_inter_eq_empty]
     ext; simp
   mem_of_adj {u v} h := by
-    have := HypercubeVert.bool_ne_of_adj h
-    by_cases u.bool <;> simp_all
+    have := HypercubeVert.parity_ne_of_adj h
+    by_cases u.parity <;> simp_all
 
 /-!
 Bipartite graphs are `3`-clique-free, hence `Q[n]` is `3`-clique-free.
@@ -568,9 +569,9 @@ lemma cliqueFree_hypercube_three (n : ℕ) : Q[n].CliqueFree 3 :=
   (IsBipartite.hypercube _).cliqueFree (by decide)
 
 /-!
-The `Bool`-colouring of `Q[4]` using `HypercubeVert.bool`.
+The `Bool`-colouring of `Q[4]` using `HypercubeVert.parity`.
 -/
-#eval (hypercube.bicoloring 4) -- {1111 ↦ false, 1110 ↦ true, ..., 0000 ↦ false}
+#eval hypercube.bicoloring 4 -- {1111 ↦ false, 1110 ↦ true, ..., 0000 ↦ false}
 
 end colorings
 
@@ -631,13 +632,13 @@ def Coloring.ofMycielskian {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1))) :
               then
                 ⟨c.mycielskianLast v ᵣ, Fin.val_lt_last c.mycielskianLast_ne_last⟩
               else
-                ⟨(c.mycielskianLast v ₗ), Fin.val_lt_last h⟩
+                ⟨c.mycielskianLast v ₗ, Fin.val_lt_last h⟩
   map_rel' := by
     intro a b hab hf
     -- the edge `a — b` of `G` gives three edges of `mμ[G]`
-    have hll : mμ[G].Adj (a ₗ) (b ₗ) := by simpa using hab
-    have hlr : mμ[G].Adj (a ₗ) (b ᵣ) := by simpa using hab
-    have hrl : mμ[G].Adj (a ᵣ) (b ₗ) := by simpa using hab
+    have hll : mμ[G].Adj a ₗ b ₗ := by simpa using hab
+    have hlr : mμ[G].Adj a ₗ b ᵣ := by simpa using hab
+    have hrl : mμ[G].Adj a ᵣ b ₗ := by simpa using hab
     split_ifs at hf with ha hb hb
     · -- `a ₗ` and `b ₗ` both have colour `k`, but they are adjacent
       exact c.mycielskianLast.valid hll (ha.trans hb.symm)
@@ -953,7 +954,7 @@ The `0` in the `else` branch is just filler; its value is irrelevant, since
 -/
 /-- The greedy `ℕ`-colouring of `G` as a function. -/
 def greedy : ℕ → ℕ :=
-  fun v => G.greedyChoice (fun u ↦ if u < v then (greedy u) else 0) v
+  fun v => G.greedyChoice (fun u ↦ if u < v then greedy u else 0) v
 
 /-!
 Notice that we didn't need to prove that `greedy` is well-defined: by working over
@@ -1052,9 +1053,9 @@ Brooks' theorem ([Brooks' Theorem*](#section-brooks-theorem)) shows that a conne
 graph needs all `Δ(G) + 1` colours only if it is a complete graph or an odd cycle.
 
 Our greedy colouring construction allows us to colour graphs on `ℕ`, for example
-`pathNat₁`, the infinite path graph on `ℕ`, and `⊤`, the complete graph on `ℕ`.
+`pathNat`, the infinite path graph on `ℕ`, and `⊤`, the complete graph on `ℕ`.
 -/
-#eval pathNat₁.greedyColoringNat 9 -- 1
+#eval pathNat.greedyColoringNat 9 -- 1
 
 #eval (⊤ : SimpleGraph ℕ).greedyColoringNat 6 -- 6
 end greedy
@@ -1205,7 +1206,7 @@ If `G` is a graph on an encodable vertex type with decidable adjacency then its
 encoded graph also has decidable adjacency.
 -/
 instance {G : SimpleGraph V} [DecidableRel G.Adj] :
-    DecidableRel (G.encode.Adj) := fun a b =>
+    DecidableRel G.encode.Adj := fun a b =>
   match ha : decode₂ V a, hb : decode₂ V b with
   | some u, some v => decidable_of_iff (G.Adj u v) (by rw [encode_adj, ha, hb])
   | none, _ => isFalse (by simp [encode_adj, ha])
@@ -1335,7 +1336,7 @@ Before looking at the trace counts below, can you work out how bad it is?
 /-!
 So colouring vertex `8` of the complete graph, where `8` has eight earlier
 neighbours, takes a truly unreasonable `2,345,851` calls! Even on the path
-`pathNat₁`, where every vertex has at most one earlier neighbour, colouring vertex
+`pathNat`, where every vertex has at most one earlier neighbour, colouring vertex
 `8` takes `46` calls. Why is it so bad?
 
 Firstly, nothing is stored: each time the algorithm needs the colour of an earlier

@@ -33,6 +33,15 @@ commands have none), since a span with just the command talks about the command
 itself; so does `#command`, which stands for any of them. A `#` command without a
 description gets a warning.
 
+The tokens of notation in a code span, such as `K[` and `]` in `K[n]` or `∈` in
+`x ∈ s`, show the docstring of their notation, and Ctrl-click goes to its
+declaration. The span is only parsed, not elaborated, so `n` need not exist. The
+tokens of core Lean syntax (binders, parentheses, `→`), separators and delimiters get
+nothing (see `notationTokens`), as in the code of the guide. A notation used before
+its declaration does not parse, so gets nothing either. A span that is just a token
+of a notation, such as `→g`, shows the docstring of the notation too (see
+`notationTokenKind?`).
+
 It also covers the rest of each doc comment, and each web link in it, with info nodes
 that have an empty hover and name no declaration. Without them, hovering anywhere in
 the comment shows the docstring of the doc-comment syntax itself ("`/-! <text> -/`
@@ -526,7 +535,7 @@ def meansFunction (before after : String) : Bool :=
   let words (s : String) :=
     (s.splitToList (fun c => c.isWhitespace || c == '`')).filter (!·.isEmpty)
   (words before).getLast? == some "Boolean" ||
-    ((words after).head?.map (·.takeWhile Char.isAlpha |>.toString)) == some "field"
+    (words after).head?.map (·.takeWhile Char.isAlpha |>.toString) == some "field"
 
 /-- If the code span `code`, from byte `b` to byte `e` of the comment text `s`, is a
 single keyword: its syntax node kind, if it has one (`#command` has none). A word
@@ -556,6 +565,84 @@ def keywordSpan? (s code : String) (b e : Nat) :
   let some (some kind) ← keywordKind? env code | return none
   return some (some kind)
 
+/-- Whether the tokens of the syntax `kind` (other than words, separators and
+delimiters) show the docstring of `kind` on hover, as `K[` and `]` of `K[n]` or `∈`
+of `x ∈ s` do: not those of core Lean syntax (binders, parentheses, `→`, `⟨⟩`) or
+of the argument lists of tactics. The guide's patched Verso uses the same rule for
+the brackets and operators in code (`notationHover` in
+`tools/patches/verso-stil.patch`). -/
+def notationKind (kind : SyntaxNodeKind) : Bool :=
+  let cs := match kind.components with
+    | `_private :: rest => (rest.dropWhile fun c : Name => !c.isNum).drop 1
+    | cs => cs
+  cs.head? != some `Lean && !cs.contains `Tactic
+
+/-- Whether the token `tok` is a separator (`,` or `;`) or a delimiter of core syntax
+(`:=`, `=>`, `↦`, `←`, `@`, `:`, `⊢`, `|` or dots), as the guide's highlighter
+classifies them. -/
+def isDelimiter (tok : String) : Bool :=
+  tok.all (fun c => c == ',' || c == ';') || tok.all (· == '.') ||
+    [":=", "=>", "↦", "←", "@", ":", "⊢", "|"].contains tok
+
+/-- The tokens of `stx`, as byte offset, token and the kind of the innermost node
+around the token other than a list (`null`) or `group` node. Only the first
+alternative of an ambiguous parse (`choice`) is used. -/
+partial def tokensWithKind (stx : Syntax) (kind : SyntaxNodeKind := .anonymous) :
+    Array (Nat × String × SyntaxNodeKind) :=
+  match stx with
+  | .atom info tok =>
+    (info.getPos?.map fun pos => #[(pos.byteIdx, tok, kind)]).getD #[]
+  | .node _ k args =>
+    if k == choiceKind then
+      (args[0]?.map (tokensWithKind · kind)).getD #[]
+    else
+      let kind := if k == nullKind || k == groupKind then kind else k
+      args.foldl (· ++ tokensWithKind · kind) #[]
+  | _ => #[]
+
+/-- The tokens of notation in the code `s` that show the docstring of their syntax
+on hover (see `notationKind`), as byte offset, token, syntax node kind and
+docstring. `s` is parsed in the current scope, without elaboration, so that its
+variables need not exist: as a tactic (so that the brackets of `simp [h]` belong to
+`simp`), else as a term, else as `(s)` (for a span `x : T`). Words (`fun`),
+separators, delimiters and tokens whose syntax has no docstring are left out, and so
+is all of `s` if it does not parse. The guide's `{smart}` role uses this too. -/
+def notationTokens (env : Environment) (s : String) :
+    IO (Array (Nat × String × SyntaxNodeKind × String)) := do
+  let parse (cat : Name) (input : String) :=
+    (Parser.runParserCategory env cat input).toOption
+  let some (stx, shift) := (parse `tactic s).map (·, 0)
+      <|> (parse `term s).map (·, 0) <|> (parse `term s!"({s})").map (·, 1)
+    | return #[]
+  let mut out := #[]
+  for (pos, tok, kind) in tokensWithKind stx do
+    if pos < shift || pos ≥ s.utf8ByteSize + shift then continue
+    if isKeywordWord tok || isDelimiter tok || !notationKind kind then continue
+    let some doc ← findDocString? env kind | continue
+    out := out.push (pos - shift, tok, kind, doc)
+  return out
+
+/-- The syntax node kind of the notation that a code span holding just the token
+`tok` stands for, as `→g` stands for `G →g H`: a production of the `term` category
+that starts with `tok` or has it after its first argument, whose tokens show its
+docstring (see `notationKind`). `none` if `tok` is a word, a separator or a
+delimiter, or if no such production has a docstring, or if two of them have
+different ones (as the `-` of `-x` and `x - y` do). The guide's `{smart}` role uses
+this too. -/
+def notationTokenKind? (env : Environment) (tok : String) :
+    IO (Option SyntaxNodeKind) := do
+  if isKeywordWord tok || isDelimiter tok then return none
+  let some c := Parser.getParserCategory? env `term | return none
+  let mut found : Option (SyntaxNodeKind × String) := none
+  for (p, _) in c.tables.leadingTable.getD (.mkSimple tok) [] ++
+      c.tables.trailingTable.getD (.mkSimple tok) [] do
+    for (k, _) in (p.info.collectKinds {}).toList do
+      unless notationKind k do continue
+      let some doc ← findDocString? env k | continue
+      if found.any (·.2 != doc) then return none
+      found := found <|> some (k, doc)
+  return found.map (·.1)
+
 /-- Runs `k` on the command inside the `set_option … in` and `open … in` prefixes of
 `stx`, in the scope they set up. -/
 partial def withInPrefixes (k : Syntax → CommandElabM Unit) (stx : Syntax) :
@@ -579,9 +666,9 @@ def pushBlankInfo (ref : Syntax) : TermElabM Unit := do
     expectedType? := none, expr := mkStrLit ""
     mkDocString? := some fun _ => pure "" }
 
-/-- Records an info node over the keyword `ref`, whose syntax node kind is `kind?`,
-that shows its hover text (see `keywordDoc?`) and goes to the declaration of `kind?`
-on Ctrl-click. -/
+/-- Records an info node over the keyword or notation token `ref`, whose syntax node
+kind is `kind?`, that shows its hover text (see `keywordDoc?`) and goes to the
+declaration of `kind?` on Ctrl-click. -/
 def pushKeywordInfo (ref : Syntax) (kind? : Option SyntaxNodeKind) :
     TermElabM Unit := do
   let env ← getEnv
@@ -632,12 +719,27 @@ def docHoverLinter : Linter where
                 m!"no description of `{code}` in `STIL.DocHover.commandDescriptions`"
             pushKeywordInfo ref kind?
             continue
+          if let some kind ← notationTokenKind? env code then
+            let b : String.Pos.Raw := ⟨start.byteIdx + spanOff⟩
+            let e : String.Pos.Raw := ⟨b.byteIdx + code.utf8ByteSize⟩
+            pushKeywordInfo
+              (Syntax.atom (.synthetic b e (canonical := true)) code) kind
+            continue
+          let notationToks ← notationTokens env code
+          for (off, tok, kind, _) in notationToks do
+            let b : String.Pos.Raw := ⟨start.byteIdx + spanOff + off⟩
+            let e : String.Pos.Raw := ⟨b.byteIdx + tok.utf8ByteSize⟩
+            pushKeywordInfo
+              (Syntax.atom (.synthetic b e (canonical := true)) tok) kind
           let ids := identifiers code
           -- A single word that is no keyword span names a constant, if anything.
           let tacticCode := code.any Char.isWhitespace &&
             ids.any (tactics.contains ·.2) && isTacticCode env code
           for (off, name) in ids do
-            if tacticCode && tactics.contains name then
+            -- the `K` of `K[` is part of a notation token
+            if tacticCode && tactics.contains name ||
+                notationToks.any fun (o, tok, _) =>
+                  o ≤ off && off < o + tok.utf8ByteSize then
               continue
             let b : String.Pos.Raw := ⟨start.byteIdx + spanOff + off⟩
             let e : String.Pos.Raw := ⟨b.byteIdx + name.utf8ByteSize⟩

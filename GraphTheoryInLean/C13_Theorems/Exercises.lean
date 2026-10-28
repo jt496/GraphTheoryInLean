@@ -25,11 +25,11 @@ example (n : ℕ) : ∃ M : K[n, n].Subgraph, M.IsPerfectMatching := by
   sorry
 
 /-!
-3. Use Hall's theorem to show that the infinite path `pathNat₁` has a perfect
+3. Use Hall's theorem to show that the infinite path `pathNat` has a perfect
 matching. Hint: `n ↦ n + 1` maps every finite set of vertices injectively into its
 neighbourhood. What happens for infinite sets?
 -/
-example : ∃ M : pathNat₁.Subgraph, M.IsPerfectMatching := by
+example : ∃ M : pathNat.Subgraph, M.IsPerfectMatching := by
   sorry
 
 /-!
@@ -239,11 +239,11 @@ example (n : ℕ) : ∃ M : K[n, n].Subgraph, M.IsPerfectMatching := by
   exact Set.mem_biUnion hx (by cases x <;> simp)
 
 /-!
-3. Use Hall's theorem to show that the infinite path `pathNat₁` has a perfect
+3. Use Hall's theorem to show that the infinite path `pathNat` has a perfect
 matching. Hint: `n ↦ n + 1` maps every finite set of vertices injectively into its
 neighbourhood. What happens for infinite sets?
 -/
-example : ∃ M : pathNat₁.Subgraph, M.IsPerfectMatching := by
+example : ∃ M : pathNat.Subgraph, M.IsPerfectMatching := by
   refine exists_isPerfectMatching_of_forall_ncard_le
     (p₁ := {n | Even n}) (p₂ := {n | Odd n}) ?_ fun s => ?_
   · refine ⟨Set.disjoint_left.2 fun n h1 h2 => Nat.not_even_iff_odd.2 h2 h1, ?_⟩
@@ -252,7 +252,7 @@ example : ∃ M : pathNat₁.Subgraph, M.IsPerfectMatching := by
   · by_cases hs : s.Finite
     · refine Set.ncard_le_ncard_of_injOn (· + 1) (fun x hx => ?_)
         (add_left_injective 1).injOn
-        (hs.biUnion fun x _ => (pathNat₁.neighborSet x).toFinite)
+        (hs.biUnion fun x _ => (pathNat.neighborSet x).toFinite)
       exact Set.mem_biUnion hx (by simp)
     · rw [Set.Infinite.ncard hs]
       exact Nat.zero_le _
@@ -418,7 +418,7 @@ theorem IsRegularOfDegree.colorable_lineGraph [G.LocallyFinite] {k : ℕ}
 
 example (n : ℕ) : χ L[Q[n]] = n := by
   have hG := IsRegularOfDegree.hypercube n
-  refine le_antisymm ((hG.colorable_lineGraph (IsBipartite.hypercube n))
+  refine le_antisymm (hG.colorable_lineGraph (IsBipartite.hypercube n)
     |>.chromaticNumber_le) ?_
   have := Q[n].degree_le_chromaticNumber_lineGraph (Classical.arbitrary _)
   rwa [hG] at this

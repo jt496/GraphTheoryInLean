@@ -177,13 +177,13 @@ example : (C[5].induce {0, 1, 2}).Adj ⟨0, by simp⟩ ⟨1, by decide⟩ := by 
 In the subgraph of the path on `ℕ` induced by even natural numbers, no two
 (necessarily even) vertices are adjacent.
 -/
-example {a b : {n : ℕ // Even n}} : ¬ (pathNat₁.induce {n | Even n}).Adj a b := by
-  rw [induce_adj, pathNat₁_adj]
+example {a b : {n : ℕ // Even n}} : ¬ (pathNat.induce {n | Even n}).Adj a b := by
+  rw [induce_adj, pathNat_adj]
   grind
 
 example {a b : ℕ} :
-    ¬ (pathNat₁.induce {n | Even n}).Adj ⟨2 * a, by simp⟩ ⟨2 * b, by simp⟩ := by
-  rw [induce_adj, pathNat₁_adj]
+    ¬ (pathNat.induce {n | Even n}).Adj ⟨2 * a, by simp⟩ ⟨2 * b, by simp⟩ := by
+  rw [induce_adj, pathNat_adj]
   -- ⊢ ¬ (↑⟨2 * a, ⋯⟩ + 1 = ↑⟨2 * b, ⋯⟩ ∨ ↑⟨2 * b, ⋯⟩ + 1 = ↑⟨2 * a, ⋯⟩)
   grind
 
@@ -193,7 +193,7 @@ in `s` (which is often a more useful definition of an induced subgraph) then you
 to use the `Subgraph` type (see [Subgraphs](#chapter-subgraphs) for details).
 -/
 variable {G : SimpleGraph V}
-#check ((⊤ : G.Subgraph).induce s)
+#check (⊤ : G.Subgraph).induce s
 end induced
 
 /-!
@@ -317,14 +317,14 @@ vertex types.
 end embed
 
 /-!
-Recall `pathNat₁`, the path graph on `ℕ`. We can embed this in itself by sending `i`
+Recall `pathNat`, the path graph on `ℕ`. We can embed this in itself by sending `i`
 to `i + j`, for any fixed `j : ℕ`.
 -/
-#source pathNat₁
+#source pathNat
 
-/-- The graph embedding `pathNat₁ ↪g pathNat₁`, with `i ↦ i + j`. -/
+/-- The graph embedding `pathNat ↪g pathNat`, with `i ↦ i + j`. -/
 @[simps]
-def pathNat₁.translate (j : ℕ) : pathNat₁ ↪g pathNat₁ where
+def pathNat.translate (j : ℕ) : pathNat ↪g pathNat where
   toFun i := i + j
   inj' := add_left_injective j
   map_rel_iff' := by grind [Function.Embedding.coeFn_mk]
@@ -336,7 +336,7 @@ blow-up are nonempty (the argument `f` below picks an element of each part).
 /-- Embedding of `G` into `G.blowUpGraph W` with nonempty parts. -/
 @[simps]
 def Embedding.blowUp {ι : Type*} (G : SimpleGraph ι) (W : ι → Type*)
-    (f : (i : ι) → W i) : G ↪g (G.blowUpGraph W) where
+    (f : (i : ι) → W i) : G ↪g G.blowUpGraph W where
   toFun i := ⟨i, f i⟩
   inj' _ _ h := congrArg Sigma.fst h
   map_rel_iff' := Iff.rfl
@@ -346,7 +346,7 @@ For example, here is the embedding of `C[4]` into its blow-up with all parts equ
 `Fin 3`, sending each vertex `i : Fin 4` of `C[4]` to the vertex `⟨i, 0⟩` of the
 blow-up.
 -/
-#check (Embedding.blowUp C[4] (fun _ => (Fin 3)) (fun _ => 0))
+#check Embedding.blowUp C[4] (fun _ => Fin 3) (fun _ => 0)
 
 /-!
 ## Copies
@@ -932,14 +932,14 @@ lemma nonempty_iso_completeGraph_two_of_regular_mycielskian {V : Type*}
   cases nonempty_fintype V
   -- From `d = 2 * G.degree u` and `d = G.degree u + 1` we get `G.degree u = 1`.
   have h1 : G.IsRegularOfDegree 1 := fun u => by
-    have hₗ : mμ[G].degree (u ₗ) = 2 * G.degree u := by simp
-    have hᵣ : mμ[G].degree (u ᵣ) = G.degree u + 1 := by simp
-    grind [hd (u ₗ), hd (u ᵣ)]
+    have hₗ : mμ[G].degree u ₗ = 2 * G.degree u := by simp
+    have hᵣ : mμ[G].degree u ᵣ = G.degree u + 1 := by simp
+    grind [hd u ₗ, hd u ᵣ]
   -- Then `d = Fintype.card V` forces `Fintype.card V = 2`, as required.
   have hcard : Fintype.card V = 2 := by
     have h₀ : mμ[G].degree none = Fintype.card V := by simp
-    have hᵣ : mμ[G].degree (v ᵣ) = G.degree v + 1 := by simp
-    grind [hd none, hd (v ᵣ), h1 v]
+    have hᵣ : mμ[G].degree v ᵣ = G.degree v + 1 := by simp
+    grind [hd none, hd v ᵣ, h1 v]
   -- we now use the fact that if `G` is regular of degree `Fintype.card V - 1`
   -- then `G` is complete.
   obtain rfl : G = ⊤ :=
@@ -957,7 +957,7 @@ theorem isVertexTransitive_mycielskian_iff {V : Type*} (G : SimpleGraph V) [Fini
     obtain ⟨d, hd⟩ := IsVertexTransitive.exists_isRegularOfDegree h
     exact nonempty_iso_completeGraph_two_of_regular_mycielskian hd
   · intro ⟨e⟩
-    exact (e.mapMycielskian.symm.comp mycielskianCompleteTwoIsoCycleFive.symm)
+    exact e.mapMycielskian.symm.comp mycielskianCompleteTwoIsoCycleFive.symm
       |>.isVertexTransitive (isVertexTransitive_cycleGraph _)
 
 /-!
@@ -1277,7 +1277,7 @@ don't want to perform tedious small case analysis by hand, so we should always a
 use `decide` or similar automation (such as `fin_cases`) where possible.
 -/
 /-- The line graph of `K[3]` is isomorphic to a triangle `K[3]`. -/
-def lineGraphCompleteGraphThreeIso : L[K[3]] ≃g K[3] where
+def lineGraphCompleteThreeIsoCompleteThree : L[K[3]] ≃g K[3] where
   toFun e := if (e : Sym2 (Fin 3)) = s(0, 1) then 0
     else if (e : Sym2 (Fin 3)) = s(0, 2) then 1 else 2
   invFun i := if i = 0 then ⟨s(0, 1), by decide⟩ else
@@ -1287,7 +1287,7 @@ def lineGraphCompleteGraphThreeIso : L[K[3]] ≃g K[3] where
   map_rel_iff' := by decide
 
 /-- The line graph of the claw graph `K[1, 3]` is isomorphic to a triangle `K[3]`. -/
-def lineGraphClawIso : L[K[1, 3]] ≃g K[3] where
+def lineGraphClawIsoCompleteThree : L[K[1, 3]] ≃g K[3] where
   toFun e := if (e : Sym2 (Fin 1 ⊕ Fin 3)) = s(.inl 0, .inr 0) then 0
         else if (e : Sym2 (Fin 1 ⊕ Fin 3)) = s(.inl 0, .inr 1) then 1 else 2
   invFun i := if i = 0 then ⟨s(.inl 0, .inr 0), by decide⟩ else
@@ -1305,12 +1305,12 @@ triangle.
 /-- If a graph `G` contains a triangle, then its line graph contains a triangle. -/
 lemma isContained_lineGraph_of_triangle {V : Type*} {G : SimpleGraph V}
     (h : K[3] ⊑ G) : K[3] ⊑ L[G] :=
-  lineGraphCompleteGraphThreeIso.isContained'.trans h.lineGraph
+  lineGraphCompleteThreeIsoCompleteThree.isContained'.trans h.lineGraph
 
 /-- If a graph `G` contains a claw, then its line graph contains a triangle. -/
 lemma isContained_lineGraph_of_claw {V : Type*} {G : SimpleGraph V}
     (h : K[1, 3] ⊑ G) : K[3] ⊑ L[G] :=
-  lineGraphClawIso.isContained'.trans h.lineGraph
+  lineGraphClawIsoCompleteThree.isContained'.trans h.lineGraph
 
 /-!
 Conversely, a triangle in the line graph comes from either a triangle or a copy of

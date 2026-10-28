@@ -24,7 +24,7 @@ use `decide +revert`, which first reverts the variable and then checks the resul
 statement `∀ y : ZMod 17, …` case by case.
 -/
 lemma paleyGraph₁₇_eq_circulant' :
-    paleyGraph (ZMod 17) = circulantGraph ({1, 2, 4, 8, 9, 13, 15, 16}) := by
+    paleyGraph (ZMod 17) = circulantGraph {1, 2, 4, 8, 9, 13, 15, 16} := by
   sorry
 
 /-!
@@ -46,7 +46,7 @@ example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := b
 /-!
 5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
 -/
-example : multiNat 1 = ⊥ := by
+example : completeEquipartiteNat 1 = ⊥ := by
   sorry
 
 /-!
@@ -75,7 +75,7 @@ empty graph. (So `mμ[⊥]` is a star on the right copies together with the isol
 left copies.)
 -/
 example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
-    ¬ mμ[(⊥ : SimpleGraph V)].Adj (u ₗ) x := by
+    ¬ mμ[(⊥ : SimpleGraph V)].Adj u ₗ x := by
   sorry
 
 /-!
@@ -83,6 +83,15 @@ example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
 this, for `C[n + 1]`, as `cycleGraph_eq_circulantGraph`, but prove it directly.)
 -/
 example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
+  sorry
+
+/-!
+11. Prove that `sigmaCompleteNat` is the complement of the complete multipartite
+graph `completeMultipartiteNat`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the cases
+`i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that `a`
+and `b` have the same type.
+-/
+example : sigmaCompleteNat = completeMultipartiteNatᶜ := by
   sorry
 
 /-! SOLUTIONS -/
@@ -106,7 +115,7 @@ use `decide +revert`, which first reverts the variable and then checks the resul
 statement `∀ y : ZMod 17, …` case by case.
 -/
 lemma paleyGraph₁₇_eq_circulant :
-    paleyGraph (ZMod 17) = circulantGraph ({1, 2, 4, 8, 9, 13, 15, 16}) := by
+    paleyGraph (ZMod 17) = circulantGraph {1, 2, 4, 8, 9, 13, 15, 16} := by
   have : {y : ZMod 17 | IsSquare y} = {0, 1, 2, 4, 8, 9, 13, 15, 16} := by
     ext
     constructor <;> decide +revert
@@ -131,7 +140,7 @@ example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := b
 /-!
 5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
 -/
-example : multiNat 1 = ⊥ := by
+example : completeEquipartiteNat 1 = ⊥ := by
   ext ⟨i, _⟩ ⟨j, _⟩
   simp [Subsingleton.elim i j]
 
@@ -162,7 +171,7 @@ empty graph. (So `mμ[⊥]` is a star on the right copies together with the isol
 left copies.)
 -/
 example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
-    ¬ mμ[(⊥ : SimpleGraph V)].Adj (u ₗ) x := by
+    ¬ mμ[(⊥ : SimpleGraph V)].Adj u ₗ x := by
   rcases x with _ | (v | v) <;> simp
 
 /-!
@@ -172,6 +181,19 @@ this, for `C[n + 1]`, as `cycleGraph_eq_circulantGraph`, but prove it directly.)
 example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
   ext u v
   grind [cycleGraph_adj, circulantGraph_adj]
+
+/-!
+11. Prove that `sigmaCompleteNat` is the complement of the complete multipartite
+graph `completeMultipartiteNat`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the cases
+`i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that `a`
+and `b` have the same type.
+-/
+example : sigmaCompleteNat = completeMultipartiteNatᶜ := by
+  ext ⟨i, a⟩ ⟨j, b⟩
+  by_cases h : i = j
+  · subst h
+    simp
+  · simp [h]
 
 /-! END SOLUTIONS -/
 
