@@ -244,7 +244,7 @@ lemma exists_isMatching_of_injective_sum {p₁ p₂ : Set V} {d : ℕ}
   have hr (x : ↑(p₁ \ X)) : (g ⟨x, hp x⟩).isRight := by
     simpa [X, hp x] using x.2.2
   let φ : ↑(p₁ \ X) → Fin d := fun x => (g ⟨x, hp x⟩).getRight (hr x)
-  have hgφ (x : ↥(p₁ \ X)) : g ⟨x, hp x⟩ = .inr (φ x) := (Sum.inr_getRight _ _).symm
+  have hgφ (x : ↑(p₁ \ X)) : g ⟨x, hp x⟩ = .inr (φ x) := (Sum.inr_getRight _ _).symm
   have hφ : Function.Injective φ := fun x y hxy => by
     have hgxy : g ⟨x, hp x⟩ = g ⟨y, hp y⟩ := by rw [hgφ, hgφ, hxy]
     simpa [Subtype.ext_iff] using hg hgxy
