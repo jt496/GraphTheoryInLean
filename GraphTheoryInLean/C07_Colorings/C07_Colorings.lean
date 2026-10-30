@@ -5,6 +5,7 @@ Authors: John Talbot
 -/
 import GraphTheoryInLean.C06_Cliques.C06_Cliques
 import Mathlib.Combinatorics.SimpleGraph.Coloring.Constructions
+import Mathlib.Combinatorics.SimpleGraph.Coloring.EdgeLabeling
 import Mathlib.Combinatorics.SimpleGraph.Partition
 import Mathlib.Logic.Equiv.Fintype
 import Mathlib.Combinatorics.SimpleGraph.FiveWheelLike
@@ -663,13 +664,13 @@ def Coloring.ofMycielskian {k : ℕ} (c : mμ(G).Coloring (Fin (k + 1))) :
     have hlr : mμ(G).Adj aˡ bʳ := by simpa using hab
     have hrl : mμ(G).Adj aʳ bˡ := by simpa using hab
     split_ifs at hf with ha hb hb
-    · -- `aˡ` and `bˡ` both have colour `k`, but they are adjacent
-      exact c.mycielskianLast.valid hll (ha.trans hb.symm)
-    · -- `hf` says that the adjacent `aʳ` and `bˡ` have the same colour
+    · -- `aˡ` and `bˡ` both have colour `k`, but are adjacent
+      exact c.mycielskianLast.valid hll (by grind)
+    · -- `hf` says that the adjacent vertices `aʳ` and `bˡ` have the same colour
       exact c.mycielskianLast.valid hrl (by grind)
-    · -- `hf` says that the adjacent `aˡ` and `bʳ` have the same colour
+    · -- `hf` says that the adjacent vertices `aˡ` and `bʳ` have the same colour
       exact c.mycielskianLast.valid hlr (by grind)
-    · -- `hf` says that the adjacent `aˡ` and `bˡ` have the same colour
+    · -- `hf` says that the adjacent vertices `aˡ` and `bˡ` have the same colour
       exact c.mycielskianLast.valid hll (by grind)
 
 /-!
@@ -685,7 +686,7 @@ def Coloring.mycielskian {k : ℕ} (c : G.Coloring (Fin k)) :
     | vˡ | vʳ => (c v).castSucc
   map_rel' := by
     -- check all nine kinds of pair: an edge `none — vʳ` has the distinct colours
-    -- `k` and `(c v).castSucc`; an edge between the copies has the colours of two
+    -- `k` and `(c v).castSucc`; an edge between copies has the colours of two
     -- adjacent vertices of `G`, which differ by `c.valid`; the other pairs are
     -- non-edges
     rintro (_ | v | v) (_ | w | w) hab <;>
@@ -740,7 +741,9 @@ example {W : Type*} {H : SimpleGraph W} (f : G →g H) (c : mμ(H).Coloring V) :
 example {W : Type*} {H : SimpleGraph W} (f : G →g H) : χ mμ(G) ≤ χ mμ(H) :=
   chromaticNumber_mono_of_hom f.mapMycielskian
 
-/-- The `n`-th iterated Mycielskian of `G` has chromatic number `χ G + n`. -/
+/-!
+The `n`-th iterated Mycielskian of `G` has chromatic number `χ G + n`.
+-/
 theorem chromaticNumber_iterMycielskian (n : ℕ) : χ mμ^n(G) = χ G + n := by
   induction n with
   | zero => simp
@@ -888,13 +891,12 @@ If `G` is a graph with vertex type `ℕ` and decidable adjacency, then we get
 now we will restrict our attention to such graphs, and to keep things simple we will
 also use `ℕ` as our set of colours. (Later we will show how to easily extend our
 greedy colourings to any constructively countable vertex type.)
+
+Any `SimpleGraph ℕ` with decidable adjacency is `LocallyLTFinite`.
 -/
 section greedy
 variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
-/-!
-Any `SimpleGraph ℕ` with decidable adjacency is `LocallyLTFinite`.
--/
 instance : G.LocallyLTFinite :=
   fun v => Fintype.ofFinset {u < v | G.Adj v u} (by simp [neighborLTSet])
 
@@ -987,14 +989,12 @@ this is using `WellFounded.Nat.fix`.)
 #print greedy -- .. WellFounded.Nat.fix ..
 
 /-!
-Lean generates the defining equation `greedy.eq_1` for us, and we can unfold `greedy`
-with `rw [greedy]`. Since the partial colouring used at `v` agrees with `greedy`
-below `v`, `greedyChoice_congr` lets us drop the `if` altogether. Viewing
-`G.greedyChoice` as a map from colourings `ℕ → ℕ` to colourings `ℕ → ℕ`, this says
-that `greedy` is a fixed point of it: `greedy = G.greedyChoice greedy`.
+We can unfold `greedy` with `rw [greedy]`. Since the partial colouring used at `v`
+agrees with `greedy` below `v`, `greedyChoice_congr` lets us drop the `if`
+altogether. Viewing `G.greedyChoice` as a map from colourings `ℕ → ℕ` to colourings
+`ℕ → ℕ`, this says that `greedy` is a fixed point of it:
+`greedy = G.greedyChoice greedy`.
 -/
-#check greedy.eq_1
-
 lemma greedy_eq_greedyChoice (v : ℕ) : G.greedy v = G.greedyChoice G.greedy v := by
   rw [greedy]
   exact G.greedyChoice_congr fun u hu => ite_eq_left hu
