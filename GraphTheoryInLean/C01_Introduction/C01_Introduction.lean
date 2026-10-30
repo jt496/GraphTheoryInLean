@@ -135,7 +135,7 @@ they do.
 [Figure: A route through the guide](https://jt496.github.io/GraphTheoryInLean/figures/reading_routes.svg)
 
 We use three running examples throughout: the `n`-dimensional hypercube `Q[n]`
-([Hypercube](#section-hypercube)), the Mycielskian `mμ[G]` of a graph `G`
+([Hypercube](#section-hypercube)), the Mycielskian `mμ(G)` of a graph `G`
 ([Mycielskian](#section-mycielskian)), and the infinite path `pathNat` on `ℕ`
 ([Constructing a SimpleGraph](#section-constructing-a-simplegraph)).
 

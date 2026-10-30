@@ -695,14 +695,14 @@ example {A B : G.Subgraph} (v w : A.verts) :
 ## Subgraphs of Mycielskians
 
 As worked examples of `Subgraph.map` and `Subgraph.comap` we consider subgraphs of
-the Mycielskian `mμ[G]`. If `H : G.Subgraph` then we can map `H` to a subgraph of
-`mμ[G]` using the embedding of `G` into `mμ[G]` given by
+the Mycielskian `mμ(G)`. If `H : G.Subgraph` then we can map `H` to a subgraph of
+`mμ(G)` using the embedding of `G` into `mμ(G)` given by
 `Embedding.mycielskianLeft G`.
 -/
 /--
-The subgraph of the Mycielskian `mμ[G]` corresponding to a subgraph `H` of `G`. -/
+The subgraph of the Mycielskian `mμ(G)` corresponding to a subgraph `H` of `G`. -/
 @[simps!]
-def Subgraph.mycielskianLeft (H : G.Subgraph) : mμ[G].Subgraph :=
+def Subgraph.mycielskianLeft (H : G.Subgraph) : mμ(G).Subgraph :=
   Subgraph.map (Embedding.mycielskianLeft G).toHom H
 
 /-!
@@ -1078,7 +1078,7 @@ lemma matchingNum_hypercube_succ (n : ℕ) : ν Q[n + 1] = 2 ^ n := by
 ## Matching Number of the Mycielskian
 
 If `M` is a matching in `G` then we can construct a matching in the Mycielskian
-`mμ[G]` by taking the edges `x ₗ — y ᵣ` and `x ᵣ — y ₗ` for each edge `x — y` in `M`.
+`mμ(G)` by taking the edges `xˡ — yʳ` and `xʳ — yˡ` for each edge `x — y` in `M`.
 This makes sense for any subgraph `M` of `G` (although it won't be a matching in
 general).
 -/
@@ -1086,12 +1086,12 @@ section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
 
 /-- Given a subgraph `M` of `G`, the `mycielskianDouble` of `M` is the subgraph of
-`mμ[G]` with edges given by `x ₗ — y ᵣ` and `x ᵣ — y ₗ` for each edge `x — y` in `M`.
+`mμ(G)` with edges given by `xˡ — yʳ` and `xʳ — yˡ` for each edge `x — y` in `M`.
 -/
 @[simps]
-def Subgraph.mycielskianDouble (M : G.Subgraph) : Subgraph mμ[G] where
-  verts := (· ₗ) '' M.verts ∪ (· ᵣ) '' M.verts
-  Adj a b := ∃ x y, M.Adj x y ∧ ((a = x ₗ ∧ b = y ᵣ) ∨ (a = x ᵣ ∧ b = y ₗ))
+def Subgraph.mycielskianDouble (M : G.Subgraph) : Subgraph mμ(G) where
+  verts := (·ˡ) '' M.verts ∪ (·ʳ) '' M.verts
+  Adj a b := ∃ x y, M.Adj x y ∧ ((a = xˡ ∧ b = yʳ) ∨ (a = xʳ ∧ b = yˡ))
   adj_sub := by
     rintro a b ⟨x, y, hxy, (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)⟩ <;> exact M.adj_sub hxy
   edge_vert := by grind [M.edge_vert]
@@ -1104,18 +1104,18 @@ of the vertices of `M` is matched with the right copy of its match in `M`.
 lemma Subgraph.IsMatching.mycielskianDouble {M : G.Subgraph}
     (h : M.IsMatching) : M.mycielskianDouble.IsMatching := by
   rintro a (⟨x, hx, rfl⟩ | ⟨x, hx, rfl⟩) <;> obtain ⟨y, hxy, huniq⟩ := h hx
-  · -- `a = x ₗ`: its unique neighbour is `y ᵣ`, where `y` is the `M`-partner of `x`.
-    refine ⟨y ᵣ, ⟨x, y, hxy, Or.inl ⟨rfl, rfl⟩⟩, ?_⟩
+  · -- `a = xˡ`: its unique neighbour is `yʳ`, where `y` is the `M`-partner of `x`.
+    refine ⟨yʳ, ⟨x, y, hxy, Or.inl ⟨rfl, rfl⟩⟩, ?_⟩
     rintro w ⟨x', y', hx'y', (⟨hl, rfl⟩ | ⟨hl, rfl⟩)⟩ <;> simp_all
-  · -- `a = x ᵣ`: its unique neighbour is `y ₗ`.
-    refine ⟨y ₗ, ⟨x, y, hxy, Or.inr ⟨rfl, rfl⟩⟩, ?_⟩
+  · -- `a = xʳ`: its unique neighbour is `yˡ`.
+    refine ⟨yˡ, ⟨x, y, hxy, Or.inr ⟨rfl, rfl⟩⟩, ?_⟩
     rintro w ⟨x', y', hx'y', (⟨hl, rfl⟩ | ⟨hl, rfl⟩)⟩ <;> simp_all
 
 /-- The embedding of the darts of a subgraph into the edge set of its Mycielskian
 double. -/
 def Subgraph.mycielskianDoubleDartEmbedding (M : G.Subgraph) :
     M.coe.Dart ↪ (M.mycielskianDouble).edgeSet where
-  toFun d := ⟨s(d.1.1.val ₗ, d.1.2.val ᵣ), by
+  toFun d := ⟨s(d.1.1.valˡ, d.1.2.valʳ), by
     simp only [Subgraph.mem_edgeSet, Subgraph.mycielskianDouble]
     exact ⟨d.1.1.val, d.1.2.val, d.adj, Or.inl ⟨rfl, rfl⟩⟩⟩
   inj' d₁ d₂ h := by ext <;> simp_all
@@ -1148,26 +1148,26 @@ The matching number of the Mycielskian of `G` is at least twice the matching num
 of `G`.
 -/
 lemma two_mul_matchingNum_le_matchingNum_mycielskian [Finite V] :
-    2 * ν G ≤ ν mμ[G] := by
+    2 * ν G ≤ ν mμ(G) := by
   obtain ⟨M, hM, hc⟩ := exists_isMatching_matchingNum (G := G)
   calc
     2 * ν G = 2 * M.edgeSet.encard := by rw [hc]
     _ ≤ (M.mycielskianDouble).edgeSet.encard :=
         two_mul_encard_edgeSet_le_encard_edgeSet_mycielskianDouble M
-    _ ≤ ν mμ[G] := hM.mycielskianDouble.le_matchingNum
+    _ ≤ ν mμ(G) := hM.mycielskianDouble.le_matchingNum
 
 /-!
 When `G` has a perfect matching the lower bound `2 * ν G` is exact: the Mycielskian
 has `2 * |V| + 1` vertices, so by `matchingNum_le_card_div_two` no matching of
-`mμ[G]` can have more than `|V| = 2 * ν G` edges.
+`mμ(G)` can have more than `|V| = 2 * ν G` edges.
 
 (For graphs without a perfect matching the lower bound `2 * ν G` can be far from
 exact. If `G` is a disjoint union of two triangles it has matching number `2`, but
-the cross edges `a ₗ — b ᵣ`, `b ₗ — c ᵣ`, `c ₗ — a ᵣ` of each triangle form a
+the cross edges `aˡ — bʳ`, `bˡ — cʳ`, `cˡ — aʳ` of each triangle form a
 matching of size `6` in the Mycielskian.)
 -/
 lemma Subgraph.IsPerfectMatching.matchingNum_mycielskian_eq [Finite V]
-    {M : G.Subgraph} (h : M.IsPerfectMatching) : ν mμ[G] = 2 * ν G := by
+    {M : G.Subgraph} (h : M.IsPerfectMatching) : ν mμ(G) = 2 * ν G := by
   classical
   have := Fintype.ofFinite V
   -- A graph with a perfect matching has an even number of vertices.
@@ -1179,8 +1179,8 @@ lemma Subgraph.IsPerfectMatching.matchingNum_mycielskian_eq [Finite V]
   -- `2 * ν G = |V|` in `ℕ∞`, since `ν G = |V| / 2` and `|V|` is even.
   have h2ν : 2 * ν G = (Nat.card V : ℕ∞) := by
     rw [h.matchingNum_eq]; norm_cast; grind
-  -- The upper bound `ν mμ[G] ≤ (2|V|+1)/2 = |V|` meets the lower bound `2 * ν G`.
-  refine le_antisymm ((matchingNum_le_card_div_two (G := mμ[G])).trans ?_)
+  -- The upper bound `ν mμ(G) ≤ (2|V|+1)/2 = |V|` meets the lower bound `2 * ν G`.
+  refine le_antisymm ((matchingNum_le_card_div_two (G := mμ(G))).trans ?_)
     two_mul_matchingNum_le_matchingNum_mycielskian
   rw [h2ν, Nat.cast_le]
   grind

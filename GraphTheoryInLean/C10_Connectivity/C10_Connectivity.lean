@@ -14,7 +14,7 @@ namespace SimpleGraph
 In this chapter we study graph connectivity. Building on the reachability relation
 `Reachable`, we start with Mathlib's notions `Preconnected` and `Connected`,
 connected components (`ConnectedComponent`) and bridges (`IsBridge`), and show that
-the Mycielskian `mμ[G]` is connected iff `G` has no isolated vertices, and that in a
+the Mycielskian `mμ(G)` is connected iff `G` has no isolated vertices, and that in a
 graph of maximum degree at most `2` every cycle is its own connected component. We
 then look at trees, and show that the infinite path `pathNat` is one. We prove
 *Euler's theorem*: a finite graph has an Eulerian trail iff all its edges lie in one
@@ -105,25 +105,25 @@ reachable.
 
 /-!
 In the Mycielskian of a graph `G`, any vertex `u` that is not isolated in `G` has
-both its left and right copies in `mμ[G]` connected to `none`. Given the edge `u — v`
-in `G` we have the walks `u ᵣ — none` and `u ₗ — v ᵣ — none` in `mμ[G]`. Conversely
-if `u` is an isolated vertex in `G` then `u ₗ` is an isolated vertex in `mμ[G]`.
+both its left and right copies in `mμ(G)` connected to `none`. Given the edge `u — v`
+in `G` we have the walks `uʳ — none` and `uˡ — vʳ — none` in `mμ(G)`. Conversely
+if `u` is an isolated vertex in `G` then `uˡ` is an isolated vertex in `mμ(G)`.
 
-Hence `mμ[G]` is connected iff `G` has no isolated vertices.
+Hence `mμ(G)` is connected iff `G` has no isolated vertices.
 -/
-theorem connected_mycielskian_iff : mμ[G].Connected ↔ ∀ v, ¬ G.IsIsolated v := by
+theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬ G.IsIsolated v := by
   simp only [IsIsolated, not_forall, not_not]
   constructor <;> intro h
   · intro v
-    obtain ⟨p⟩ := h.preconnected v ₗ none
+    obtain ⟨p⟩ := h.preconnected vˡ none
     cases p; grind [mycielskian_adj]
   · apply (connected_iff_exists_forall_reachable _).2 ⟨none, fun z => ?_⟩
     rcases z with (_ | ⟨v | v⟩)
     · rfl
     · obtain ⟨u, h⟩ := h v
-      exact (by simp : mμ[G].Adj _ _).reachable.trans
-            (by simpa using h.symm : mμ[G].Adj u ᵣ _).reachable
-    · exact (by simp : mμ[G].Adj _ _).reachable
+      exact (by simp : mμ(G).Adj _ _).reachable.trans
+            (by simpa using h.symm : mμ(G).Adj uʳ _).reachable
+    · exact (by simp : mμ(G).Adj _ _).reachable
 
 /-!
 ## Connected Components
@@ -173,28 +173,10 @@ so we can count the components. The empty graph `⊥` on `Fin 3` has three, whil
 #eval Fintype.card C[5].ConnectedComponent -- 1
 
 /-!
-A connected graph has exactly one component. We state this with `Nat.card`, so it
-applies to infinite graphs too. Mathlib's
-`Preconnected.subsingleton_connectedComponent` says that there is at most one
-component, and a connected graph is nonempty, so there is at least one
-(`Nat.card_eq_one_iff_unique`).
+A graph is connected iff it has exactly one component. Mathlib states this with
+`Nat.card`, so it applies to infinite graphs too.
 -/
-lemma Connected.card_connectedComponent (h : G.Connected) :
-    Nat.card G.ConnectedComponent = 1 :=
-  Nat.card_eq_one_iff_unique.mpr ⟨h.preconnected.subsingleton_connectedComponent,
-    h.nonempty.map G.connectedComponentMk⟩
-
-/-!
-Conversely, a graph with exactly one component is connected: any two vertices lie in
-the same component, and the graph is nonempty since that component has a
-representative vertex (`ConnectedComponent.out`).
--/
-lemma connected_iff_card_connectedComponent :
-    G.Connected ↔ Nat.card G.ConnectedComponent = 1 := by
-  refine ⟨Connected.card_connectedComponent, fun h => ?_⟩
-  obtain ⟨_, ⟨C⟩⟩ := Nat.card_eq_one_iff_unique.mp h
-  have : Nonempty V := ⟨C.out⟩
-  exact ⟨fun u v => ConnectedComponent.exact (Subsingleton.elim _ _)⟩
+#check card_connectedComponent_eq_one_iff
 
 /-!
 In informal graph theory we often think of a connected component as a graph, or
@@ -308,52 +290,52 @@ gives rise to a `5`-cycle in its Mycielskian.
 #check isCycle_mycielskianClosed_of_adj
 
 /-!
-So every edge of `mμ[G]` that comes from an edge of `G` lies on a `5`-cycle, and so
-does the edge `none — u ᵣ` whenever `u` has a neighbour `v` in `G`. None of these
+So every edge of `mμ(G)` that comes from an edge of `G` lies on a `5`-cycle, and so
+does the edge `none — uʳ` whenever `u` has a neighbour `v` in `G`. None of these
 edges is a bridge. On the other hand, if `u` is isolated in `G` then `none` is the
-only neighbour of `u ᵣ`, so deleting the edge `none — u ᵣ` cuts `u ᵣ` off. Hence the
-bridges of `mμ[G]` are precisely the edges `none — u ᵣ` where `u` is an isolated
+only neighbour of `uʳ`, so deleting the edge `none — uʳ` cuts `uʳ` off. Hence the
+bridges of `mμ(G)` are precisely the edges `none — uʳ` where `u` is an isolated
 vertex of `G`.
 
 [Figure: Left: a graph $G$ with an isolated vertex $u$. Right: its Mycielskian, with its unique bridge edge highlighted](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
 -/
 
-lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ[G].edgeSet) :
-    mμ[G].IsBridge e ↔ ∃ u, G.IsIsolated u ∧ e = s(none, u ᵣ) := by
+lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ(G).edgeSet) :
+    mμ(G).IsBridge e ↔ ∃ u, G.IsIsolated u ∧ e = s(none, uʳ) := by
   refine ⟨fun h => ?_, ?_⟩
-  · -- `hncyc`: the bridge `e` lies on no cycle of `mμ[G]`
-    have hncyc : ∀ ⦃u⦄ ⦃p : mμ[G].Walk u u⦄, p.IsCycle → e ∉ p.edges :=
+  · -- `hncyc`: the bridge `e` lies on no cycle of `mμ(G)`
+    have hncyc : ∀ ⦃u⦄ ⦃p : mμ(G).Walk u u⦄, p.IsCycle → e ∉ p.edges :=
       fun _ _ hp => h.notMem_edges_of_isCycle hp
     induction e using Sym2.ind with
     | h x y =>
-      have hxy : mμ[G].Adj x y := mμ[G].mem_edgeSet.mp he
+      have hxy : mμ(G).Adj x y := mμ(G).mem_edgeSet.mp he
       -- split on the types of the endpoints; `simp only` discharges the four pairs
-      -- that are never edges: `none — none`, `none — v ₗ`, `u ₗ — none`, `u ᵣ — v ᵣ`
+      -- that are never edges: `none — none`, `none — vˡ`, `uˡ — none`, `uʳ — vʳ`
       rcases x with _ | (u | u) <;>
         rcases y with _ | (v | v) <;> simp only [mycielskian_adj] at hxy
-      · -- `none — v ᵣ`: a neighbour `w` of `v` would put `e` on a `5`-cycle, so `v`
+      · -- `none — vʳ`: a neighbour `w` of `v` would put `e` on a `5`-cycle, so `v`
         -- is isolated
         exact ⟨v, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian]), rfl⟩
-      · -- `u ₗ — v ₗ`: impossible, it lies on the `5`-cycle of the edge `u — v`
+      · -- `uˡ — vˡ`: impossible, it lies on the `5`-cycle of the edge `u — v`
         exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
           (by simp [Walk.mycielskian])).elim
-      · -- `u ₗ — v ᵣ`: impossible, it lies on the `5`-cycle of the edge `u — v`
+      · -- `uˡ — vʳ`: impossible, it lies on the `5`-cycle of the edge `u — v`
         exact (hncyc (isCycle_mycielskianClosed_of_adj hxy)
           (by simp [Walk.mycielskian])).elim
-      · -- `u ᵣ — none`: as in the first case, `u` is isolated
+      · -- `uʳ — none`: as in the first case, `u` is isolated
         exact ⟨u, fun w hw => hncyc (isCycle_mycielskianClosed_of_adj hw.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian]), Sym2.eq_swap⟩
-      · -- `u ᵣ — v ₗ`: impossible, it lies on the `5`-cycle of the edge `v — u`
+      · -- `uʳ — vˡ`: impossible, it lies on the `5`-cycle of the edge `v — u`
         exact (hncyc (isCycle_mycielskianClosed_of_adj hxy.symm)
           (by simp [Sym2.eq_swap, Walk.mycielskian])).elim
   · rintro ⟨u, hiso, rfl⟩
     rw [isBridge_iff]
-    -- `u` is isolated in `G`, so `none` is the only neighbour of `u ᵣ`: once the
-    -- edge `none — u ᵣ` is deleted, `u ᵣ` has no neighbours at all
-    have hnb : ∀ w, ¬ (mμ[G].deleteEdges {s(none, u ᵣ)}).Adj u ᵣ w := by
+    -- `u` is isolated in `G`, so `none` is the only neighbour of `uʳ`: once the
+    -- edge `none — uʳ` is deleted, `uʳ` has no neighbours at all
+    have hnb : ∀ w, ¬ (mμ(G).deleteEdges {s(none, uʳ)}).Adj uʳ w := by
       rintro (_ | w | w) h <;> simp_all [Sym2.eq_swap, IsIsolated]
-    -- so a walk from `u ᵣ` to `none` has nowhere to take its first step
+    -- so a walk from `uʳ` to `none` has nowhere to take its first step
     intro h
     obtain ⟨p⟩ := h.symm
     cases p with
@@ -1983,10 +1965,10 @@ Then colourings `C` of `A` and `D` of `B` with the same pattern on `{x, y}` can 
 glued into a colouring of `A ∪ B`: permute the colours of `D` so that it agrees with
 `C` on `{x, y}`, and use `C` on `A` and the permuted `D` on `B \ A`.
 -/
-lemma ColoringOn.nonempty_union_of_eq_iff_eq {α : Type*} {A B : Set V} {x y : V}
-    (C : G.ColoringOn α A) (D : G.ColoringOn α B) (hmeet : A ∩ B ⊆ {x, y})
+lemma ColoringOn.nonempty_union_of_eq_iff_eq {γ : Type*} {A B : Set V} {x y : V}
+    (C : G.ColoringOn γ A) (D : G.ColoringOn γ B) (hmeet : A ∩ B ⊆ {x, y})
     (hcross : ∀ u ∈ A \ B, ∀ v ∈ B \ A, ¬G.Adj u v)
-    (hpat : C x = C y ↔ D x = D y) : Nonempty (G.ColoringOn α (A ∪ B)) := by
+    (hpat : C x = C y ↔ D x = D y) : Nonempty (G.ColoringOn γ (A ∪ B)) := by
   classical
   obtain ⟨σ, hσx, hσy⟩ := Equiv.exists_perm_of_eq_iff_eq hpat
   refine ⟨C.union (D.map σ.toEmbedding) fun u v hu hv huv => ?_⟩
@@ -2148,7 +2130,7 @@ private lemma regular_case [G.LocallyFinite] [DecidableRel G.Adj] (hΔ : 3 ≤ �
   have hdegs : ∀ a ∈ s, G.degree a = Δ := fun a ha =>
     (hdeg a).antisymm ((hreg a ha).trans (degIn_le_degree s a))
   have hsubs : ∀ a ∈ s, G.neighborFinset a ⊆ s := fun a ha =>
-    neighborFinset_subset_of_degree_le_degIn s a ((hdeg a).trans (hreg a ha))
+    neighborFinset_subset_of_degree_le_degIn a s ((hdeg a).trans (hreg a ha))
   exact closed_regular_case hΔ hcf s v₂ hv₂ hsubs hdegs ih
 
 /-!

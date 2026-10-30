@@ -91,14 +91,14 @@ example (h : 3 ≤ G.ediam) : Gᶜ.ediam ≤ 3 := by
   sorry
 
 /-!
-10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ[G]` the two
-copies `v ₗ` and `v ᵣ` of `v` are at distance exactly `2`. Hint: `edist_eq_two_iff`.
+10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ(G)` the two
+copies `vˡ` and `vʳ` of `v` are at distance exactly `2`. Hint: `edist_eq_two_iff`.
 -/
-example {u v : V} (h : G.Adj u v) : mμ[G].edist v ₗ v ᵣ = 2 := by
+example {u v : V} (h : G.Adj u v) : mμ(G).edist vˡ vʳ = 2 := by
   sorry
 
 /-!
-11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`. Hint: use
+11. Show that the Grötzsch graph `mμ(C[5])` has girth `4`. Hint: use
 `egirth_mycielskian_eq_four`.
 -/
 example : grotzschGraph.egirth = 4 := by
@@ -285,20 +285,20 @@ example (h : 3 ≤ G.ediam) : Gᶜ.ediam ≤ 3 := by
     _ = 3 := by norm_num
 
 /-!
-10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ[G]` the two
-copies `v ₗ` and `v ᵣ` of `v` are at distance exactly `2`. Hint: `edist_eq_two_iff`.
+10. Show that if `v` has a neighbour in `G` then in the Mycielskian `mμ(G)` the two
+copies `vˡ` and `vʳ` of `v` are at distance exactly `2`. Hint: `edist_eq_two_iff`.
 
 The two copies of `v` are distinct and not adjacent (`v` is not adjacent to itself
-in `G`), and the left copy `u ₗ` of any neighbour `u` of `v` is a common neighbour.
+in `G`), and the left copy `uˡ` of any neighbour `u` of `v` is a common neighbour.
 -/
-example {u v : V} (h : G.Adj u v) : mμ[G].edist v ₗ v ᵣ = 2 := by
+example {u v : V} (h : G.Adj u v) : mμ(G).edist vˡ vʳ = 2 := by
   rw [edist_eq_two_iff]
-  refine ⟨by simp, by simp, ⟨u ₗ, ?_⟩⟩
+  refine ⟨by simp, by simp, ⟨uˡ, ?_⟩⟩
   rw [mem_commonNeighbors]
   simp [h.symm]
 
 /-!
-11. Show that the Grötzsch graph `mμ[C[5]]` has girth `4`. Hint: use
+11. Show that the Grötzsch graph `mμ(C[5])` has girth `4`. Hint: use
 `egirth_mycielskian_eq_four`.
 
 `C[5]` is triangle-free, and its vertex `0` has the two neighbours `1` and `4`, so

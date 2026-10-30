@@ -86,8 +86,8 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 /-!
 8. The vector `mycielskianLift t x` again has entries summing to zero, so the
 construction can be repeated. Show this, and deduce that the Grötzsch graph
-`grotzschGraph`, i.e. `mμ[C[5]]`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
-`grotzschGraph` is isomorphic to `mμ[mμ[K[2]]]`, by `Iso.mapMycielskian` applied to
+`grotzschGraph`, i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
+`grotzschGraph` is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
 `mycielskianCompleteTwoIsoCycleFive`.)
 -/
 lemma sum_mycielskianLift' [Fintype V] {R : Type*} [CommRing R] (t : R)
@@ -109,11 +109,11 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
 
 /-!
 10. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
-the Mycielskian `mμ[G]` is `1`-dimensional.
+the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (h : ∀ v, ¬ G.IsIsolated v) :
-    Module.finrank ℝ (mμ[G].lapMatrix ℝ).toLin'.ker = 1 := by
+    Module.finrank ℝ (mμ(G).lapMatrix ℝ).toLin'.ker = 1 := by
   sorry
 
 /-!
@@ -341,8 +341,8 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
 /-!
 8. The vector `mycielskianLift t x` again has entries summing to zero, so the
 construction can be repeated. Show this, and deduce that the Grötzsch graph
-`grotzschGraph`, i.e. `mμ[C[5]]`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
-`grotzschGraph` is isomorphic to `mμ[mμ[K[2]]]`, by `Iso.mapMycielskian` applied to
+`grotzschGraph`, i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
+`grotzschGraph` is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
 `mycielskianCompleteTwoIsoCycleFive`.)
 -/
 lemma sum_mycielskianLift [Fintype V] {R : Type*} [CommRing R] (t : R)
@@ -351,7 +351,7 @@ lemma sum_mycielskianLift [Fintype V] {R : Type*} [CommRing R] (t : R)
 
 /-!
 Lifting the eigenvector `![1, -1]` of `K[2]` twice, first with `s` and then with `φ`
-or `ψ`, gives the eigenvalues `φ * (s * -1)` and `ψ * (s * -1)` of `mμ[mμ[K[2]]]`,
+or `ψ`, gives the eigenvalues `φ * (s * -1)` and `ψ * (s * -1)` of `mμ(mμ(K[2]))`,
 for `s = φ` and `s = ψ`. Since `φ * ψ = -1`, these are `-φ ^ 2`, `1` and `-ψ ^ 2`.
 -/
 open Matrix in
@@ -365,8 +365,8 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
   have hx0 : (![1, -1] : Fin 2 → ℝ) ≠ 0 := by simp
   have hsum : ∑ i, (![1, -1] : Fin 2 → ℝ) i = 0 := by simp
   have h (s : ℝ) (hs : s ^ 2 = s + 1) :
-      φ * (s * -1) ∈ spectrum ℝ (mμ[mμ[K[2]]].adjMatrix ℝ) ∧
-        ψ * (s * -1) ∈ spectrum ℝ (mμ[mμ[K[2]]].adjMatrix ℝ) :=
+      φ * (s * -1) ∈ spectrum ℝ (mμ(mμ(K[2])).adjMatrix ℝ) ∧
+        ψ * (s * -1) ∈ spectrum ℝ (mμ(mμ(K[2])).adjMatrix ℝ) :=
     mem_spectrum_adjMatrix_mycielskian (mycielskianLift_ne_zero s hx0)
       (adjMatrix_mycielskian_mulVec_mycielskianLift hs hK hsum)
       (sum_mycielskianLift s hsum)
@@ -391,14 +391,14 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
 
 /-!
 10. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
-the Mycielskian `mμ[G]` is `1`-dimensional.
+the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (h : ∀ v, ¬ G.IsIsolated v) :
-    Module.finrank ℝ (mμ[G].lapMatrix ℝ).toLin'.ker = 1 := by
+    Module.finrank ℝ (mμ(G).lapMatrix ℝ).toLin'.ker = 1 := by
   rw [← card_connectedComponent_eq_finrank_ker_toLin'_lapMatrix,
     Fintype.card_eq_nat_card]
-  exact (connected_mycielskian_iff.2 h).card_connectedComponent
+  exact card_connectedComponent_eq_one_iff.2 (connected_mycielskian_iff.2 h)
 
 /-!
 11. Show that `C[5]` is strongly regular with parameters `(5, 2, 0, 1)`, and deduce

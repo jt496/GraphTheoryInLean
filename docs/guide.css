@@ -59,17 +59,9 @@ main .authors:has(.author) .note::before {
     color: var(--stil-sorry-color);
 }
 
-/* Set graph notation (`K[n]`, `mμ[G]`, `G ≃g H`, `δ(G)`, `χ G`) like a keyword,
-   whatever the highlighter classes its tokens as: it makes `mμ[` a keyword, since it
-   starts with a letter, but `K[`, `]`, `≃g` and `χ` punctuation. The tokens are those
-   of syntax in the `SimpleGraph` namespace (the guide's notation and Mathlib's graph
-   notation), found through `data-binding` as for `sorry` above. Inline Lean keeps
-   its single colour (see below). */
-.hl.lean .token[data-binding^="kw-occ-SimpleGraph."],
-.hl.lean .token[data-binding^="kw-occ-_private."][data-binding*=".SimpleGraph.«"] {
-    color: var(--verso-code-keyword-color);
-    font-weight: var(--verso-code-keyword-weight, bold);
-}
+/* The notation of the namespaces in guide.json's "notation_namespaces" is set like
+   a keyword by an inline style in the page head, found through `data-binding` as
+   for `sorry` above (see notation_head in convert_lean_to_verso.py). */
 
 /* Make display math have comfortable vertical spacing */
 .math-display {

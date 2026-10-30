@@ -340,21 +340,21 @@ lemma radius_hypercube {n : ℕ} : Q[n].radius = n := by
 
 If `G` is a graph without isolated vertices then, whatever the diameter of `G`, its
 Mycielskian has radius at most `2` and diameter at most `4`. The apex `none` is
-adjacent to every right copy `v ᵣ`, and each left copy `v ₗ` is at distance at most
+adjacent to every right copy `vʳ`, and each left copy `vˡ` is at distance at most
 `2` from the apex, via the right copy of any neighbour of `v`.
 -/
 @[simp]
-lemma edist_mycielskian_none_right {v : V} : mμ[G].edist none v ᵣ = 1 := by
+lemma edist_mycielskian_none_right {v : V} : mμ(G).edist none vʳ = 1 := by
   simp [edist_eq_one_iff_adj]
 
 lemma edist_mycielskian_none_left_le_two {u v : V} (h : G.Adj u v) :
-    mμ[G].edist none v ₗ ≤ 2 := by
-  have h1 : mμ[G].Adj none u ᵣ := by simp
-  have h2 : mμ[G].Adj u ᵣ v ₗ := by simpa
+    mμ(G).edist none vˡ ≤ 2 := by
+  have h1 : mμ(G).Adj none uʳ := by simp
+  have h2 : mμ(G).Adj uʳ vˡ := by simpa
   exact edist_le (cons h1 <| cons h2 nil)
 
 theorem radius_mycielskian_le_two (h : ∀ v : V, ¬ G.IsIsolated v) :
-    mμ[G].radius ≤ 2 := by
+    mμ(G).radius ≤ 2 := by
   refine radius_le_eccent.trans ((eccent_le_iff none _).mpr ?_)
   rintro (_ | ⟨v | v⟩)
   · simp
@@ -364,13 +364,13 @@ theorem radius_mycielskian_le_two (h : ∀ v : V, ¬ G.IsIsolated v) :
 
 /-!
 The diameter bound follows from `ediam_le_two_mul_radius`, which leaves the goal
-`2 * mμ[G].radius ≤ 4`. We close it with `grw` ("generalized rewrite"), which
+`2 * mμ(G).radius ≤ 4`. We close it with `grw` ("generalized rewrite"), which
 rewrites with an inequality instead of an equation, using the same monotonicity
 facts as `gcongr`: since multiplication by `2` is monotone, the bound
-`mμ[G].radius ≤ 2` turns the goal into `2 * 2 ≤ 4`, which holds by `rfl`.
+`mμ(G).radius ≤ 2` turns the goal into `2 * 2 ≤ 4`, which holds by `rfl`.
 -/
 theorem ediam_mycielskian_le_four (h : ∀ v : V, ¬ G.IsIsolated v) :
-    mμ[G].ediam ≤ 4 :=
+    mμ(G).ediam ≤ 4 :=
   ediam_le_two_mul_radius.trans <| by grw [radius_mycielskian_le_two h]; rfl
 
 /-!
@@ -379,13 +379,13 @@ since the diameter of a disconnected graph is the junk value `0`. Here the junk 
 removes a hypothesis, but only because the `ℕ`-valued statement says nothing about
 the disconnected case.
 -/
-theorem diam_mycielskian_le_four : mμ[G].diam ≤ 4 := by
+theorem diam_mycielskian_le_four : mμ(G).diam ≤ 4 := by
   by_cases! h : ∀ v : V, ¬ G.IsIsolated v
   · exact ENat.toNat_le_of_le_natCast (ediam_mycielskian_le_four h)
-  · -- an isolated vertex `v` of `G` makes `v ₗ` isolated in `mμ[G]`
+  · -- an isolated vertex `v` of `G` makes `vˡ` isolated in `mμ(G)`
     obtain ⟨v, hv⟩ := h
     refine (diam_eq_zero_of_not_connected fun hc => ?_).trans_le (by norm_num)
-    obtain ⟨p⟩ := hc.preconnected v ₗ none
+    obtain ⟨p⟩ := hc.preconnected vˡ none
     cases p with
     | @cons _ x _ ha _ =>
       rcases x with _ | x | x <;> simp_all [IsIsolated]
@@ -399,7 +399,7 @@ which is `0` for an acyclic graph. Girth is the natural counterpart of the diame
 if the maximum degree is bounded, small diameter forces *few* vertices, while if the
 minimum degree is bounded below, large girth forces *many* vertices. These are the
 Moore and cage bounds of [Moore and Cage Bounds](#section-moore-and-cage-bounds).
-Girth also enters the Mycielski construction: `mμ[G]` raises the chromatic number
+Girth also enters the Mycielski construction: `mμ(G)` raises the chromatic number
 (`chromaticNumber_mycielskian`) while staying triangle-free
 (`CliqueFree.mycielskian`), and below we compute its girth exactly.
 
@@ -620,8 +620,8 @@ The Mycielskian of a triangle-free graph is triangle-free, so its girth is at le
 `4`. Whether it is exactly `4` depends on whether `G` has two edges sharing an
 endpoint: if it does, the two edges give a `4`-cycle through the apex; if not, the
 edges of `G` form a matching (so `G` is a matching plus isolated vertices), and then
-the girth of `mμ[G]` is `5` provided `G` has an edge. (If `G` has no edges then
-`mμ[G]` is a star centred at the apex plus isolated vertices, so it is acyclic.)
+the girth of `mμ(G)` is `5` provided `G` has an edge. (If `G` has no edges then
+`mμ(G)` is a star centred at the apex plus isolated vertices, so it is acyclic.)
 -/
 /-- The edges of `G` form a matching: no two edges share an endpoint, that is,
 every vertex has at most one neighbour (so `G` is a matching plus isolated
@@ -630,12 +630,12 @@ abbrev EdgesFormMatching (G : SimpleGraph V) : Prop :=
   ∀ x y z : V, G.Adj x y → G.Adj x z → y = z
 
 /-- A pair of edges with a common endpoint, `u — v` and `u — w`, gives rise to a walk
-in the Mycielskian, `none — v ᵣ — u ₗ — w ᵣ — none`. (If `v ≠ w` this is a
+in the Mycielskian, `none — vʳ — uˡ — wʳ — none`. (If `v ≠ w` this is a
 `4`-cycle.) -/
 def mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w) :
-    mμ[G].Walk none none :=
-  cons (by simp : mμ[G].Adj none v ᵣ) <| cons (by simp [h1.symm])
-    <| cons (by simpa : mμ[G].Adj u ₗ w ᵣ) <| cons (by simp) nil
+    mμ(G).Walk none none :=
+  cons (by simp : mμ(G).Adj none vʳ) <| cons (by simp [h1.symm])
+    <| cons (by simpa : mμ(G).Adj uˡ wʳ) <| cons (by simp) nil
 
 lemma isCycle_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w)
     (h : v ≠ w) : (mycielskianFourCycle h1 h2).IsCycle := by
@@ -645,18 +645,18 @@ lemma length_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w) 
     (mycielskianFourCycle h1 h2).length = 4 := rfl
 
 /-!
-If `G` is triangle-free and its edges do not form a matching, then `mμ[G]` has
+If `G` is triangle-free and its edges do not form a matching, then `mμ(G)` has
 girth `4`.
 -/
 lemma egirth_mycielskian_eq_four (h3 : G.CliqueFree 3)
-    (hnm : ¬G.EdgesFormMatching) : egirth mμ[G] = 4 := by
+    (hnm : ¬G.EdgesFormMatching) : egirth mμ(G) = 4 := by
   obtain ⟨x, y, z, h1, h2, hvw⟩ : ∃ x y z, G.Adj x y ∧ G.Adj x z ∧ y ≠ z := by grind
   refine le_antisymm ?_ (four_le_egirth_of_cliqueFree_three h3.mycielskian)
   simpa [length_mycielskianFourCycle] using
     (isCycle_mycielskianFourCycle h1 h2 hvw).egirth_le_length
 
 /-!
-If the edges of `G` form a matching then `mμ[G]` contains no copy of `C[4]`.
+If the edges of `G` form a matching then `mμ(G)` contains no copy of `C[4]`.
 We use `cycleGraph_four_free_iff_common_neighbor_unique`: given distinct vertices `x`
 and `y` with common neighbours `u` and `v`, we split into cases according to whether
 each of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy. The adjacency
@@ -664,7 +664,7 @@ rules of the Mycielskian dispose of most of the `81` cases, and `grind` finishes
 rest.
 -/
 lemma cycleGraph_four_free_mycielskian (hmatch : G.EdgesFormMatching) :
-    C[4].Free mμ[G] := by
+    C[4].Free mμ(G) := by
   apply cycleGraph_four_free_iff_common_neighbor_unique.mpr
   rintro (_ | (a | a)) (_ | (b | b)) (_ | (u | u)) (_ | (v | v)) h1 h2 h3 h4 hne
     <;> simp_all only [mycielskian_adj] <;> grind [Adj.symm]
@@ -679,10 +679,10 @@ lemma EdgesFormMatching.cliqueFree_three (hmatch : G.EdgesFormMatching) :
   exact hbc.ne (hmatch a b c hab hac)
 
 /-!
-If `G` has an edge and its edges form a matching, then `mμ[G]` has girth `5`.
+If `G` has an edge and its edges form a matching, then `mμ(G)` has girth `5`.
 -/
 lemma egirth_mycielskian_eq_five {u v : V} (hadj : G.Adj u v)
-    (hmatch : G.EdgesFormMatching) : egirth mμ[G] = 5 := by
+    (hmatch : G.EdgesFormMatching) : egirth mμ(G) = 5 := by
   refine le_antisymm ?_ (five_le_egirth_of_cliqueFree_three_of_free
     hmatch.cliqueFree_three.mycielskian (cycleGraph_four_free_mycielskian hmatch))
   simpa [mycielskianClosed] using
@@ -1182,8 +1182,7 @@ their union has three elements, and the remaining two elements of `Fin 5` form a
 common neighbour.
 -/
 lemma petersenGraph_exists_adj_adj : ∀ u v, u ≠ v → ¬ petersenGraph.Adj u v →
-    ∃ w, petersenGraph.Adj u w ∧ petersenGraph.Adj w v := by
-  decide
+    ∃ w, petersenGraph.Adj u w ∧ petersenGraph.Adj w v := by decide
 
 /-!
 No three `2`-subsets of `Fin 5` are pairwise disjoint, so there are no triangles.

@@ -890,346 +890,7 @@ span.stil-footnote:focus-within span.stil-footnote-content,
 span.stil-footnote.stil-footnote-open span.stil-footnote-content {
   display: block;
 }
-</style><script>
-window.onload = async () => {
-
-    // Don't show hovers inside of closed tactic states
-    function blockedByTactic(elem) {
-      let parent = elem.parentNode;
-      while (parent && "classList" in parent) {
-        if (parent.classList.contains("tactic")) {
-          const toggle = parent.querySelector(":scope > input.tactic-toggle");
-          if (toggle) {
-            return !toggle.checked;
-          }
-        }
-        parent = parent.parentNode;
-      }
-      return false;
-    }
-
-    // The innermost element under the pointer, used to show only the most specific hover
-    let hoverTarget = null;
-    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
-
-    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
-    const visibleTippies = new Set();
-    function blockedByTippy(elem) {
-      for (const ref of visibleTippies) {
-        if (!ref.contains(elem) && !elem.contains(ref)) return true;
-      }
-      return false;
-    }
-
-    // Whether the element's tooltip would have content to show. Content nested in a
-    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
-    // not a tippy instance is currently attached to it.
-    function showsContent(el) {
-      if (!el._tippy) return false;
-      if (el.classList.contains('tactic')) {
-        const toggle = el.querySelector(':scope > input.tactic-toggle');
-        return !!toggle && !toggle.checked;
-      }
-      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
-        !blockedByTactic(el);
-    }
-
-    // The nearest enclosing element whose tooltip has content
-    function innermostShowable(el) {
-      while (el && el.nodeType === Node.ELEMENT_NODE) {
-        if (showsContent(el)) return el;
-        el = el.parentElement;
-      }
-      return null;
-    }
-
-    // Binding highlights via event delegation with cached lookups
-    const bindingCache = new Map(); // context+binding -> [token elements]
-    let highlightedTokens = [];
-    function getBindingTokens(context, binding) {
-      const key = context + "\0" + binding;
-      let tokens = bindingCache.get(key);
-      if (!tokens) {
-        tokens = [];
-        for (const example of document.querySelectorAll(".hl.lean")) {
-          if (example.dataset.leanContext == context) {
-            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
-              tokens.push(tok);
-            }
-          }
-        }
-        bindingCache.set(key, tokens);
-      }
-      return tokens;
-    }
-    for (const container of document.querySelectorAll(".hl.lean")) {
-      container.addEventListener("mouseover", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
-        if (blockedByTactic(c)) return;
-        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
-        for (const tok of tokens) {
-          tok.classList.add("binding-hl");
-        }
-        highlightedTokens = tokens;
-      });
-      container.addEventListener("mouseout", (event) => {
-        const c = event.target.closest(".token");
-        if (!c || !container.contains(c)) return;
-        for (const tok of highlightedTokens) {
-          tok.classList.remove("binding-hl");
-        }
-        highlightedTokens = [];
-      });
-    }
-    /* Render docstrings */
-    if ('undefined' !== typeof marked) {
-        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement("div");
-            rendered.classList.add("docstring");
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-        }
-    }
-    // Add hovers
-    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
-
-    function hideParentTooltips(element) {
-      let parent = element.parentElement;
-      while (parent) {
-        const tippyInstance = parent._tippy;
-        if (tippyInstance) {
-          tippyInstance.hide();
-        }
-        parent = parent.parentElement;
-      }
-    }
-
-    function hideDescendantTooltips(element) {
-      for (const ref of visibleTippies) {
-        if (ref !== element && element.contains(ref)) {
-          ref._tippy.hide();
-        }
-      }
-    }
-
-    // Renders the documentation for a hover ID from the doc table
-    function docHoverContent(hoverId) {
-      const info = document.createElement('span');
-      info.className = 'hover-info';
-      info.style.display = 'block';
-      const data = versoDocData[hoverId];
-      if (data) {
-        info.innerHTML = data;
-        /* Render docstrings - TODO server-side */
-        if ('undefined' !== typeof marked) {
-          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
-            const str = d.innerText;
-            const html = marked.parse(str);
-            const rendered = document.createElement('div');
-            rendered.classList.add('docstring');
-            rendered.innerHTML = html;
-            d.parentNode.replaceChild(rendered, d);
-          }
-        }
-      } else {
-        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
-      }
-      return info;
-    }
-
-
-
-
-    const defaultTippyProps = {
-      /* DEBUG -- remove the space: * /
-      onHide(any) { return false; },
-      trigger: "click",
-      // */
-      /* theme: "lean", */
-      maxWidth: "none",
-      appendTo: () => document.body,
-      interactive: true,
-      delay: [100, null],
-      /* ignoreAttributes: true, */
-      followCursor: 'initial',
-      onShow(inst) {
-        const ref = inst.reference;
-        if (ref.className == 'tactic') {
-          const toggle = ref.querySelector(":scope > input.tactic-toggle");
-          if (toggle && toggle.checked) {
-            return false;
-          }
-        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
-          if (blockedByTactic(ref)) { return false };
-        } else { // Nothing to show here!
-          return false;
-        }
-        // Show only the most specific hover under the pointer
-        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
-          return false;
-        }
-        hideParentTooltips(ref);
-        hideDescendantTooltips(ref);
-        if (blockedByTippy(ref)) { return false; }
-      },
-      onShown(inst) { visibleTippies.add(inst.reference); },
-      onHidden(inst) { visibleTippies.delete(inst.reference); },
-      content (tgt) {
-        const content = document.createElement("span");
-        if (tgt.className == 'tactic') {
-          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
-          state.style.display = "block";
-          content.appendChild(state);
-          content.style.display = "block";
-          content.className = "hl lean popup";
-        } else {
-          content.className = "hl lean";
-          content.style.display = "block";
-          content.style.maxHeight = "300px";
-          content.style.overflowY = "auto";
-          content.style.overflowX = "hidden";
-          // Messages come from the inline hover-info; documentation comes from the doc
-          // table. An element with both (a message span sharing a documented token's
-          // extent) shows both in one tooltip.
-          const hoverId = tgt.dataset.versoHover;
-          const hoverInfo = tgt.querySelector(".hover-info");
-          if (hoverInfo) {
-            content.appendChild(hoverInfo.cloneNode(true));
-          }
-          if (hoverId) {
-            // TODO stop doing an implicit conversion from string to number here
-            content.appendChild(docHoverContent(hoverId));
-          }
-          if (hoverInfo && hoverId) {
-            content.classList.add('mixed');
-          }
-          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
-          if (extraLinks) {
-            try {
-              const extras = JSON.parse(extraLinks);
-              const links = document.createElement('ul');
-              links.className = 'extra-doc-links';
-              extras.forEach((l) => {
-                const li = document.createElement('li');
-                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
-                links.appendChild(li);
-              });
-              content.appendChild(links);
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        }
-        return content;
-      }
-    };
-
-
-    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .punctuation.token[data-verso-hover], .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'lean');
-    });
-    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'warning message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'info message');
-    });
-    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'error message');
-    });
-    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
-      element.setAttribute('data-tippy-theme', 'tactic');
-    });
-    // Skip tokens inside closed tactics — they interfere with tactic tippys
-    const closedTactics = new Set();
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle && !toggle.checked) closedTactics.add(tactic);
-    });
-    function isInsideClosedTactic(el) {
-      const tactic = el.closest('.tactic');
-      return tactic && tactic !== el && closedTactics.has(tactic);
-    }
-
-    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .punctuation.token[data-verso-hover], .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
-    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
-
-    // Create/destroy token tippys when tactic checkbox toggles
-    const tacticTippySelector = '.const.token, .keyword.token, .punctuation.token[data-verso-hover], .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
-    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
-      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
-      if (toggle) toggle.addEventListener('change', () => {
-        if (toggle.checked) {
-          closedTactics.delete(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (!el._tippy) {
-              tippy(el, defaultTippyProps);
-            }
-          });
-        } else {
-          closedTactics.add(tactic);
-          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
-            if (el._tippy) el._tippy.destroy();
-          });
-        }
-        // The toggle changes which element's tooltip belongs to the pointer's position,
-        // but the pointer stays put, so no hover event announces the change. Show the
-        // right tooltip once the click that flipped the toggle has hidden the old one.
-        setTimeout(() => {
-          if (hoverTarget && hoverTarget.isConnected) {
-            const showable = innermostShowable(hoverTarget);
-            if (showable && showable._tippy) showable._tippy.show();
-          }
-        }, 0);
-      });
-  });
-}
-</script><script>
-window.addEventListener("DOMContentLoaded", function () {
-  var refs = document.querySelectorAll("span.stil-footnote-ref");
-  for (var i = 0; i < refs.length; i++) {
-    refs[i].textContent = "[" + (i + 1) + "]";
-  }
-});
-
-/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
-
-   Hovering alone is not enough: the Lean hover tooltips are appended to
-   `document.body`, outside the footnote span, so as soon as the pointer touches
-   one the span loses `:hover` and the note closes — dropping the pointer onto the
-   prose underneath, whose tooltips then appear instead. A pinned note survives
-   that. Closes on a second click, on Escape, or on a click elsewhere; clicks
-   inside the note or inside a tooltip keep it open. */
-window.addEventListener("DOMContentLoaded", function () {
-  function closeAll() {
-    var open = document.querySelectorAll("span.stil-footnote.stil-footnote-open");
-    for (var i = 0; i < open.length; i++) {
-      open[i].classList.remove("stil-footnote-open");
-    }
-  }
-  document.addEventListener("click", function (e) {
-    if (!e.target || !e.target.closest) { return; }
-    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
-    if (ref) {
-      var note = ref.closest("span.stil-footnote");
-      var wasOpen = note.classList.contains("stil-footnote-open");
-      closeAll();
-      if (!wasOpen) { note.classList.add("stil-footnote-open"); }
-      e.preventDefault();
-      return;
-    }
-    if (e.target.closest("span.stil-footnote-content") ||
-        e.target.closest("[data-tippy-root]")) { return; }
-    closeAll();
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { closeAll(); }
-  });
-});
-</script><script>window.xref = {"Verso.Genre.Manual.section":
+</style><script>window.xref = {"Verso.Genre.Manual.section":
  {"title": "Sections or chapters of the manual",
   "description": null,
   "contents":
@@ -1876,7 +1537,7 @@ window.addEventListener("DOMContentLoaded", function () {
      "data":
      {"title": "The Handshake Lemma",
       "shortTitle": null,
-      "sectionNum": "4.3.5.",
+      "sectionNum": "4.3.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -1884,7 +1545,7 @@ window.addEventListener("DOMContentLoaded", function () {
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "The Handshake Lemma", "shortTitle": null, "number": "5"}]},
+       {"title": "The Handshake Lemma", "shortTitle": null, "number": "4"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-the-greedy-bound-for-graphs-on":
    [{"id": "section-the-greedy-bound-for-graphs-on",
@@ -2564,7 +2225,7 @@ window.addEventListener("DOMContentLoaded", function () {
      "data":
      {"title": "Regular Graphs",
       "shortTitle": null,
-      "sectionNum": "4.3.6.",
+      "sectionNum": "4.3.5.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -2572,7 +2233,7 @@ window.addEventListener("DOMContentLoaded", function () {
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Regular Graphs", "shortTitle": null, "number": "6"}]},
+       {"title": "Regular Graphs", "shortTitle": null, "number": "5"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-reachability":
    [{"id": "section-reachability",
@@ -2810,7 +2471,7 @@ window.addEventListener("DOMContentLoaded", function () {
      "data":
      {"title": "Neighbours in a Set",
       "shortTitle": null,
-      "sectionNum": "4.3.7.",
+      "sectionNum": "4.3.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -2818,7 +2479,7 @@ window.addEventListener("DOMContentLoaded", function () {
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Neighbours in a Set", "shortTitle": null, "number": "7"}]},
+       {"title": "Neighbours in a Set", "shortTitle": null, "number": "6"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-neighbours":
    [{"id": "section-neighbours",
@@ -2934,7 +2595,7 @@ window.addEventListener("DOMContentLoaded", function () {
      "data":
      {"title": "Minimum and Maximum Degree",
       "shortTitle": null,
-      "sectionNum": "4.3.4.",
+      "sectionNum": "4.3.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -2944,7 +2605,7 @@ window.addEventListener("DOMContentLoaded", function () {
        {"title": "Degrees", "shortTitle": null, "number": "3"},
        {"title": "Minimum and Maximum Degree",
         "shortTitle": null,
-        "number": "4"}]},
+        "number": "3"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-maximum-degree-two":
    [{"id": "section-maximum-degree-two",
@@ -4359,23 +4020,6 @@ window.addEventListener("DOMContentLoaded", function () {
      "data":
      {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
       "shortTitle": null,
-      "sectionNum": "4.3.3.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Decidability, Finiteness and Degrees",
-        "shortTitle": null,
-        "number": "4"},
-       {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
-        "shortTitle": null,
-        "number": "3"}]},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "section-degrees-in-complete-bipartite-graphs":
-   [{"id": "section-degrees-in-complete-bipartite-graphs",
-     "data":
-     {"title": "Degrees in Complete Bipartite Graphs",
-      "shortTitle": null,
       "sectionNum": "4.3.2.",
       "searchPriority": 50,
       "context":
@@ -4384,7 +4028,7 @@ window.addEventListener("DOMContentLoaded", function () {
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Degrees in Complete Bipartite Graphs",
+       {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
         "shortTitle": null,
         "number": "2"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
@@ -5010,14 +4654,14 @@ window.addEventListener("DOMContentLoaded", function () {
    "section-complete-multipartite-graphs-and-blow-ups":
    [{"id": "section-complete-multipartite-graphs-and-blow-ups",
      "data":
-     {"title": "Complete Multipartite Graphs and Blow-ups*",
+     {"title": "Complete Multipartite Graphs and Blow-ups",
       "shortTitle": null,
       "sectionNum": "3.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"}]},
      "address": "/Constructions/"}],
@@ -5031,7 +4675,7 @@ window.addEventListener("DOMContentLoaded", function () {
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"},
        {"title": "Complete Multipartite Graphs",
@@ -5841,7 +5485,7 @@ window.addEventListener("DOMContentLoaded", function () {
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"},
        {"title": "Blow-ups", "shortTitle": null, "number": "2"}]},
@@ -6485,22 +6129,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Decidability",
         "Bool and Prop"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.unexpandMycielskianVert":
-   [{"id":
-     "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandMycielskianVert",
-     "data":
-     {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandMycielskianVert":
-      {"display": "unexpandMycielskianVert",
-       "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
-     "address": "/Constructions/"}],
-   "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.unexpandIterMycielskian":
-   [{"id":
-     "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandIterMycielskian",
-     "data":
-     {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandIterMycielskian":
-      {"display": "unexpandIterMycielskian",
-       "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
-     "address": "/Constructions/"}],
    "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.kneserGraphFintype":
    [{"id":
      "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___kneserGraphFintype",
@@ -6673,6 +6301,13 @@ window.addEventListener("DOMContentLoaded", function () {
       {"display": "tensorProd_adj",
        "context": ["Graph Theory in Lean", "Maps", "Tensor Products*"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.tensorProdFintypeNeighborSet":
+   [{"id": "SimpleGraph___tensorProdFintypeNeighborSet",
+     "data":
+     {"/Maps/#SimpleGraph___tensorProdFintypeNeighborSet":
+      {"display": "tensorProdFintypeNeighborSet",
+       "context": ["Graph Theory in Lean", "Maps", "Tensor Products*"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.tensorProd.sndHom":
    [{"id": "SimpleGraph___tensorProd___sndHom",
      "data":
@@ -6795,17 +6430,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Clique and Independence Number of the Mycielskian",
         "Independence Number of the Mycielskian*"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.subset_compl_openNeighborhoodFinset":
-   [{"id": "SimpleGraph___subset_compl_openNeighborhoodFinset",
-     "data":
-     {"/Cliques/#SimpleGraph___subset_compl_openNeighborhoodFinset":
-      {"display": "subset_compl_openNeighborhoodFinset",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Independence Number of the Mycielskian*"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.subgraphIsoEquivAut":
    [{"id": "SimpleGraph___subgraphIsoEquivAut",
      "data":
@@ -6890,17 +6514,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Independent Sets",
         "Independence Number of the Kneser Graph*"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.single_true_left_inj":
-   [{"id": "SimpleGraph___single_true_left_inj",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___single_true_left_inj":
-      {"display": "single_true_left_inj",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Injectivity"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.sigma_induce_adj":
    [{"id": "SimpleGraph___sigma_induce_adj",
      "data":
@@ -7040,6 +6653,17 @@ window.addEventListener("DOMContentLoaded", function () {
         "Tensor Products*",
         "Indexed Tensor Products"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.piTensorProdFintypeNeighborSet":
+   [{"id": "SimpleGraph___piTensorProdFintypeNeighborSet",
+     "data":
+     {"/Maps/#SimpleGraph___piTensorProdFintypeNeighborSet":
+      {"display": "piTensorProdFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Tensor Products*",
+        "Indexed Tensor Products"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.piTensorProd":
    [{"id": "SimpleGraph___piTensorProd",
      "data":
@@ -7156,6 +6780,13 @@ window.addEventListener("DOMContentLoaded", function () {
         "Trails, Paths, Circuits and Cycles",
         "Trails and Paths"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.pathNat.bicoloring":
+   [{"id": "SimpleGraph___pathNat___bicoloring",
+     "data":
+     {"/Colorings/#SimpleGraph___pathNat___bicoloring":
+      {"display": "pathNat.bicoloring",
+       "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.pathNat":
    [{"id": "SimpleGraph___pathNat",
      "data":
@@ -7164,18 +6795,6 @@ window.addEventListener("DOMContentLoaded", function () {
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathGraphAdjDecidableRw":
-   [{"id": "SimpleGraph___pathGraphAdjDecidableRw",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___pathGraphAdjDecidableRw":
-      {"display": "pathGraphAdjDecidableRw",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Decidability",
-        "Deciding Adjacency",
-        "Decidability and Kernel Reduction*"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.pathGraph.path":
    [{"id": "SimpleGraph___pathGraph___path",
      "data":
@@ -7498,39 +7117,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Computations with Mycielskians",
         "Mycielskian Degrees"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.mycielskianProj_right":
-   [{"id": "SimpleGraph___mycielskianProj_right",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_right":
-      {"display": "mycielskianProj_right",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.mycielskianProj_none":
-   [{"id": "SimpleGraph___mycielskianProj_none",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_none":
-      {"display": "mycielskianProj_none",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.mycielskianProj_left":
-   [{"id": "SimpleGraph___mycielskianProj_left",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_left":
-      {"display": "mycielskianProj_left",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.mycielskianProj":
    [{"id": "SimpleGraph___mycielskianProj",
      "data":
@@ -8039,26 +7625,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Connectivity",
         "Eulerian Circuits and Trails"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.locallyFiniteBlowUpGraph'":
-   [{"id": "SimpleGraph___locallyFiniteBlowUpGraph___",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___locallyFiniteBlowUpGraph___":
-      {"display": "locallyFiniteBlowUpGraph'",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.locallyFiniteBlowUpGraph":
-   [{"id": "SimpleGraph___locallyFiniteBlowUpGraph",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___locallyFiniteBlowUpGraph":
-      {"display": "locallyFiniteBlowUpGraph",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.lineGraphCompleteThreeIsoCompleteThree":
    [{"id": "SimpleGraph___lineGraphCompleteThreeIsoCompleteThree",
      "data":
@@ -9662,6 +9228,17 @@ window.addEventListener("DOMContentLoaded", function () {
         "Hypercubes and Mycielskians",
         "Embeddings of Hypercubes"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.hypercube.bicoloring_apply":
+   [{"id": "SimpleGraph___hypercube___bicoloring_apply",
+     "data":
+     {"/Colorings/#SimpleGraph___hypercube___bicoloring_apply":
+      {"display": "hypercube.bicoloring_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Hypercubes"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.hypercube.bicoloring":
    [{"id": "SimpleGraph___hypercube___bicoloring",
      "data":
@@ -9723,16 +9300,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Decidability, Finiteness and Degrees",
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hasseAdjDecidable":
-   [{"id": "SimpleGraph___hasseAdjDecidable",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hasseAdjDecidable":
-      {"display": "hasseAdjDecidable",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.hammingNorm_single":
    [{"id": "SimpleGraph___hammingNorm_single",
@@ -10809,6 +10376,18 @@ window.addEventListener("DOMContentLoaded", function () {
         "Eccentricity, Diameter and Radius",
         "Diameter of Box Products"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.edgeDecidableRelAdj":
+   [{"id": "SimpleGraph___edgeDecidableRelAdj",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___edgeDecidableRelAdj":
+      {"display": "edgeDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Decidability",
+        "Deciding Adjacency",
+        "Decidability and Kernel Reduction*"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.edgeConnectivity_of_subsingleton":
    [{"id": "SimpleGraph___edgeConnectivity_of_subsingleton",
      "data":
@@ -11055,28 +10634,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Decidability, Finiteness and Degrees",
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.degree_completeBipartiteGraph_inr":
-   [{"id": "SimpleGraph___degree_completeBipartiteGraph_inr",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___degree_completeBipartiteGraph_inr":
-      {"display": "degree_completeBipartiteGraph_inr",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degrees",
-        "Degrees in Complete Bipartite Graphs"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.degree_completeBipartiteGraph_inl":
-   [{"id": "SimpleGraph___degree_completeBipartiteGraph_inl",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___degree_completeBipartiteGraph_inl":
-      {"display": "degree_completeBipartiteGraph_inl",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degrees",
-        "Degrees in Complete Bipartite Graphs"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.degree_blowUpN":
    [{"id": "SimpleGraph___degree_blowUpN",
@@ -11600,17 +11157,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Maximum Degree at Least Three",
         "Step 2: Gluing Along the Pair"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.connected_iff_card_connectedComponent":
-   [{"id": "SimpleGraph___connected_iff_card_connectedComponent",
-     "data":
-     {"/Connectivity/#SimpleGraph___connected_iff_card_connectedComponent":
-      {"display": "connected_iff_card_connectedComponent",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Connectivity",
-        "Connected Components"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.connected_hypercube":
    [{"id": "SimpleGraph___connected_hypercube",
      "data":
@@ -11633,15 +11179,15 @@ window.addEventListener("DOMContentLoaded", function () {
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.completeMultipartiteNat":
-   [{"id": "SimpleGraph___completeMultipartiteNat",
+   "SimpleGraph.completeMultipartiteNatFin":
+   [{"id": "SimpleGraph___completeMultipartiteNatFin",
      "data":
-     {"/Constructions/#SimpleGraph___completeMultipartiteNat":
-      {"display": "completeMultipartiteNat",
+     {"/Constructions/#SimpleGraph___completeMultipartiteNatFin":
+      {"display": "completeMultipartiteNatFin",
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.completeMultipartiteGraph_adj":
@@ -11652,18 +11198,18 @@ window.addEventListener("DOMContentLoaded", function () {
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.completeEquipartiteNat":
-   [{"id": "SimpleGraph___completeEquipartiteNat",
+   "SimpleGraph.completeMultipartiteFinNat":
+   [{"id": "SimpleGraph___completeMultipartiteFinNat",
      "data":
-     {"/Constructions/#SimpleGraph___completeEquipartiteNat":
-      {"display": "completeEquipartiteNat",
+     {"/Constructions/#SimpleGraph___completeMultipartiteFinNat":
+      {"display": "completeMultipartiteFinNat",
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.completeBipartiteGraph_not_adj_inr_iff'":
@@ -11731,17 +11277,6 @@ window.addEventListener("DOMContentLoaded", function () {
       {"display": "completeBipartiteGraph.bicoloring",
        "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
      "address": "/Colorings/"}],
-   "SimpleGraph.compl_openNeighborhoodFinset_nonempty":
-   [{"id": "SimpleGraph___compl_openNeighborhoodFinset_nonempty",
-     "data":
-     {"/Cliques/#SimpleGraph___compl_openNeighborhoodFinset_nonempty":
-      {"display": "compl_openNeighborhoodFinset_nonempty",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Independence Number of the Mycielskian*"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.colorable_of_forall_finite_subgraph_colorable":
    [{"id": "SimpleGraph___colorable_of_forall_finite_subgraph_colorable",
      "data":
@@ -12804,6 +12339,17 @@ window.addEventListener("DOMContentLoaded", function () {
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.blowUpNFintypeNeighborSet":
+   [{"id": "SimpleGraph___blowUpNFintypeNeighborSet",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpNFintypeNeighborSet":
+      {"display": "blowUpNFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Degrees",
+        "Degrees in the  n -Uniform Blow-up of a Graph"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.blowUpN":
    [{"id": "SimpleGraph___blowUpN",
      "data":
@@ -12812,9 +12358,29 @@ window.addEventListener("DOMContentLoaded", function () {
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Blow-ups"]}},
      "address": "/Constructions/"}],
+   "SimpleGraph.blowUpGraphFintypeNeighborSet'":
+   [{"id": "SimpleGraph___blowUpGraphFintypeNeighborSet___",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpGraphFintypeNeighborSet___":
+      {"display": "blowUpGraphFintypeNeighborSet'",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Exercises"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.blowUpGraphFintypeNeighborSet":
+   [{"id": "SimpleGraph___blowUpGraphFintypeNeighborSet",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpGraphFintypeNeighborSet":
+      {"display": "blowUpGraphFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Exercises"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.blowUpGraph":
    [{"id": "SimpleGraph___blowUpGraph",
      "data":
@@ -12823,7 +12389,7 @@ window.addEventListener("DOMContentLoaded", function () {
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Blow-ups"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.blockSetoid":
@@ -14092,17 +13658,6 @@ window.addEventListener("DOMContentLoaded", function () {
       {"display": "Walk.IsCycle.tail_not_nil",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsCycle.snd_eq_of_mem_darts":
-   [{"id": "SimpleGraph___Walk___IsCycle___snd_eq_of_mem_darts",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsCycle___snd_eq_of_mem_darts":
-      {"display": "Walk.IsCycle.snd_eq_of_mem_darts",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsCycle.neighborSet_toSubgraph_eq_of_degree_le_two":
    [{"id":
      "SimpleGraph___Walk___IsCycle___neighborSet_toSubgraph_eq_of_degree_le_two",
@@ -14924,6 +14479,17 @@ window.addEventListener("DOMContentLoaded", function () {
         "Degrees",
         "Regular Graphs"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.IsRegularOfDegree.boxProd":
+   [{"id": "SimpleGraph___IsRegularOfDegree___boxProd",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___IsRegularOfDegree___boxProd":
+      {"display": "IsRegularOfDegree.boxProd",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes",
+        "Stating Results Across a Diamond*"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.IsRegularOfDegree.blowUpN":
    [{"id": "SimpleGraph___IsRegularOfDegree___blowUpN",
      "data":
@@ -15223,11 +14789,33 @@ window.addEventListener("DOMContentLoaded", function () {
       {"display": "IsNClique.boxProd_image_fst",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.IsIndepSet.subset_compl_openNeighborhoodFinset":
+   [{"id": "SimpleGraph___IsIndepSet___subset_compl_openNeighborhoodFinset",
+     "data":
+     {"/Cliques/#SimpleGraph___IsIndepSet___subset_compl_openNeighborhoodFinset":
+      {"display": "IsIndepSet.subset_compl_openNeighborhoodFinset",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Clique and Independence Number of the Mycielskian",
+        "Independence Number of the Mycielskian*"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.IsIndepSet.mycielskian":
    [{"id": "SimpleGraph___IsIndepSet___mycielskian",
      "data":
      {"/Cliques/#SimpleGraph___IsIndepSet___mycielskian":
       {"display": "IsIndepSet.mycielskian",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Clique and Independence Number of the Mycielskian",
+        "Independence Number of the Mycielskian*"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.IsIndepSet.compl_openNeighborhoodFinset_nonempty":
+   [{"id": "SimpleGraph___IsIndepSet___compl_openNeighborhoodFinset_nonempty",
+     "data":
+     {"/Cliques/#SimpleGraph___IsIndepSet___compl_openNeighborhoodFinset_nonempty":
+      {"display": "IsIndepSet.compl_openNeighborhoodFinset_nonempty",
        "context":
        ["Graph Theory in Lean",
         "Cliques",
@@ -15459,6 +15047,13 @@ window.addEventListener("DOMContentLoaded", function () {
         "The Bondy–Chvátal Theorem",
         "The Closure of a Graph"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.IsClique.injOn_of_adj":
+   [{"id": "SimpleGraph___IsClique___injOn_of_adj",
+     "data":
+     {"/Cliques/#SimpleGraph___IsClique___injOn_of_adj":
+      {"display": "IsClique.injOn_of_adj",
+       "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.IsClique.boxProd_snd_eq'":
    [{"id": "SimpleGraph___IsClique___boxProd_snd_eq___",
      "data":
@@ -15590,17 +15185,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Automorphisms",
         "Vertex-Transitivity of Hypercubes"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.HypercubeVert.parity_ne_of_adj":
-   [{"id": "SimpleGraph___HypercubeVert___parity_ne_of_adj",
-     "data":
-     {"/Colorings/#SimpleGraph___HypercubeVert___parity_ne_of_adj":
-      {"display": "HypercubeVert.parity_ne_of_adj",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Hypercubes"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.HypercubeVert.parity":
    [{"id": "SimpleGraph___HypercubeVert___parity",
      "data":
@@ -16080,17 +15664,6 @@ window.addEventListener("DOMContentLoaded", function () {
         "Connectivity",
         "Eulerian Circuits and Trails"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Connected.card_connectedComponent":
-   [{"id": "SimpleGraph___Connected___card_connectedComponent",
-     "data":
-     {"/Connectivity/#SimpleGraph___Connected___card_connectedComponent":
-      {"display": "Connected.card_connectedComponent",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Connectivity",
-        "Connected Components"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.ComponentCompl.mem_of_hom":
    [{"id": "SimpleGraph___ComponentCompl___mem_of_hom",
      "data":
@@ -16294,6 +15867,13 @@ window.addEventListener("DOMContentLoaded", function () {
       {"display": "Coloring.mycielskian",
        "context":
        ["Graph Theory in Lean", "Colorings", "Colouring Mycielskians"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.Coloring.isBipartiteWith":
+   [{"id": "SimpleGraph___Coloring___isBipartiteWith",
+     "data":
+     {"/Colorings/#SimpleGraph___Coloring___isBipartiteWith":
+      {"display": "Coloring.isBipartiteWith",
+       "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.Coloring.boxProd":
    [{"id": "SimpleGraph___Coloring___boxProd",
@@ -16777,17 +16357,7 @@ window.addEventListener("DOMContentLoaded", function () {
         "Connectivity",
         "Edge and Vertex Connectivity",
         "Connectivity Numbers*"]}},
-     "address": "/Connectivity/"}],
-   "CovBy.decidableRel":
-   [{"id": "CovBy___decidableRel",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#CovBy___decidableRel":
-      {"display": "_root_.CovBy.decidableRel",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}]}},
+     "address": "/Connectivity/"}]}},
  "Verso.Genre.Manual.doc.tech":
  {"title": "Terminology",
   "description": "Definitions of technical terms",
@@ -17128,4 +16698,347 @@ if (paramName) {
         }
     });
 }
-</script><link rel="stylesheet" href="guide.css"/><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Cross-Reference Redirection</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Cross-Reference Redirection</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Bibliography/#chapter-bibliography">Bibliography</a></td></tr><tr class="numbered"><td class="num">15.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><div></div><div></div></nav><section><h1 id="title"></h1><div id="message"></div></section><nav class="prev-next-buttons"><div></div><div></div></nav></div></main></div></body></html>
+</script><script>
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .punctuation.token[data-verso-hover], .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .punctuation.token[data-verso-hover], .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .punctuation.token[data-verso-hover], .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script><script>
+window.addEventListener("DOMContentLoaded", function () {
+  var refs = document.querySelectorAll("span.stil-footnote-ref");
+  for (var i = 0; i < refs.length; i++) {
+    refs[i].textContent = "[" + (i + 1) + "]";
+  }
+});
+
+/* Clicking a marker (or a citation label, see `mycite`) pins its note open.
+
+   Hovering alone is not enough: the Lean hover tooltips are appended to
+   `document.body`, outside the footnote span, so as soon as the pointer touches
+   one the span loses `:hover` and the note closes — dropping the pointer onto the
+   prose underneath, whose tooltips then appear instead. A pinned note survives
+   that. Closes on a second click, on Escape, or on a click elsewhere; clicks
+   inside the note or inside a tooltip keep it open. */
+window.addEventListener("DOMContentLoaded", function () {
+  function closeAll() {
+    var open = document.querySelectorAll("span.stil-footnote.stil-footnote-open");
+    for (var i = 0; i < open.length; i++) {
+      open[i].classList.remove("stil-footnote-open");
+    }
+  }
+  document.addEventListener("click", function (e) {
+    if (!e.target || !e.target.closest) { return; }
+    var ref = e.target.closest("span.stil-footnote-ref, span.stil-cite-ref");
+    if (ref) {
+      var note = ref.closest("span.stil-footnote");
+      var wasOpen = note.classList.contains("stil-footnote-open");
+      closeAll();
+      if (!wasOpen) { note.classList.add("stil-footnote-open"); }
+      e.preventDefault();
+      return;
+    }
+    if (e.target.closest("span.stil-footnote-content") ||
+        e.target.closest("[data-tippy-root]")) { return; }
+    closeAll();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeAll(); }
+  });
+});
+</script><link rel="stylesheet" href="guide.css"/><style>.hl.lean .token[data-binding^="kw-occ-SimpleGraph."],
+.hl.lean .token[data-binding^="kw-occ-_private."][data-binding*=".SimpleGraph.«"] {
+    color: var(--verso-code-keyword-color);
+    font-weight: var(--verso-code-keyword-weight, bold);
+}</style><script src="guide.js"></script></head><body><header><div class="header-logo-wrapper"></div><div class="header-title-wrapper"><a href class="header-title"><h1>Cross-Reference Redirection</h1></a></div></header><label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc"><div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div><nav id="toc"><input type="checkbox" id="toggle-toc"/><div class="first"><a href class="toc-title"><h1>Cross-Reference Redirection</h1></a><div class="split-tocs"><div class="split-toc book"><div class="title"><label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"/></label><span class>Table of Contents</span></div><table><tr class="numbered"><td class="num">1.</td><td><a href="Introduction/#chapter-introduction">Introduction</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="SimpleGraph/#chapter-simplegraph">SimpleGraph</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Constructions/#chapter-constructions">Constructions</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Decidability___-Finiteness-and-Degrees/#chapter-decidability-finiteness-and-degrees">Decidability, Finiteness and Degrees</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="Maps/#chapter-maps">Maps</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="Cliques/#chapter-cliques">Cliques</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="Colorings/#chapter-colorings">Colorings</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="Walks/#chapter-walks">Walks</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="Subgraphs/#chapter-subgraphs">Subgraphs</a></td></tr><tr class="numbered"><td class="num">10.</td><td><a href="Connectivity/#chapter-connectivity">Connectivity</a></td></tr><tr class="numbered"><td class="num">11.</td><td><a href="Distance/#chapter-distance">Distance</a></td></tr><tr class="numbered"><td class="num">12.</td><td><a href="Algebraic-Graph-Theory/#chapter-algebraic-graph-theory">Algebraic Graph Theory</a></td></tr><tr class="numbered"><td class="num">13.</td><td><a href="Theorems/#chapter-theorems">Theorems</a></td></tr><tr class="numbered"><td class="num">14.</td><td><a href="Bibliography/#chapter-bibliography">Bibliography</a></td></tr><tr class="numbered"><td class="num">15.</td><td><a href="Appendix/#chapter-appendix">Appendix</a></td></tr></table></div></div></div><div class="last"></div></nav><div class="toc-resize-handle"></div><main><div class="content-wrapper"><nav class="prev-next-buttons"><div></div><div></div></nav><section><h1 id="title"></h1><div id="message"></div></section><nav class="prev-next-buttons"><div></div><div></div></nav></div></main></div></body></html>

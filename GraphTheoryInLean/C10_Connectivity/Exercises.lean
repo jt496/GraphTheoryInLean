@@ -53,16 +53,17 @@ example {W : Type*} {H : SimpleGraph W}
   sorry
 
 /-!
-6. Show that if `G` has no isolated vertices then the Mycielskian `mμ[G]` has no
+6. Show that if `G` has no isolated vertices then the Mycielskian `mμ(G)` has no
 bridges. Hint: `isBridge_mycielskian_iff`.
 -/
 example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
-    (he : e ∈ mμ[G].edgeSet) : ¬ mμ[G].IsBridge e := by
+    (he : e ∈ mμ(G).edgeSet) : ¬ mμ(G).IsBridge e := by
   sorry
 
 /-!
-7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `isAcyclic_pathNat` using `IsAcyclic.comap`.
+7. Show that the path graph `pathGraph (n + 1)` is a tree. (Mathlib has this, but
+prove it directly.) Hint: deduce acyclicity from `isAcyclic_pathNat` using
+`IsAcyclic.comap`.
 -/
 example (n : ℕ) : P[n + 1].IsTree := by
   sorry
@@ -423,17 +424,18 @@ example {W : Type*} {H : SimpleGraph W}
   (Hom.sigmaDesc _ f).comp isoSigmaConnectedComponents.toHom
 
 /-!
-6. Show that if `G` has no isolated vertices then the Mycielskian `mμ[G]` has no
+6. Show that if `G` has no isolated vertices then the Mycielskian `mμ(G)` has no
 bridges. Hint: `isBridge_mycielskian_iff`.
 -/
 example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
-    (he : e ∈ mμ[G].edgeSet) : ¬ mμ[G].IsBridge e := fun hb => by
+    (he : e ∈ mμ(G).edgeSet) : ¬ mμ(G).IsBridge e := fun hb => by
   obtain ⟨u, hu, -⟩ := (isBridge_mycielskian_iff he).mp hb
   exact hG u hu
 
 /-!
-7. Show that the path graph `pathGraph (n + 1)` is a tree. Hint: deduce acyclicity
-from `isAcyclic_pathNat` using `IsAcyclic.comap`.
+7. Show that the path graph `pathGraph (n + 1)` is a tree. (Mathlib has this, but
+prove it directly.) Hint: deduce acyclicity from `isAcyclic_pathNat` using
+`IsAcyclic.comap`.
 
 The path graph is connected, and `Fin.val` is an injective homomorphism from
 `P[n + 1]` into the infinite path `pathNat`, which is acyclic. So any cycle in

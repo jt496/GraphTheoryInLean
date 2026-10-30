@@ -170,7 +170,7 @@ lemma isHamiltonian_hypercube' {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
   sorry
 
 /-!
-19. Show that the Grötzsch graph `mμ[C[5]]` is Hamiltonian. Hint:
+19. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
 `IsHamiltonian.mycielskian`.
 -/
 example : grotzschGraph.IsHamiltonian := by
@@ -179,20 +179,18 @@ example : grotzschGraph.IsHamiltonian := by
 /-!
 The next three exercises return to the example from the chapter's closure section:
 `C[5] ⊔ edge 0 2 ⊔ edge 0 3`, i.e. `C[5]` with the two chords `0 — 2` and `0 — 3`.
-Mathlib's `Decidable` instance for adjacency in `edge u v` is currently defined using
-a cast, so `decide` gets stuck on any graph built from `edge` (see [Decidability and
-Kernel Reduction*](#section-decidability-and-kernel-reduction)). So we redefine the
-graph using `fromRel` instead.
+Our instance `edgeDecidableRelAdj` from [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction) takes priority over
+Mathlib's, so `decide` can check facts about this graph directly.
 -/
 /-- `C[5]` with the two chords `0 — 2` and `0 — 3`. -/
-abbrev chordedC5 : SimpleGraph (Fin 5) :=
-  C[5] ⊔ fromRel fun x y => x = 0 ∧ (y = 2 ∨ y = 3)
+abbrev chordedC5 : SimpleGraph (Fin 5) := C[5] ⊔ edge 0 2 ⊔ edge 0 3
 
 /-!
-20. Check that `chordedC5` is the graph from the chapter. Hint: after `ext`, simplify
-the adjacency relation and then `decide +revert` should complete the proof.
+20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
+have degree `2`. Hint: `decide`.
 -/
-example : chordedC5 = C[5] ⊔ edge 0 2 ⊔ edge 0 3 := by
+example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   sorry
 
 /-!
@@ -567,20 +565,18 @@ lemma isHamiltonian_hypercube {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
   | n + 2 => fun _ => ⟨_, _, hypercube.isHamiltonianCycle_grayCycle n⟩
 
 /-!
-19. Show that the Grötzsch graph `mμ[C[5]]` is Hamiltonian. Hint:
+19. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
 `IsHamiltonian.mycielskian`.
 -/
 example : grotzschGraph.IsHamiltonian :=
   IsHamiltonian.mycielskian (isHamiltonian_cycleGraph (by grind)) (by simp)
 
 /-!
-20. Check that `chordedC5` is the graph from the chapter. Hint: after `ext`, simplify
-the adjacency relation and then `decide +revert` should complete the proof.
+20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
+have degree `2`. Hint: `decide`.
 -/
-example : chordedC5 = C[5] ⊔ edge 0 2 ⊔ edge 0 3 := by
-  ext x y
-  simp only [sup_adj, fromRel_adj, edge_adj]
-  decide +revert
+example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
+  decide
 
 /-!
 21. Show that `chordedC5` is not an Ore graph.

@@ -92,7 +92,8 @@ example (n : ℕ) : χ L[Q[n]] = n := by
 
 /-!
 9. Show that the Turán graph `T[n, r]` is `r`-colourable for `r > 0`. (So by Turán's
-theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.) Mathlib
+has this, but prove it directly.
 -/
 example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r := by
   sorry
@@ -102,7 +103,7 @@ example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r := by
 triangle-free graph.
 -/
 example [Fintype V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
-    #mμ[G].edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
+    #mμ(G).edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
   sorry
 
 /-!
@@ -245,17 +246,14 @@ neighbourhood. What happens for infinite sets?
 -/
 example : ∃ M : pathNat.Subgraph, M.IsPerfectMatching := by
   refine exists_isPerfectMatching_of_forall_ncard_le
-    (p₁ := {n | Even n}) (p₂ := {n | Odd n}) ?_ fun s => ?_
-  · refine ⟨Set.disjoint_left.2 fun n h1 h2 => Nat.not_even_iff_odd.2 h2 h1, ?_⟩
-    rintro v w (rfl | rfl) <;>
-      simp [Nat.even_add_one, ← Nat.not_even_iff_odd, em, em']
-  · by_cases hs : s.Finite
-    · refine Set.ncard_le_ncard_of_injOn (· + 1) (fun x hx => ?_)
-        (add_left_injective 1).injOn
-        (hs.biUnion fun x _ => (pathNat.neighborSet x).toFinite)
-      exact Set.mem_biUnion hx (by simp)
-    · rw [Set.Infinite.ncard hs]
-      exact Nat.zero_le _
+    pathNat.bicoloring.isBipartiteWith fun s => ?_
+  by_cases hs : s.Finite
+  · refine Set.ncard_le_ncard_of_injOn (· + 1) (fun x hx => ?_)
+      (add_left_injective 1).injOn
+      (hs.biUnion fun x _ => (pathNat.neighborSet x).toFinite)
+    exact Set.mem_biUnion hx (by simp)
+  · rw [Set.Infinite.ncard hs]
+    exact Nat.zero_le _
 
 /-!
 4. Deduce the two-sided version of Hall's theorem: if every vertex lies in `p₁` or
@@ -425,7 +423,8 @@ example (n : ℕ) : χ L[Q[n]] = n := by
 
 /-!
 9. Show that the Turán graph `T[n, r]` is `r`-colourable for `r > 0`. (So by Turán's
-theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.)
+theorem every Turán-maximal `(r + 1)`-clique-free graph is `r`-colourable.) Mathlib
+has this, but prove it directly.
 -/
 example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r :=
   ⟨Coloring.mk (fun v => ⟨v % r, Nat.mod_lt _ hr⟩) fun h => by
@@ -436,7 +435,7 @@ example (n r : ℕ) (hr : 0 < r) : T[n, r].Colorable r :=
 triangle-free graph.
 -/
 example [Fintype V] [DecidableRel G.Adj] (h : G.CliqueFree 3) :
-    #mμ[G].edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
+    #mμ(G).edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 / 4 := by
   have := (CliqueFree.mycielskian h).card_edgeFinset_le (r := 2)
   rwa [turanNumber_two, Fintype.card_option, Fintype.card_sum, ← two_mul]
     at this

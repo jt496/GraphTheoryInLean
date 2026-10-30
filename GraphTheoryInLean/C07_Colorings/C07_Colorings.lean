@@ -14,8 +14,8 @@ namespace SimpleGraph
 A *proper colouring* of a graph assigns a colour to each vertex so that adjacent
 vertices receive different colours, and the *chromatic number* is the least number of
 colours that suffice. Colourings are among the most studied topics in graph theory.
-Any clique needs as many colours as it has vertices, so the clique number is a lower
-bound for the chromatic number.
+Any clique requires as many colours as it has vertices, so the clique number is a
+lower bound for the chromatic number.
 
 In this chapter we study graph colourings (`Coloring`), colourability (`Colorable`),
 the chromatic number (`chromaticNumber`) and bipartite graphs (`IsBipartite`). We
@@ -37,13 +37,14 @@ efficient to run.
 
 In Mathlib, a `γ`-colouring of `G` is a *graph homomorphism* from `G` to the complete
 graph `⊤` on `γ`. Since all distinct pairs of vertices are adjacent in `⊤`, this
-corresponds exactly to a proper `γ`-colouring.
+corresponds exactly to a proper `γ`-colouring. (We call the type of colours `γ`, but
+Mathlib's own statements, such as the definition below, call it `α`.)
 -/
 open Finset
 section colorings
 variable {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
 
-#source SimpleGraph.Coloring -- abbrev Coloring (α : Type v) := G →g completeGraph α
+#source Coloring -- abbrev Coloring (α : Type v) := G →g completeGraph α
 
 /-!
 Adjacent vertices get different colours.
@@ -58,7 +59,7 @@ The colour class of a colour `c` is the set of vertices coloured `c`.
 /-!
 Colour classes are independent sets.
 -/
-#check Coloring.isIndepSet_colorClass -- : G.IsIndepSet (C.colorClass c)
+#check Coloring.isIndepSet_colorClass -- G.IsIndepSet (C.colorClass c)
 
 /-!
 So a colouring is the same thing as a partition of the vertices into independent
@@ -80,7 +81,7 @@ Any cycle graph can be `3`-coloured, and any even cycle can be `2`-coloured usin
 
 /-!
 If `n : ℕ` then `G.Colorable n` says that `G` has a proper colouring with `n` colours
-(using `Fin n`). Note the difference between the two notions: a `G.Coloring α` is
+(using `Fin n`). Note the difference between the two notions: a `G.Coloring γ` is
 *data*, a specific colouring, whereas `G.Colorable n` is a `Prop` that only records
 that some colouring exists (`Nonempty`). Inside a proof, `obtain ⟨C⟩ := h` recovers
 a colouring `C` from `h : G.Colorable n`.
@@ -88,8 +89,8 @@ a colouring `C` from `h : G.Colorable n`.
 example (n : ℕ) : G.Colorable n ↔ Nonempty (G.Coloring (Fin n)) := Iff.rfl
 
 /-!
-In the other direction, a colouring `C : G.Coloring α` with a finite type of colours
-`α` shows that `G` is `Fintype.card α`-colourable.
+In the other direction, a colouring `C : G.Coloring γ` with a finite type of colours
+`γ` shows that `G` is `Fintype.card γ`-colourable.
 -/
 #check Coloring.colorable
 -- [Fintype α] (C : G.Coloring α) : G.Colorable (Fintype.card α)
@@ -153,15 +154,17 @@ there are vertices.
 -/
 #check SimpleGraph.chromaticNumber_le_card  -- χ G ≤ Fintype.card V
 
-/-- Any graph on a finite vertex type has finite chromatic number. -/
+/-!
+Any graph on a finite vertex type has finite chromatic number.
+-/
 theorem chromaticNumber_ne_top_of_finite (G : SimpleGraph V) [Finite V] :
     χ G ≠ ⊤ :=
   chromaticNumber_ne_top_iff_exists.mpr ⟨_, G.colorable_chromaticNumber_of_fintype⟩
 
 /-!
-On an infinite vertex type the chromatic number can genuinely be `⊤`: the complete
-graph on `ℕ` cannot be coloured with finitely many colours. Compare this with the
-`ℕ`-valued clique number, for which `ω (⊤ : SimpleGraph ℕ) = 0` is a junk value.
+On an infinite vertex type the chromatic number can be `⊤`: the complete graph on `ℕ`
+cannot be coloured with finitely many colours. Compare this with the `ℕ`-valued
+clique number, for which `ω (⊤ : SimpleGraph ℕ) = 0` is a junk value.
 -/
 example : χ (⊤ : SimpleGraph ℕ) = ⊤ := chromaticNumber_top_eq_top_of_infinite ℕ
 
@@ -177,7 +180,6 @@ example (n : ℕ) : χ K[n] = n := by
 Any `k`-clique in a graph requires at least `k` colours to colour it, so the clique
 number of a graph is at most its chromatic number.
 -/
-#check cliqueNum_le_chromaticNumber
 example {s : Finset V} (h : G.IsClique s) : #s ≤ χ G := h.card_le_chromaticNumber
 
 /-!
@@ -197,7 +199,7 @@ are adjacent, so they receive different colours. Since a colouring is a homomorp
 this is a special case of `Hom.injOn_of_isClique` from
 [Finite Cliques](#section-finite-cliques), which dot notation finds for us.
 -/
-example {α : Type*} (c : G.Coloring α) {s : Set V} (hs : G.IsClique s) :
+example {γ : Type*} (c : G.Coloring γ) {s : Set V} (hs : G.IsClique s) :
     Set.InjOn c s :=
   c.injOn_of_isClique hs
 
@@ -208,6 +210,15 @@ of `H`, e.g. a bipartite graph cannot contain a triangle.
 #check free_of_colorable
 
 /-!
+A graph is *complete multipartite* (`IsCompleteMultipartite`) if its vertices split
+into parts so that two vertices are adjacent iff they lie in different parts. Mathlib
+defines this as transitivity of non-adjacency in `G`. Non-adjacency is always
+reflexive (there are no loops) and symmetric, so transitivity makes it an equivalence
+relation, and its equivalence classes are the parts.
+-/
+#source IsCompleteMultipartite
+
+/-!
 What can we say about maximally clique-free graphs? Suppose that `G` is
 `(r + 1)`-clique-free but adding any edge creates an `(r + 1)`-clique. Then `G` is
 `r`-colourable iff it is complete multipartite.
@@ -215,20 +226,11 @@ What can we say about maximally clique-free graphs? Suppose that `G` is
 #check colorable_iff_isCompleteMultipartite_of_maximal_cliqueFree
 
 /-!
-A graph is *complete multipartite* if its vertices split into parts so that two
-vertices are adjacent iff they lie in different parts. Mathlib defines this as
-transitivity of non-adjacency in `G`. Non-adjacency is always reflexive (there are
-no loops) and symmetric, so transitivity makes it an equivalence relation, and its
-equivalence classes are the parts.
--/
-#source IsCompleteMultipartite
-
-/-!
 Colour classes give a bound in the other direction, in terms of independent sets.
 If `G` is `k`-colourable then its vertices are covered by `k` colour classes, each
 an independent set of at most `⍺ G` vertices, so `G` has at most `k * ⍺ G` vertices.
 No finiteness assumption is needed: if `V` is infinite then `Nat.card V` is the junk
-value `0`, so the inequality holds trivially, and we dispose of this case first.
+value `0`, so the inequality holds trivially.
 -/
 theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
     Nat.card V ≤ k * ⍺ G := by
@@ -241,7 +243,8 @@ theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
   calc Nat.card V = ∑ i, #{v | C v = i} := by
         rw [Nat.card_eq_fintype_card, ← card_univ,
           card_eq_sum_card_fiberwise fun v _ => mem_univ (C v)]
-    _ ≤ ∑ _ : Fin k, ⍺ G := sum_le_sum fun i _ => IsIndepSet.card_le_indepNum <| by
+    _ ≤ ∑ _ : Fin k, ⍺ G := by
+        apply sum_le_sum fun i _ => IsIndepSet.card_le_indepNum ?_
         simpa [Coloring.colorClass] using C.isIndepSet_colorClass i
     _ = k * ⍺ G := by simp
 
@@ -291,17 +294,18 @@ theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
   classical
   obtain ⟨c₁⟩ := h₁
   obtain ⟨c₂⟩ := h₂
-  let S := G₁.support ∩ G₂.support
-  -- Both colourings are injective on the shared clique `S` (which is therefore
-  -- finite), so a permutation `σ` of the palette carries `c₂` to `c₁` on `S`.
-  have hinj₁ : Function.Injective (fun x : S => c₁ x) :=
+  let s := G₁.support ∩ G₂.support
+  -- Both colourings are injective on the shared clique `s`
+  have hinj₁ : Function.Injective (fun x : s => c₁ x) :=
     Set.injOn_iff_injective.1 (c₁.injOn_of_isClique hs₁)
-  have hinj₂ : Function.Injective (fun x : S => c₂ x) :=
+  have hinj₂ : Function.Injective (fun x : s => c₂ x) :=
     Set.injOn_iff_injective.1 (c₂.injOn_of_isClique hs₂)
-  have : Finite S := Finite.of_injective _ hinj₁
+  -- which is therefore finite
+  have : Finite s := Finite.of_injective _ hinj₁
+  -- so a permutation `σ` of the palette carries `c₂` to `c₁` on `s`.
   obtain ⟨σ, hσ⟩ := Equiv.Perm.exists_extending_pair
-    (fun x : S => c₂ x) (fun x : S => c₁ x) hinj₂ hinj₁
-  have hσkey : ∀ x ∈ S, σ (c₂ x) = c₁ x := fun x hx => hσ ⟨x, hx⟩
+    (fun x : s => c₂ x) (fun x : s => c₁ x) hinj₂ hinj₁
+  have hσkey : ∀ x ∈ s, σ (c₂ x) = c₁ x := fun x hx => hσ ⟨x, hx⟩
   -- The glued colouring: `c₁` on `G₁`'s support, the recoloured `c₂` elsewhere.
   let f : V → Fin n := fun x => if x ∈ G₁.support then c₁ x else σ (c₂ x)
   -- On `G₂`'s support, `f` coincides with the recoloured `c₂` (they agree on the
@@ -321,8 +325,8 @@ theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
 /-!
 In particular if the supports of the two graphs share at most the single vertex `v`,
 then any colourings of `G₁` and `G₂` with the same palette merge into a colouring of
-`G₁ ⊔ G₂`. This is the special case of `sup_of_isClique_inter` where the overlap is a
-subsingleton, hence vacuously a clique in each part.
+`G₁ ⊔ G₂`. This is the special case of `Colorable.sup_of_isClique_inter` where the
+overlap is a subsingleton, hence vacuously a clique in each part.
 -/
 theorem Colorable.sup_of_subsingleton_inter {G₁ G₂ : SimpleGraph V}
     {v : V} (hmeet : G₁.support ∩ G₂.support ⊆ {v})
@@ -348,9 +352,10 @@ edges within parts. In Mathlib this is defined in the obvious way via
 /-!
 Any complete bipartite graph is `2`-colourable (bipartite). Mathlib gives the natural
 colouring, `CompleteBipartiteGraph.bicoloring`, which uses `Bool` as the set of
-colours (`true` on the right part). By Mathlib's naming conventions it should be
-called `completeBipartiteGraph.bicoloring` (compare `pathGraph.bicoloring`), so we
-introduce that alias and use it for the rest of the guide.
+colours (`true` on the right part). By [Mathlib's naming
+conventions](#section-naming-conventions) it should be called
+`completeBipartiteGraph.bicoloring` (compare `pathGraph.bicoloring`), so we introduce
+that alias and use it for the rest of the guide.
 -/
 alias completeBipartiteGraph.bicoloring := CompleteBipartiteGraph.bicoloring
 
@@ -376,9 +381,14 @@ For example, colouring each vertex by its parity shows that the infinite path
 `pathNat` has chromatic number `2`: an infinite graph can have finite chromatic
 number.
 -/
+
+/-- The natural `Bool`-colouring of `pathNat`, by parity. -/
+def pathNat.bicoloring : pathNat.Coloring Bool where
+  toFun n := n % 2 = 0
+  map_rel' := by rintro a b (rfl | rfl) <;> grind [top_adj]
+
 example : χ pathNat = 2 :=
-  chromaticNumber_eq_two_iff.2 ⟨(Coloring.mk (fun n => n % 2 == 0)
-    (by rintro a b (rfl | rfl) <;> grind)).colorable,
+  chromaticNumber_eq_two_iff.2 ⟨pathNat.bicoloring.colorable,
     ne_bot_iff_exists_adj.2 ⟨0, 1, Or.inl rfl⟩⟩
 
 /-!
@@ -393,9 +403,18 @@ For example, the complete bipartite graph is bipartite with parts the left and r
 copies. (Mathlib also has this as `IsBipartiteWith.completeBipartiteGraph`.)
 -/
 example : (completeBipartiteGraph V W).IsBipartiteWith
-    (Set.range Sum.inl) (Set.range Sum.inr) where
+    (Set.range .inl) (Set.range .inr) where
   disjoint := by grind
   mem_of_adj {u v} h := by grind
+
+/-!
+More generally, any `Bool`-colouring `c` of `G` makes `G` bipartite with parts the
+vertices coloured `true` and the vertices coloured `false`.
+-/
+lemma Coloring.isBipartiteWith (c : G.Coloring Bool) :
+    G.IsBipartiteWith {v | c v} {v | ¬ c v} where
+  disjoint := Set.disjoint_left.2 fun _ h h' => h' h
+  mem_of_adj _ _ h := by grind [c.valid h]
 
 /-!
 Mathlib also shows that acyclic graphs (`IsAcyclic`), and in particular trees
@@ -438,18 +457,18 @@ example {ι : Type*} (W : ι → Type*) :
 /-!
 ## Colouring Box Products
 
-A colouring `C` of `G □ H` restricts, along any fixed vertex of one factor, to a
-colouring of the other factor with the same colours: `v ↦ C (v, w₀)` colours `G` and
-`w ↦ C (v₀, w)` colours `H`.
+We can restrict a colouring `C` of `G □ H`, along any fixed vertex of one factor, to
+a colouring of the other factor with the same colours: `v ↦ C (v, w₀)` colours `G`
+and `w ↦ C (v₀, w)` colours `H`.
 -/
 /-- The colouring of `G` induced by a colouring of `G □ H`. -/
-def Coloring.ofBoxProdLeft {α : Type*} (C : (G □ H).Coloring α) (w : W) :
-    G.Coloring α :=
+def Coloring.ofBoxProdLeft {γ : Type*} (C : (G □ H).Coloring γ) (w : W) :
+    G.Coloring γ :=
   C.comp <| boxProdLeft G H w
 
 /-- The colouring of `H` induced by a colouring of `G □ H`. -/
-def Coloring.ofBoxProdRight {α : Type*} (C : (G □ H).Coloring α) (v : V) :
-    H.Coloring α :=
+def Coloring.ofBoxProdRight {γ : Type*} (C : (G □ H).Coloring γ) (v : V) :
+    H.Coloring γ :=
   C.comp <| boxProdRight G H v
 
 /-!
@@ -457,20 +476,27 @@ Conversely, given `k`-colourings of `G` and `H` we can `k`-colour `G □ H` as f
 If `C₁ : G.Coloring (Fin k)` and `C₂ : H.Coloring (Fin k)` then `C : V × W → Fin k`
 defined by `C (v, w) = C₁ v + C₂ w`, with addition modulo `k` in `Fin k`, is a valid
 colouring of `G □ H`. Along an edge one coordinate is fixed, so the colours differ
-because the colouring of the other factor is valid. (In the proof we need to
-use `add_left/right_inj` in the final `simpa`s. These require `NeZero k`.)
+because the colouring of the other factor is valid.
+
+The only property of addition this uses is cancellation: `a + b = a + c` implies
+`b = c`, and `b + a = c + a` implies `b = c` (`IsCancelAdd`). So we define the
+colouring for any colour type `γ` with a cancellative addition. Mathlib has
+`IsCancelAdd (Fin k)` for every `k`, so this covers `Fin k`. (Asking for an
+additive group instead would be too much: `Fin k` is an additive group only when
+`k ≠ 0`.)
 -/
-/-- The `k`-colouring of `G □ H` induced by `k`-colourings of `G` and `H`. -/
-def Coloring.boxProd {k : ℕ} (C₁ : G.Coloring (Fin k)) (C₂ : H.Coloring (Fin k)) :
-    (G □ H).Coloring (Fin k) :=
+/-- The colouring `(v, w) ↦ C₁ v + C₂ w` of `G □ H` induced by colourings `C₁` of `G`
+and `C₂` of `H`, for colours with a cancellative addition. -/
+def Coloring.boxProd {γ : Type*} [Add γ] [IsCancelAdd γ] (C₁ : G.Coloring γ)
+    (C₂ : H.Coloring γ) : (G □ H).Coloring γ :=
   Coloring.mk (fun x => C₁ x.1 + C₂ x.2) <| by
     rintro ⟨v, w⟩ ⟨v', w'⟩ (⟨hadj, rfl⟩ | ⟨hadj, rfl⟩)
-    -- For these `simpa`s we need `NeZero k`, which holds since `C₁ v : Fin k`
-      <;> have : NeZero k := ⟨by rintro rfl; exact (C₁ v).elim0⟩
     · simpa using C₁.valid hadj
     · simpa using C₂.valid hadj
 
-/-- If `G` and `H` are both `k`-colourable then so is `G □ H`. -/
+/-!
+If `G` and `H` are both `k`-colourable then so is `G □ H`.
+-/
 theorem Colorable.boxProd {k : ℕ} (h₁ : G.Colorable k) (h₂ : H.Colorable k) :
     (G □ H).Colorable k :=
   ⟨Coloring.boxProd h₁.some h₂.some⟩
@@ -518,49 +544,46 @@ hypercube is bipartite: `Q[0]` has no edges, and `⊤` on `Bool` is `2`-colourab
 -/
 lemma IsBipartite.hypercube (n : ℕ) : Q[n].IsBipartite := by
   induction n with
-  | zero => exact ⟨Coloring.mk (fun _ => 0) (by simp [hypercube_zero])⟩
+  | zero => exact ⟨Coloring.mk (fun _ => 0) (by simp)⟩
   | succ n ih => exact ih.boxProd (⊤ : SimpleGraph Bool).colorable_of_fintype
 
 /-!
 Behind this proof is an explicit colouring, but we cannot compute it from the proof:
 `IsBipartite` is a `Prop`, and `Colorable.boxProd` picks its colourings with
-`.some`. So we define the colouring directly. The box product colouring of
-`Q[n] □ ⊤` gives `(v, b)` the colour of `v` plus `b`, modulo `2`. With `Bool` as the
-colours, addition modulo `2` is `Bool.xor`, so we colour each vertex by the parity
-of its coordinates.
+`Nonempty.some`. However `Coloring.boxProd` is data, and it works for any colours
+with a cancellative addition, so we can use the same induction with `Bool` as the
+colours. Mathlib's addition (`+`) on `Bool` is `Bool.xor` (addition modulo `2`), and
+we colour `⊤` on `Bool` by the identity (`selfColoring`).
 -/
-/-- The parity of a hypercube vertex (the `xor` of its coordinates), used as a
-`Bool`-colouring of `Q[n]`. -/
+/-- The natural `Bool`-colouring of the hypercube `Q[n]`. -/
+def hypercube.bicoloring : (n : ℕ) → Q[n].Coloring Bool
+  | 0 => Coloring.mk (fun _ => false) (by simp)
+  | n + 1 => (hypercube.bicoloring n).boxProd (⊤ : SimpleGraph Bool).selfColoring
+
+/-!
+So the vertex `(v, b)` of `Q[n + 1]` gets the colour of `v` xor `b`. Unwinding the
+recursion, each vertex is coloured by the parity of its coordinates.
+-/
+/-- The parity of a hypercube vertex (the `xor` of its coordinates). -/
 def HypercubeVert.parity : {n : ℕ} → HypercubeVert n → Bool
   | 0, _ => false
   | _ + 1, (v, b) => v.parity ^^ b
 
-/-!
-This is a valid colouring.
--/
-lemma HypercubeVert.parity_ne_of_adj {n : ℕ} {v w : HypercubeVert n}
-    (h : Q[n].Adj v w) : HypercubeVert.parity v ≠ HypercubeVert.parity w := by
+lemma hypercube.bicoloring_apply {n : ℕ} (v : HypercubeVert n) :
+    hypercube.bicoloring n v = v.parity := by
   induction n with
-  | zero => cases h
+  | zero => rfl
   | succ n ih =>
-    rcases v; rcases w
-    rcases h with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp_all [HypercubeVert.parity]
-
-/-- The natural `Bool`-colouring of the hypercube `Q[n]`. -/
-def hypercube.bicoloring (n : ℕ) : Q[n].Coloring Bool :=
-  ⟨HypercubeVert.parity, HypercubeVert.parity_ne_of_adj⟩
+    rcases v with ⟨v, b⟩
+    exact congrArg (· ^^ b) (ih v)
 
 /-!
-The hypercube is bipartite with the two parts being the sets of vertices with parity
-`true` and `false`.
+By `Coloring.isBipartiteWith`, the hypercube is bipartite with the two parts being
+the sets of vertices with parity `true` and `false`.
 -/
-example (n : ℕ) : Q[n].IsBipartiteWith {v | v.parity} {v | ¬ v.parity} where
-  disjoint := by
-    rw [Set.disjoint_iff_inter_eq_empty]
-    ext; simp
-  mem_of_adj {u v} h := by
-    have := HypercubeVert.parity_ne_of_adj h
-    by_cases u.parity <;> simp_all
+example (n : ℕ) : Q[n].IsBipartiteWith {v | v.parity} {v | ¬ v.parity} := by
+  simpa only [hypercube.bicoloring_apply] using
+    (hypercube.bicoloring n).isBipartiteWith
 
 /-!
 Bipartite graphs are `3`-clique-free, hence `Q[n]` is `3`-clique-free.
@@ -569,7 +592,7 @@ lemma cliqueFree_hypercube_three (n : ℕ) : Q[n].CliqueFree 3 :=
   (IsBipartite.hypercube _).cliqueFree (by decide)
 
 /-!
-The `Bool`-colouring of `Q[4]` using `HypercubeVert.parity`.
+The `Bool`-colouring of `Q[4]`, by parity.
 -/
 #eval hypercube.bicoloring 4 -- {1111 ↦ false, 1110 ↦ true, ..., 0000 ↦ false}
 
@@ -578,26 +601,26 @@ end colorings
 /-!
 # Colouring Mycielskians
 
-We now come to the main reason for defining the Mycielskian `mμ[G]` (`mycielskian`):
-its chromatic number is exactly one more than that of `G`. Since `mμ[G]` is also
+We now come to the main reason for defining the Mycielskian `mμ(G)` (`mycielskian`):
+its chromatic number is exactly one more than that of `G`. Since `mμ(G)` is also
 triangle-free whenever `G` is (`CliqueFree.mycielskian`), iterating the construction
 gives triangle-free graphs of arbitrarily large chromatic number.
 
-To show that `χ mμ[G] = χ G + 1` we will need to construct a `k`-colouring of `G`
-from a `(k + 1)`-colouring of `mμ[G]` and also construct a `(k + 1)`-colouring of
-`mμ[G]` from a `k`-colouring of `G`.
+To show that `χ mμ(G) = χ G + 1` we will need to construct a `k`-colouring of `G`
+from a `(k + 1)`-colouring of `mμ(G)` and also construct a `(k + 1)`-colouring of
+`mμ(G)` from a `k`-colouring of `G`.
 
-The basic idea is that if `mμ[G]` is `(k + 1)`-colourable then we can colour it with
+The basic idea is that if `mμ(G)` is `(k + 1)`-colourable then we can colour it with
 the `k + 1` colours of `Fin (k + 1)` (i.e. `{0, 1, ..., k}`) in such a way that the
 vertex `none` is coloured with colour `k`. Since `none` is adjacent to every vertex
-in `Vᵣ` (the "right" copy of `V`), this ensures that no vertex in `Vᵣ` is coloured
+in `Vʳ` (the "right" copy of `V`), this ensures that no vertex in `Vʳ` is coloured
 `k`. We can then construct a `k`-colouring of `G` by colouring each vertex `v : V`
-with the colour of `v ₗ`, if this doesn't equal `k`, and otherwise with the colour of
-`v ᵣ` (which by construction is not `k`).
+with the colour of `vˡ`, if this doesn't equal `k`, and otherwise with the colour of
+`vʳ` (which by construction is not `k`).
 
 [Figure: The 3-colouring of $C_5$ induced from a 4-colouring of $mμ(C_5)$](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_coloring.svg)
 
-Conversely given a `k`-colouring of `G` we can get a `(k + 1)`-colouring of `mμ[G]`
+Conversely given a `k`-colouring of `G` we can get a `(k + 1)`-colouring of `mμ(G)`
 by colouring the "left" and "right" copies of `V` with the same colours as used by
 their preimages in `G` and colouring `none` with the new colour `k`.
 
@@ -610,58 +633,58 @@ of `none`: `Equiv.swap (Fin.last k) (c none)`.
 section mycielskian_and_edges
 variable {V : Type*} {G : SimpleGraph V}
 
-/-- Given any `(k + 1)`-colouring of `mμ[G]` this is the equivalent
+/-- Given any `(k + 1)`-colouring of `mμ(G)` this is the equivalent
 `(k + 1)`-colouring in which the vertex `none` receives colour `k`. -/
-def Coloring.mycielskianLast {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1))) :
-    mμ[G].Coloring (Fin (k + 1)) :=
-  mμ[G].recolorOfEquiv (Equiv.swap (Fin.last k) (c none)) c
+def Coloring.mycielskianLast {k : ℕ} (c : mμ(G).Coloring (Fin (k + 1))) :
+    mμ(G).Coloring (Fin (k + 1)) :=
+  mμ(G).recolorOfEquiv (Equiv.swap (Fin.last k) (c none)) c
 
 /-!
 No vertex in the "right" copy of `V` is assigned the colour `k` in the
 `Coloring.mycielskianLast`.
 -/
-lemma Coloring.mycielskianLast_ne_last {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1)))
-    {v : V} : c.mycielskianLast v ᵣ ≠ Fin.last k :=
-  fun hf => c.mycielskianLast.valid (v := v ᵣ) (w := none)
+lemma Coloring.mycielskianLast_ne_last {k : ℕ} (c : mμ(G).Coloring (Fin (k + 1)))
+    {v : V} : c.mycielskianLast vʳ ≠ Fin.last k :=
+  fun hf => c.mycielskianLast.valid (v := vʳ) (w := none)
              (by simp) (by rw [hf, Coloring.mycielskianLast]; simp)
 
-/-- The natural `k`-colouring of `G` induced by a `(k + 1)`-colouring of `mμ[G]`. -/
-def Coloring.ofMycielskian {k : ℕ} (c : mμ[G].Coloring (Fin (k + 1))) :
+/-- The natural `k`-colouring of `G` induced by a `(k + 1)`-colouring of `mμ(G)`. -/
+def Coloring.ofMycielskian {k : ℕ} (c : mμ(G).Coloring (Fin (k + 1))) :
     G.Coloring (Fin k) where
-  toFun v := if h : c.mycielskianLast v ₗ = Fin.last k
+  toFun v := if h : c.mycielskianLast vˡ = Fin.last k
               then
-                ⟨c.mycielskianLast v ᵣ, Fin.val_lt_last c.mycielskianLast_ne_last⟩
+                ⟨c.mycielskianLast vʳ, Fin.val_lt_last c.mycielskianLast_ne_last⟩
               else
-                ⟨c.mycielskianLast v ₗ, Fin.val_lt_last h⟩
+                ⟨c.mycielskianLast vˡ, Fin.val_lt_last h⟩
   map_rel' := by
     intro a b hab hf
-    -- the edge `a — b` of `G` gives three edges of `mμ[G]`
-    have hll : mμ[G].Adj a ₗ b ₗ := by simpa using hab
-    have hlr : mμ[G].Adj a ₗ b ᵣ := by simpa using hab
-    have hrl : mμ[G].Adj a ᵣ b ₗ := by simpa using hab
+    -- the edge `a — b` of `G` gives three edges of `mμ(G)`
+    have hll : mμ(G).Adj aˡ bˡ := by simpa using hab
+    have hlr : mμ(G).Adj aˡ bʳ := by simpa using hab
+    have hrl : mμ(G).Adj aʳ bˡ := by simpa using hab
     split_ifs at hf with ha hb hb
-    · -- `a ₗ` and `b ₗ` both have colour `k`, but they are adjacent
+    · -- `aˡ` and `bˡ` both have colour `k`, but they are adjacent
       exact c.mycielskianLast.valid hll (ha.trans hb.symm)
-    · -- `hf` says that the adjacent `a ᵣ` and `b ₗ` have the same colour
+    · -- `hf` says that the adjacent `aʳ` and `bˡ` have the same colour
       exact c.mycielskianLast.valid hrl (by grind)
-    · -- `hf` says that the adjacent `a ₗ` and `b ᵣ` have the same colour
+    · -- `hf` says that the adjacent `aˡ` and `bʳ` have the same colour
       exact c.mycielskianLast.valid hlr (by grind)
-    · -- `hf` says that the adjacent `a ₗ` and `b ₗ` have the same colour
+    · -- `hf` says that the adjacent `aˡ` and `bˡ` have the same colour
       exact c.mycielskianLast.valid hll (by grind)
 
 /-!
 `Coloring.ofMycielskian` gives the harder direction; the easier direction is the
 following colouring.
 -/
-/-- The `(k + 1)`-colouring of `mμ[G]` induced by a `k`-colouring of `G`. -/
+/-- The `(k + 1)`-colouring of `mμ(G)` induced by a `k`-colouring of `G`. -/
 def Coloring.mycielskian {k : ℕ} (c : G.Coloring (Fin k)) :
-    mμ[G].Coloring (Fin (k + 1)) where
+    mμ(G).Coloring (Fin (k + 1)) where
   toFun v :=
     match v with
     | none => Fin.last k
-    | v ₗ | v ᵣ => (c v).castSucc
+    | vˡ | vʳ => (c v).castSucc
   map_rel' := by
-    -- check all nine kinds of pair: an edge `none — v ᵣ` has the distinct colours
+    -- check all nine kinds of pair: an edge `none — vʳ` has the distinct colours
     -- `k` and `(c v).castSucc`; an edge between the copies has the colours of two
     -- adjacent vertices of `G`, which differ by `c.valid`; the other pairs are
     -- non-edges
@@ -669,23 +692,23 @@ def Coloring.mycielskian {k : ℕ} (c : G.Coloring (Fin k)) :
       simp_all [c.valid, (Fin.castSucc_ne_last _).symm]
 
 /-!
-`G` is `k`-colourable iff `mμ[G]` is `(k + 1)`-colourable.
+`G` is `k`-colourable iff `mμ(G)` is `(k + 1)`-colourable.
 -/
 lemma colorable_mycielskian_succ_iff (k : ℕ) :
-    mμ[G].Colorable (k + 1) ↔ G.Colorable k := by
+    mμ(G).Colorable (k + 1) ↔ G.Colorable k := by
   constructor <;> intro ⟨c⟩
   · exact ⟨c.ofMycielskian⟩
   · exact ⟨c.mycielskian⟩
 
 /-!
-And so the chromatic number of `mμ[G]` is `χ G + 1`. We use the same strategy as for
+And so the chromatic number of `mμ(G)` is `χ G + 1`. We use the same strategy as for
 `chromaticNumber_boxProd`: compare both sides with an arbitrary `m : ℕ∞`. When `m` is
 a natural number we split further into the cases `m = 0` (neither side is at most
-`0`, since `mμ[G]` has the vertex `none`) and `m = k + 1`, which is
+`0`, since `mμ(G)` has the vertex `none`) and `m = k + 1`, which is
 `colorable_mycielskian_succ_iff`.
 -/
 /-- The chromatic number of the Mycielskian of `G`. -/
-theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ[G] = χ G + 1 := by
+theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ(G) = χ G + 1 := by
   refine eq_of_forall_ge_iff fun m => ?_
   cases m with
   | top => simp
@@ -699,26 +722,26 @@ theorem chromaticNumber_mycielskian (G : SimpleGraph V) : χ mμ[G] = χ G + 1 :
 /-!
 Notice that `chromaticNumber_mycielskian` needs no hypotheses at all. If `G` has no
 finite colouring then both sides are `⊤` (in `ℕ∞` we have `⊤ + 1 = ⊤`), and if `V` is
-empty then `χ G = 0` while `mμ[G]` is the single vertex `none`, so `χ mμ[G] = 1`.
+empty then `χ G = 0` while `mμ(G)` is the single vertex `none`, so `χ mμ(G) = 1`.
 Compare this with `cliqueNum_mycielskian_of_ne_bot`, which needs both `[Finite V]`
 and `G ≠ ⊥`: the `ℕ`-valued clique number has the junk value `0` when there are
-arbitrarily large cliques, and if `V` is nonempty then `ω ⊥ = 1` but `ω mμ[⊥] = 2`.
+arbitrarily large cliques, and if `V` is nonempty then `ω ⊥ = 1` but `ω mμ(⊥) = 2`.
 
 Since the Mycielskian is functorial (`Hom.mapMycielskian`), any homomorphism
-`G →g H` lets us turn colourings of `mμ[H]` into colourings of `mμ[G]`, so
-`χ mμ[G] ≤ χ mμ[H]`.
+`G →g H` lets us turn colourings of `mμ(H)` into colourings of `mμ(G)`, so
+`χ mμ(G) ≤ χ mμ(H)`.
 -/
 #check Hom.mapMycielskian
 
-example {W : Type*} {H : SimpleGraph W} (f : G →g H) (c : mμ[H].Coloring V) :
-    mμ[G].Coloring V :=
+example {W : Type*} {H : SimpleGraph W} (f : G →g H) (c : mμ(H).Coloring V) :
+    mμ(G).Coloring V :=
   c.comp f.mapMycielskian
 
-example {W : Type*} {H : SimpleGraph W} (f : G →g H) : χ mμ[G] ≤ χ mμ[H] :=
+example {W : Type*} {H : SimpleGraph W} (f : G →g H) : χ mμ(G) ≤ χ mμ(H) :=
   chromaticNumber_mono_of_hom f.mapMycielskian
 
 /-- The `n`-th iterated Mycielskian of `G` has chromatic number `χ G + n`. -/
-theorem chromaticNumber_iterMycielskian (n : ℕ) : χ (mμ^n G) = χ G + n := by
+theorem chromaticNumber_iterMycielskian (n : ℕ) : χ mμ^n(G) = χ G + n := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -728,23 +751,23 @@ theorem chromaticNumber_iterMycielskian (n : ℕ) : χ (mμ^n G) = χ G + n := b
     norm_cast
 
 /-!
-Since `K[2]` has chromatic number `2` (`chromaticNumber_top`), `mμ^n K[2]` has
-chromatic number `n + 2`. (In particular `C[5] ≃g mμ[K[2]]` is `3`-chromatic and the
-Grötzsch graph `mμ[C[5]]` is `4`-chromatic.)
+Since `K[2]` has chromatic number `2` (`chromaticNumber_top`), `mμ^n(K[2])` has
+chromatic number `n + 2`. (In particular `C[5] ≃g mμ(K[2])` is `3`-chromatic and the
+Grötzsch graph `mμ(C[5])` is `4`-chromatic.)
 -/
 theorem chromaticNumber_iterMycielskian_completeGraph_two (n : ℕ) :
-    χ (mμ^n K[2]) = n + 2 := by
+    χ mμ^n(K[2]) = n + 2 := by
   simp [chromaticNumber_iterMycielskian, add_comm]
 
 /-!
 Combining this with `cliqueNum_iterMycielskian_completeGraph_two` gives what we
-promised, Mycielski's theorem: the graphs `mμ^n K[2]` all have clique number `2`,
+promised, Mycielski's theorem: the graphs `mμ^n(K[2])` all have clique number `2`,
 but their chromatic numbers are unbounded. So the clique number can be an arbitrarily
 bad lower bound for the chromatic number.
 -/
 /-- *Mycielski's theorem*: the nth-iterated Mycielskian of `K[2]` has clique number
 `2` and chromatic number `n + 2`. -/
-theorem mycielski (n : ℕ) : ω (mμ^n K[2]) = 2 ∧ χ (mμ^n K[2]) = n + 2 :=
+theorem mycielski (n : ℕ) : ω mμ^n(K[2]) = 2 ∧ χ mμ^n(K[2]) = n + 2 :=
   ⟨cliqueNum_iterMycielskian_completeGraph_two n,
     chromaticNumber_iterMycielskian_completeGraph_two n⟩
 
@@ -1544,7 +1567,7 @@ instance (n : ℕ) : Encodable (ZMod n) := by
   cases n <;> unfold ZMod <;> infer_instance
 
 instance iterMycielskianEncodable {V : Type*} [Encodable V] (n : ℕ) :
-    Encodable (mμᵥ^n V) := by
+    Encodable mμᵥ^n(V) := by
   induction n <;> unfold MycielskianVert <;> infer_instance
 
 instance hypercubeEncodable (n : ℕ) : Encodable (HypercubeVert n) := by
@@ -1564,13 +1587,13 @@ We can now compute greedy colourings of many concrete graphs:
 
 #eval Q[4].greedyColoring  -- {1111 ↦ 0, 1110 ↦ 1, ..., 0001 ↦ 1, 0000 ↦ 0}
 
-#eval mμ[C[5]].greedyColoring -- {∗ ↦ 0, 0ₗ ↦ 0, ..., 3ₗ ↦ 2, ..., 4ᵣ ↦ 1}
+#eval mμ(C[5]).greedyColoring -- {∗ ↦ 0, 0ˡ ↦ 0, ..., 3ˡ ↦ 2, ..., 4ʳ ↦ 1}
 
-#eval (mμ^4 C[5]).greedyColoring -- {∗ ↦ 0, ∗ₗ ↦ 0, ∗ₗₗ ↦ 0, ∗ₗₗₗ ↦ 0,..., 4ᵣᵣᵣᵣ ↦ 1}
+#eval mμ^4(C[5]).greedyColoring -- {∗ ↦ 0, ∗ˡ ↦ 0, ∗ˡˡ ↦ 0, ∗ˡˡˡ ↦ 0,..., 4ʳʳʳʳ ↦ 1}
 
 /-!
 Unlike on the crown graph, `greedy` does well on all of these examples: each
-colouring above is optimal. For instance the colouring of `mμ^4 C[5]` uses the
+colouring above is optimal. For instance the colouring of `mμ^4(C[5])` uses the
 colours `0, ..., 6`, and since `χ C[5] = 3`, `chromaticNumber_iterMycielskian` shows
 that `7` colours are needed. Similarly the `6` colours used for
 `paleyGraph (ZMod 17)` are optimal: its independence number is `3` (see the exercises

@@ -121,7 +121,7 @@ sends any vertex to any other; and an isomorphism to `K[2]` would give an elemen
 `e.symm 0` of `V`.
 -/
 lemma isVertexTransitive_mycielskian_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) :
-    mμ[G].IsVertexTransitive :=
+    mμ(G).IsVertexTransitive :=
   sorry
 
 lemma isEmpty_iso_completeGraph_two_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) :
@@ -162,8 +162,8 @@ neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency
 automatic.
 -/
 example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
-    {f : (i : ι) → U i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    [∀ i, Fintype ((G i).neighborSet (f i))] :
+    {f : (i : ι) → U i} [Fintype ι] [Nonempty ι]
+    [∀ i, Fintype ((G i).neighborSet (f i))] [Fintype ((⨂g i, G i).neighborSet f)] :
     (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
   sorry
 
@@ -184,7 +184,7 @@ example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
   map_rel_iff' := sorry
 
 /-!
-The last exercise is about `ClawFree`, from a starred section.
+The last exercise is about `ClawFree`.
 
 19. Show that `K[4]` is claw-free, but contains a non-induced copy of the claw
 `K[1, 3]`.
@@ -211,7 +211,6 @@ def pathGraph.embedding (n k : ℕ) : P[n] ↪g P[n + k] where
   toFun i := i.addNat k
   inj' := (Fin.addNatEmb k).injective
   map_rel_iff' := by
-    intro i j
     grind [Function.Embedding.coeFn_mk, pathGraph_adj]
 
 #check pathGraph.embedding_apply
@@ -310,7 +309,6 @@ finite graphs with decidable adjacency (`DecidableRel Q[n].Adj` is
 checked by `decide`. Recall also that `v[i, j]` where
 `i, j ∈ {0, 1}` is scoped notation for the vertices of `Q[2]`.
 -/
-
 /-- The Gray-code isomorphism `Q[2] ≃g C[4]`, sending the vertices
 `00, 10, 11, 01` to `0, 1, 2, 3`. -/
 def hypercubeTwoIsoCycleFour : Q[2] ≃g C[4] where
@@ -353,7 +351,7 @@ sends any vertex to any other; and an isomorphism to `K[2]` would give an elemen
 `e.symm 0` of `V`.
 -/
 lemma isVertexTransitive_mycielskian_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
-    mμ[G].IsVertexTransitive :=
+    mμ(G).IsVertexTransitive :=
   fun _ _ => ⟨.refl, Subsingleton.elim _ _⟩
 
 lemma isEmpty_iso_completeGraph_two_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
@@ -427,13 +425,15 @@ neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency
 automatic.
 -/
 example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
-    {f : (i : ι) → U i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    [∀ i, Fintype ((G i).neighborSet (f i))] :
+    {f : (i : ι) → U i} [Fintype ι] [Nonempty ι]
+    [∀ i, Fintype ((G i).neighborSet (f i))] [Fintype ((⨂g i, G i).neighborSet f)] :
     (⨂g i, G i).degree f = ∏ i, (G i).degree (f i) := by
+  classical
   simp_rw [← card_neighborFinset_eq_degree, ← Fintype.card_piFinset]
   congr 1
   ext g
   simp
+
 /-!
 18. Given graph homomorphisms from `K` to each `G i`, one of which, `f i₀`, is a
 graph embedding, we have a graph embedding of `K` into the indexed tensor product.
@@ -455,7 +455,7 @@ example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
     exact ⟨fun h => reflect (h i₀), fun hk i => (f i).map_adj hk⟩
 
 /-!
-The last exercise is about `ClawFree`, from a starred section.
+The last exercise is about `ClawFree`.
 
 19. Show that `K[4]` is claw-free, but contains a non-induced copy of the claw
 `K[1, 3]`.

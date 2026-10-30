@@ -552,19 +552,19 @@ example : IsEmpty (K[4, 1] ≃g C[4] ⊕g K[1]) := ⟨fun e => by
 Apart from the eigenvalue `d` of a `d`-regular graph (and the Laplacian eigenvalue
 `0`), Mathlib has no eigenvalues of particular graphs. But we can often find them by
 exhibiting eigenvectors, as Mathlib does for `d`. As an example we show that
-eigenvalues of `G` give eigenvalues of its Mycielskian `mμ[G]`, scaled by the golden
+eigenvalues of `G` give eigenvalues of its Mycielskian `mμ(G)`, scaled by the golden
 ratio.
 
 Mathlib writes `M *ᵥ x` (`Matrix.mulVec`) for the product of a matrix `M` and a
 vector `x`, whose entry at `i` is `∑ j, M i j * x j`. So a nonzero vector `x` is an
 eigenvector of `M` with eigenvalue `ξ` iff `M *ᵥ x = ξ • x`.
 
-We list the vertices of `mμ[G]` in the order given by their type `Option (V ⊕ V)`:
-first the apex `none`, then the left copies `v ₗ`, then the right copies `v ᵣ`. Let
+We list the vertices of `mμ(G)` in the order given by their type `Option (V ⊕ V)`:
+first the apex `none`, then the left copies `vˡ`, then the right copies `vʳ`. Let
 `A` be the adjacency matrix of `G`, and write `1` for the all-ones vector. A left
-copy `v ₗ` is adjacent to both copies of each neighbour of `v`, and a right copy
-`v ᵣ` is adjacent to the left copies of the neighbours of `v` and to the apex. So the
-adjacency matrix of `mμ[G]` has the block form shown in the figure.
+copy `vˡ` is adjacent to both copies of each neighbour of `v`, and a right copy
+`vʳ` is adjacent to the left copies of the neighbours of `v` and to the apex. So the
+adjacency matrix of `mμ(G)` has the block form shown in the figure.
 
  `             apex  left  right                              `
  `   apex   [  0     0     1ᵀ ]   [ 0   ]   [ 1ᵀ x        ]   `
@@ -584,23 +584,23 @@ the vector `y` with blocks `0`, `t • x` and `x` is sent to the vector with blo
 are these roots. (An eigenvalue `ξ` of `G` need not have an eigenvector whose
 entries sum to zero, and then the construction says nothing about `φ * ξ` and
 `ψ * ξ`. For example, the only eigenvectors of `K[2]` with eigenvalue `1` are the
-constant vectors, and neither `φ` nor `ψ` is an eigenvalue of `mμ[K[2]]`, which is
+constant vectors, and neither `φ` nor `ψ` is an eigenvalue of `mμ(K[2])`, which is
 the `5`-cycle (see below). In a `d`-regular graph, however, every eigenvalue other
 than `d` has such an eigenvector: eigenvectors of a symmetric matrix with distinct
 eigenvalues are orthogonal, and `1` is an eigenvector with eigenvalue `d`.)
 
 In Lean, if we define `y` by pattern matching on the three kinds of vertex and mark
-the definition `@[simp]`, then `simp` evaluates `y` at `none`, `v ₗ` and `v ᵣ`
+the definition `@[simp]`, then `simp` evaluates `y` at `none`, `vˡ` and `vʳ`
 but leaves `y` alone when it isn't applied to a vertex.
 -/
-/-- The vector on the vertices of `mμ[G]` with value `0` at `none`, `t * x v` at
-`v ₗ` and `x v` at `v ᵣ`. -/
+/-- The vector on the vertices of `mμ(G)` with value `0` at `none`, `t * x v` at
+`vˡ` and `x v` at `vʳ`. -/
 @[simp]
 def mycielskianLift {R : Type*} [Zero R] [Mul R] (t : R) (x : V → R) :
     Option (V ⊕ V) → R
   | none => 0
-  | v ₗ => t * x v
-  | v ᵣ => x v
+  | vˡ => t * x v
+  | vʳ => x v
 
 /-!
 The proof is the computation in the figure, with one case for each kind of vertex.
@@ -610,14 +610,14 @@ right copies. We work over any commutative ring, and with any root `t` of
 `t ^ 2 = t + 1`.
 
 If `A *ᵥ x = ξ • x`, the entries of `x` sum to zero and `t ^ 2 = t + 1`, then
-`mycielskianLift t x` satisfies the corresponding equation for `mμ[G]`, with
+`mycielskianLift t x` satisfies the corresponding equation for `mμ(G)`, with
 eigenvalue `t * ξ`.
 -/
 open Matrix in
 theorem adjMatrix_mycielskian_mulVec_mycielskianLift [Fintype V]
     [DecidableRel G.Adj] {R : Type*} [CommRing R] {t ξ : R} (ht : t ^ 2 = t + 1)
     {x : V → R} (hx : G.adjMatrix R *ᵥ x = ξ • x) (hsum : ∑ v, x v = 0) :
-    mμ[G].adjMatrix R *ᵥ mycielskianLift t x = (t * ξ) • mycielskianLift t x := by
+    mμ(G).adjMatrix R *ᵥ mycielskianLift t x = (t * ξ) • mycielskianLift t x := by
   -- the entries of `A *ᵥ x` and of `A *ᵥ (t • x)`
   have hv (v : V) : ∑ u, (if G.Adj v u then x u else 0) = ξ * x v := by
     simpa [mulVec, dotProduct, adjMatrix_apply] using congrFun hx v
@@ -631,14 +631,14 @@ theorem adjMatrix_mycielskian_mulVec_mycielskianLift [Fintype V]
   ext (_ | v | v) <;> simp_all [mulVec, dotProduct, mul_assoc]
 
 /-!
-Since `mycielskianLift t x` takes the value `x v` at `v ᵣ`, it is nonzero whenever
+Since `mycielskianLift t x` takes the value `x v` at `vʳ`, it is nonzero whenever
 `x` is.
 -/
 lemma mycielskianLift_ne_zero {R : Type*} [Zero R] [Mul R] (t : R) {x : V → R}
     (hx : x ≠ 0) : mycielskianLift t x ≠ 0 := by
   contrapose hx
   ext v
-  simpa using congrFun hx v ᵣ
+  simpa using congrFun hx vʳ
 
 /-!
 An eigenvector gives an element of the spectrum. As in Mathlib's proof of
@@ -649,17 +649,17 @@ and use the fact that eigenvalues of a linear map lie in its spectrum
 following.
 
 If `x ≠ 0` is an eigenvector of `A` with eigenvalue `ξ` whose entries sum to zero,
-then `φ * ξ` and `ψ * ξ` are eigenvalues of `mμ[G]`.
+then `φ * ξ` and `ψ * ξ` are eigenvalues of `mμ(G)`.
 -/
 open Matrix in
 open scoped goldenRatio in
 theorem mem_spectrum_adjMatrix_mycielskian [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] {ξ : ℝ} {x : V → ℝ} (hx0 : x ≠ 0)
     (hx : G.adjMatrix ℝ *ᵥ x = ξ • x) (hsum : ∑ v, x v = 0) :
-    φ * ξ ∈ spectrum ℝ (mμ[G].adjMatrix ℝ) ∧
-      ψ * ξ ∈ spectrum ℝ (mμ[G].adjMatrix ℝ) := by
+    φ * ξ ∈ spectrum ℝ (mμ(G).adjMatrix ℝ) ∧
+      ψ * ξ ∈ spectrum ℝ (mμ(G).adjMatrix ℝ) := by
   have key {t : ℝ} (ht : t ^ 2 = t + 1) :
-      t * ξ ∈ spectrum ℝ (mμ[G].adjMatrix ℝ) := by
+      t * ξ ∈ spectrum ℝ (mμ(G).adjMatrix ℝ) := by
     rw [← spectrum_toLin']
     apply Module.End.HasEigenvalue.mem_spectrum
     exact Module.End.hasEigenvalue_of_hasEigenvector
@@ -670,7 +670,7 @@ theorem mem_spectrum_adjMatrix_mycielskian [Fintype V] [DecidableEq V]
 
 /-!
 For example, `K[2]` has the eigenvector `![1, -1]` with eigenvalue `-1`, and its
-entries sum to zero. Since `mμ[K[2]]` is isomorphic to `C[5]`
+entries sum to zero. Since `mμ(K[2])` is isomorphic to `C[5]`
 (`mycielskianCompleteTwoIsoCycleFive`), the `5`-cycle has eigenvalues `-φ` and
 `-ψ`.
 -/
@@ -687,10 +687,10 @@ example :
 /-!
 Mathlib's `spectrum` is a set, so it does not record multiplicities. But for a
 `d`-regular graph `G` on `n` vertices this construction accounts for most of the
-spectrum of `mμ[G]`, with multiplicities. The adjacency matrix of `G` is symmetric,
+spectrum of `mμ(G)`, with multiplicities. The adjacency matrix of `G` is symmetric,
 so it has an orthogonal basis of eigenvectors that contains `1`, and the other
 `n - 1` basis vectors are orthogonal to `1`. They give `2 * (n - 1)` independent
-eigenvectors of `mμ[G]`. The remaining three eigenvectors are constant on the left
+eigenvectors of `mμ(G)`. The remaining three eigenvectors are constant on the left
 copies and on the right copies, and their eigenvalues are the roots of
 `X ^ 3 - d * X ^ 2 - (d ^ 2 + n) * X + d * n`. For `G = K[2]` we have `d = 1` and
 `n = 2` so this cubic is `(X - 2) * (X ^ 2 + X - 1)`, whose quadratic factor gives
@@ -773,20 +773,14 @@ end adjmatrix
 
 /-!
 For example, the hypercube `Q[n]` is `n`-regular and connected, so `n` is a simple
-eigenvalue of its adjacency matrix. (As in [Stating Results Across a
-Diamond*](#section-stating-results-across-a-diamond), we first put the filtering
-`LocallyFinite` instance in scope, since the adjacency matrix is built from
-`DecidableRel Q[n].Adj`.)
+eigenvalue of its adjacency matrix.
 -/
 example (n : ℕ) :
     Module.finrank ℝ (Module.End.eigenspace (Q[n].adjMatrix ℝ).toLin' n) = 1 := by
-  -- put the filtering instance in scope, so that
-  -- `IsRegularOfDegree.hypercube` uses it
-  let : Q[n].LocallyFinite := fun v => Subtype.fintype _
   rw [(IsRegularOfDegree.hypercube n).finrank_eigenspace_adjMatrix]
   -- `Q[n]` is connected, so it has exactly one connected component
   rw [Fintype.card_eq_nat_card]
-  exact (connected_hypercube n).card_connectedComponent
+  exact card_connectedComponent_eq_one_iff.2 (connected_hypercube n)
 
 /-!
 The *incidence matrix* (`incMatrix`) has rows indexed by vertices and columns by
@@ -1038,8 +1032,9 @@ instance _root_.Pi.instBooleanRing {ι : Type*} {R : ι → Type*}
 /-!
 The two lemmas are `simp` lemmas only once the `BooleanRing` namespace is open
 (they are *scoped*), so we open it for the rest of the chapter with
-`open scoped BooleanRing`. Mathlib has no lemma for `x + (x + y) = y`, so we add
-one.
+`open scoped BooleanRing`. Mathlib's `CharTwo.add_cancel_left` states
+`x + (x + y) = y`, but it needs a characteristic-`2` instance (`CharP`), which
+Mathlib does not provide for `Bool` or for `Fin n → Bool`, so we add our own lemma.
 -/
 open scoped BooleanRing
 example {n : ℕ} (x : Fin n → Bool) : -x = x := by simp
@@ -1243,12 +1238,11 @@ lemma hyperoctahedralToAut_apply {n : ℕ} (t : Multiplicative (Fin n → Bool))
 
 The homomorphism into the automorphism group is injective: if permuting coordinates
 by `σ` and then translating by `t` fixes every vertex, then evaluating at `0` shows
-`t = 0`, and evaluating at the basis vectors shows `σ = 1`. First a small helper: the
-map `i ↦ e i` is injective.
+`t = 0`, and evaluating at the basis vectors shows `σ = 1`. For the latter we use
+Mathlib's `Pi.single_left_injective`: the map `i ↦ e i` is injective, since `true` is
+nonzero in `Bool`.
 -/
-lemma single_true_left_inj {n : ℕ} {i j : Fin n}
-    (h : (e i : Fin n → Bool) = e j) : i = j := by
-  simpa [Pi.single_apply] using congrFun h i
+#check Pi.single_left_injective
 
 lemma hyperoctahedralToAut_injective (n : ℕ) :
     Function.Injective (hyperoctahedralToAut n) := by
@@ -1356,7 +1350,7 @@ lemma hyperoctahedralToAut_surjective (n : ℕ) :
     intro i j hij
     have h' : g (e i) = g (e j) := by
       rw [hp i, hp j, hij]
-    exact single_true_left_inj (g.injective h')
+    exact Pi.single_left_injective (by decide) (g.injective h')
   let σ : Equiv.Perm (Fin n) :=
     Equiv.ofBijective p (Finite.injective_iff_bijective.mp hpinj)
   have hh0 : ((hypercubeHamming.permuteHom n σ)⁻¹ * g) 0 = 0 := by
@@ -1885,7 +1879,7 @@ lemma subcubeCopy_injective {n k : ℕ} :
     intro i
     have hx := add_left_cancel (happ (e i))
     rw [extendEmb_single, extendEmb_single] at hx
-    exact single_true_left_inj hx
+    exact Pi.single_left_injective (by decide) hx
   rw [hd]
 
 /-!
@@ -1930,7 +1924,7 @@ lemma copy_apply_eq_add_add {n k : ℕ}
   have hne₁ : f y ≠ f (y + e i + e j) := fun h => by
     simpa [Pi.single_apply, hij] using congrFun (f.injective h) i
   have hne₂ : f (y + e i) ≠ f (y + e j) := fun h =>
-    hij (single_true_left_inj (add_left_cancel (f.injective h)))
+    hij (Pi.single_left_injective (by decide) (add_left_cancel (f.injective h)))
   have hpar : f (y + e i) + f (y + e j) = f y + f (y + e i + e j) :=
     hypercubeHamming_parallelogram (hadj y i) (hadj _ j) (hadj y j) h₄ hne₁ hne₂
   -- substitute `hpar` and cancel the two copies of `f (y + e i + e j)`
@@ -1958,7 +1952,7 @@ lemma exists_apply_single_eq_add_single {n k : ℕ}
     intro i j hdij
     have h : f (e i) = f (e j) := by
       rw [hd i, hd j, hdij]
-    exact single_true_left_inj (f.injective h)
+    exact Pi.single_left_injective (by decide) (f.injective h)
   exact ⟨⟨d, hdinj⟩, hd⟩
 
 /-!

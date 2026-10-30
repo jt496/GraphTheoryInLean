@@ -9,7 +9,8 @@ namespace SimpleGraph
 # Exercises
 
 1. Show that a Cayley graph defined on a commutative additive group is simply a
-circulant graph.
+circulant graph. (Hint: `addCayley_adj'`, `circulantGraph_adj` and
+`add_sub_cancel_left` could be useful.)
 -/
 example (G : Type*) [AddCommGroup G] (s : Set G) :
     addCayley s = circulantGraph s := by
@@ -36,17 +37,19 @@ example {n : ℕ} (v : HypercubeVert n) (b₁ b₂ : Bool) :
   sorry
 
 /-!
-4. Prove that the union (i.e. `⊔`) of the complete bipartite graph between `V` and
-`W` with the disjoint union `⊕g` (i.e. `sum`) of complete graphs on `V` and `W` is
-the complete graph on `V ⊕ W`.
+4. Prove that the union (i.e. sup `⊔`) of the complete bipartite graph between `V`
+and `W` with the disjoint union `⊕g` (i.e. `sum`) of complete graphs on `V` and `W`
+is the complete graph on `V ⊕ W`.
 -/
 example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := by
   sorry
 
 /-!
-5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
+5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty. (Hint:
+if `i : Fin 1` then `fin_cases i` splits the goal into one case for each possible
+value of `i`.)
 -/
-example : completeEquipartiteNat 1 = ⊥ := by
+example : completeMultipartiteFinNat 1 = ⊥ := by
   sorry
 
 /-!
@@ -64,18 +67,18 @@ example : C[3] = K[3] := by
   sorry
 
 /-!
-8. Prove that the disjoint union of empty graphs is empty.
+8. Prove that the disjoint union of empty graphs is the empty graph.
 -/
 example {ι : Type*} {V : ι → Type*} : Σg (fun i => (⊥ : SimpleGraph (V i))) = ⊥ := by
   sorry
 
 /-!
 9. Prove that every left copy of a vertex is isolated in the Mycielskian of the
-empty graph. (So `mμ[⊥]` is a star on the right copies together with the isolated
+empty graph. (So `mμ(⊥)` is a star on the right copies together with the isolated
 left copies.)
 -/
 example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
-    ¬ mμ[(⊥ : SimpleGraph V)].Adj u ₗ x := by
+    ¬ mμ(⊥).Adj uˡ x := by
   sorry
 
 /-!
@@ -87,24 +90,25 @@ example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
 
 /-!
 11. Prove that `sigmaCompleteNat` is the complement of the complete multipartite
-graph `completeMultipartiteNat`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the cases
-`i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that `a`
-and `b` have the same type.
+graph `completeMultipartiteNatFin`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the
+cases `i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that
+`a` and `b` have the same type.
 -/
-example : sigmaCompleteNat = completeMultipartiteNatᶜ := by
+example : sigmaCompleteNat = completeMultipartiteNatFinᶜ := by
   sorry
 
 /-! SOLUTIONS -/
 
 /-!
 1. Show that a Cayley graph defined on a commutative additive group is simply a
-circulant graph.
+circulant graph. (Hint: `addCayley_adj'`, `circulantGraph_adj` and
+`add_sub_cancel_left` could be useful.)
 -/
 example (G : Type*) [AddCommGroup G] (s : Set G) :
     addCayley s = circulantGraph s := by
   ext u v
   rw [addCayley_adj', circulantGraph_adj]
-  aesop
+  grind [add_sub_cancel_left]
 
 /-!
 2. Show that the Paley graph on 17 vertices is a circulant graph with the following
@@ -117,7 +121,7 @@ statement `∀ y : ZMod 17, …` case by case.
 lemma paleyGraph₁₇_eq_circulant :
     paleyGraph (ZMod 17) = circulantGraph {1, 2, 4, 8, 9, 13, 15, 16} := by
   have : {y : ZMod 17 | IsSquare y} = {0, 1, 2, 4, 8, 9, 13, 15, 16} := by
-    ext
+    ext x
     constructor <;> decide +revert
   simp [this, circulantGraph_eq_erase_zero]
 
@@ -129,20 +133,22 @@ example {n : ℕ} (v : HypercubeVert n) (b₁ b₂ : Bool) :
     Q[n + 1].Adj (v, b₁) (v, b₂) ↔ b₁ ≠ b₂ := by simp
 
 /-!
-4. Prove that the union (i.e. `⊔`) of the complete bipartite graph between `V` and
-`W` with the disjoint union `⊕g` (i.e. `sum`) of complete graphs on `V` and `W` is
-the complete graph on `V ⊕ W`.
+4. Prove that the union (i.e. sup `⊔`) of the complete bipartite graph between `V`
+and `W` with the disjoint union `⊕g` (i.e. `sum`) of complete graphs on `V` and `W`
+is the complete graph on `V ⊕ W`.
 -/
 example {V W : Type*} : completeBipartiteGraph V W ⊔ (⊤ ⊕g ⊤) = ⊤ := by
   ext u v
   cases u <;> cases v <;> simp
 
 /-!
-5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty.
+5. Prove that the complete `1`-partite graph with a single class `ℕ` is empty. (Hint:
+if `i : Fin 1` then `fin_cases i` splits the goal into one case for each possible
+value of `i`.)
 -/
-example : completeEquipartiteNat 1 = ⊥ := by
+example : completeMultipartiteFinNat 1 = ⊥ := by
   ext ⟨i, _⟩ ⟨j, _⟩
-  simp [Subsingleton.elim i j]
+  fin_cases i ; fin_cases j; simp
 
 /-!
 6. Prove that the blow-up of a complete graph is a complete multipartite graph.
@@ -159,7 +165,7 @@ example : C[3] = K[3] := by
   decide +revert
 
 /-!
-8. Prove that the disjoint union of empty graphs is empty.
+8. Prove that the disjoint union of empty graphs is the empty graph.
 -/
 example {ι : Type*} {V : ι → Type*} : Σg (fun i => (⊥ : SimpleGraph (V i))) = ⊥ := by
   ext ⟨i, u⟩ ⟨j, v⟩
@@ -167,11 +173,11 @@ example {ι : Type*} {V : ι → Type*} : Σg (fun i => (⊥ : SimpleGraph (V i)
 
 /-!
 9. Prove that every left copy of a vertex is isolated in the Mycielskian of the
-empty graph. (So `mμ[⊥]` is a star on the right copies together with the isolated
+empty graph. (So `mμ(⊥)` is a star on the right copies together with the isolated
 left copies.)
 -/
 example {V : Type*} (u : V) (x : Option (V ⊕ V)) :
-    ¬ mμ[(⊥ : SimpleGraph V)].Adj u ₗ x := by
+    ¬ mμ(⊥).Adj uˡ x := by
   rcases x with _ | (v | v) <;> simp
 
 /-!
@@ -184,11 +190,11 @@ example (n : ℕ) : C[n + 2] = circulantGraph {1} := by
 
 /-!
 11. Prove that `sigmaCompleteNat` is the complement of the complete multipartite
-graph `completeMultipartiteNat`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the cases
-`i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that `a`
-and `b` have the same type.
+graph `completeMultipartiteNatFin`. Hint: after `ext ⟨i, a⟩ ⟨j, b⟩`, consider the
+cases `i = j` and `i ≠ j` separately. In the first case `subst` the equation, so that
+`a` and `b` have the same type.
 -/
-example : sigmaCompleteNat = completeMultipartiteNatᶜ := by
+example : sigmaCompleteNat = completeMultipartiteNatFinᶜ := by
   ext ⟨i, a⟩ ⟨j, b⟩
   by_cases h : i = j
   · subst h

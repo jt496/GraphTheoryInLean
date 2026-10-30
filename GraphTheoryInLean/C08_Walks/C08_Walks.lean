@@ -1343,7 +1343,7 @@ end basics
 # Walks in Hypercube and Mycielskian Graphs
 
 We now return to two of our running examples, the hypercube `Q[n]` and the
-Mycielskian `mμ[G]`, and build walks in each of them.
+Mycielskian `mμ(G)`, and build walks in each of them.
 
 ## Walks in Hypercubes
 
@@ -1381,7 +1381,7 @@ which is `(u, b)` by definition but not syntactically, so in both cases we use
 Since a Hamming path is a path between two `HypercubeVert n` vertices, we choose to
 put it, and related definitions and results, in the `HypercubeVert` namespace.
 (Although `(embedBool n b) u` and `(u, b)` are defeq, we discharge the first side
-condition of each `Walk.copy` with `by simp` rather than `rfl`. Lean stores each such
+condition of each `Walk.copy` with `simp` rather than `rfl`. Lean stores each such
 proof as an auxiliary lemma, and with `rfl` its statement would be
 `(embedBool n b).toHom u = (embedBool n b).toHom u`. The definition would still be
 valid, but `rw` and `simp` would then fail to match this against `(u, b)`, so the
@@ -1581,48 +1581,48 @@ see the [Exercises](#section-exercises-walks) for details.
 
 ## Walks in the Mycielskian
 
-Recall `mμ[G]`, the `mycielskian` of a graph `G`. Given any non-nil walk in `G`,
-there is a natural way to define a walk in `mμ[G]`. We explore this construction in
-detail below, using it to prove that every edge of `G` gives a `5`-cycle in `mμ[G]`,
-and that `mμ[G]` contains a Hamiltonian path or cycle whenever `G` does (provided
+Recall `mμ(G)`, the `mycielskian` of a graph `G`. Given any non-nil walk in `G`,
+there is a natural way to define a walk in `mμ(G)`. We explore this construction in
+detail below, using it to prove that every edge of `G` gives a `5`-cycle in `mμ(G)`,
+and that `mμ(G)` contains a Hamiltonian path or cycle whenever `G` does (provided
 `G` has at least two vertices).
 
 Rather than defining the walks that give the Hamiltonian path and cycle directly, we
 first define a zig-zag walk, `mycielskianZigZag`, that has a simple recursive
-definition and from which it is easy to build paths and cycles in `mμ[G]` from paths
+definition and from which it is easy to build paths and cycles in `mμ(G)` from paths
 and cycles in `G`.
 
 First, note that if `u — w` is a walk of length 1 in `G` (i.e. a single edge) then
-there is a corresponding walk of length 2 in `mμ[G]`, given by `u ₗ — w ₗ — u ᵣ`.
+there is a corresponding walk of length 2 in `mμ(G)`, given by `uˡ — wˡ — uʳ`.
 Further, if `u — v — w` is a walk of length 2 in `G`, then there is a corresponding
-walk of length 4 in `mμ[G]`: `u ₗ — v ᵣ — w ₗ — v ₗ — u ᵣ`. Notice that this second
+walk of length 4 in `mμ(G)`: `uˡ — vʳ — wˡ — vˡ — uʳ`. Notice that this second
 example can be obtained from the first by taking the walk corresponding to the single
-edge `v — w`, reversing it and adding the edges `u ₗ — v ᵣ` and `v ₗ — u ᵣ` to the
+edge `v — w`, reversing it and adding the edges `uˡ — vʳ` and `vˡ — uʳ` to the
 start and end respectively.
 
 This generalizes, and allows us to define the walk `mycielskianZigZag` recursively.
-Having built the walk in `mμ[G]` from `v ₗ` to `v ᵣ` corresponding to a non-nil walk
+Having built the walk in `mμ(G)` from `vˡ` to `vʳ` corresponding to a non-nil walk
 `p : G.Walk v w`, the walk for `cons h p`, where `h : G.Adj u v`, is formed by
-prepending the edge `u ₗ — v ᵣ` to the reverse of the walk corresponding to `p` and
-then concatenating the edge `v ₗ — u ᵣ` to give
-`mycielskianZigZag(cons h p) = u ₗ — [mycielskianZigZag(p).reverse] — u ᵣ`.
+prepending the edge `uˡ — vʳ` to the reverse of the walk corresponding to `p` and
+then concatenating the edge `vˡ — uʳ` to give
+`mycielskianZigZag(cons h p) = uˡ — [mycielskianZigZag(p).reverse] — uʳ`.
 
 [Figure: The two cases of the zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianZigZag.svg)
 -/
 section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
 
-/-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `u ₗ`
-to `u ᵣ` in `mμ[G]`. -/
+/-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `uˡ`
+to `uʳ` in `mμ(G)`. -/
 def Walk.mycielskianZigZag {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
-    mμ[G].Walk u ₗ u ᵣ :=
+    mμ(G).Walk uˡ uʳ :=
   match p with
   | nil => (hn .nil).elim  -- This case is ruled out by the `¬ p.Nil` hypothesis
   | cons' u v w h p =>
-    -- the last edge of the walk `v ₗ — u ᵣ`
-    have hl : mμ[G].Adj v ₗ u ᵣ := by simpa using h.symm
+    -- the last edge of the walk `vˡ — uʳ`
+    have hl : mμ(G).Adj vˡ uʳ := by simpa using h.symm
     match p with
-    | nil => cons (by simpa using h) <| cons hl nil -- `u ₗ — v ₗ — u ᵣ`
+    | nil => cons (by simpa using h) <| cons hl nil -- `uˡ — vˡ — uʳ`
     | cons' _ x _ h' p' =>
       have hn' : ¬ (p'.cons h').Nil := nofun
       cons (by simpa using h) ((mycielskianZigZag hn').reverse.concat hl)
@@ -1637,7 +1637,7 @@ that have more meaningful names.
 lemma Walk.mycielskianZigZag_cons_nil {u v} (h : G.Adj u v)
     (hn : ¬ (cons h nil).Nil) :
     mycielskianZigZag hn =
-      have hl : mμ[G].Adj v ₗ u ᵣ := by simpa using h.symm
+      have hl : mμ(G).Adj vˡ uʳ := by simpa using h.symm
       cons (by simpa using h) (cons hl nil) := rfl
 
 @[simp]
@@ -1673,14 +1673,14 @@ lemma Walk.length_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
 We can use the zig-zag walk to map any non-nil walk of length `k` in `G` to a
 walk of length `2k + 2` in the Mycielskian. This preserves the property of being a
 path and in particular maps Hamiltonian paths to Hamiltonian paths. We simply add the
-two edges `u ᵣ — none — w ᵣ` at the end of the zig-zag walk.
+two edges `uʳ — none — wʳ` at the end of the zig-zag walk.
 -/
-/-- Given a non-nil walk from `u` to `w` in `G`, this is a walk from `u ₗ` to
-`w ᵣ` in `mμ[G]`. If the original walk was a (Hamiltonian) path then so is the new
+/-- Given a non-nil walk from `u` to `w` in `G`, this is a walk from `uˡ` to
+`wʳ` in `mμ(G)`. If the original walk was a (Hamiltonian) path then so is the new
 walk. -/
 protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
-    mμ[G].Walk u ₗ w ᵣ :=
-  mycielskianZigZag hn|>.concat (by simp) |>.concat (by simp : mμ[G].Adj none _ )
+    mμ(G).Walk uˡ wʳ :=
+  mycielskianZigZag hn|>.concat (by simp) |>.concat (by simp : mμ(G).Adj none _ )
 
 /-!
 [Figure: Converting a path in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
@@ -1690,10 +1690,10 @@ Mycielskian. This preserves the property of being a cycle and in particular maps
 Hamiltonian cycles to Hamiltonian cycles in the Mycielskian.
 -/
 
-/-- Given a closed walk from `u` to `u` in `G`, there is a walk from `u ᵣ` to `u ᵣ`
-in `mμ[G]`. If the original walk was a (Hamiltonian) cycle then so is this new walk.
+/-- Given a closed walk from `u` to `u` in `G`, there is a walk from `uʳ` to `uʳ`
+in `mμ(G)`. If the original walk was a (Hamiltonian) cycle then so is this new walk.
 -/
-def Walk.mycielskianClosed {u} (c : Walk G u u) : mμ[G].Walk u ᵣ u ᵣ :=
+def Walk.mycielskianClosed {u} (c : Walk G u u) : mμ(G).Walk uʳ uʳ :=
   match c with
   | nil => nil
   | cons h' nil => (h'.ne rfl).elim
@@ -1748,7 +1748,7 @@ walk.
 -/
 lemma Walk.exists_of_mem_support_mycielskianZigZag {u w z} {p : G.Walk u w}
     (hn : ¬ p.Nil) (hz : z ∈ (mycielskianZigZag hn).support) :
-    ∃ y ∈ p.support, z = y ₗ ∨ z = y ᵣ := by
+    ∃ y ∈ p.support, z = yˡ ∨ z = yʳ := by
   induction hn using mycielskianZigZag.induct <;> aesop
 
 /-!
@@ -1764,11 +1764,11 @@ lemma Walk.none_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
 
 /-!
 If the original walk `p : G.Walk u w` is a path, then the zig-zag walk does not
-visit `w ᵣ`.
+visit `wʳ`.
 -/
 @[simp]
 lemma Walk.end_right_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
-    (hn : ¬ p.Nil) (hp : p.IsPath) : w ᵣ ∉ (mycielskianZigZag hn).support := by
+    (hn : ¬ p.Nil) (hp : p.IsPath) : wʳ ∉ (mycielskianZigZag hn).support := by
   induction hn using mycielskianZigZag.induct <;> aesop
 
 /-!
@@ -1833,9 +1833,9 @@ lemma Walk.isCycle_mycielskianClosed {u} {p : Walk G u u} (hn : ¬ p.Nil)
 The weaker assumption is exactly what we need for one application of the result. If
 `h : G.Adj u v` then the closed walk `u — v — u` goes along an edge and straight
 back, so it is not a cycle. But it is not nil, and the tail `[v, u]` of its support
-has no repeated vertices, so its image `u ᵣ — v ₗ — u ₗ — v ᵣ — none — u ᵣ` is a
-`5`-cycle. Hence every edge of `G` gives a `5`-cycle in `mμ[G]`. We will use this to
-find the bridges of `mμ[G]` in [Bridges](#section-bridges) and to compute its girth
+has no repeated vertices, so its image `uʳ — vˡ — uˡ — vʳ — none — uʳ` is a
+`5`-cycle. Hence every edge of `G` gives a `5`-cycle in `mμ(G)`. We will use this to
+find the bridges of `mμ(G)` in [Bridges](#section-bridges) and to compute its girth
 in [The Girth of the Mycielskian](#section-the-girth-of-the-mycielskian).
 -/
 lemma isCycle_mycielskianClosed_of_adj {u v : V} (h : G.Adj u v) :
@@ -1866,12 +1866,12 @@ lemma Walk.IsHamiltonianCycle.mycielskianClosed [DecidableEq V] {u} {p : G.Walk 
         Fintype.card_option, Fintype.card_sum]
 
 /-!
-Finally we can show that if `G` is Hamiltonian then `mμ[G]` is also Hamiltonian
-(unless `G` has only one vertex, in which case `mμ[G]` is an edge plus an isolated
+Finally we can show that if `G` is Hamiltonian then `mμ(G)` is also Hamiltonian
+(unless `G` has only one vertex, in which case `mμ(G)` is an edge plus an isolated
 vertex and so is clearly not Hamiltonian).
 -/
 theorem IsHamiltonian.mycielskian [DecidableEq V] [Fintype V]
-    (hH : G.IsHamiltonian) (hf : Fintype.card V ≠ 1) : mμ[G].IsHamiltonian := by
+    (hH : G.IsHamiltonian) (hf : Fintype.card V ≠ 1) : mμ(G).IsHamiltonian := by
   intro
   have ⟨_, _, hc⟩ := hH hf
   exact ⟨_, _, hc.mycielskianClosed⟩
@@ -2264,24 +2264,13 @@ then closes this path up into a Hamiltonian cycle of `G`. Hamiltonicity plays no
 part in the surgery itself, so we cut open an arbitrary cycle and record what the
 resulting path inherits from it.
 
-We first need to prove a simple lemma about darts of a cycle.
+We first need a simple fact about darts of a cycle `c : G.Walk u u`: if the first
+vertex of a dart `d` of `c` is `u`, then the second vertex of `d` is the second
+vertex of the cycle. Mathlib proves this for any walk whose `Walk.dropLast` is a
+path, and dropping the last dart of a cycle leaves a path.
 -/
-#check darts_getElem_eq_getVert
-/-!
-If `d` is a dart of a cycle `c : G.Walk u u` and the first vertex of `d` is `u`, then
-the second vertex of `d` is the second vertex of the cycle.
--/
-lemma Walk.IsCycle.snd_eq_of_mem_darts {u : V} {c : G.Walk u u}
-    (hc : c.IsCycle) {d : G.Dart} (hd : d ∈ c.darts) (hfst : d.fst = u) :
-    d.snd = c.snd := by
-  obtain ⟨i, hi, rfl⟩ := List.mem_iff_getElem.1 hd
-  rw [darts_getElem_eq_getVert] at hfst ⊢
-  have hilt : i < c.length := c.length_darts ▸ hi
-  -- the dart leaves `u`, which only occurs at the ends, so its index is `0`
-  have h0 : i = 0 := by
-    rcases (hc.getVert_endpoint_iff hilt.le).1 hfst with h | h <;> grind
-  subst h0
-  rfl
+#check Walk.IsPath.snd_eq_of_mem_darts
+#check Walk.IsCycle.isPath_dropLast
 
 /-!
 Deleting an edge `u — v` from a cycle `c` leaves a path from `u` to `v` that is one
@@ -2309,7 +2298,8 @@ lemma Walk.IsCycle.exists_isPath_of_mem_edges {x u v : V} {c : G.Walk x x}
     -- rotate `c` to be based at `d.fst`, so that `d` becomes its first dart
     have ha := c.dart_fst_mem_support_of_mem_darts hd
     have hr := hc.rotate ha
-    rw [hr.snd_eq_of_mem_darts ((c.rotate_darts _ ha).perm.mem_iff.2 hd) rfl]
+    rw [← hr.isPath_dropLast.snd_eq_of_mem_darts
+      ((c.rotate_darts _ ha).perm.mem_iff.2 hd) rfl]
     -- the reversed tail of the rotated cycle is the required path
     refine ⟨_, hr.isPath_tail.reverse, ?_, fun w => ?_, ?_⟩
     · simpa using length_tail_add_one hr.not_nil

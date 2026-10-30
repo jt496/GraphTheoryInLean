@@ -645,7 +645,7 @@
      "data":
      {"title": "The Handshake Lemma",
       "shortTitle": null,
-      "sectionNum": "4.3.5.",
+      "sectionNum": "4.3.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -653,7 +653,7 @@
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "The Handshake Lemma", "shortTitle": null, "number": "5"}]},
+       {"title": "The Handshake Lemma", "shortTitle": null, "number": "4"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-the-greedy-bound-for-graphs-on":
    [{"id": "section-the-greedy-bound-for-graphs-on",
@@ -1333,7 +1333,7 @@
      "data":
      {"title": "Regular Graphs",
       "shortTitle": null,
-      "sectionNum": "4.3.6.",
+      "sectionNum": "4.3.5.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -1341,7 +1341,7 @@
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Regular Graphs", "shortTitle": null, "number": "6"}]},
+       {"title": "Regular Graphs", "shortTitle": null, "number": "5"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-reachability":
    [{"id": "section-reachability",
@@ -1579,7 +1579,7 @@
      "data":
      {"title": "Neighbours in a Set",
       "shortTitle": null,
-      "sectionNum": "4.3.7.",
+      "sectionNum": "4.3.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -1587,7 +1587,7 @@
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Neighbours in a Set", "shortTitle": null, "number": "7"}]},
+       {"title": "Neighbours in a Set", "shortTitle": null, "number": "6"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-neighbours":
    [{"id": "section-neighbours",
@@ -1703,7 +1703,7 @@
      "data":
      {"title": "Minimum and Maximum Degree",
       "shortTitle": null,
-      "sectionNum": "4.3.4.",
+      "sectionNum": "4.3.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
@@ -1713,7 +1713,7 @@
        {"title": "Degrees", "shortTitle": null, "number": "3"},
        {"title": "Minimum and Maximum Degree",
         "shortTitle": null,
-        "number": "4"}]},
+        "number": "3"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "section-maximum-degree-two":
    [{"id": "section-maximum-degree-two",
@@ -3128,23 +3128,6 @@
      "data":
      {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
       "shortTitle": null,
-      "sectionNum": "4.3.3.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Decidability, Finiteness and Degrees",
-        "shortTitle": null,
-        "number": "4"},
-       {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
-        "shortTitle": null,
-        "number": "3"}]},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "section-degrees-in-complete-bipartite-graphs":
-   [{"id": "section-degrees-in-complete-bipartite-graphs",
-     "data":
-     {"title": "Degrees in Complete Bipartite Graphs",
-      "shortTitle": null,
       "sectionNum": "4.3.2.",
       "searchPriority": 50,
       "context":
@@ -3153,7 +3136,7 @@
         "shortTitle": null,
         "number": "4"},
        {"title": "Degrees", "shortTitle": null, "number": "3"},
-       {"title": "Degrees in Complete Bipartite Graphs",
+       {"title": "Degrees in the  n -Uniform Blow-up of a Graph",
         "shortTitle": null,
         "number": "2"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
@@ -3779,14 +3762,14 @@
    "section-complete-multipartite-graphs-and-blow-ups":
    [{"id": "section-complete-multipartite-graphs-and-blow-ups",
      "data":
-     {"title": "Complete Multipartite Graphs and Blow-ups*",
+     {"title": "Complete Multipartite Graphs and Blow-ups",
       "shortTitle": null,
       "sectionNum": "3.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"}]},
      "address": "/Constructions/"}],
@@ -3800,7 +3783,7 @@
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"},
        {"title": "Complete Multipartite Graphs",
@@ -4610,7 +4593,7 @@
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Constructions", "shortTitle": null, "number": "3"},
-       {"title": "Complete Multipartite Graphs and Blow-ups*",
+       {"title": "Complete Multipartite Graphs and Blow-ups",
         "shortTitle": null,
         "number": "6"},
        {"title": "Blow-ups", "shortTitle": null, "number": "2"}]},
@@ -5254,22 +5237,6 @@
         "Decidability",
         "Bool and Prop"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.unexpandMycielskianVert":
-   [{"id":
-     "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandMycielskianVert",
-     "data":
-     {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandMycielskianVert":
-      {"display": "unexpandMycielskianVert",
-       "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
-     "address": "/Constructions/"}],
-   "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.unexpandIterMycielskian":
-   [{"id":
-     "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandIterMycielskian",
-     "data":
-     {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___unexpandIterMycielskian":
-      {"display": "unexpandIterMycielskian",
-       "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
-     "address": "/Constructions/"}],
    "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.kneserGraphFintype":
    [{"id":
      "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___kneserGraphFintype",
@@ -5442,6 +5409,13 @@
       {"display": "tensorProd_adj",
        "context": ["Graph Theory in Lean", "Maps", "Tensor Products*"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.tensorProdFintypeNeighborSet":
+   [{"id": "SimpleGraph___tensorProdFintypeNeighborSet",
+     "data":
+     {"/Maps/#SimpleGraph___tensorProdFintypeNeighborSet":
+      {"display": "tensorProdFintypeNeighborSet",
+       "context": ["Graph Theory in Lean", "Maps", "Tensor Products*"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.tensorProd.sndHom":
    [{"id": "SimpleGraph___tensorProd___sndHom",
      "data":
@@ -5564,17 +5538,6 @@
         "Clique and Independence Number of the Mycielskian",
         "Independence Number of the Mycielskian*"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.subset_compl_openNeighborhoodFinset":
-   [{"id": "SimpleGraph___subset_compl_openNeighborhoodFinset",
-     "data":
-     {"/Cliques/#SimpleGraph___subset_compl_openNeighborhoodFinset":
-      {"display": "subset_compl_openNeighborhoodFinset",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Independence Number of the Mycielskian*"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.subgraphIsoEquivAut":
    [{"id": "SimpleGraph___subgraphIsoEquivAut",
      "data":
@@ -5659,17 +5622,6 @@
         "Independent Sets",
         "Independence Number of the Kneser Graph*"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.single_true_left_inj":
-   [{"id": "SimpleGraph___single_true_left_inj",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___single_true_left_inj":
-      {"display": "single_true_left_inj",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Injectivity"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.sigma_induce_adj":
    [{"id": "SimpleGraph___sigma_induce_adj",
      "data":
@@ -5809,6 +5761,17 @@
         "Tensor Products*",
         "Indexed Tensor Products"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.piTensorProdFintypeNeighborSet":
+   [{"id": "SimpleGraph___piTensorProdFintypeNeighborSet",
+     "data":
+     {"/Maps/#SimpleGraph___piTensorProdFintypeNeighborSet":
+      {"display": "piTensorProdFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Maps",
+        "Tensor Products*",
+        "Indexed Tensor Products"]}},
+     "address": "/Maps/"}],
    "SimpleGraph.piTensorProd":
    [{"id": "SimpleGraph___piTensorProd",
      "data":
@@ -5925,6 +5888,13 @@
         "Trails, Paths, Circuits and Cycles",
         "Trails and Paths"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.pathNat.bicoloring":
+   [{"id": "SimpleGraph___pathNat___bicoloring",
+     "data":
+     {"/Colorings/#SimpleGraph___pathNat___bicoloring":
+      {"display": "pathNat.bicoloring",
+       "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.pathNat":
    [{"id": "SimpleGraph___pathNat",
      "data":
@@ -5933,18 +5903,6 @@
        "context":
        ["Graph Theory in Lean", "SimpleGraph", "Constructing a SimpleGraph"]}},
      "address": "/SimpleGraph/"}],
-   "SimpleGraph.pathGraphAdjDecidableRw":
-   [{"id": "SimpleGraph___pathGraphAdjDecidableRw",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___pathGraphAdjDecidableRw":
-      {"display": "pathGraphAdjDecidableRw",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Decidability",
-        "Deciding Adjacency",
-        "Decidability and Kernel Reduction*"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.pathGraph.path":
    [{"id": "SimpleGraph___pathGraph___path",
      "data":
@@ -6267,39 +6225,6 @@
         "Computations with Mycielskians",
         "Mycielskian Degrees"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.mycielskianProj_right":
-   [{"id": "SimpleGraph___mycielskianProj_right",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_right":
-      {"display": "mycielskianProj_right",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.mycielskianProj_none":
-   [{"id": "SimpleGraph___mycielskianProj_none",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_none":
-      {"display": "mycielskianProj_none",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
-   "SimpleGraph.mycielskianProj_left":
-   [{"id": "SimpleGraph___mycielskianProj_left",
-     "data":
-     {"/Cliques/#SimpleGraph___mycielskianProj_left":
-      {"display": "mycielskianProj_left",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Clique Number of the Mycielskian"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.mycielskianProj":
    [{"id": "SimpleGraph___mycielskianProj",
      "data":
@@ -6808,26 +6733,6 @@
         "Connectivity",
         "Eulerian Circuits and Trails"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.locallyFiniteBlowUpGraph'":
-   [{"id": "SimpleGraph___locallyFiniteBlowUpGraph___",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___locallyFiniteBlowUpGraph___":
-      {"display": "locallyFiniteBlowUpGraph'",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.locallyFiniteBlowUpGraph":
-   [{"id": "SimpleGraph___locallyFiniteBlowUpGraph",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___locallyFiniteBlowUpGraph":
-      {"display": "locallyFiniteBlowUpGraph",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.lineGraphCompleteThreeIsoCompleteThree":
    [{"id": "SimpleGraph___lineGraphCompleteThreeIsoCompleteThree",
      "data":
@@ -8431,6 +8336,17 @@
         "Hypercubes and Mycielskians",
         "Embeddings of Hypercubes"]}},
      "address": "/Maps/"}],
+   "SimpleGraph.hypercube.bicoloring_apply":
+   [{"id": "SimpleGraph___hypercube___bicoloring_apply",
+     "data":
+     {"/Colorings/#SimpleGraph___hypercube___bicoloring_apply":
+      {"display": "hypercube.bicoloring_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Colouring Concrete Graphs",
+        "Colouring Hypercubes"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.hypercube.bicoloring":
    [{"id": "SimpleGraph___hypercube___bicoloring",
      "data":
@@ -8492,16 +8408,6 @@
         "Decidability, Finiteness and Degrees",
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hasseAdjDecidable":
-   [{"id": "SimpleGraph___hasseAdjDecidable",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___hasseAdjDecidable":
-      {"display": "hasseAdjDecidable",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.hammingNorm_single":
    [{"id": "SimpleGraph___hammingNorm_single",
@@ -9578,6 +9484,18 @@
         "Eccentricity, Diameter and Radius",
         "Diameter of Box Products"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.edgeDecidableRelAdj":
+   [{"id": "SimpleGraph___edgeDecidableRelAdj",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___edgeDecidableRelAdj":
+      {"display": "edgeDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Decidability",
+        "Deciding Adjacency",
+        "Decidability and Kernel Reduction*"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.edgeConnectivity_of_subsingleton":
    [{"id": "SimpleGraph___edgeConnectivity_of_subsingleton",
      "data":
@@ -9824,28 +9742,6 @@
         "Decidability, Finiteness and Degrees",
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.degree_completeBipartiteGraph_inr":
-   [{"id": "SimpleGraph___degree_completeBipartiteGraph_inr",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___degree_completeBipartiteGraph_inr":
-      {"display": "degree_completeBipartiteGraph_inr",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degrees",
-        "Degrees in Complete Bipartite Graphs"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.degree_completeBipartiteGraph_inl":
-   [{"id": "SimpleGraph___degree_completeBipartiteGraph_inl",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___degree_completeBipartiteGraph_inl":
-      {"display": "degree_completeBipartiteGraph_inl",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Degrees",
-        "Degrees in Complete Bipartite Graphs"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.degree_blowUpN":
    [{"id": "SimpleGraph___degree_blowUpN",
@@ -10369,17 +10265,6 @@
         "Maximum Degree at Least Three",
         "Step 2: Gluing Along the Pair"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.connected_iff_card_connectedComponent":
-   [{"id": "SimpleGraph___connected_iff_card_connectedComponent",
-     "data":
-     {"/Connectivity/#SimpleGraph___connected_iff_card_connectedComponent":
-      {"display": "connected_iff_card_connectedComponent",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Connectivity",
-        "Connected Components"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.connected_hypercube":
    [{"id": "SimpleGraph___connected_hypercube",
      "data":
@@ -10402,15 +10287,15 @@
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.completeMultipartiteNat":
-   [{"id": "SimpleGraph___completeMultipartiteNat",
+   "SimpleGraph.completeMultipartiteNatFin":
+   [{"id": "SimpleGraph___completeMultipartiteNatFin",
      "data":
-     {"/Constructions/#SimpleGraph___completeMultipartiteNat":
-      {"display": "completeMultipartiteNat",
+     {"/Constructions/#SimpleGraph___completeMultipartiteNatFin":
+      {"display": "completeMultipartiteNatFin",
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.completeMultipartiteGraph_adj":
@@ -10421,18 +10306,18 @@
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.completeEquipartiteNat":
-   [{"id": "SimpleGraph___completeEquipartiteNat",
+   "SimpleGraph.completeMultipartiteFinNat":
+   [{"id": "SimpleGraph___completeMultipartiteFinNat",
      "data":
-     {"/Constructions/#SimpleGraph___completeEquipartiteNat":
-      {"display": "completeEquipartiteNat",
+     {"/Constructions/#SimpleGraph___completeMultipartiteFinNat":
+      {"display": "completeMultipartiteFinNat",
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Complete Multipartite Graphs"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.completeBipartiteGraph_not_adj_inr_iff'":
@@ -10500,17 +10385,6 @@
       {"display": "completeBipartiteGraph.bicoloring",
        "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
      "address": "/Colorings/"}],
-   "SimpleGraph.compl_openNeighborhoodFinset_nonempty":
-   [{"id": "SimpleGraph___compl_openNeighborhoodFinset_nonempty",
-     "data":
-     {"/Cliques/#SimpleGraph___compl_openNeighborhoodFinset_nonempty":
-      {"display": "compl_openNeighborhoodFinset_nonempty",
-       "context":
-       ["Graph Theory in Lean",
-        "Cliques",
-        "Clique and Independence Number of the Mycielskian",
-        "Independence Number of the Mycielskian*"]}},
-     "address": "/Cliques/"}],
    "SimpleGraph.colorable_of_forall_finite_subgraph_colorable":
    [{"id": "SimpleGraph___colorable_of_forall_finite_subgraph_colorable",
      "data":
@@ -11573,6 +11447,17 @@
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.blowUpNFintypeNeighborSet":
+   [{"id": "SimpleGraph___blowUpNFintypeNeighborSet",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpNFintypeNeighborSet":
+      {"display": "blowUpNFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Degrees",
+        "Degrees in the  n -Uniform Blow-up of a Graph"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.blowUpN":
    [{"id": "SimpleGraph___blowUpN",
      "data":
@@ -11581,9 +11466,29 @@
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Blow-ups"]}},
      "address": "/Constructions/"}],
+   "SimpleGraph.blowUpGraphFintypeNeighborSet'":
+   [{"id": "SimpleGraph___blowUpGraphFintypeNeighborSet___",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpGraphFintypeNeighborSet___":
+      {"display": "blowUpGraphFintypeNeighborSet'",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Exercises"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.blowUpGraphFintypeNeighborSet":
+   [{"id": "SimpleGraph___blowUpGraphFintypeNeighborSet",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___blowUpGraphFintypeNeighborSet":
+      {"display": "blowUpGraphFintypeNeighborSet",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Exercises"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.blowUpGraph":
    [{"id": "SimpleGraph___blowUpGraph",
      "data":
@@ -11592,7 +11497,7 @@
        "context":
        ["Graph Theory in Lean",
         "Constructions",
-        "Complete Multipartite Graphs and Blow-ups*",
+        "Complete Multipartite Graphs and Blow-ups",
         "Blow-ups"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.blockSetoid":
@@ -12861,17 +12766,6 @@
       {"display": "Walk.IsCycle.tail_not_nil",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.IsCycle.snd_eq_of_mem_darts":
-   [{"id": "SimpleGraph___Walk___IsCycle___snd_eq_of_mem_darts",
-     "data":
-     {"/Walks/#SimpleGraph___Walk___IsCycle___snd_eq_of_mem_darts":
-      {"display": "Walk.IsCycle.snd_eq_of_mem_darts",
-       "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "The Bondy–Chvátal Theorem"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsCycle.neighborSet_toSubgraph_eq_of_degree_le_two":
    [{"id":
      "SimpleGraph___Walk___IsCycle___neighborSet_toSubgraph_eq_of_degree_le_two",
@@ -13693,6 +13587,17 @@
         "Degrees",
         "Regular Graphs"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "SimpleGraph.IsRegularOfDegree.boxProd":
+   [{"id": "SimpleGraph___IsRegularOfDegree___boxProd",
+     "data":
+     {"/Decidability___-Finiteness-and-Degrees/#SimpleGraph___IsRegularOfDegree___boxProd":
+      {"display": "IsRegularOfDegree.boxProd",
+       "context":
+       ["Graph Theory in Lean",
+        "Decidability, Finiteness and Degrees",
+        "Computations with Hypercubes",
+        "Stating Results Across a Diamond*"]}},
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
    "SimpleGraph.IsRegularOfDegree.blowUpN":
    [{"id": "SimpleGraph___IsRegularOfDegree___blowUpN",
      "data":
@@ -13992,11 +13897,33 @@
       {"display": "IsNClique.boxProd_image_fst",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.IsIndepSet.subset_compl_openNeighborhoodFinset":
+   [{"id": "SimpleGraph___IsIndepSet___subset_compl_openNeighborhoodFinset",
+     "data":
+     {"/Cliques/#SimpleGraph___IsIndepSet___subset_compl_openNeighborhoodFinset":
+      {"display": "IsIndepSet.subset_compl_openNeighborhoodFinset",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Clique and Independence Number of the Mycielskian",
+        "Independence Number of the Mycielskian*"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.IsIndepSet.mycielskian":
    [{"id": "SimpleGraph___IsIndepSet___mycielskian",
      "data":
      {"/Cliques/#SimpleGraph___IsIndepSet___mycielskian":
       {"display": "IsIndepSet.mycielskian",
+       "context":
+       ["Graph Theory in Lean",
+        "Cliques",
+        "Clique and Independence Number of the Mycielskian",
+        "Independence Number of the Mycielskian*"]}},
+     "address": "/Cliques/"}],
+   "SimpleGraph.IsIndepSet.compl_openNeighborhoodFinset_nonempty":
+   [{"id": "SimpleGraph___IsIndepSet___compl_openNeighborhoodFinset_nonempty",
+     "data":
+     {"/Cliques/#SimpleGraph___IsIndepSet___compl_openNeighborhoodFinset_nonempty":
+      {"display": "IsIndepSet.compl_openNeighborhoodFinset_nonempty",
        "context":
        ["Graph Theory in Lean",
         "Cliques",
@@ -14228,6 +14155,13 @@
         "The Bondy–Chvátal Theorem",
         "The Closure of a Graph"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.IsClique.injOn_of_adj":
+   [{"id": "SimpleGraph___IsClique___injOn_of_adj",
+     "data":
+     {"/Cliques/#SimpleGraph___IsClique___injOn_of_adj":
+      {"display": "IsClique.injOn_of_adj",
+       "context": ["Graph Theory in Lean", "Cliques", "Finite Cliques"]}},
+     "address": "/Cliques/"}],
    "SimpleGraph.IsClique.boxProd_snd_eq'":
    [{"id": "SimpleGraph___IsClique___boxProd_snd_eq___",
      "data":
@@ -14359,17 +14293,6 @@
         "Automorphisms",
         "Vertex-Transitivity of Hypercubes"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.HypercubeVert.parity_ne_of_adj":
-   [{"id": "SimpleGraph___HypercubeVert___parity_ne_of_adj",
-     "data":
-     {"/Colorings/#SimpleGraph___HypercubeVert___parity_ne_of_adj":
-      {"display": "HypercubeVert.parity_ne_of_adj",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Colouring Concrete Graphs",
-        "Colouring Hypercubes"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.HypercubeVert.parity":
    [{"id": "SimpleGraph___HypercubeVert___parity",
      "data":
@@ -14849,17 +14772,6 @@
         "Connectivity",
         "Eulerian Circuits and Trails"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Connected.card_connectedComponent":
-   [{"id": "SimpleGraph___Connected___card_connectedComponent",
-     "data":
-     {"/Connectivity/#SimpleGraph___Connected___card_connectedComponent":
-      {"display": "Connected.card_connectedComponent",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Connectivity",
-        "Connected Components"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.ComponentCompl.mem_of_hom":
    [{"id": "SimpleGraph___ComponentCompl___mem_of_hom",
      "data":
@@ -15063,6 +14975,13 @@
       {"display": "Coloring.mycielskian",
        "context":
        ["Graph Theory in Lean", "Colorings", "Colouring Mycielskians"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.Coloring.isBipartiteWith":
+   [{"id": "SimpleGraph___Coloring___isBipartiteWith",
+     "data":
+     {"/Colorings/#SimpleGraph___Coloring___isBipartiteWith":
+      {"display": "Coloring.isBipartiteWith",
+       "context": ["Graph Theory in Lean", "Colorings", "Bipartite Graphs"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.Coloring.boxProd":
    [{"id": "SimpleGraph___Coloring___boxProd",
@@ -15546,17 +15465,7 @@
         "Connectivity",
         "Edge and Vertex Connectivity",
         "Connectivity Numbers*"]}},
-     "address": "/Connectivity/"}],
-   "CovBy.decidableRel":
-   [{"id": "CovBy___decidableRel",
-     "data":
-     {"/Decidability___-Finiteness-and-Degrees/#CovBy___decidableRel":
-      {"display": "_root_.CovBy.decidableRel",
-       "context":
-       ["Graph Theory in Lean",
-        "Decidability, Finiteness and Degrees",
-        "Exercises"]}},
-     "address": "/Decidability___-Finiteness-and-Degrees/"}]}},
+     "address": "/Connectivity/"}]}},
  "Verso.Genre.Manual.doc.tech":
  {"title": "Terminology",
   "description": "Definitions of technical terms",

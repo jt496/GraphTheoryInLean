@@ -7,18 +7,6 @@ exercises with solutions (`Exercises.lean`).
 Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>.
 The HTML is in `docs/`, served by GitHub Pages.
 
-## Viewing the guide locally
-
-To read the guide without GitHub Pages (for instance while this repository is
-private), serve `docs/` over HTTP from the repository root:
-
-    python3 -m http.server -d docs 8000
-
-and open <http://localhost:8000/>. Opening `docs/index.html` directly via
-`file://` does not work: the pages use directory-style links that only resolve
-when something is serving them. Formula rendering loads a script from a CDN, so
-keep a network connection.
-
 ## Building
 
     lake exe cache get   # download prebuilt Mathlib (do this first)

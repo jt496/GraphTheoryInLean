@@ -44,11 +44,11 @@ Mathlib.
 | `Q[n]` | `n`-dimensional hypercube | `hypercube n` |
 | `v[a, b, …]` | Hypercube vertex (`open HypercubeVert`) | `((((), a), b), …)` |
 | `G[n]` | `n`-uniform blow-up of a graph `G` | `blowUpN G n` |
-| `mμ[G]` | Mycielskian of a graph `G` | `mycielskian G` |
-| `v ₗ` | "Left" copy of `v` in the Mycielskian | `mycielskian.left v` |
-| `v ᵣ` | "Right" copy of `v` in the Mycielskian | `mycielskian.right v` |
-| `mμᵥ^n V` | Vertices of the `n`-th iterated Mycielskian | `MycielskianVert V n` |
-| `mμ^n G` | `n`-th iterated Mycielskian of a graph `G` | `iterMycielskian G n` |
+| `mμ(G)` | Mycielskian of a graph `G` | `mycielskian G` |
+| `vˡ` | "Left" copy of `v` in the Mycielskian | `mycielskian.left v` |
+| `vʳ` | "Right" copy of `v` in the Mycielskian | `mycielskian.right v` |
+| `mμᵥ^n(V)` | Vertices of the `n`-th iterated Mycielskian | `MycielskianVert V n` |
+| `mμ^n(G)` | `n`-th iterated Mycielskian of a graph `G` | `iterMycielskian G n` |
 | `Kn[n, k]` | Kneser graph on `k`-subsets of `Fin n` | `kneserGraph (Fin n) k` |
 | `T[n, r]` | Turán graph on `n` vertices with `r` parts | `turanGraph n r` |
 | `Σg H` | Disjoint union of a family of graphs `H i` | `SimpleGraph.sigma H` |
@@ -94,15 +94,15 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `HypercubeVert`: recursive definition of the vertex set of the hypercube.
 * `hypercube` / `Q[n]`: recursive box product definition of the `n`-dimensional
   hypercube.
-* `mycielskian` / `mμ[G]`: the Mycielskian of a graph `G`.
-* `grotzschGraph`: Grötzsch graph (i.e. `mμ[C[5]]`).
-* `mycielskian.left` / `v ₗ`: left copy of a vertex in the Mycielskian.
-* `mycielskian.right` / `v ᵣ`: right copy of a vertex in the Mycielskian.
-* `MycielskianVert` / `mμᵥ^n V`: vertex type of the `n`-th iterated Mycielskian.
-* `iterMycielskian` / `mμ^n G`: `n`-th iterated Mycielskian of `G`.
-* `completeEquipartiteNat`: complete multipartite graph with copies of `ℕ` as
+* `mycielskian` / `mμ(G)`: the Mycielskian of a graph `G`.
+* `grotzschGraph`: Grötzsch graph (i.e. `mμ(C[5])`).
+* `mycielskian.left` / `vˡ`: left copy of a vertex in the Mycielskian.
+* `mycielskian.right` / `vʳ`: right copy of a vertex in the Mycielskian.
+* `MycielskianVert` / `mμᵥ^n(V)`: vertex type of the `n`-th iterated Mycielskian.
+* `iterMycielskian` / `mμ^n(G)`: `n`-th iterated Mycielskian of `G`.
+* `completeMultipartiteFinNat`: complete multipartite graph with copies of `ℕ` as
   classes.
-* `completeMultipartiteNat`: complete multipartite graph with classes `Fin n`.
+* `completeMultipartiteNatFin`: complete multipartite graph with classes `Fin n`.
 * `blowUpGraph`: blow-up of a graph `G` by replacing each vertex with a class of
   vertices.
 * `blowUpN` / `G[n]`: `n`-uniform blow-up of a graph `G`.
@@ -117,15 +117,17 @@ The following custom definitions and abbreviations are introduced in this guide:
   noncomputable.
 * `pathNatFromRelAbbrev`: `pathNatFromRel` restated as an `abbrev`, so that Lean can
   synthesize `DecidableRel` for its adjacency.
-* `pathGraphAdjDecidableRw`: deliberately flawed `rw`-based decidability instance,
-  illustrating how a non-definitional cast blocks kernel reduction and hence
-  `decide`.
 * `locallyFiniteOfFintypeEdgeSet`: a graph with finitely many edges is locally
   finite.
+* `blowUpNFintypeNeighborSet`: a vertex `⟨v, i⟩` of the blow-up `G[n]` has a finite
+  neighbourhood when `v` has one in `G` (a `def`, not an instance).
 * `degIn`: the number of neighbours of `v` lying in a finite set `s`, defined as the
   size of Mathlib's `s.bipartiteAbove G.Adj v`.
 * `hypercubeVertToBin`: conversion of a hypercube vertex to its binary string
   representation.
+* `hypercubeFintypeNeighborSet`: an efficient `Fintype` instance for the
+  neighbourhoods of `Q[n]`, built through the box product (a `def`, not an
+  instance).
 * `degreeMultiset`: the multiset of degrees of all vertices in a finite graph.
 * `degreeSequence`: the list of degrees of all vertices in a finite graph, sorted in
   non-increasing order.
@@ -143,8 +145,8 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 *From the exercises:*
 
-* `locallyFiniteBlowUpGraph`: a blow-up of a locally finite graph with finite classes
-  is locally finite.
+* `blowUpGraphFintypeNeighborSet`: a vertex `w` of a blow-up has a finite
+  neighbourhood if `w.fst` does and the classes over its neighbours are finite.
 
 ## Chapter 5: Maps
 * `pathNat.translate`: embedding of the infinite path `pathNat` into itself.
@@ -153,26 +155,31 @@ The following custom definitions and abbreviations are introduced in this guide:
   equivalence `α ≃ β`.
 * `hypercube.embedBool` / `hypercube.embedFalse` / `hypercube.embedTrue`: embeddings
   of `Q[n]` into `Q[n + 1]`.
-* `Embedding.mycielskianLeft`: embedding of a graph `G` into its Mycielskian `mμ[G]`.
-* `Hom.mapMycielskian`: graph homomorphism `mμ[G] →g mμ[H]` induced by a homomorphism
+* `Embedding.mycielskianLeft`: embedding of a graph `G` into its Mycielskian `mμ(G)`.
+* `Hom.mapMycielskian`: graph homomorphism `mμ(G) →g mμ(H)` induced by a homomorphism
   `G →g H`.
-* `Embedding.mapMycielskian`: graph embedding `mμ[G] ↪g mμ[H]` induced by an
+* `Embedding.mapMycielskian`: graph embedding `mμ(G) ↪g mμ(H)` induced by an
   embedding `G ↪g H`.
-* `Iso.mapMycielskian`: graph isomorphism `mμ[G] ≃g mμ[H]` induced by an isomorphism
+* `Iso.mapMycielskian`: graph isomorphism `mμ(G) ≃g mμ(H)` induced by an isomorphism
   `G ≃g H`.
 * `IsVertexTransitive`: predicate for a graph being vertex-transitive.
 * `cycleGraph.rotate`: automorphism of `C[n]` rotating the vertices modulo `n`,
   sending `d` to `0`.
 * `HypercubeVert.xor` / `⊕ₕ`: bitwise `xor` addition on hypercube vertices.
 * `hypercube.translate`: automorphism of `Q[n]` by translating by a vertex.
-* `mycielskianCompleteTwoIsoCycleFive`: the isomorphism `mμ[K[2]] ≃g C[5]`.
+* `mycielskianCompleteTwoIsoCycleFive`: the isomorphism `mμ(K[2]) ≃g C[5]`.
 * `tensorProd` / `G ⊗g H`: tensor (categorical) product of two graphs, on the vertex
   type `V × W`.
+* `tensorProdFintypeNeighborSet`: finite neighbourhoods in `G ⊗g H` from finite
+  neighbourhoods in `G` and `H` (a `def`, not an instance).
 * `tensorProd.fstHom` / `tensorProd.sndHom`: the two projections out of the tensor
   product as graph homomorphisms.
 * `tensorProd.prod`: the homomorphism into `tensorProd G H` induced by a pair of
   homomorphisms (universal property of the product).
 * `piTensorProd` / `⨂g i, G i`: tensor product of an arbitrary family of graphs.
+* `piTensorProdFintypeNeighborSet`: finite neighbourhoods in `⨂g i, G i` from finite
+  neighbourhoods in each `G i`, for a finite nonempty index type (a `def`, not an
+  instance).
 * `IndFree`: `A.IndFree B` means that `B` contains no induced copy of `A`.
 * `ClawFree`: a graph is *claw-free* if it contains no induced copy of the claw
   `K[1, 3]`.
@@ -190,7 +197,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `hypercubeTwoIsoCycleFour`: the Gray-code isomorphism `Q[2] ≃g C[4]`.
 
 ## Chapter 6: Cliques
-* `mycielskianProj`: projection from the vertex set of `mμ[G]` to `G` mapping both
+* `mycielskianProj`: projection from the vertex set of `mμ(G)` to `G` mapping both
   left and right copies to the original vertex.
 * `openNeighborhoodSet`: the open neighbourhood of a set `s`, i.e. the union of the
   neighbourhoods of its vertices.
@@ -201,19 +208,23 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `completeBipartiteGraph.bicoloring`: the natural `Bool`-colouring of
   `completeBipartiteGraph V W` (`true` on the right part); a correctly named alias of
   Mathlib's `CompleteBipartiteGraph.bicoloring`.
+* `pathNat.bicoloring`: the natural `Bool`-colouring of the infinite path `pathNat`
+  by parity.
 * `Coloring.ofBoxProdLeft` / `Coloring.ofBoxProdRight`: the colourings of `G` and `H`
   obtained by restricting a colouring of `G □ H` along a fixed vertex of the other
   factor.
-* `Coloring.boxProd`: the `k`-colouring `(v, w) ↦ C₁ v + C₂ w` (addition modulo `k`)
-  of `G □ H` built from `k`-colourings of `G` and `H`.
+* `Coloring.boxProd`: the colouring `(v, w) ↦ C₁ v + C₂ w` of `G □ H` built from
+  colourings of `G` and `H`, for colours with a cancellative addition
+  (`IsCancelAdd`), such as `Fin k` (addition modulo `k`).
+* `hypercube.bicoloring`: the natural `Bool`-colouring of the hypercube `Q[n]`, built
+  by induction on `n` with `Coloring.boxProd`.
 * `HypercubeVert.parity`: the parity (`Bool.xor` of the coordinates) of a hypercube
-  vertex, used as a `Bool`-valued colour.
-* `hypercube.bicoloring`: the natural `Bool`-colouring of the hypercube `Q[n]`.
-* `Coloring.mycielskianLast`: the equivalent `(k + 1)`-colouring of `mμ[G]` in which
+  vertex, which is its colour under `hypercube.bicoloring`.
+* `Coloring.mycielskianLast`: the equivalent `(k + 1)`-colouring of `mμ(G)` in which
   the vertex `none` receives colour `k`.
 * `Coloring.ofMycielskian`: the `k`-colouring of `G` induced by a `(k + 1)`-colouring
-  of `mμ[G]`.
-* `Coloring.mycielskian`: the `(k + 1)`-colouring of `mμ[G]` induced by a
+  of `mμ(G)`.
+* `Coloring.mycielskian`: the `(k + 1)`-colouring of `mμ(G)` induced by a
   `k`-colouring of `G`.
 * `neighborLTSet`: set of neighbours of a vertex `v` that are smaller than `v`.
 * `neighborLTFinset`: finset of neighbours of a vertex `v` that are smaller than `v`.
@@ -266,10 +277,10 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `HypercubeVert.grayStart` / `HypercubeVert.grayEnd`: start and end vertices of the
   Gray code walk.
 * `hypercube.grayPath`: Gray code walk on `Q[n]`.
-* `Walk.mycielskianZigZag`: zig-zag walk in `mμ[G]`.
-* `Walk.mycielskian`: walk in `mμ[G]` constructed from a walk in `G` (`protected`, to
+* `Walk.mycielskianZigZag`: zig-zag walk in `mμ(G)`.
+* `Walk.mycielskian`: walk in `mμ(G)` constructed from a walk in `G` (`protected`, to
   coexist with the graph constructor `mycielskian`).
-* `Walk.mycielskianClosed`: closed walk in `mμ[G]` constructed from a closed walk in
+* `Walk.mycielskianClosed`: closed walk in `mμ(G)` constructed from a closed walk in
   `G` (a cycle if the original is one).
 * `Walk.posaRotate`: Pósa rotation of a path walk.
 * `Walk.posaClosed`: closing a Pósa path to obtain a cycle.
@@ -294,15 +305,15 @@ The following custom definitions and abbreviations are introduced in this guide:
   longer.
 
 ## Chapter 9: Subgraphs
-* `Subgraph.mycielskianLeft`: lift of a subgraph in `G` to a subgraph in `mμ[G]`.
+* `Subgraph.mycielskianLeft`: lift of a subgraph in `G` to a subgraph in `mμ(G)`.
 * `matchingNum` / `ν G`: matching number of `G` (in `ℕ∞`, mirroring
   `SimpleGraph.vertexCoverNum`), the maximum number of edges in a matching of `G`.
 * `Subgraph.boxProdLeft`: a subgraph `M` of `G` copied into every `G`-fibre of
   `G □ H`.
 * `hypercube.matching`: perfect matching of `Q[n + 1]`, defined recursively as `⊤` on
   `Q[1]` and the fibre-copy of the previous matching thereafter.
-* `Subgraph.mycielskianDouble`: the subgraph of `mμ[G]` with edges `x ₗ — y ᵣ` and
-  `x ᵣ — y ₗ` for each edge `x — y` of a subgraph of `G`.
+* `Subgraph.mycielskianDouble`: the subgraph of `mμ(G)` with edges `xˡ — yʳ` and
+  `xʳ — yˡ` for each edge `x — y` of a subgraph of `G`.
 * `Subgraph.mycielskianDoubleDartEmbedding`: embedding of the darts of a subgraph
   into the edge set of its Mycielskian double.
 * `ColoringOn`: colouring of every vertex of `G` that need only be proper on the
@@ -376,7 +387,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 ## Chapter 11: Distance
 * `EdgesFormMatching`: the edges form a matching, i.e. every vertex has at most one
   neighbour.
-* `mycielskianFourCycle`: `4`-cycle in `mμ[G]` using `none` and left/right copies.
+* `mycielskianFourCycle`: `4`-cycle in `mμ(G)` using `none` and left/right copies.
 * `layer`: the `i`-th distance layer around a vertex `r`, i.e. the `Finset` of
   vertices at distance exactly `i` from `r`.
 
@@ -388,8 +399,8 @@ The following custom definitions and abbreviations are introduced in this guide:
   to `DihedralGroup (n + 3)`.
 * `autHypercubeTwoMulEquivDihedral`: the automorphism group of `Q[2]` is isomorphic
   to `DihedralGroup 4`.
-* `mycielskianLift`: the vector on the vertices of `mμ[G]` with value `0` at the
-  apex, `t * x v` at `v ₗ` and `x v` at `v ᵣ`.
+* `mycielskianLift`: the vector on the vertices of `mμ(G)` with value `0` at the
+  apex, `t * x v` at `vˡ` and `x v` at `vʳ`.
 * `HypercubeVert.equivPi`: equivalence between the hypercube vertex types
   `HypercubeVert n` and `Fin n → Bool`, via `Fin.snoc`.
 * `hypercubeIsoHamming`: the hypercube `Q[n]` is isomorphic to the Hamming cube
@@ -480,8 +491,6 @@ its exercises:
 * `good_card_edgeFinset`: the number of edges of `G` depends only on
   `[Fintype G.edgeSet]`; contrast `bad_card_edgeFinset`, which needlessly assumes
   `[Fintype V]` and `[DecidableRel G.Adj]`.
-* `degree_completeBipartiteGraph_inl` / `degree_completeBipartiteGraph_inr`:
-  vertices in the two parts of `K[s, t]` have degree `t` and `s`.
 * `degree_pathNat`: degrees in the infinite path graph on `ℕ`, which is locally
   finite without having a finite vertex type.
 * `degree_blowUpN` / `IsRegularOfDegree.blowUpN`: each vertex of the `n`-uniform
@@ -496,8 +505,10 @@ its exercises:
   a `d`-regular graph on `n` vertices has `d * n / 2` edges.
 * `card_hypercubeVert`: the hypercube `Q[n]` has `2 ^ n` vertices.
 * `IsRegularOfDegree.hypercube`: the hypercube `Q[n]` is `n`-regular.
+* `IsRegularOfDegree.boxProd`: a box product of regular graphs is regular, with the
+  degrees adding.
 * `card_edgeFinset_hypercube`: the hypercube `Q[n]` has `n * 2 ^ (n - 1)` edges.
-* `degree_mycielskian_left`: the degree of a left vertex `v ₗ` of the Mycielskian is
+* `degree_mycielskian_left`: the degree of a left vertex `vˡ` of the Mycielskian is
   twice the degree of `v`.
 * `Graphic.exists_card_eq`: a graphic multiset `m` is the degree multiset of a graph
   with exactly `m.card` vertices.
@@ -511,12 +522,12 @@ its exercises:
 
 *From the exercises:*
 
-* `degree_mycielskian_right` / `degree_mycielskian_none`: a right vertex `v ᵣ` of the
+* `degree_mycielskian_right` / `degree_mycielskian_none`: a right vertex `vʳ` of the
   Mycielskian has degree one more than `v`, and the apex has degree `|V|`.
-* `card_edgeFinset_mycielskian`: the Mycielskian `mμ[G]` has `3 * |E| + |V|`
+* `card_edgeFinset_mycielskian`: the Mycielskian `mμ(G)` has `3 * |E| + |V|`
   edges.
 * `maxDegree_mycielskian` / `minDegree_mycielskian`: the maximum and minimum degrees
-  of `mμ[G]` are `max (2 * Δ(G)) (Fintype.card V)` and `min (2 * δ(G)) (δ(G) + 1)`.
+  of `mμ(G)` are `max (2 * Δ(G)) (Fintype.card V)` and `min (2 * δ(G)) (δ(G) + 1)`.
 * `Graphic.even_sum`: a graphic multiset has an even sum.
 * `degree_coneGraph_some` / `degreeMultiset_coneGraph`: the remaining degrees of
   `coneGraph H s`, and its degree multiset.
@@ -528,7 +539,7 @@ its exercises:
 * `isVertexTransitive_cycleGraph`: the cycle graph `C[n]` is vertex-transitive.
 * `isVertexTransitive_hypercube`: the hypercube `Q[n]` is vertex-transitive.
 * `isVertexTransitive_mycielskian_iff`: for finite nonempty `V`, the Mycielskian
-  `mμ[G]` is vertex-transitive iff `G ≃g K[2]`.
+  `mμ(G)` is vertex-transitive iff `G ≃g K[2]`.
 * `degree_tensorProd`: the degree of `(v, w)` in the tensor product is
   `G.degree v * H.degree w`.
 * `clawFree_lineGraph`: line graphs are claw-free.
@@ -559,23 +570,23 @@ its exercises:
   triangle-free.
 * `CliqueFree.iterMycielskian` /
   `cliqueFree_three_iterMycielskian_completeGraph_two`: the iterated Mycielskians of
-  a triangle-free graph are triangle-free; in particular so is every `mμ^n K[2]`.
+  a triangle-free graph are triangle-free; in particular so is every `mμ^n(K[2])`.
 * `IsNClique.mycielskian`: the Mycielskian embedding maps `k`-cliques in `G` to
-  `k`-cliques in `mμ[G]`.
+  `k`-cliques in `mμ(G)`.
 * `mycielskian_none_notMem_clique`: the apex `none` does not belong to any
-  `k`-clique in `mμ[G]` for `k ≥ 3`.
-* `IsNClique.of_mycielskian`: any `k`-clique in `mμ[G]` (with `k ≥ 3`) projects to
+  `k`-clique in `mμ(G)` for `k ≥ 3`.
+* `IsNClique.of_mycielskian`: any `k`-clique in `mμ(G)` (with `k ≥ 3`) projects to
   a `k`-clique in `G` under the Mycielskian projection.
 * `CliqueFree.mycielskian_of_three_le`: for `r ≥ 3`, the Mycielskian of an
   `r`-clique-free graph is `r`-clique-free.
-* `cliqueNum_mycielskian_of_ne_bot`: the clique number of `mμ[G]` equals that of `G`
+* `cliqueNum_mycielskian_of_ne_bot`: the clique number of `mμ(G)` equals that of `G`
   whenever `G` is finite and has an edge.
 * `cliqueNum_iterMycielskian_completeGraph_two`: every iterated Mycielskian of
   `K[2]` has clique number `2`.
 * `IsIndepSet.mycielskian`: if `s` is an independent set of `G` then the left copies
   of `s` together with the right copies of every vertex having no neighbour in `s`
-  form an independent set of `mμ[G]`.
-* `indepNum_mycielskian`: the independence number of `mμ[G]` is the maximum, over
+  form an independent set of `mμ(G)`.
+* `indepNum_mycielskian`: the independence number of `mμ(G)` is the maximum, over
   the independent sets `s` of `G`, of `#s` plus the number of vertices with no
   neighbour in `s`.
 
@@ -587,7 +598,7 @@ its exercises:
 * `not_cliqueFree_three_and_indepSetFree_three`: every graph on at least `6` vertices
   contains a triangle or an independent set of size `3`, i.e. `R(3, 3) ≤ 6`.
 * `cliqueNum_mycielskian_bot_of_isEmpty` / `cliqueNum_mycielskian_bot`: the clique
-  number of `mμ[⊥]` is `1` if `V` is empty and `2` otherwise.
+  number of `mμ(⊥)` is `1` if `V` is empty and `2` otherwise.
 
 ## Chapter 7: Colorings (Results)
 * `chromaticNumber_ne_top_of_finite`: a graph on a finite vertex type has finite
@@ -605,14 +616,14 @@ its exercises:
   `H`), and `χ (G □ H) = max (χ G) (χ H)` for nonempty `G` and `H`.
 * `IsBipartite.hypercube` / `cliqueFree_hypercube_three`: the hypercube `Q[n]` is
   bipartite, hence triangle-free.
-* `colorable_mycielskian_succ_iff`: `G` is `k`-colourable iff `mμ[G]` is
+* `colorable_mycielskian_succ_iff`: `G` is `k`-colourable iff `mμ(G)` is
   `(k + 1)`-colourable.
-* `chromaticNumber_mycielskian`: `χ mμ[G] = χ G + 1`.
+* `chromaticNumber_mycielskian`: `χ mμ(G) = χ G + 1`.
 * `chromaticNumber_iterMycielskian` /
   `chromaticNumber_iterMycielskian_completeGraph_two`: the `n`-th iterated
   Mycielskian of `G` has chromatic number `χ G + n`, so that of `K[2]` has chromatic
   number `n + 2`.
-* `mycielski`: Mycielski's theorem, `mμ^n K[2]` has clique number `2` and chromatic
+* `mycielski`: Mycielski's theorem, `mμ^n(K[2])` has clique number `2` and chromatic
   number `n + 2`.
 * `degree_le_chromaticNumber_lineGraph` / `maxDegree_le_chromaticNumber_lineGraph`:
   the chromatic index `χ L[G]` is at least the degree of every vertex, and so at
@@ -650,9 +661,9 @@ its exercises:
   Hamming walk between any two vertices in `Q[n]` is a path of length equal to their
   Hamming distance.
 * `hypercube.isHamiltonian_grayPath`: the Gray code walk on `Q[n]` is Hamiltonian.
-* `isCycle_mycielskianClosed_of_adj`: every edge of `G` gives a `5`-cycle in `mμ[G]`.
+* `isCycle_mycielskianClosed_of_adj`: every edge of `G` gives a `5`-cycle in `mμ(G)`.
 * `IsHamiltonian.mycielskian`: if `G` is Hamiltonian and does not have exactly one
-  vertex, then its Mycielskian `mμ[G]` is Hamiltonian.
+  vertex, then its Mycielskian `mμ(G)` is Hamiltonian.
 * `Walk.IsPath.posaRotate` / `Walk.IsPath.isCycle_posaClosed`: a Pósa rotation of a
   path is again a path; closing a path of length at least two at a crossing pair
   yields a cycle.
@@ -719,7 +730,7 @@ its exercises:
 * `matchingNum_le_vertexCoverNum`: weak duality `ν G ≤ τ G`.
 * `matchingNum_hypercube_succ`: `ν Q[n + 1] = 2 ^ n`.
 * `two_mul_matchingNum_le_matchingNum_mycielskian` /
-  `Subgraph.IsPerfectMatching.matchingNum_mycielskian_eq`: `2 * ν G ≤ ν mμ[G]`, with
+  `Subgraph.IsPerfectMatching.matchingNum_mycielskian_eq`: `2 * ν G ≤ ν mμ(G)`, with
   equality if `G` has a perfect matching.
 
 *From the exercises:*
@@ -742,13 +753,10 @@ its exercises:
   `G.induce s` is `n`-colourable.
 
 ## Chapter 10: Connectivity (Results)
-* `Connected.card_connectedComponent` / `connected_iff_card_connectedComponent`: a
-  graph is connected iff it has exactly one connected component (counted with
-  `Nat.card`, so with no finiteness assumption).
 * `connected_hypercube`: the `n`-dimensional hypercube is connected.
-* `connected_mycielskian_iff`: the Mycielskian `mμ[G]` is connected iff `G` has no
+* `connected_mycielskian_iff`: the Mycielskian `mμ(G)` is connected iff `G` has no
   isolated vertices.
-* `isBridge_mycielskian_iff`: the bridges of `mμ[G]` are the edges `none — u ᵣ` with
+* `isBridge_mycielskian_iff`: the bridges of `mμ(G)` are the edges `none — uʳ` with
   `u` isolated in `G`.
 * `Walk.IsCycle.mem_support_iff_reachable_of_degree_le_two` /
   `Walk.IsCycle.toSubgraph_eq_of_degree_le_two` /
@@ -845,7 +853,7 @@ its exercises:
   girth `4`.
 * `egirth_hypercube`: the girth of the hypercube `Q[n + 2]` is `4`.
 * `egirth_mycielskian_eq_four` / `egirth_mycielskian_eq_five`: for triangle-free `G`
-  the girth of `mμ[G]` is `4` if two edges of `G` share an endpoint, and `5` if `G`
+  the girth of `mμ(G)` is `4` if two edges of `G` share an endpoint, and `5` if `G`
   has at least one edge and its edges form a matching.
 * `egirth_le_edist_add_edist_add_two`: two distinct neighbours `a` and `b` of `v`,
   neither further from `r` than `v`, give a cycle of length at most
@@ -882,7 +890,7 @@ its exercises:
 * `adjMatrix_mycielskian_mulVec_mycielskianLift` /
   `mem_spectrum_adjMatrix_mycielskian`: if `x ≠ 0` is an eigenvector of `G` with
   eigenvalue `ξ` whose entries sum to zero, then `mycielskianLift φ x` and
-  `mycielskianLift ψ x` are eigenvectors of `mμ[G]` with eigenvalues `φ * ξ` and
+  `mycielskianLift ψ x` are eigenvectors of `mμ(G)` with eigenvalues `φ * ξ` and
   `ψ * ξ`, where `φ` and `ψ` are the golden ratio and its conjugate.
 * `IsRegularOfDegree.finrank_eigenspace_adjMatrix`: in a `d`-regular graph the
   multiplicity of the eigenvalue `d` is the number of connected components.

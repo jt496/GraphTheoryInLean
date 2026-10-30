@@ -182,10 +182,6 @@ lemma cliqueNum_hypercube' {n : ℕ} : ω Q[n] = if n = 0 then 1 else 2 := by
   sorry
 
 /-!
-The next few exercises are on independent sets, Ramsey numbers, Kneser graphs and
-Mycielskians.
--/
-/-!
 20. Show that the Paley graph on `17` vertices has independence number `3`. (As in
 the chapter, rewrite with `cliqueFree_compl` before using `decide` or
 `native_decide`.) Together with Exercise 3 this shows that there is a graph on `17`
@@ -222,16 +218,16 @@ example (n : ℕ) : Nonempty (Kn[n, 1] ≃g K[n]) := by
 
 /-!
 24. Compute the clique number of the Mycielskian of the edgeless graph `⊥`. The
-answer depends on whether `V` is empty. If `V` is empty then `mμ[⊥]` has only the
-vertex `none`, so its clique number is `1`. If `V` is nonempty then `none` and `v ᵣ`
-are adjacent and `mμ[⊥]` is triangle-free, so its clique number is `2`.
+answer depends on whether `V` is empty. If `V` is empty then `mμ(⊥)` has only the
+vertex `none`, so its clique number is `1`. If `V` is nonempty then `none` and `vʳ`
+are adjacent and `mμ(⊥)` is triangle-free, so its clique number is `2`.
 -/
 lemma cliqueNum_mycielskian_bot_of_isEmpty' [IsEmpty V] :
-    ω mμ[(⊥ : SimpleGraph V)] = 1 := by
+    ω mμ((⊥ : SimpleGraph V)) = 1 := by
   sorry
 
 lemma cliqueNum_mycielskian_bot' [Nonempty V] :
-    ω mμ[(⊥ : SimpleGraph V)] = 2 := by
+    ω mμ((⊥ : SimpleGraph V)) = 2 := by
   sorry
 
 /-!
@@ -243,13 +239,13 @@ their Mycielskians).
 the left part, and similarly for right vertices.
 -/
 lemma completeBipartiteGraph_not_adj_inl_iff' {V W : Type*} {v : V} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
-      x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
+    ¬ (completeBipartiteGraph V W).Adj (.inl v) x ↔
+      x ∈ Set.range .inl := by
   sorry
 
 lemma completeBipartiteGraph_not_adj_inr_iff' {V W : Type*} {w : W} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
-      x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
+    ¬ (completeBipartiteGraph V W).Adj (.inr w) x ↔
+      x ∈ Set.range .inr := by
   sorry
 
 /-!
@@ -259,7 +255,7 @@ vertices are non-neighbours of that vertex, so all lie in the left part.
 -/
 lemma completeBipartiteGraph_isIndepSet_subset_left_or_right' {V W : Type*}
     {s : Set (V ⊕ W)} (hs : (completeBipartiteGraph V W).IsIndepSet s) :
-    s ⊆ Set.range Sum.inl ∨ s ⊆ Set.range Sum.inr := by
+    s ⊆ Set.range .inl ∨ s ⊆ Set.range .inr := by
   sorry
 
 /-!
@@ -277,7 +273,7 @@ lemma card_le_of_subset_range' {α β : Type*} [Finite α] {f : α → β} {s : 
 independent, since a part contains no edges (we only need this for the right part).
 -/
 lemma isIndepSet_completeBipartiteGraph_of_subset_range_inr' {V W : Type*}
-    {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
+    {s : Set (V ⊕ W)} (h : s ⊆ Set.range .inr) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   sorry
 
@@ -317,11 +313,11 @@ lemma completeBipartiteGraph_isIndepSet_card_add_le' {a b : ℕ} (hab : a ≤ b)
 31. The independence number of the Mycielskian of `K[a, b]` is `2 * b` whenever
 `a ≤ b` and `b ≠ 0`: the right part `B` is an independent set with `B ⊆ N(B)ᶜ`,
 so it contributes at least `2 * b`, and no independent set does better by the
-previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
+previous lemma. (Note that `b ≠ 0` is needed: `mμ(K[0, 0])` still has the vertex
 `none`, so its independence number is `1`.)
 -/
 lemma indepNum_mycielskian_completeBipartiteGraph' {a b : ℕ} [NeZero b]
-    (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
+    (h : a ≤ b) : ⍺ mμ(K[a, b]) = 2 * b := by
   sorry
 
 /-! SOLUTIONS -/
@@ -336,8 +332,7 @@ example {s : Set V} {t : Finset V} (hc : G.IsClique s) (h : ↑t ⊆ s) :
 /-!
 2. Show that `{0, 1, 2}` is a triangle in the Paley graph on `17` vertices.
 -/
-example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by
-  decide
+example : (paleyGraph (ZMod 17)).IsNClique 3 {0, 1, 2} := by decide
 
 /-!
 3. Show that the Paley graph on `17` vertices is `4`-clique-free. (Although `decide`
@@ -596,10 +591,6 @@ lemma cliqueNum_hypercube {n : ℕ} : ω Q[n] = if n = 0 then 1 else 2 := by
     cases n <;> simpa
 
 /-!
-The next few exercises are on independent sets, Ramsey numbers, Kneser graphs and
-Mycielskians.
--/
-/-!
 20. Show that the Paley graph on `17` vertices has independence number `3`. (As in
 the chapter, rewrite with `cliqueFree_compl` before using `decide` or
 `native_decide`.) Together with Exercise 3 this shows that there is a graph on `17`
@@ -677,24 +668,24 @@ example (n : ℕ) : Nonempty (Kn[n, 1] ≃g K[n]) := by
 
 /-!
 24. Compute the clique number of the Mycielskian of the edgeless graph `⊥`. The
-answer depends on whether `V` is empty. If `V` is empty then `mμ[⊥]` has only the
-vertex `none`, so its clique number is `1`. If `V` is nonempty then `none` and `v ᵣ`
-are adjacent and `mμ[⊥]` is triangle-free, so its clique number is `2`.
+answer depends on whether `V` is empty. If `V` is empty then `mμ(⊥)` has only the
+vertex `none`, so its clique number is `1`. If `V` is nonempty then `none` and `vʳ`
+are adjacent and `mμ(⊥)` is triangle-free, so its clique number is `2`.
 -/
 lemma cliqueNum_mycielskian_bot_of_isEmpty [IsEmpty V] :
-    ω mμ[(⊥ : SimpleGraph V)] = 1 :=
-  -- `mμ[⊥]` has exactly one vertex, `none`
+    ω mμ((⊥ : SimpleGraph V)) = 1 :=
+  -- `mμ(⊥)` has exactly one vertex, `none`
   one_le_cliqueNum.antisymm'
-    (by simpa using mμ[(⊥ : SimpleGraph V)].cliqueNum_le_natCard)
+    (by simpa using mμ((⊥ : SimpleGraph V)).cliqueNum_le_natCard)
 
 lemma cliqueNum_mycielskian_bot [Nonempty V] :
-    ω mμ[(⊥ : SimpleGraph V)] = 2 := by
+    ω mμ((⊥ : SimpleGraph V)) = 2 := by
   classical
-  -- `none` and `v ᵣ` are adjacent, giving a `2`-clique
+  -- `none` and `vʳ` are adjacent, giving a `2`-clique
   obtain ⟨v⟩ := ‹Nonempty V›
-  have h2 : mμ[(⊥ : SimpleGraph V)].IsNClique 2 {none, v ᵣ} :=
+  have h2 : mμ(⊥).IsNClique 2 {none, vʳ} :=
     is2Clique_pair_iff.mpr (by simp)
-  -- moreover `mμ[⊥]` is `3`-clique-free since `⊥` is trivially triangle-free
+  -- moreover `mμ(⊥)` is `3`-clique-free since `⊥` is trivially triangle-free
   exact h2.cliqueNum_eq_of_cliqueFree (cliqueFree_bot (by norm_num)).mycielskian
 
 /-!
@@ -706,13 +697,13 @@ their Mycielskians).
 the left part, and similarly for right vertices.
 -/
 lemma completeBipartiteGraph_not_adj_inl_iff {V W : Type*} {v : V} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (Sum.inl v) x ↔
-      x ∈ Set.range (Sum.inl : V → V ⊕ W) := by
+    ¬ (completeBipartiteGraph V W).Adj (.inl v) x ↔
+      x ∈ Set.range .inl := by
   cases x <;> simp
 
 lemma completeBipartiteGraph_not_adj_inr_iff {V W : Type*} {w : W} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (Sum.inr w) x ↔
-      x ∈ Set.range (Sum.inr : W → V ⊕ W) := by
+    ¬ (completeBipartiteGraph V W).Adj (.inr w) x ↔
+      x ∈ Set.range .inr := by
   cases x <;> simp
 
 /-!
@@ -722,8 +713,8 @@ vertices are non-neighbours of that vertex, so all lie in the left part.
 -/
 lemma completeBipartiteGraph_isIndepSet_subset_left_or_right {V W : Type*}
     {s : Set (V ⊕ W)} (hs : (completeBipartiteGraph V W).IsIndepSet s) :
-    s ⊆ Set.range Sum.inl ∨ s ⊆ Set.range Sum.inr := by
-  by_cases h : ∃ v, Sum.inl v ∈ s
+    s ⊆ Set.range .inl ∨ s ⊆ Set.range .inr := by
+  by_cases h : ∃ v, .inl v ∈ s
   · obtain ⟨v, hv⟩ := h
     exact Or.inl fun x hx =>
       completeBipartiteGraph_not_adj_inl_iff.mp fun hadj => hs hv hx hadj.ne hadj
@@ -752,7 +743,7 @@ lemma card_le_of_subset_range {α β : Type*} [Finite α] {f : α → β} {s : F
 independent, since a part contains no edges (we only need this for the right part).
 -/
 lemma isIndepSet_completeBipartiteGraph_of_subset_range_inr {V W : Type*}
-    {s : Set (V ⊕ W)} (h : s ⊆ Set.range (Sum.inr : W → V ⊕ W)) :
+    {s : Set (V ⊕ W)} (h : s ⊆ Set.range .inr) :
     (completeBipartiteGraph V W).IsIndepSet s := by
   intro u hu v hv hne hadj
   obtain ⟨x, rfl⟩ := h hu
@@ -816,15 +807,15 @@ lemma completeBipartiteGraph_isIndepSet_card_add_le {a b : ℕ} (hab : a ≤ b)
 31. The independence number of the Mycielskian of `K[a, b]` is `2 * b` whenever
 `a ≤ b` and `b ≠ 0`: the right part `B` is an independent set with `B ⊆ N(B)ᶜ`,
 so it contributes at least `2 * b`, and no independent set does better by the
-previous lemma. (Note that `b ≠ 0` is needed: `mμ[K[0, 0]]` still has the vertex
+previous lemma. (Note that `b ≠ 0` is needed: `mμ(K[0, 0])` still has the vertex
 `none`, so its independence number is `1`.)
 -/
 lemma indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
-    (h : a ≤ b) : ⍺ mμ[K[a, b]] = 2 * b := by
+    (h : a ≤ b) : ⍺ mμ(K[a, b]) = 2 * b := by
   refine le_antisymm ?_ ?_
-  · -- `≤` : a maximum independent set `T` of `mμ[K[a, b]]` satisfies
+  · -- `≤` : a maximum independent set `T` of `mμ(K[a, b])` satisfies
     -- `#T ≤ #A + #N(A)ᶜ ≤ 2 * b`, where `A` is the left part of `T`
-    obtain ⟨T, hT⟩ := mμ[K[a, b]].exists_isNIndepSet_indepNum
+    obtain ⟨T, hT⟩ := mμ(K[a, b]).exists_isNIndepSet_indepNum
     rw [← hT.card_eq]
     exact le_trans (mycielskian_indepSet_card_le hT.isIndepSet)
       (completeBipartiteGraph_isIndepSet_card_add_le h
@@ -835,7 +826,7 @@ lemma indepNum_mycielskian_completeBipartiteGraph {a b : ℕ} [NeZero b]
       isIndepSet_completeBipartiteGraph_of_subset_range_inr (by simp)
     refine le_trans ?_ (le_indepNum_mycielskian hind)
     have h1 : #(univ.map .inr : Finset (Fin a ⊕ Fin b)) = b := by simp
-    have h2 := card_le_card (subset_compl_openNeighborhoodFinset hind)
+    have h2 := card_le_card hind.subset_compl_openNeighborhoodFinset
     grind
 
 /-! END SOLUTIONS -/

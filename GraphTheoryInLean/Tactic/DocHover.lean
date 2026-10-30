@@ -26,12 +26,18 @@ docstring of its syntax instead, and Ctrl-click goes to the declaration of the
 syntax: the span is treated as the guide's `{smart}` role renders it, using the same
 functions. So a word that names a constant, such as `rfl`, shows the constant, except
 for `decide`, which is the tactic unless the prose calls it "the Boolean `decide`" or
-"the `decide` field", and a word that is a term on its own, such as `sorry`, is left
-alone. A command whose name starts with `#`, such as `#check` or `#eval`, also shows
-a short description from `commandDescriptions` above the docstring (many such
-commands have none), since a span with just the command talks about the command
+"the `decide` field", and a word that is a term on its own, such as `Prop` or
+`sorry`, shows the docstring of the syntax of that term, as the guide's highlighter
+does in the HTML. A command whose name starts with `#`, such as `#check` or `#eval`,
+also shows a short description from `commandDescriptions` above the docstring (many
+such commands have none), since a span with just the command talks about the command
 itself; so does `#command`, which stands for any of them. A `#` command without a
-description gets a warning.
+description gets a warning, but not notation such as `#s`, the cardinality of a
+`Finset`.
+
+A span that is an attribute list, such as `@[simp]` or `@[implicit_reducible]`,
+shows the docstring of each attribute on its entry (see `attributeDoc?`): the hover
+that its name has in code, both in the editor and in the guide's HTML.
 
 The tokens of notation in a code span, such as `K[` and `]` in `K[n]` or `∈` in
 `x ∈ s`, show the docstring of their notation, and Ctrl-click goes to its
@@ -41,6 +47,10 @@ nothing (see `notationTokens`), as in the code of the guide. A notation used bef
 its declaration does not parse, so gets nothing either. A span that is just a token
 of a notation, such as `→g`, shows the docstring of the notation too (see
 `notationTokenKind?`).
+
+Some core syntax has no docstring, such as the term `nofun`. The module gives it one
+(see `syntaxDocStrings`), which then shows wherever its docstring would: in code and
+in doc comments in the editor, and in the guide's HTML.
 
 It also covers the rest of each doc comment, and each web link in it, with info nodes
 that have an empty hover and name no declaration. Without them, hovering anywhere in
@@ -477,6 +487,24 @@ def commandDescriptions : Std.HashMap String String := .ofList [
   ("#synth", "`#synth C` searches for an instance of the type class `C`, and shows \
     the instance that it finds or reports that there is none.")]
 
+/-- Docstrings for core syntax that has none. They are added as builtin docstrings,
+which `findDocString?` falls back to for a declaration without a docstring of its
+own, so each one shows wherever the docstring of its syntax would: in hovers in the
+editor (by Lean's server and by this linter) and in the guide's HTML (by the
+highlighter and `{smart}`), in every module that imports this one. -/
+def syntaxDocStrings : List (SyntaxNodeKind × String) := [
+  (``Parser.Term.nofun, "`nofun` is a function with no cases, for a function type \
+    whose arguments cannot all exist, as in `example : ¬ (0 = 1) := nofun`. It \
+    stands for `fun a₁ … aₙ => nomatch a₁, …, aₙ`, with one argument for each \
+    argument of the expected type, which must therefore be known. Like `nomatch`, \
+    it elaborates only if Lean can show that no pattern matches the arguments: \
+    here, the only constructor of `Eq`, `Eq.refl`, would need `0` and `1` to be \
+    the same.\n\nThe tactic `nofun` is short for `exact nofun`.")]
+
+initialize
+  for (kind, doc) in syntaxDocStrings do
+    addBuiltinDocString kind doc
+
 /-- The syntax node kind of the keyword `tok`, if `tok` is the leading token of a
 production in the `command`, `term`, `tactic` or `doElem` category: that of the
 best-matching production, or `none` if no production is best. A kind whose name
@@ -522,6 +550,40 @@ def keywordDoc? (env : Environment) (tok : String) (kind? : Option SyntaxNodeKin
     | some d, none => some d
     | none, doc? => doc?
 
+/-- The entries of the attribute list `str`, such as `@[simp, implicit_reducible]`,
+if each parses as an attribute known to the environment: for each, its byte offset
+in `str`, its text, the attribute's name (without flags such as the `!` of `simps!`)
+and its syntax node kind. The guide's `{smart}` role uses this too. -/
+def attributeList? (env : Environment) (str : String) :
+    Option (Array (Nat × String × Name × SyntaxNodeKind)) := Id.run do
+  unless str.startsWith "@[" && str.endsWith "]" do return none
+  let isNameChar (c : Char) := c.isAlphanum || c == '_' || c == '.'
+  let mut out := #[]
+  let mut off := 2
+  for raw in ((str.drop 2).dropEnd 1).toString.splitOn "," do
+    let piece := raw.trimAscii.toString
+    let .ok stx := Parser.runParserCategory env `attr piece | return none
+    let attr := (piece.takeWhile isNameChar).toString.toName
+    unless isAttribute env attr do return none
+    let lead := (raw.takeWhile Char.isWhitespace).toString.utf8ByteSize
+    out := out.push (off + lead, piece, attr, stx.getKind)
+    off := off + raw.utf8ByteSize + 1
+  return some out
+
+/-- The hover text of the attribute `attr`, whose entry in an attribute list has
+syntax node kind `kind`, with the declaration it comes from: the docstring of the
+syntax, if the attribute has syntax of its own with one (`@[simp]`), else the
+docstring of the declaration that registers the attribute, which the editor shows on
+its name in code (`@[implicit_reducible]`), else the attribute's description. The
+guide's patched highlighter gives an attribute's name the same hover in code, and its
+`{smart}` role uses this too. -/
+def attributeDoc? (env : Environment) (attr : Name) (kind : SyntaxNodeKind) :
+    IO (Option (String × Name)) := do
+  if let some doc ← findDocString? env kind then
+    return some (doc, kind)
+  let .ok impl := getAttributeImpl env attr | return none
+  return some ((← findDocString? env impl.ref).getD impl.descr, impl.ref)
+
 /-- Tactic names that are also constants, but that prose almost always uses for the
 tactic: `decide` is also the function `Decidable.decide`. Such a word is the tactic,
 unless it is applied to an argument (`decide p`) or the prose calls it a Boolean or a
@@ -541,8 +603,9 @@ def meansFunction (before after : String) : Bool :=
 single keyword: its syntax node kind, if it has one (`#command` has none). A word
 that names a constant is the constant instead (unless it is one of
 `proseTacticWords` and the prose does not call it a function), and so is left to the
-caller; a word that is a term on its own (`sorry`) is left alone, as `{smart}`
-renders it as a term. -/
+caller. A word that is a term on its own (`Prop`, `Type`, `sorry`) gets the kind of
+that term, if it has a docstring: `{smart}` renders it as a term, and the guide's
+highlighter shows the docstring of its syntax on hover. -/
 def keywordSpan? (s code : String) (b e : Nat) :
     TermElabM (Option (Option SyntaxNodeKind)) := do
   unless isKeywordWord code do return none
@@ -561,7 +624,9 @@ def keywordSpan? (s code : String) (b e : Nat) :
     if isConst then
       return none
     if let .ok stx := Parser.runParserCategory env `term code then
-      unless stx.isIdent do return none
+      unless stx.isIdent do
+        let kind := stx.getKind
+        return if (← findDocString? env kind).isSome then some (some kind) else none
   let some (some kind) ← keywordKind? env code | return none
   return some (some kind)
 
@@ -666,22 +731,27 @@ def pushBlankInfo (ref : Syntax) : TermElabM Unit := do
     expectedType? := none, expr := mkStrLit ""
     mkDocString? := some fun _ => pure "" }
 
+/-- Records an info node over `ref` that shows `doc` on hover and goes to the
+declaration `decl?` on Ctrl-click. -/
+def pushDocInfo (ref : Syntax) (doc : String) (decl? : Option Name) :
+    TermElabM Unit := do
+  let env ← getEnv
+  let location? : Option DeclarationLocation ← match decl? with
+    | none => pure none
+    | some decl => do
+      let some ranges ← findDeclarationRanges? decl | pure none
+      pure (some ⟨(← findModuleOf? decl).getD env.mainModule, ranges.selectionRange⟩)
+  pushInfoLeaf <| .ofDelabTermInfo {
+    elaborator := .anonymous, stx := ref, lctx := ← getLCtx
+    expectedType? := none, expr := mkStrLit ref.getAtomVal, location?
+    mkDocString? := some fun _ => pure doc }
+
 /-- Records an info node over the keyword or notation token `ref`, whose syntax node
 kind is `kind?`, that shows its hover text (see `keywordDoc?`) and goes to the
 declaration of `kind?` on Ctrl-click. -/
 def pushKeywordInfo (ref : Syntax) (kind? : Option SyntaxNodeKind) :
     TermElabM Unit := do
-  let env ← getEnv
-  let doc := (← keywordDoc? env ref.getAtomVal kind?).getD ""
-  let location? : Option DeclarationLocation ← match kind? with
-    | none => pure none
-    | some kind => do
-      let some ranges ← findDeclarationRanges? kind | pure none
-      pure (some ⟨(← findModuleOf? kind).getD env.mainModule, ranges.selectionRange⟩)
-  pushInfoLeaf <| .ofDelabTermInfo {
-    elaborator := .anonymous, stx := ref, lctx := ← getLCtx
-    expectedType? := none, expr := mkStrLit ref.getAtomVal, location?
-    mkDocString? := some fun _ => pure doc }
+  pushDocInfo ref ((← keywordDoc? (← getEnv) ref.getAtomVal kind?).getD "") kind?
 
 /-- See the module docstring. -/
 def docHoverLinter : Linter where
@@ -714,10 +784,22 @@ def docHoverLinter : Linter where
             let b : String.Pos.Raw := ⟨start.byteIdx + spanOff⟩
             let e : String.Pos.Raw := ⟨b.byteIdx + code.utf8ByteSize⟩
             let ref := Syntax.atom (.synthetic b e (canonical := true)) code
-            if code.startsWith "#" && !commandDescriptions.contains code then
+            -- `#check` is one token, but `#s` is `#` applied to `s` (`Finset.card`)
+            let isToken := ((Parser.getTokenTable env).find? code).isSome
+            if code.startsWith "#" && isToken &&
+                !commandDescriptions.contains code then
               Linter.logLint linter.docHover ref
                 m!"no description of `{code}` in `STIL.DocHover.commandDescriptions`"
             pushKeywordInfo ref kind?
+            continue
+          if let some attrs := attributeList? env code then
+            for (off, entry, attr, kind) in attrs do
+              let some (doc, decl) ← attributeDoc? env attr kind
+                | continue
+              let b : String.Pos.Raw := ⟨start.byteIdx + spanOff + off⟩
+              let e : String.Pos.Raw := ⟨b.byteIdx + entry.utf8ByteSize⟩
+              pushDocInfo (Syntax.atom (.synthetic b e (canonical := true)) entry)
+                doc decl
             continue
           if let some kind ← notationTokenKind? env code then
             let b : String.Pos.Raw := ⟨start.byteIdx + spanOff⟩

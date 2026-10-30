@@ -70,7 +70,7 @@ it is `noncomputable`: for each `w : W` the inverse has to *choose* some `v` wit
 noncomputable example (f : V → W) (hf : Function.Bijective f) : V ≃ W :=
   Equiv.ofBijective f hf
 /-!
-The inverse of an equivalence `e` is `e.symm`.
+The *inverse* of an equivalence `e` is `e.symm`.
 -/
 example (e : V ≃ W) : W ≃ V := e.symm
 /-!
@@ -103,9 +103,9 @@ Given a function `f : V → W`, we can push a graph `G : SimpleGraph V` forwards
 *map* of `G` along `f` and the latter is called the *comap* of `H` along `f`.
 
 Of these, `SimpleGraph.comap` is used frequently in constructions of concrete graphs,
-so we start with it. The `SimpleGraph.map` construction is less frequently used for
-constructing concrete graphs, but appears often in proofs; we return to it in
-[Maps](#section-maps), once we have met graph homomorphisms.
+so we start with it. (The `SimpleGraph.map` construction is less frequently used for
+constructing concrete graphs, but often appears in proofs; we return to it in
+[Maps](#section-maps), once we have met graph homomorphisms.)
 
 Given `f : V → W` and `G : SimpleGraph W`, `G.comap f` is the `SimpleGraph V` where
 two vertices are adjacent iff their images under `f` are adjacent in `G`.
@@ -117,9 +117,10 @@ example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
   (G.comap f).Adj v₁ v₂ ↔ G.Adj (f v₁) (f v₂) := comap_adj ..
 
 /-!
-Two examples of graphs defined using `comap` are the complete multipartite and
-blow-up graphs. (If you read the starred section [Complete Multipartite Graphs and
-Blow-ups*](#section-complete-multipartite-graphs-and-blow-ups), you have already seen
+Two examples of graphs defined using `SimpleGraph.comap` are complete multipartite
+(`completeMultipartiteGraph`)and blow-up graphs (`blowUpGraph`). (If you read the
+section [Complete Multipartite Graphs and
+Blow-ups](#section-complete-multipartite-graphs-and-blow-ups), you have already seen
 them.) Two vertices are adjacent in a complete multipartite graph iff they are in
 different parts.
 -/
@@ -145,23 +146,23 @@ that sends a vertex to its part.
 
 ## Induced Subgraphs via Comap
 
-The `comap` gives a natural way to define induced subgraphs (`SimpleGraph.induce`).
-Given a set of vertices `s : Set V`, the embedding of `s` into `V` as a `Subtype` is
-given by `Function.Embedding.subtype (· ∈ s)`.
+The `SimpleGraph.comap` gives a natural way to define induced subgraphs
+(`SimpleGraph.induce`). Given a set of vertices `s : Set V`, the embedding of `s`
+into `V` as a `Subtype` is given by `Function.Embedding.subtype (· ∈ s)`.
 -/
 section induced
 variable {V : Type*} {s : Set V}
 #check Function.Embedding.subtype (· ∈ s) -- {x // x ∈ s} ↪ V
 /-!
-The induced subgraph of `G` on the vertex set `s` is then given by the `comap` of `G`
-by this embedding.
+The induced subgraph of `G` on the vertex set `s` is then given by the
+`SimpleGraph.comap` of `G` by this embedding.
 
 [Figure: Left: a graph $G$ with a subset $s$ of its vertices. Right: the induced subgraph on $s$](https://jt496.github.io/GraphTheoryInLean/figures/induced.svg)
 -/
 #source induce -- abbrev induce (s : Set V) (G : SimpleGraph V) : SimpleGraph s :=
-               --                   G.comap (Function.Embedding.subtype _)
+               --   G.comap (Function.Embedding.subtype _)
 
-#check SimpleGraph.induce_adj --  (induce s G).Adj u v ↔ G.Adj ↑u ↑v
+#check SimpleGraph.induce_adj -- (induce s G).Adj u v ↔ G.Adj ↑u ↑v
 #check SimpleGraph.induce s   -- induce s : SimpleGraph V → SimpleGraph ↑s
 /-!
 Notice that `G.induce s` gives a `SimpleGraph ↑s` whose vertices have a different
@@ -169,7 +170,7 @@ type to those of the original graph. So for example in the subgraph of `C[5]` in
 by the set `{0, 1, 2}` the vertices are of type `↑{0, 1, 2}`. So when talking about
 vertices in this graph we need to provide a pair `⟨v, hv⟩` where `v : Fin 5` and
 `hv : v ∈ {0, 1, 2}`. Often these proof obligations can be discharged automatically
-using `by simp` or `by decide`. (Either will work in the example below.)
+using `simp` or `decide`. (Either will work in the example below.)
 -/
 example : (C[5].induce {0, 1, 2}).Adj ⟨0, by simp⟩ ⟨1, by decide⟩ := by decide
 
@@ -194,16 +195,17 @@ to use the `Subgraph` type (see [Subgraphs](#chapter-subgraphs) for details).
 -/
 variable {G : SimpleGraph V}
 #check (⊤ : G.Subgraph).induce s
+
 end induced
 
 /-!
 # Morphisms
 
 Graph homomorphisms, embeddings, and isomorphisms are the structure-preserving maps
-between graphs. Unlike `comap`, which takes a plain function and builds a new graph,
-a morphism is *data* relating two given graphs: a function between their vertex types
-together with a proof that it respects adjacency. We will see below how the two ideas
-are related.
+between graphs. Unlike `SimpleGraph.comap`, which takes a plain function and builds a
+new graph, a morphism is *data* relating two given graphs: a function between their
+vertex types together with a proof that it respects adjacency. We will see below how
+the two ideas are related.
 
 Before looking at morphisms in detail we note that they are all defined as `abbrev`s
 for the corresponding `Rel*` types in Mathlib. This means that occasionally when
@@ -245,9 +247,9 @@ example (f : G →g H) (v : V) : (G.neighborSet v).image f ⊆ H.neighborSet (f 
   exact f.map_adj hu
 
 /-!
-We can now relate homomorphisms to `comap`. A function `f : V → W` underlies a
-homomorphism `G →g H` iff `G` is a subgraph of `H.comap f`: both say that `f` sends
-every edge of `G` to an edge of `H`.
+We can now relate homomorphisms to `SimpleGraph.comap`. A function `f : V → W`
+underlies a homomorphism `G →g H` iff `G` is a subgraph of `H.comap f`: both say that
+`f` sends every edge of `G` to an edge of `H`.
 -/
 example (f : G →g H) : G ≤ H.comap f := f.le_comap
 example (f : V → W) (h : G ≤ H.comap f) : G →g H := ⟨f, fun huv ↦ h huv⟩
@@ -289,10 +291,11 @@ subgraph of `H`.
 example {u v : V} : H.Adj (f u) (f v) ↔ G.Adj u v := f.map_adj_iff
 
 /-!
-In terms of `comap`: an injective function `f` underlies an embedding `G ↪g H` iff
-pulling back `H` along `f` gives exactly `G`. Conversely, `comap` along any injective
-function is an embedding (`Embedding.comap`), and a special case of this is the
-inclusion of an induced subgraph (`Embedding.induce`).
+In terms of `SimpleGraph.comap`: an injective function `f` underlies an embedding
+`G ↪g H` iff pulling back `H` along `f` gives exactly `G`. Conversely,
+`SimpleGraph.comap` along any injective function is an embedding (`Embedding.comap`),
+and a special case of this is the inclusion of an induced subgraph
+(`Embedding.induce`).
 -/
 example : H.comap f = G := f.comap_eq
 #check Embedding.comap  -- (f : V ↪ W) (G : SimpleGraph W) : G.comap f ↪g G
@@ -420,7 +423,7 @@ The underlying equivalence of vertex types:
 -/
 #check f.toEquiv  -- V ≃ W
 /-!
-Any graph isomorphism gives rise to a graph embedding or graph homomorphism.
+Any graph isomorphism gives rise to a graph embedding and graph homomorphism.
 -/
 #check Iso.toEmbedding  -- G ≃g G' → G ↪g G'
 #check Iso.toHom        -- G ≃g G' → G →g G'
@@ -537,32 +540,32 @@ example (f : V ↪ W) {w₁ w₂ : W} :
 /-!
 Either way, the adjacency relation of `G.map f` contains an existential quantifier:
 two vertices are adjacent if there *exist* adjacent preimages. This makes graphs
-defined using `map` harder to work with, particularly in computations.
+defined using `SimpleGraph.map` harder to work with, particularly in computations.
 
-How does `map` relate to homomorphisms? The image of `G` under a homomorphism
-`f : G →g H` is a subgraph of `H` (`Hom.map_le`). For an embedding of vertex types
-`f : V ↪ W` the converse also holds, so in that case `G.map f ≤ H` and
+How does `SimpleGraph.map` relate to homomorphisms? The image of `G` under a
+homomorphism `f : G →g H` is a subgraph of `H` (`Hom.map_le`). For an embedding of
+vertex types `f : V ↪ W` the converse also holds, so in that case `G.map f ≤ H` and
 `G ≤ H.comap f` both say that `f` is a homomorphism `G →g H`.
 -/
 example (f : G →g H) : G.map f ≤ H := f.map_le
 example (f : V ↪ W) : G.map f ≤ H ↔ G ≤ H.comap f := map_le_iff_le_comap
 /-!
-For a function that is not injective the converse fails: `map` may send two adjacent
-vertices to the same vertex, so `G.map f ≤ H` does not ensure that `f` sends every
-edge of `G` to an edge of `H`.
+For a function that is not injective the converse fails: `SimpleGraph.map` may send
+two adjacent vertices to the same vertex, so `G.map f ≤ H` does not ensure that `f`
+sends every edge of `G` to an edge of `H`.
 
-In the language of order theory, `map_le_iff_le_comap` says that `map f` and
-`comap f` form a *Galois connection* when `f` is an embedding. It is in fact a
-*Galois coinsertion*: mapping forwards and then pulling back recovers the original
-graph, while pulling back and then mapping forwards only gives a subgraph. (See the
-exercises for an example where this inequality is strict.)
+In the language of order theory, `map_le_iff_le_comap` says that `SimpleGraph.map f`
+and `SimpleGraph.comap f` form a *Galois connection* when `f` is an embedding. It is
+in fact a *Galois coinsertion*: mapping forwards and then pulling back recovers the
+original graph, while pulling back and then mapping forwards only gives a subgraph.
+(See the exercises for an example where this inequality is strict.)
 -/
 example (f : V ↪ W) : (G.map f).comap f = G := comap_map_eq ..
 example (f : V ↪ W) : (H.comap f).map f ≤ H := map_comap_le ..
 /-!
-Mathlib also packages `map` as morphisms: an embedding `f : V ↪ W` gives a graph
-embedding `G ↪g G.map f`, and an equivalence `e : V ≃ W` gives a graph isomorphism
-`G ≃g G.map e`.
+Mathlib also packages `SimpleGraph.map` as morphisms: an embedding `f : V ↪ W` gives
+a graph embedding `G ↪g G.map f`, and an equivalence `e : V ≃ W` gives a graph
+isomorphism `G ≃g G.map e`.
 -/
 #check Embedding.map -- (f : V ↪ W) (G : SimpleGraph V) : G ↪g G.map f
 #check Iso.map       -- (f : V ≃ W) (G : SimpleGraph V) : G ≃g G.map f
@@ -571,11 +574,11 @@ end maps
 /-!
 ## SpanningCoe
 
-Having defined induced subgraphs via `comap` we can also go in the other direction:
-starting with `G : SimpleGraph ↑s`, where `s : Set V`, we can use `SimpleGraph.map`
-and `Subtype s ↪ V` to get a `SimpleGraph V` whose edges are exactly those of `G`.
-Since this graph contains all vertices of `V` but is otherwise the same as `G`, it is
-called the `spanningCoe` of `G`.
+Having defined induced subgraphs via `SimpleGraph.comap` we can also go in the other
+direction: starting with `G : SimpleGraph ↑s`, where `s : Set V`, we can use
+`SimpleGraph.map` and `Subtype s ↪ V` to get a `SimpleGraph V` whose edges are
+exactly those of `G`. Since this graph contains all vertices of `V` but is otherwise
+the same as `G`, it is called the `spanningCoe` of `G`.
 -/
 section spanningcoe
 variable {V : Type*}
@@ -583,8 +586,9 @@ variable {V : Type*}
 #source spanningCoe -- spanningCoe {s : Set V} (G : SimpleGraph s) :
                     --    SimpleGraph V := G.map (Function.Embedding.subtype _)
 /-!
-Since `map` and `comap` along the embedding `Subtype s ↪ V` form a Galois
-coinsertion, we have two very useful results relating `induce` and `spanningCoe`.
+Since `SimpleGraph.map` and `SimpleGraph.comap` along the embedding `Subtype s ↪ V`
+form a Galois coinsertion, we have two very useful results relating `induce` and
+`spanningCoe`.
 
 Firstly, if we start with `G : SimpleGraph ↑s` (where `s : Set V`), take its
 `spanningCoe` and form the induced subgraph on `s`, then we recover `G`.
@@ -615,8 +619,8 @@ We have now met three ways of describing a subgraph of `G : SimpleGraph V`: a gr
 `(G.induce s).spanningCoe`; an induced subgraph `G.induce s : SimpleGraph ↑s`, whose
 vertex type is the subtype `↑s` of `V`; and a copy `Copy A G` of a graph `A` whose
 vertices may have any type ([Copies](#section-copies)). Mathlib has a fourth,
-`G.Subgraph`, in which the vertex set can vary inside `V`. We compare all four in
-[Which Notion of Subgraph?](#section-which-notion-of-subgraph).
+`G.Subgraph`, in which the vertex set can vary inside `V`. We compare all four later
+in [Which Notion of Subgraph?](#section-which-notion-of-subgraph).
 -/
 
 /-!
@@ -649,36 +653,38 @@ abbrev hypercube.embedTrue (n : ℕ) : Q[n] ↪g Q[n + 1] :=
 /-!
 ## Embeddings and Maps of Mycielskians
 
-There is a natural embedding of a graph `G` into its Mycielskian `mμ[G]`, given
+There is a natural embedding of a graph `G` into its Mycielskian `mμ(G)`, given
 by sending a vertex `v` to the left copy of `v` in the Mycielskian.
 -/
-/-- The graph embedding `G ↪g mμ[G]` of a graph into its Mycielskian. -/
+/-- The graph embedding `G ↪g mμ(G)` of a graph into its Mycielskian. -/
 @[simps]
-def Embedding.mycielskianLeft {V : Type*} (G : SimpleGraph V) : G ↪g mμ[G] where
-  toFun := (·ₗ) -- V → Option (V ⊕ V); v ↦ some (Sum.inl v)
+def Embedding.mycielskianLeft {V : Type*} (G : SimpleGraph V) : G ↪g mμ(G) where
+  toFun := (·ˡ) -- V → Option (V ⊕ V); v ↦ some (Sum.inl v)
   inj' := Option.some_injective _ |>.comp Sum.inl_injective
   map_rel_iff' := Iff.rfl
 
 /-!
-Any graph homomorphism `f : G →g H` induces a homomorphism `mμ[G] →g mμ[H]`. Notice
+Any graph homomorphism `f : G →g H` induces a homomorphism `mμ(G) →g mμ(H)`. Notice
 that below we use some useful shorthand for defining a function on `Option (V ⊕ V)`.
 -/
 #check Option.elim'
 #check Sum.elim
 
-/-- A graph homomorphism `f : G →g H` induces a homomorphism `mμ[G] →g mμ[H]`,
+/-- A graph homomorphism `f : G →g H` induces a homomorphism `mμ(G) →g mμ(H)`,
 showing that the Mycielskian is functorial on `SimpleGraph.Hom`. -/
 @[simps]
 def Hom.mapMycielskian {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
-    (f : G →g H) : mμ[G] →g mμ[H] where
-  toFun := Option.elim' none <| Sum.elim (fun v => (f v)ₗ) (fun v => (f v)ᵣ)
+    (f : G →g H) : mμ(G) →g mμ(H) where
+  toFun := Option.elim' none <| Sum.elim (fun v => (f v)ˡ) (fun v => (f v)ʳ)
   map_rel' := by
     intro u v h
     rcases u with _ | (_|_) <;> rcases v with _ | (_|_) <;>
       simp_all [f.map_adj]
 
-/-- `Hom.mapMycielskian` sends the identity homomorphism on `G` to the identity on
-`mμ[G]`. -/
+/-!
+`Hom.mapMycielskian` sends the identity homomorphism on `G` to the identity on
+`mμ(G)`.
+-/
 theorem Hom.mapMycielskian_id {V : Type*} (G : SimpleGraph V) :
     (Hom.id (G := G)).mapMycielskian = Hom.id := by
   ext x; rcases x with _ | (_|_) <;> rfl
@@ -699,20 +705,20 @@ lemma Hom.mapMycielskian_comp {V W X : Type*} {G : SimpleGraph V}
 The same construction turns embeddings into embeddings and isomorphisms into
 isomorphisms.
 -/
-/-- A graph embedding `f : G ↪g H` induces an embedding `mμ[G] ↪g mμ[H]`. -/
+/-- A graph embedding `f : G ↪g H` induces an embedding `mμ(G) ↪g mμ(H)`. -/
 @[simps]
 def Embedding.mapMycielskian {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
-    (f : G ↪g H) : mμ[G] ↪g mμ[H] where
+    (f : G ↪g H) : mμ(G) ↪g mμ(H) where
   toFun := f.toHom.mapMycielskian
   inj' u v h := by
     rcases u with _ | (_|_) <;> rcases v with _ | (_|_) <;> simp_all
   map_rel_iff' {u v} := by
     rcases u with _ | (_|_) <;> rcases v with _ | (_|_) <;> simp [Hom.mapMycielskian]
 
-/-- A graph isomorphism `f : G ≃g H` induces an isomorphism `mμ[G] ≃g mμ[H]`. -/
+/-- A graph isomorphism `f : G ≃g H` induces an isomorphism `mμ(G) ≃g mμ(H)`. -/
 @[simps]
 def Iso.mapMycielskian {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
-    (f : G ≃g H) : mμ[G] ≃g mμ[H] where
+    (f : G ≃g H) : mμ(G) ≃g mμ(H) where
   toFun  := f.toHom.mapMycielskian
   invFun := f.symm.toHom.mapMycielskian
   left_inv x := by rcases x with _ | (_|_) <;> simp
@@ -748,14 +754,18 @@ automorphism of `G` mapping `u` to `v`. -/
 abbrev IsVertexTransitive {V : Type*} (G : SimpleGraph V) : Prop :=
   ∀ u v : V, ∃ f : G ≃g G, f u = v
 
-/-- Any vertex-transitive graph is regular. -/
+/-!
+Any vertex-transitive graph is regular.
+-/
 theorem IsVertexTransitive.exists_isRegularOfDegree {V : Type*} {G : SimpleGraph V}
     [G.LocallyFinite] (h : G.IsVertexTransitive) : ∃ d, G.IsRegularOfDegree d := by
   rcases isEmpty_or_nonempty V with hV | ⟨⟨v₀⟩⟩
   · exact ⟨0, isEmptyElim⟩
   · exact ⟨G.degree v₀, fun v => by obtain ⟨f, rfl⟩ := h v₀ v; simp⟩
 
-/-- Isomorphisms preserve vertex-transitivity. -/
+/-!
+Isomorphisms preserve vertex-transitivity.
+-/
 lemma Iso.isVertexTransitive {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
     (f : G ≃g H) (h : G.IsVertexTransitive) : H.IsVertexTransitive := by
   intro u v
@@ -769,7 +779,9 @@ an automorphism: this is Mathlib's `Iso.completeGraph`.
 -/
 #check Iso.completeGraph -- (f : α ≃ β) : completeGraph α ≃g completeGraph β
 
-/-- The complete graph is vertex-transitive. -/
+/-!
+The complete graph is vertex-transitive.
+-/
 lemma isVertexTransitive_top {V : Type*} :
     IsVertexTransitive (⊤ : SimpleGraph V) := by
   intro u v
@@ -802,9 +814,11 @@ def cycleGraph.rotate {n : ℕ} (d : Fin n) : C[n] ≃g C[n] where
     match n with
     | 0 | 1 | n + 2 => simp [cycleGraph_adj]
 
-/-- The cycle `C[n]` is vertex-transitive for all `n`. The rotation sending
+/-!
+The cycle `C[n]` is vertex-transitive for all `n`. The rotation sending
 `u - v` to `0` sends `u` to `v`. (For `n = 0` there is nothing to prove since
-there are no vertices.) -/
+there are no vertices.)
+-/
 lemma isVertexTransitive_cycleGraph (n : ℕ) : C[n].IsVertexTransitive :=
   match n with
   | 0 => fun u _ => u.elim0
@@ -830,8 +844,10 @@ avoid clashing with the `Sum` notation `α ⊕ β`.)
 @[inherit_doc HypercubeVert.xor]
 scoped infixl:65 " ⊕ₕ " => HypercubeVert.xor
 
-/-- `xor`-ing twice by the same vertex is the identity, so translation is an
-involution. -/
+/-!
+`xor`-ing twice by the same vertex is the identity, so translation is an
+involution.
+-/
 @[simp]
 lemma HypercubeVert.xor_xor {n : ℕ} (v t : HypercubeVert n) : (v ⊕ₕ t) ⊕ₕ t = v := by
   induction n with
@@ -848,7 +864,9 @@ lemma HypercubeVert.xor_involutive {n : ℕ} (t : HypercubeVert n) :
     Function.Involutive (· ⊕ₕ t) :=
   (HypercubeVert.xor_xor · t)
 
-/-- `xor`-ing `u` into `u ⊕ₕ v` recovers `v`. -/
+/-!
+`xor`-ing `u` into `u ⊕ₕ v` recovers `v`.
+-/
 @[simp]
 lemma HypercubeVert.xor_xor_cancel {n : ℕ} (u v : HypercubeVert n) :
     u ⊕ₕ (u ⊕ₕ v) = v := by
@@ -859,14 +877,18 @@ lemma HypercubeVert.xor_xor_cancel {n : ℕ} (u v : HypercubeVert n) :
     obtain ⟨v, b⟩ := v
     exact Prod.ext (ih u v) (by cases a <;> cases b <;> rfl)
 
-/-- Translation by `t` is injective. -/
+/-!
+Translation by `t` is injective.
+-/
 @[simp]
 lemma HypercubeVert.xor_left_inj {n : ℕ} {v w t : HypercubeVert n} :
     v ⊕ₕ t = w ⊕ₕ t ↔ v = w :=
   (HypercubeVert.xor_involutive t).injective.eq_iff
 
-/-- Translating both vertices of a potential edge by `t` preserves adjacency in
-`Q[n]`. -/
+/-!
+Translating both vertices of a potential edge by `t` preserves adjacency in
+`Q[n]`.
+-/
 lemma HypercubeVert.xor_adj {n : ℕ} (v w t : HypercubeVert n) :
     Q[n].Adj (v ⊕ₕ t) (w ⊕ₕ t) ↔ Q[n].Adj v w := by
   induction n with
@@ -881,7 +903,9 @@ def hypercube.translate {n : ℕ} (t : HypercubeVert n) : Q[n] ≃g Q[n] where
   toEquiv := (HypercubeVert.xor_involutive t).toPerm
   map_rel_iff' := HypercubeVert.xor_adj _ _ t
 
-/-- The hypercube `Q[n]` is vertex-transitive. -/
+/-!
+The hypercube `Q[n]` is vertex-transitive.
+-/
 lemma isVertexTransitive_hypercube (n : ℕ) : Q[n].IsVertexTransitive :=
   fun u v => ⟨hypercube.translate (u ⊕ₕ v), HypercubeVert.xor_xor_cancel u v⟩
 
@@ -892,64 +916,65 @@ the coordinates. While our construction of the hypercube using the vertices
 `HypercubeVert n` is very convenient for inductive proofs, to talk about the
 "coordinates" of a vertex it is better to use `Fin n → Bool`. We return to this in
 [The Hypercube and the Hamming Cube](#section-the-hypercube-and-the-hamming-cube),
-where we give a graph isomorphism `Q[n] ≃g hypercubeHamming n` between our hypercube
-and the Hamming cube on `Fin n → Bool`, and then use it to identify the automorphism
-group of `Q[n]` as `ℤ/2 ≀ Sₙ`.
+where we give a graph isomorphism `Q[n] ≃g hypercubeHamming n` between our box
+product model of the hypercube and the Hamming cube on `Fin n → Bool`, and then use
+it to identify the automorphism group of `Q[n]`.
 
 ## Vertex-Transitivity of Mycielskians
 
 The Mycielskian of a graph is rarely vertex-transitive. In fact we can see this
 easily by looking at degrees, which are equal in any vertex-transitive graph
 (`IsVertexTransitive.exists_isRegularOfDegree`). If `V` is finite and nonempty then
-`mμ[G]` is vertex-transitive iff `G` is isomorphic to `K[2]`.
+`mμ(G)` is vertex-transitive iff `G` is isomorphic to `K[2]`.
 
-To help in the proof we first construct a graph isomorphism from `mμ[K[2]]` to
+To help in the proof we first construct a graph isomorphism from `mμ(K[2])` to
 `C[5]`, which we already know to be vertex-transitive. We define both maps using
 Mathlib's *vector notation*: `![a, b, c]` is the function `Fin 3 → α` sending `0`,
 `1` and `2` to `a`, `b` and `c`. So the forward map sends the apex `none` to `0`,
-`0 ₗ` and `1 ₗ` to `3` and `2`, and `0 ᵣ` and `1 ᵣ` to `1` and `4`.
+`0ˡ` and `1ˡ` to `3` and `2`, and `0ʳ` and `1ʳ` to `1` and `4`.
 
 [Figure: Left: $K_2$. Right: its Mycielskian drawn as a $5$-cycle. The orange numbers are the vertices of $C_5$ to which `mycielskianCompleteTwoIsoCycleFive` sends them](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_K2.svg)
 -/
-/-- A graph isomorphism from `mμ[K[2]]` to `C[5]`. -/
-def mycielskianCompleteTwoIsoCycleFive : mμ[K[2]] ≃g C[5] where
+/-- A graph isomorphism from `mμ(K[2])` to `C[5]`. -/
+def mycielskianCompleteTwoIsoCycleFive : mμ(K[2]) ≃g C[5] where
   toFun := Option.elim' 0 (Sum.elim ![3, 2] ![1, 4])
-  invFun := ![none, 0 ᵣ, 1 ₗ, 0 ₗ, 1 ᵣ]
+  invFun := ![none, 0ʳ, 1ˡ, 0ˡ, 1ʳ]
   left_inv := by decide +revert
   right_inv := by decide +revert
   map_rel_iff' := by decide +revert
 
 /-!
-The forward direction only needs `mμ[G]` to be regular, so we isolate it as a lemma:
-comparing the degrees of `u ₗ`, `u ᵣ` and `none` shows that if `V` is finite and
-nonempty and `mμ[G]` is regular then `G` is a single edge.
+The forward direction only needs `mμ(G)` to be regular, so we isolate it as a lemma:
+comparing the degrees of `uˡ`, `uʳ` and `none` shows that if `V` is finite and
+nonempty and `mμ(G)` is regular then `G` is a single edge.
 -/
 lemma nonempty_iso_completeGraph_two_of_regular_mycielskian {V : Type*}
-    {G : SimpleGraph V} [Finite V] [Nonempty V] [mμ[G].LocallyFinite] {d : ℕ}
-    (hd : mμ[G].IsRegularOfDegree d) : Nonempty (G ≃g K[2]) := by
+    {G : SimpleGraph V} [Finite V] [Nonempty V] [mμ(G).LocallyFinite] {d : ℕ}
+    (hd : mμ(G).IsRegularOfDegree d) : Nonempty (G ≃g K[2]) := by
   classical
   obtain ⟨v : V⟩ := ‹Nonempty V›
   cases nonempty_fintype V
   -- From `d = 2 * G.degree u` and `d = G.degree u + 1` we get `G.degree u = 1`.
   have h1 : G.IsRegularOfDegree 1 := fun u => by
-    have hₗ : mμ[G].degree u ₗ = 2 * G.degree u := by simp
-    have hᵣ : mμ[G].degree u ᵣ = G.degree u + 1 := by simp
-    grind [hd u ₗ, hd u ᵣ]
+    have hₗ : mμ(G).degree uˡ = 2 * G.degree u := by simp
+    have hᵣ : mμ(G).degree uʳ = G.degree u + 1 := by simp
+    grind [hd uˡ, hd uʳ]
   -- Then `d = Fintype.card V` forces `Fintype.card V = 2`, as required.
   have hcard : Fintype.card V = 2 := by
-    have h₀ : mμ[G].degree none = Fintype.card V := by simp
-    have hᵣ : mμ[G].degree v ᵣ = G.degree v + 1 := by simp
-    grind [hd none, hd v ᵣ, h1 v]
+    have h₀ : mμ(G).degree none = Fintype.card V := by simp
+    have hᵣ : mμ(G).degree vʳ = G.degree v + 1 := by simp
+    grind [hd none, hd vʳ, h1 v]
   -- we now use the fact that if `G` is regular of degree `Fintype.card V - 1`
   -- then `G` is complete.
-  obtain rfl : G = ⊤ :=
-    G.isRegularOfDegree_card_sub_one_iff_eq_top.1 (by simpa [hcard] using h1)
+  obtain rfl : G = ⊤ := G.isRegularOfDegree_card_sub_one_iff_eq_top.1 (by grind)
   exact ⟨Iso.completeGraph (Fintype.equivFinOfCardEq hcard)⟩
 
-/-- The Mycielskian of a graph on a finite nonempty vertex type is vertex-transitive
-iff the original graph is isomorphic to `K[2]`. -/
+/-!
+The Mycielskian of a graph on a finite nonempty vertex type is vertex-transitive
+iff the original graph is isomorphic to `K[2]`.
+-/
 theorem isVertexTransitive_mycielskian_iff {V : Type*} (G : SimpleGraph V) [Finite V]
-    [Nonempty V] : mμ[G].IsVertexTransitive ↔ Nonempty (G ≃g K[2]) := by
+    [Nonempty V] : mμ(G).IsVertexTransitive ↔ Nonempty (G ≃g K[2]) := by
   classical
   constructor
   · intro h
@@ -981,18 +1006,14 @@ We introduce the notation `G ⊗g H` for the tensor product of two graphs.
 scoped infixl:70 " ⊗g " => SimpleGraph.tensorProd
 
 /-!
-Adjacency in the tensor product is given by the adjacency relations of the two
-graphs. (As for Mathlib's `boxProd_adj`, we state this as an `↔` lemma, so that it
-can be used with `.1`/`.2` as well as with `rw` and `simp`.)
-
 [Figure: Tensor product $P_3\otimes K_3$](https://jt496.github.io/GraphTheoryInLean/figures/tensorprod.svg)
+
+Adjacency in the tensor product is given by the adjacency relations of the two
+graphs.
 -/
 @[simp]
 lemma tensorProd_adj {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W}
     {x y : V × W} : (G ⊗g H).Adj x y ↔ G.Adj x.1 y.1 ∧ H.Adj x.2 y.2 := Iff.rfl
-
-example {V W : Type*} {G H} {v₁ v₂ : V} {w₁ w₂ : W} :
-    (G ⊗g H).Adj (v₁, w₁) (v₂, w₂) ↔ G.Adj v₁ v₂ ∧ H.Adj w₁ w₂ := Iff.rfl
 
 /-!
 Decidable adjacency for tensor products follows from decidable adjacency for the two
@@ -1005,18 +1026,26 @@ instance {V W : Type*} (G : SimpleGraph V) (H : SimpleGraph W) [DecidableRel G.A
 /-!
 If `x.1` and `x.2` have finite neighbourhoods in `G` and `H` respectively, then so
 does `x` in `G ⊗g H`, since its neighbourhood is the product `s ×ˢ t` of the two
-neighbourhoods. (We state the instance for `x : V × W` rather than for a pair
-`(v, w)`, since otherwise it would not fire on a general `x : V × W`.)
+neighbourhoods. As with `blowUpNFintypeNeighborSet` (see [Degrees in the n -Uniform
+Blow-up of a Graph](#section-degrees-in-the-n-uniform-blow-up-of-a-graph)), we make
+this a `def` rather than an `instance`: when `V` and `W` are finite and adjacency is
+decidable, Lean already finds a `Fintype` instance for this neighbourhood by
+filtering, and an instance would give a second route to it. (We state it for
+`x : V × W` rather than for a pair `(v, w)`, so that it also applies to a general
+`x : V × W` when we use it as an instance.)
 -/
 /-- If `G` and `H` have finite neighbourhoods at `x.fst` and `x.snd` respectively,
 then their tensor product has a finite neighbourhood at `x`. -/
-instance {V W : Type*} {x : V × W} {G : SimpleGraph V} {H : SimpleGraph W}
-    [Fintype (G.neighborSet x.fst)] [Fintype (H.neighborSet x.snd)] :
-    Fintype ((G ⊗g H).neighborSet x) :=
+@[instance_reducible]
+def tensorProdFintypeNeighborSet {V W : Type*} {x : V × W} {G : SimpleGraph V}
+    {H : SimpleGraph W} [Fintype (G.neighborSet x.fst)]
+    [Fintype (H.neighborSet x.snd)] : Fintype ((G ⊗g H).neighborSet x) :=
   Fintype.ofFinset (G.neighborFinset x.fst ×ˢ H.neighborFinset x.snd) (by simp)
 
-/-- The degree of a vertex in the tensor product is the product of the degrees of its
-components. -/
+/-!
+The degree of a vertex in the tensor product is the product of the degrees of its
+components.
+-/
 lemma degree_tensorProd {V W : Type*} {x : V × W} {G : SimpleGraph V}
     {H : SimpleGraph W} [Fintype (G.neighborSet x.fst)]
     [Fintype (H.neighborSet x.snd)] [Fintype ((G ⊗g H).neighborSet x)] :
@@ -1121,11 +1150,15 @@ instance {ι : Type*} {V : ι → Type*} [Fintype ι] [∀ i, DecidableEq (V i)]
 /-!
 If each `G i` has a finite neighbourhood at `f i` then the tensor product has a
 finite neighbourhood at `f`, provided the index type is finite, nonempty and has
-decidable equality.
+decidable equality. Again we make this a `def`, for the same reason as
+`tensorProdFintypeNeighborSet`.
 -/
-instance {ι : Type*} {V : ι → Type*} {G : (i : ι) → SimpleGraph (V i)}
-    {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι] [Nonempty ι]
-    [∀ i, Fintype ((G i).neighborSet (f i))] :
+/-- If each `G i` has a finite neighbourhood at `f i`, then the indexed tensor
+product has a finite neighbourhood at `f`. -/
+@[instance_reducible]
+def piTensorProdFintypeNeighborSet {ι : Type*} {V : ι → Type*}
+    {G : (i : ι) → SimpleGraph (V i)} {f : (i : ι) → V i} [Fintype ι] [DecidableEq ι]
+    [Nonempty ι] [∀ i, Fintype ((G i).neighborSet (f i))] :
     Fintype ((⨂g i, G i).neighborSet f) :=
   Fintype.ofFinset (Fintype.piFinset fun i ↦ (G i).neighborFinset (f i)) fun y ↦ by
     simp
@@ -1137,9 +1170,8 @@ The analogues for the indexed tensor product of the maps in
 
 # Claw-Free Graphs *
 
-We say that `H` contains `G` as an *induced subgraph* (up to isomorphism) if there
-is an induced subgraph of `H` isomorphic to `G`, i.e. there is an embedding
-`G ↪g H`. This is written `G ⊴ H`.
+We say that `H` contains an induced copy of `G` if there is an embedding `G ↪g H`.
+This is written `G ⊴ H`.
 -/
 #source IsIndContained -- def IsIndContained (G : SimpleGraph V)
                        --       (H : SimpleGraph W) : Prop := Nonempty (G ↪g H)
@@ -1150,10 +1182,11 @@ copy of a graph in Mathlib, so we introduce one here (following the pattern of
 -/
 /-- `A.IndFree B` means that `B` does not contain an induced copy of `A`. -/
 abbrev IndFree {V W : Type*} (A : SimpleGraph V) (B : SimpleGraph W) := ¬A ⊴ B
+
 /-!
 The *claw* is the complete bipartite graph `K[1, 3]`.
 -/
-/-- A graph is *claw-free* if it does not contain an induced copy of `K[1, 3]`. -/
+/-- A graph is *claw-free* if it does not contain an *induced* copy of `K[1, 3]`. -/
 abbrev ClawFree {V : Type*} (G : SimpleGraph V) : Prop := K[1, 3].IndFree G
 
 /-!
@@ -1163,11 +1196,12 @@ claw-free in that sense would simply mean that every vertex has at most two
 neighbours. The two notions really are different: `K[4]` is claw-free, since any four
 of its vertices induce a copy of `K[4]`, yet `K[1, 3] ⊑ K[4]`, since every vertex of
 `K[4]` has three neighbours (see the exercises).
+
+Line graphs are always claw-free.
 -/
-/-- Line graphs are always claw-free. -/
 theorem clawFree_lineGraph {V : Type*} (G : SimpleGraph V) : L[G].ClawFree := by
   classical
-  -- Suppose not: then we have an embedding `f` of `K[1, 3]` in `L[G]`.
+  -- Suppose not: then we have an embedding `f : K[1, 3] ↪g L[G]`.
   rintro ⟨f⟩
   -- The centre of the claw is adjacent to each leaf, so its edge `f (.inl 0)` shares
   -- a vertex `w i` with each leaf edge `f (.inr i)`.
@@ -1175,7 +1209,7 @@ theorem clawFree_lineGraph {V : Type*} (G : SimpleGraph V) : L[G].ClawFree := by
     intro i
     have hadj : K[1, 3].Adj (.inl 0) (.inr i) := by simp
     rw [← f.map_adj_iff, lineGraph_adj_iff_exists] at hadj
-    simpa using hadj
+    exact hadj.2
   -- The `choose` tactic turns `key` into a function `w : Fin 3 → V` together with
   -- `hwc : ∀ i, w i ∈ f (.inl 0)` and `hwl : ∀ i, w i ∈ f (.inr i)`.
   -- This uses the axiom of choice.
@@ -1212,9 +1246,10 @@ iff `G` contains either a copy of `K[3]` or a copy of the claw `K[1, 3]`.
 
 First, two simple helper lemmas, which build the required copies directly from their
 vertices.
+
+If `G` contains three mutually adjacent vertices then it contains a copy of the
+triangle `K[3]`.
 -/
-/-- If `G` contains three mutually adjacent vertices then it contains a copy of the
-triangle `K[3]`. -/
 lemma top_three_isContained {V : Type*} {G : SimpleGraph V} {a b c : V}
     (hab : G.Adj a b) (hac : G.Adj a c) (hbc : G.Adj b c) : K[3] ⊑ G := by
   -- Map the vertices `0, 1, 2` of `K[3]` to `a, b, c` using vector notation `![ ]`.
@@ -1226,8 +1261,10 @@ lemma top_three_isContained {V : Type*} {G : SimpleGraph V} {a b c : V}
   -- A homomorphism from a complete graph is injective, so `f` gives a copy.
   exact ⟨f.toCopy f.injective_of_top_hom⟩
 
-/-- A vertex `a` with three distinct neighbours `b, c, d` gives a copy of the claw
-`K[1, 3]`. -/
+/-!
+A vertex `a` with three distinct neighbours `b, c, d` gives a copy of the claw
+`K[1, 3]`.
+-/
 lemma claw_isContained {V : Type*} {G : SimpleGraph V} {a b c d : V} (hb : G.Adj a b)
     (hc : G.Adj a c) (hd : G.Adj a d) (hbc : b ≠ c) (hbd : b ≠ d) (hcd : c ≠ d) :
     K[1, 3] ⊑ G := by
@@ -1250,9 +1287,10 @@ lemma claw_isContained {V : Type*} {G : SimpleGraph V} {a b c d : V} (hb : G.Adj
 /-!
 In a locally finite graph, we can characterize the existence of a copy of the claw in
 `G` in terms of the existence of a vertex of degree at least 3.
+
+A graph `G` contains a copy of the claw `K[1, 3]` iff it has a vertex of degree
+at least 3.
 -/
-/-- A graph `G` contains a copy of the claw `K[1, 3]` iff it has a vertex of degree
-at least 3. -/
 theorem claw_isContained_iff {V : Type*} (G : SimpleGraph V) [G.LocallyFinite] :
     K[1, 3] ⊑ G ↔ ∃ v, 3 ≤ G.degree v := by
   rw [exists_three_le_degree_iff]
@@ -1301,13 +1339,16 @@ Since containment passes to line graphs (`IsContained.lineGraph`), a copy of `K[
 in `G` gives a copy of `L[K[3]]`, and hence of `K[3]`, in the line graph of `G`.
 Likewise a copy of the claw in `G` gives a copy of `L[K[1, 3]]`, which is again a
 triangle.
+
+If a graph `G` contains a triangle, then its line graph contains a triangle.
 -/
-/-- If a graph `G` contains a triangle, then its line graph contains a triangle. -/
 lemma isContained_lineGraph_of_triangle {V : Type*} {G : SimpleGraph V}
     (h : K[3] ⊑ G) : K[3] ⊑ L[G] :=
   lineGraphCompleteThreeIsoCompleteThree.isContained'.trans h.lineGraph
 
-/-- If a graph `G` contains a claw, then its line graph contains a triangle. -/
+/-!
+If a graph `G` contains a claw, then its line graph contains a triangle.
+-/
 lemma isContained_lineGraph_of_claw {V : Type*} {G : SimpleGraph V}
     (h : K[1, 3] ⊑ G) : K[3] ⊑ L[G] :=
   lineGraphClawIsoCompleteThree.isContained'.trans h.lineGraph
@@ -1316,9 +1357,10 @@ lemma isContained_lineGraph_of_claw {V : Type*} {G : SimpleGraph V}
 Conversely, a triangle in the line graph comes from either a triangle or a copy of
 the claw in `G`: three pairwise distinct, pairwise intersecting edges either share a
 common vertex (giving a copy of the claw) or form a triangle.
+
+If the line graph of a graph `G` contains a triangle, then `G` contains a
+triangle or a copy of the claw.
 -/
-/-- If the line graph of a graph `G` contains a triangle, then `G` contains a
-triangle or a copy of the claw. -/
 lemma top_three_or_claw_isContained_of_isContained_lineGraph {V : Type*}
     {G : SimpleGraph V} (h : K[3] ⊑ L[G]) : K[3] ⊑ G ∨ K[1, 3] ⊑ G := by
   obtain ⟨f⟩ := h
@@ -1356,13 +1398,13 @@ lemma top_three_or_claw_isContained_of_isContained_lineGraph {V : Type*}
 
 /-!
 Putting everything together we have a complete characterization.
+
+The line graph of `G` contains a triangle iff `G` contains a triangle or a copy
+of the claw.
 -/
-/-- The line graph of `G` contains a triangle iff `G` contains a triangle or a copy
-of the claw. -/
 theorem top_three_isContained_lineGraph_iff {V : Type*}
     {G : SimpleGraph V} : K[3] ⊑ L[G] ↔ K[3] ⊑ G ∨ K[1, 3] ⊑ G :=
   ⟨top_three_or_claw_isContained_of_isContained_lineGraph,
     fun h => h.elim isContained_lineGraph_of_triangle isContained_lineGraph_of_claw⟩
-
 
 end SimpleGraph

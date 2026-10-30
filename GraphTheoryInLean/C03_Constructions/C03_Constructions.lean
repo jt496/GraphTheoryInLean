@@ -83,8 +83,7 @@ procedure for deciding whether two vertices are equal then we can decide whether
 they are adjacent in the complete graph, since adjacency is precisely not-equal-to
 `≠`. For example, `10` and `111` are adjacent in `K[417]`.
 -/
-example : K[417].Adj 10 111 := by
-  decide
+example : K[417].Adj 10 111 := by decide
 
 /-!
 We also introduce notation for the empty graph on `Fin n`.
@@ -153,11 +152,6 @@ We introduce notation for the path graph on `Fin n`.
 scoped notation "P[" n "]" => pathGraph n
 
 /-!
-Mathlib has no decidability instance for adjacency in `hasse` or `P[n]`, so we will
-need to provide our own if we want to do computations with these graphs. This is a
-bit more work than the instances we give in this chapter, so we defer it until
-[Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees).
-
 ## Cycle Graphs
 
 For any `n : ℕ` we can define the *cycle graph* on `n` vertices as the graph with
@@ -253,10 +247,10 @@ If we try to check adjacency of two vertices in `K[4, 5]` we get an error.
 #eval K[4, 5].Adj (Sum.inl 0) (Sum.inr 3)
 
 /-!
-This is because, as for `pathGraph`, there is no decidability instance for
-`completeBipartiteGraph` in Mathlib. This time, though, it is easy to provide the
-missing instance ourselves. (Don't worry if this is unfamiliar; we will look at
-decidability in *much* more detail in [Decidability, Finiteness and
+This is because there is currently no instance of decidable adjacency for
+`completeBipartiteGraph` in Mathlib. In this case it is easy to give. (Don't worry if
+this is unfamiliar; we will look at decidability in *much* more detail in
+[Decidability, Finiteness and
 Degrees](#chapter-decidability-finiteness-and-degrees).)
 -/
 instance (V W : Type*) : DecidableRel (completeBipartiteGraph V W).Adj := by
@@ -562,8 +556,9 @@ abbrev hypercubeHasse (n : ℕ) : SimpleGraph (Finset (Fin n)) :=
   hasse _
 
 /-!
-The Hamming cube construction is also easy to give and easier to work with than the
-Hasse diagram.
+The Hamming cube construction is also easy to give, and easier to work with than the
+Hasse diagram: adjacency is a single symmetric condition, and all coordinates are
+treated alike.
 -/
 /-- The Hamming cube definition of the `n`-dimensional hypercube. -/
 def hypercubeHamming (n : ℕ) : SimpleGraph (Fin n → Bool) where
@@ -574,22 +569,25 @@ def hypercubeHamming (n : ℕ) : SimpleGraph (Fin n → Bool) where
 But for our purposes the most useful construction of the hypercube is as the box
 product of `n` copies of `K₂`.
 
-The box product construction of the hypercube requires a bit more setup, but will be
-worth it. The reason we choose this construction is that it is *recursive* in `n`:
-its vertex type is built so that `Q[n + 1] = Q[n] □ K₂` holds definitionally. Almost
-every result we prove about the hypercube in the later chapters is by induction on
-`n`, and this recursive structure is exactly what allows these to work. It
-also lets us reuse Mathlib's box product lemmas directly.
+This construction requires a bit more setup, but will be worth it. The reason we
+choose it is that it is *recursive* in `n`: its vertex type is built so that
+`Q[n + 1] = Q[n] □ K₂` holds definitionally, where `Q[n]` denotes the `n`-dimensional
+hypercube. Almost every result we prove about `Q[n]` in the later chapters is by
+induction on `n`, and this recursive structure is exactly what allows these to work.
+It also lets us reuse Mathlib's box product lemmas directly. (The price is that the
+last coordinate is singled out, so for results about the symmetries of the hypercube,
+such as its automorphism group, we will pass to the Hamming cube in
+[The Hypercube and the Hamming Cube](#section-the-hypercube-and-the-hamming-cube).)
 
-For the box product construction we need to first define the vertex type of the
-hypercube. There are two things we need to decide: firstly what should the vertex
-type of `Q[0]` be? Since `Q[0]` is a single vertex we will use the canonical type
-with exactly one element, `Unit`.
+To give the box product construction we first need to define its vertex type. There
+are two things to decide. Firstly, what should the vertex type of `Q[0]` be? Since
+`Q[0]` has a single vertex we will use the canonical type with exactly one element,
+`Unit`.
 -/
 #check Unit
 /-!
-Secondly, when we said `Q[n + 1] = Q[n] □ K₂` we need to choose a vertex type for
-`K₂`. We will choose the type `Bool` with its two elements, `false` and `true`.
+Secondly, to form `Q[n + 1] = Q[n] □ K₂` we need to choose a vertex type for `K₂`.
+We will use `Bool`, whose two elements are `false` and `true`.
 -/
 #source Bool
 
@@ -682,20 +680,20 @@ explicit vertices of `Q[n]` one coordinate at a time.
 # Mycielskian
 
 The *Mycielskian* of a graph `G : SimpleGraph V` is constructed as follows. Its
-vertex set consists of two disjoint copies `Vₗ` and `Vᵣ` of `V` together with a new
+vertex set consists of two disjoint copies `Vˡ` and `Vʳ` of `V` together with a new
 apex vertex which we call `none`.
 
-The edges inside `Vₗ` are identical to those of `G`; there are no edges inside `Vᵣ`;
-there is an edge between vertices `a ∈ Vₗ` and `b ∈ Vᵣ` iff there is an edge in `G`
+The edges inside `Vˡ` are identical to those of `G`; there are no edges inside `Vʳ`;
+there is an edge between vertices `a ∈ Vˡ` and `b ∈ Vʳ` iff there is an edge in `G`
 between the vertices of which `a` and `b` are copies. Finally `none` is adjacent to
-every vertex in `Vᵣ` but to no vertices in `Vₗ`.
+every vertex in `Vʳ` but to no vertices in `Vˡ`.
 
 This construction is due to Jan Mycielski
 [Mycielski 1955](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-mycielski-1955),
 who showed that:
 
-1. if `G` is triangle-free, then `mμ[G]` is also triangle-free.
-2. if `G` has chromatic number `k`, then `mμ[G]` has chromatic number `k + 1`.
+1. if `G` is triangle-free, then `mμ(G)` is also triangle-free.
+2. if `G` has chromatic number `k`, then `mμ(G)` has chromatic number `k + 1`.
 
 Thus starting with any triangle-free graph we can use it to construct triangle-free
 graphs with arbitrarily large chromatic number.
@@ -725,10 +723,10 @@ def mycielskian (G : SimpleGraph V) : SimpleGraph (Option (V ⊕ V)) where
   loopless := ⟨by rintro (_ | _ | _) <;> simp⟩
 
 /-!
-We introduce the notation `mμ[G]` for the Mycielskian of a graph `G`.
+We introduce the notation `mμ(G)` for the Mycielskian of a graph `G`.
 -/
-/-- `mμ[G]` is the Mycielskian `mycielskian G` of `G`. -/
-scoped notation "mμ[" G "]" => mycielskian G
+/-- `mμ(G)` is the Mycielskian `mycielskian G` of `G`. -/
+scoped notation "mμ(" G ")" => mycielskian G
 /-!
 As mentioned above if we iterate the Mycielskian construction starting with a
 triangle-free graph then we obtain a sequence of triangle-free graphs with increasing
@@ -742,13 +740,13 @@ Mycielskians](#section-vertex-transitivity-of-mycielskians)), and the Mycielskia
 -/
 /-- The *Grötzsch graph* (i.e. the Mycielskian of `C[5]`). -/
 @[simps!]
-abbrev grotzschGraph : SimpleGraph (Option (Fin 5 ⊕ Fin 5)) := mμ[C[5]]
+abbrev grotzschGraph : SimpleGraph (Option (Fin 5 ⊕ Fin 5)) := mμ(C[5])
 
 #check grotzschGraph_adj
 /-!
 [Figure: The Grötzsch graph (i.e. the Mycielskian of $C_5$)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian.svg)
 
-In order to talk about the vertices of `mμ[G]` it will be useful to introduce some
+In order to talk about the vertices of `mμ(G)` it will be useful to introduce some
 terminology. We name the two copies of `V` in a `mycielskian` namespace, since these
 names only make sense for this construction. The `@[match_pattern]` attribute lets us
 use them (and the notation below) as patterns when defining a function by pattern
@@ -768,58 +766,58 @@ end mycielskian
 
 /-!
 We can introduce notation for these as follows. The left copy of `v : V` is denoted
-`v ₗ` and the right copy is denoted `v ᵣ`.
+`vˡ` and the right copy is denoted `vʳ`.
 -/
-/-- `v ₗ` is the copy of the vertex `v` in the "left" part of the Mycielskian. -/
-scoped postfix:max "ₗ" => mycielskian.left
-/-- `v ᵣ` is the copy of the vertex `v` in the "right" part of the Mycielskian. -/
-scoped postfix:max "ᵣ" => mycielskian.right
+/-- `vˡ` is the copy of the vertex `v` in the "left" part of the Mycielskian. -/
+scoped postfix:max "ˡ" => mycielskian.left
+/-- `vʳ` is the copy of the vertex `v` in the "right" part of the Mycielskian. -/
+scoped postfix:max "ʳ" => mycielskian.right
 
 /-!
 The `@[simps]` attribute on our definition of `mycielskian` generated a `@[simp]`
-lemma `mycielskian_adj`, which rewrites `mμ[G].Adj x y` to the `match` in its
-definition. Once both vertices are named, as in `v ₗ`, `w ᵣ` or `none`, `simp`
+lemma `mycielskian_adj`, which rewrites `mμ(G).Adj x y` to the `match` in its
+definition. Once both vertices are named, as in `vˡ`, `wʳ` or `none`, `simp`
 reduces the `match`, so it (and tactics such as `aesop` that call it) can decide any
 adjacency between named vertices.
 -/
-example {G : SimpleGraph V} (v w : V) : mμ[G].Adj v ₗ w ᵣ ↔ G.Adj v w := by simp
+example {G : SimpleGraph V} (v w : V) : mμ(G).Adj vˡ wʳ ↔ G.Adj v w := by simp
 
-example {G : SimpleGraph V} (v w : V) : ¬ mμ[G].Adj v ᵣ w ᵣ := by simp
+example {G : SimpleGraph V} (v w : V) : ¬ mμ(G).Adj vʳ wʳ := by simp
 
 /-!
 We now prove a few lemmas about the Mycielskian construction that will be useful
 later on.
 
-The maps `v ↦ v ₗ` and `v ↦ v ᵣ` are injective. (In the proofs, `e |>.comp f` means
+The maps `v ↦ vˡ` and `v ↦ vʳ` are injective. (In the proofs, `e |>.comp f` means
 `(e).comp f`: the `|>.` lets us use dot notation on the result of
 `Option.some_injective _` without extra brackets.)
 -/
-lemma mycielskian.left_injective : Function.Injective fun v : V => v ₗ :=
+lemma mycielskian.left_injective : Function.Injective fun v : V => vˡ :=
   Option.some_injective _ |>.comp Sum.inl_injective
 
-lemma mycielskian.right_injective : Function.Injective fun v : V => v ᵣ :=
+lemma mycielskian.right_injective : Function.Injective fun v : V => vʳ :=
   Option.some_injective _ |>.comp Sum.inr_injective
 
 /-!
-The neighbourhoods of the vertices in `mμ[G]` are as follows.
+The neighbourhoods of the vertices in `mμ(G)` are as follows.
 
-A left copy `v ₗ` is adjacent to the left and right copies of the neighbours of `v`
+A left copy `vˡ` is adjacent to the left and right copies of the neighbours of `v`
 in `G`.
 -/
 @[simp]
 lemma neighborSet_mycielskian_left {G : SimpleGraph V} (v : V) :
-    mμ[G].neighborSet v ₗ = (G.neighborSet v).image (· ₗ) ∪
-      (G.neighborSet v).image (· ᵣ) := by
+    mμ(G).neighborSet vˡ = (G.neighborSet v).image (·ˡ) ∪
+      (G.neighborSet v).image (·ʳ) := by
   ext x
   grind [mem_neighborSet, mycielskian_adj]
 
 /-!
-A right copy `v ᵣ` is adjacent to the left copies of the neighbours of `v` in `G`
+A right copy `vʳ` is adjacent to the left copies of the neighbours of `v` in `G`
 and to `none`.
 -/
 @[simp]
 lemma neighborSet_mycielskian_right {G : SimpleGraph V} (v : V) :
-    mμ[G].neighborSet v ᵣ = insert none ((G.neighborSet v).image (· ₗ)) := by
+    mμ(G).neighborSet vʳ = insert none ((G.neighborSet v).image (·ˡ)) := by
   ext x
   grind [mem_neighborSet, mycielskian_adj]
 
@@ -828,7 +826,7 @@ The apex vertex `none` is adjacent to the right copies of all vertices in `G`.
 -/
 @[simp]
 lemma neighborSet_mycielskian_none {G : SimpleGraph V} :
-    mμ[G].neighborSet none = Set.range (· ᵣ) := by
+    mμ(G).neighborSet none = Set.range (·ʳ) := by
   ext x
   grind [mem_neighborSet, mycielskian_adj]
 
@@ -837,17 +835,17 @@ The left copies, the right copies and `none` are pairwise disjoint.
 -/
 @[simp]
 lemma mycielskian.disjoint_image_left_image_right (s t : Set V) :
-    Disjoint (s.image (· ₗ)) (t.image (· ᵣ)) := by
+    Disjoint (s.image (·ˡ)) (t.image (·ʳ)) := by
   grind
 
 @[simp]
 lemma mycielskian.disjoint_image_left_none (s : Set V) :
-    Disjoint (s.image (· ₗ)) {none} := by
+    Disjoint (s.image (·ˡ)) {none} := by
   grind
 
 @[simp]
 lemma mycielskian.disjoint_image_right_none (s : Set V) :
-    Disjoint (s.image (· ᵣ)) {none} := by
+    Disjoint (s.image (·ʳ)) {none} := by
   grind
 
 end mycielskian_section
@@ -855,15 +853,14 @@ end mycielskian_section
 As mentioned above we will be interested in iterating the Mycielskian construction,
 but in order to do this we first need to define the iterated vertex type. (Below we
 use `Type _` which means that the universe level is inferred (it will be the same as
-the universe level of `V`). If you replaced `Type _` with `Type*`, the definition
-would need to change.)
+the universe level of `V`).)
 
 As with `HypercubeVert`, the `@[implicit_reducible]` attribute lets Lean unfold
-`mμᵥ^(n + 1) V` when checking implicit and instance-implicit arguments.
+this definition when checking implicit and instance-implicit arguments.
 -/
 
 /-- The vertex type of the `n`-th Mycielskian of a `SimpleGraph V` (denoted
-`mμᵥ^n V`). -/
+`mμᵥ^n(V)`). -/
 @[implicit_reducible]
 def MycielskianVert (V : Type*) : ℕ → Type _
   | 0     => V
@@ -877,66 +874,46 @@ lemma mycielskianVert_succ {V : Type*} (n : ℕ) :
       Option (MycielskianVert V n ⊕ MycielskianVert V n) := rfl
 
 /-!
-Notation for the vertex type of the `n`-th Mycielskian. Unlike `notation`, a `syntax`
-declaration only tells Lean how to *parse* `mμᵥ^n V`. For Lean to also *print*
-`MycielskianVert V n` as `mμᵥ^n V` (in goals, hovers and `#check` output) we add an
-*unexpander*, which turns the application back into the notation.
+We write `mμᵥ^n(V)` for `MycielskianVert V n`.
 -/
-/-- `mμᵥ^n V` is the vertex type of the `n`-th iterated Mycielskian of a
+/-- `mμᵥ^n(V)` is the vertex type of the `n`-th iterated Mycielskian of a
 `SimpleGraph V`. -/
-scoped syntax "mμᵥ^" term:max ppSpace term:max : term
-scoped macro_rules
-  | `(mμᵥ^ $n $V) => `(MycielskianVert $V $n)
+scoped notation "mμᵥ^" n:max "(" V ")" => MycielskianVert V n
 
-/-- Print `MycielskianVert V n` as `mμᵥ^n V`. -/
-@[scoped app_unexpander MycielskianVert]
-private def unexpandMycielskianVert : Lean.PrettyPrinter.Unexpander
-  | `($_ $V $n) => `(mμᵥ^ $n $V)
-  | _ => throw ()
-
-/-- The `n`-th iterated Mycielskian of a graph `G` (denoted `mμ^n G`). -/
-def iterMycielskian {V : Type*} (G : SimpleGraph V) : (n : ℕ) → SimpleGraph (mμᵥ^n V)
+/-- The `n`-th iterated Mycielskian of a graph `G` (denoted `mμ^n(G)`). -/
+def iterMycielskian {V : Type*} (G : SimpleGraph V) : (n : ℕ) → SimpleGraph mμᵥ^n(V)
   | 0     => G
-  | n + 1 => mμ[iterMycielskian G n]
+  | n + 1 => mμ(iterMycielskian G n)
 
 @[simp]
 lemma iterMycielskian_zero {V : Type*} (G : SimpleGraph V) :
     iterMycielskian G 0 = G := rfl
 
 lemma iterMycielskian_succ {V : Type*} (G : SimpleGraph V) (n : ℕ) :
-    iterMycielskian G (n + 1) = mμ[iterMycielskian G n] := rfl
+    iterMycielskian G (n + 1) = mμ(iterMycielskian G n) := rfl
 
 /-!
-Notation for the iterated Mycielskian, again with an unexpander so that Lean prints
-`iterMycielskian G n` as `mμ^n G`.
+Similarly, we write `mμ^n(G)` for `iterMycielskian G n`.
 -/
-/-- `mμ^n G` is the `n`-th iterated Mycielskian of `G`. -/
-scoped syntax "mμ^" term:max ppSpace term:max : term
-scoped macro_rules
-  | `(mμ^ $n $G) => `(iterMycielskian $G $n)
+/-- `mμ^n(G)` is the `n`-th iterated Mycielskian of `G`. -/
+scoped notation "mμ^" n:max "(" G ")" => iterMycielskian G n
 
-/-- Print `iterMycielskian G n` as `mμ^n G`. -/
-@[scoped app_unexpander iterMycielskian]
-private def unexpandIterMycielskian : Lean.PrettyPrinter.Unexpander
-  | `($_ $G $n) => `(mμ^ $n $G)
-  | _ => throw ()
-
-#check mμ^3 C[5]
+#check mμ^3(C[5])
 /-!
-The postfix operators `ₗ` and `ᵣ` can be stacked: `(0 : Fin 5)ₗᵣᵣ` means `((0ₗ)ᵣ)ᵣ`,
+The postfix operators `ˡ` and `ʳ` can be stacked: `(0 : Fin 5)ˡʳʳ` means `((0ˡ)ʳ)ʳ`,
 the right copy of the right copy of the left copy of `0`, which is a vertex of the
 3rd iterated Mycielskian of `C[5]`. Written out in full this would be the unreadable
 term `some (Sum.inr (some (Sum.inr (some (Sum.inl 0)))))`. The adjacency lemmas above
 peel off one layer at a time: left–left and right–left pairs are adjacent exactly
-when the underlying vertices are, so `(0 : Fin 5)ₗᵣᵣ` is adjacent to `(1 : Fin 5)ₗₗₗ`
+when the underlying vertices are, so `(0 : Fin 5)ˡʳʳ` is adjacent to `(1 : Fin 5)ˡˡˡ`
 because `0` and `1` are adjacent in `C[5]`. In the proof, `simpa [lemmas] using e`
 simplifies both the goal and the type of `e`, then closes the goal with `e`.
 -/
-example : (mμ^3 C[5]).Adj (0 : Fin 5)ₗᵣᵣ (1 : Fin 5)ₗₗₗ := by
+example : mμ^3(C[5]).Adj (0 : Fin 5)ˡʳʳ (1 : Fin 5)ˡˡˡ := by
   simpa [iterMycielskian_succ] using (by decide : C[5].Adj 0 1)
 
 /-!
-# Complete Multipartite Graphs and Blow-ups *
+# Complete Multipartite Graphs and Blow-ups
 
 Having earlier introduced complete bipartite graphs we would now like to discuss
 complete multipartite graphs and their generalization: blow-up graphs. However these
@@ -987,39 +964,39 @@ lemma completeMultipartiteGraph_adj {ι : Type*} (V : ι → Type*) (u v : Σ i,
     (completeMultipartiteGraph V).Adj u v ↔ u.fst ≠ v.fst := Iff.rfl
 
 /-!
-As an example, the complete multipartite graph with `n` classes, where each class is
-a copy of `ℕ` can be defined as follows.
+We give two concrete examples.
 -/
 /-- The complete multipartite graph with `n` classes, where each class is a copy of
 `ℕ`. -/
 @[simps!]
-abbrev completeEquipartiteNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
+abbrev completeMultipartiteFinNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
   completeMultipartiteGraph fun (_ : Fin n) => ℕ
 
-#check completeEquipartiteNat_adj -- produced by the `@[simps!]` attribute
+#check completeMultipartiteFinNat_adj -- produced by the `@[simps!]` attribute
 
 /-!
 We can also define the complete multipartite graph with classes indexed by `ℕ`, where
-the `n`-th class is `Fin n`.
+the `n`-th class is `Fin n`. (The names of these two graphs spell out their vertex
+types, `Σ _ : Fin n, ℕ` and `Σ n : ℕ, Fin n`.)
 -/
 /-- The complete multipartite graph with classes indexed by `ℕ`, where the `n`-th
 class is `Fin n`. -/
 @[simps!]
-abbrev completeMultipartiteNat : SimpleGraph (Σ n : ℕ, Fin n) :=
+abbrev completeMultipartiteNatFin : SimpleGraph (Σ n : ℕ, Fin n) :=
   completeMultipartiteGraph fun n => Fin n
 
-#check completeMultipartiteNat_adj
+#check completeMultipartiteNatFin_adj
 
 /-!
 Deciding whether two vertices are adjacent in a complete multipartite graph is easy:
 they are adjacent if and only if their first components are different. So
 decidability of adjacency follows from decidability of equality on their index type.
-Since `Fin n` and `ℕ` have decidable equality, `completeEquipartiteNat` and
-`completeMultipartiteNat` have decidable adjacency.
+Since `Fin n` and `ℕ` have decidable equality, `completeMultipartiteFinNat` and
+`completeMultipartiteNatFin` have decidable adjacency.
 -/
-example : (completeEquipartiteNat 3).Adj ⟨0, 12⟩ ⟨2, 10⟩ := by decide
+example : (completeMultipartiteFinNat 3).Adj ⟨0, 12⟩ ⟨2, 10⟩ := by decide
 
-example : ¬ completeMultipartiteNat.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
+example : ¬ completeMultipartiteNatFin.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
 
 /-!
 ## Blow-ups
@@ -1068,38 +1045,38 @@ The `k`-th Kneser graph
 [Kneser 1955](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-kneser-1955)
 on a type `β` has as vertices the `k`-element subsets of `β`, with edges between any
 distinct disjoint subsets. Before we can define this as a `SimpleGraph` we need to
-decide what the vertex type should be. If we are happy to work with finite types
+decide what its vertex type should be. If we are happy to work with finite types
 (i.e. to assume `Fintype β`) then we could use
 `(Finset.univ : Finset β).powersetCard k` which is the finite family of `k`-element
 subsets of a finite type `β`.
 -/
 #check Finset.powersetCard
 /-!
-Using `Finset.powersetCard` gives us easy access to lots of counting results about
-families of finite sets, which would be useful.
-
-But there are two drawbacks. Firstly, the finiteness assumption is a bit restrictive.
-Secondly, this vertex type mentions `Finset.univ`, and hence the `Fintype β`
-instance: two different instances give vertex types that are equal but not
-definitionally equal, so a lemma proved for one does not apply to the other. (Since
-we won't use this definition we mark it `private`.)
+Using `Finset.powersetCard` gives us easy access to its API consisting of counting
+results about families of finite sets, which would be useful.
 -/
 @[simps]
 private def kneserGraphFintype (β : Type*) [Fintype β] (k : ℕ) :
     SimpleGraph ((Finset.univ : Finset β).powersetCard k) where
   Adj u v := Disjoint u.val v.val ∧ u ≠ v
   symm := ⟨fun _ _ h => ⟨h.1.symm, h.2.symm⟩⟩
-  loopless := ⟨fun _ h => h.2 rfl⟩
 
 /-!
-Instead we use the subtype of `Finset β` consisting of `k`-element subsets, i.e.
-`{s : Finset β // s.card = k}`. This means we no longer need to assume `Fintype β`
-but we lose direct access to the `Finset.powersetCard` results. However we can solve
-this issue with a simple translation lemma saying that, for any predicate `p`,
-counting the `k`-element subsets satisfying `p` as terms of the subtype
-`{s : Finset β // s.card = k}` gives the same answer as counting them as members of
-the family `(Finset.univ : Finset β).powersetCard k`. (See [Independence Number of
-the Kneser Graph*](#section-independence-number-of-the-kneser-graph) for details.)
+But there are two drawbacks with this definition. Firstly, the finiteness assumption
+is a bit restrictive. Secondly, this vertex type mentions `Finset.univ`, and hence
+the `Fintype β` instance: two different instances give vertex types that are equal
+but not definitionally equal, so a lemma proved for one does not apply to the other.
+(Since we won't actually use this definition we marked it `private`.)
+
+Instead we take the vertex type to be the subtype of `Finset β` consisting of
+`k`-element subsets, i.e. `{s : Finset β // s.card = k}`. This means we no longer
+need to assume `Fintype β` but we lose direct access to the `Finset.powersetCard` API
+(even when `β` is finite). However we can solve this issue with a simple translation
+lemma saying that, for any predicate `p`, counting the `k`-element subsets satisfying
+`p` as terms of the subtype `{s : Finset β // s.card = k}` gives the same answer as
+counting them as members of the family `(Finset.univ : Finset β).powersetCard k`.
+(See [Independence Number of the Kneser
+Graph*](#section-independence-number-of-the-kneser-graph) for details.)
 -/
 /-- The `k`-th Kneser graph on `β`: vertices are `k`-element subsets of `β`, and
 edges join disjoint, distinct subsets. -/
@@ -1108,7 +1085,6 @@ def kneserGraph (β : Type*) (k : ℕ) :
     SimpleGraph {s : Finset β // s.card = k} where
   Adj u v := Disjoint u.val v.val ∧ u ≠ v
   symm := ⟨fun _ _ h => ⟨h.1.symm, h.2.symm⟩⟩
-  loopless := ⟨fun _ h => h.2 rfl⟩
 
 #check kneserGraph_adj -- (kneserGraph β k).Adj u v = (Disjoint ↑u ↑v ∧ u ≠ v)
 

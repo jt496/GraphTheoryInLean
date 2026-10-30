@@ -76,10 +76,10 @@ matching has an even number of vertices.
 #check Subgraph.IsPerfectMatching.even_card
 
 /-!
-For example, the Mycielskian `mμ[G]` of a finite graph has `2 * |V| + 1` vertices, an
+For example, the Mycielskian `mμ(G)` of a finite graph has `2 * |V| + 1` vertices, an
 odd number, so it never has a perfect matching.
 -/
-example [Finite V] (M : mμ[G].Subgraph) : ¬ M.IsPerfectMatching := fun hM => by
+example [Finite V] (M : mμ(G).Subgraph) : ¬ M.IsPerfectMatching := fun hM => by
   have := Fintype.ofFinite V
   simpa [Fintype.card_option, Fintype.card_sum, Nat.even_add_one] using hM.even_card
 
@@ -546,7 +546,7 @@ is a triangle-free graph on `2 * n + 1` vertices, so Mantel's theorem bounds its
 number of edges by `(2 * n + 1) ^ 2 / 4`.
 -/
 example [Fintype V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3) :
-    #mμ[G].edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 /4 := by
+    #mμ(G).edgeFinset ≤ (2 * Fintype.card V + 1) ^ 2 /4 := by
   convert CliqueFree.card_edgeFinset_le h3.mycielskian
   simp [two_mul, turanNumber_two]
 
@@ -969,17 +969,17 @@ exercises).
 #check SimpleGraph.colorable_of_cliqueFree_lt_minDegree
 
 /-!
-For example, if `G` is triangle-free and has an edge, then `mμ[G]` is triangle-free
-(`CliqueFree.mycielskian`) but not `2`-colourable, since `mμ[G]` is
+For example, if `G` is triangle-free and has an edge, then `mμ(G)` is triangle-free
+(`CliqueFree.mycielskian`) but not `2`-colourable, since `mμ(G)` is
 `(k + 1)`-colourable only when `G` is `k`-colourable
-(`colorable_mycielskian_succ_iff`). So the Andrásfai–Erdős–Sós theorem forces `mμ[G]`
+(`colorable_mycielskian_succ_iff`). So the Andrásfai–Erdős–Sós theorem forces `mμ(G)`
 to have minimum degree at most `2 * n / 5`, where `n = 2 * |V| + 1` is its number of
 vertices.
 -/
 example [Fintype V] [DecidableRel G.Adj] (h3 : G.CliqueFree 3) {u v : V}
-    (huv : G.Adj u v) : δ(mμ[G]) ≤ 2 * (2 * Fintype.card V + 1) / 5 := by
+    (huv : G.Adj u v) : δ(mμ(G)) ≤ 2 * (2 * Fintype.card V + 1) / 5 := by
   by_contra! h
-  have h2 : mμ[G].Colorable 2 := colorable_of_cliqueFree_lt_minDegree h3.mycielskian
+  have h2 : mμ(G).Colorable 2 := colorable_of_cliqueFree_lt_minDegree h3.mycielskian
       (by simpa [Fintype.card_option, Fintype.card_sum, two_mul] using h)
   obtain ⟨c⟩ := (colorable_mycielskian_succ_iff 1).1 h2
   exact c.valid huv (Subsingleton.elim _ _)

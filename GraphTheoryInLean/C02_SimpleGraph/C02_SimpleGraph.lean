@@ -560,8 +560,7 @@ Even when our goal is to prove theorems, computations such as these can be very
 useful. Firstly, they allow us to perform quick sanity checks of our definitions
 and secondly they can be used inside proofs with the `decide` tactic.
 -/
-example : (⊤ : SimpleGraph (Fin 6)).Adj 2 3 := by
-  decide
+example : (⊤ : SimpleGraph (Fin 6)).Adj 2 3 := by decide
 
 /-!
 Both `#eval` and `decide` rely on adjacency being *decidable*: Lean needs a concrete

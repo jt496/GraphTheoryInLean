@@ -56,9 +56,11 @@ def elabPropExample : CommandElab := fun stx => do
   let m ← elabModifiers mods
   if m.isNoncomputable || m.isUnsafe || m.isPartial || m.isMeta then throwUnsupportedSyntax
   unless ← isPropType bs type do throwUnsupportedSyntax
-  -- A name with no position, so that it gets no hover and messages about the
-  -- declaration fall back to the `example` command, as for the built-in.
-  let id := mkIdent (← liftCoreM <| mkFreshUserName `example)
+  -- As for the built-in, the name takes the position of the `example` keyword, so that
+  -- messages about the declaration (such as `declaration uses sorry`) are reported
+  -- there rather than on the whole command.
+  let id := mkIdentFrom stx[1][0] (← liftCoreM <| mkFreshUserName `example)
+    (canonical := true)
   elabCommand (← `($mods:declModifiers theorem $id:ident $bs* : $type:term $val:declVal))
 
 end STIL.PropExample
