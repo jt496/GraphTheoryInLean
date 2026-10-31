@@ -112,13 +112,6 @@ with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
 example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
   sorry
 
-/-!
-11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
-`[Encodable V]` as a `SimpleGraph ℕ` agree.
--/
-example [Encodable V] : G.encode = G.encodeMap := by
-  sorry
-
 /-! SOLUTIONS -/
 
 /-!
@@ -290,28 +283,6 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
   refine (⊤ : SimpleGraph ℕ).greedy_eq_of_image_eq_range ?_
   ext c
   grind [mem_neighborLTFinset, top_adj]
-
-/-!
-11. The two definitions of the encoded version of a graph `G : SimpleGraph V` with
-`[Encodable V]` as a `SimpleGraph ℕ` agree.
--/
-example [Encodable V] : G.encode = G.encodeMap := by
-  ext a b
-  simp only [encode_adj, encodeMap_adj]
-  constructor
-  · intro h
-    match hda : Encodable.decode₂ V a, hdb : Encodable.decode₂ V b with
-    | some u, some v =>
-        simp only [hda, hdb] at h
-        rw [Encodable.decode₂_eq_some] at hda hdb
-        have hab : a ≠ b := by
-          rintro rfl
-          rw [← hdb, Encodable.encode_inj] at hda
-          exact h.ne hda
-        exact ⟨hab, u, v, h, hda, hdb⟩
-    | none, _ | _, none => grind
-  · rintro ⟨h, u, v, hadj, rfl, rfl⟩
-    simpa
 
 /-! END SOLUTIONS -/
 

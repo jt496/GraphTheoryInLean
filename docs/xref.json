@@ -9244,17 +9244,6 @@
         "Moore and Cage Bounds",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.encodeMap":
-   [{"id": "SimpleGraph___encodeMap",
-     "data":
-     {"/Colorings/#SimpleGraph___encodeMap":
-      {"display": "encodeMap",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Encodable Vertex Types"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.encode":
    [{"id": "SimpleGraph___encode",
      "data":

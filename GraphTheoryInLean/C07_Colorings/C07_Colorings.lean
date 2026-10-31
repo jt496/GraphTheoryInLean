@@ -898,7 +898,7 @@ section greedy
 variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
 instance : G.LocallyLTFinite :=
-  fun v => Fintype.ofFinset {u < v | G.Adj v u} (by simp [neighborLTSet])
+  fun v => Fintype.ofFinset {u < v | G.Adj v u} (by simp)
 
 /-!
 Given an assignment `c` of colours to `{0, 1, ..., v - 1}`, we want to define the
@@ -920,7 +920,7 @@ returns the least such `n`.
 /-!
 To use this for the choice of colour at vertex `v`, we simply need to prove that
 there is at least one natural number that is not used by any of the earlier
-neighbours of `v`.
+neighbours of `v`. Since `ℕ` is infinite this is easy.
 -/
 lemma greedyChoice_exists (c : ℕ → ℕ) (v : ℕ) :
     ∃ x, x ∉ (G.neighborLTFinset v).image c :=
@@ -937,18 +937,18 @@ its earlier neighbours.
 -/
 lemma greedyChoice_le_card_image (c : ℕ → ℕ) (v : ℕ) :
     G.greedyChoice c v ≤ #((G.neighborLTFinset v).image c) := by
-  have hsub : range (G.greedyChoice c v) ⊆ (G.neighborLTFinset v).image c :=
-      fun u hu => not_not.mp <|
-        Nat.find_min (G.greedyChoice_exists c v) (mem_range.mp hu)
+  have hsub : range (G.greedyChoice c v) ⊆ (G.neighborLTFinset v).image c := by
+    intro u hu
+    exact not_not.mp <| Nat.find_min (G.greedyChoice_exists c v) (mem_range.mp hu)
   simpa using card_le_card hsub
 
 /-!
 The colour chosen at vertex `v` is never used by any earlier neighbour.
 -/
 lemma greedyChoice_ne_of_mem_neighborLTFinset (c : ℕ → ℕ) {v u : ℕ}
-    (hu : u ∈ G.neighborLTFinset v) : G.greedyChoice c v ≠ c u :=
-  fun hf =>
-    Nat.find_spec (G.greedyChoice_exists c v) (mem_image.mpr ⟨u, hu, hf.symm⟩)
+    (hu : u ∈ G.neighborLTFinset v) : G.greedyChoice c v ≠ c u := by
+  intro hf
+  exact Nat.find_spec (G.greedyChoice_exists c v) (mem_image.mpr ⟨u, hu, hf.symm⟩)
 
 /-!
 Finally, `greedyChoice c n` only inspects the partial colouring `c` on the earlier
@@ -958,28 +958,27 @@ greedy choice at `n`.
 /-- `greedyChoice c n` only depends on the values of `c` below `n`. -/
 lemma greedyChoice_congr {c₁ c₂ : ℕ → ℕ} {n : ℕ} (h : ∀ m < n, c₁ m = c₂ m) :
     G.greedyChoice c₁ n = G.greedyChoice c₂ n := by
-  simp only [greedyChoice,
-    image_congr fun m hm => h m ((G.mem_neighborLTFinset n m).mp hm).1]
+  simp_all [greedyChoice]
 
 /-!
 [Figure: Left: a greedy colouring, with colours $0$, $1$, $2$ and $3$ drawn as red, blue, green and yellow. Right: for each vertex $n$, its earlier neighbours, the colours they forbid, and the least colour not forbidden](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
 
 We will use `greedyChoice` to define a function `greedy` that will give us the greedy
 colouring of `G` using *well-founded recursion* on `ℕ`: to colour a vertex `v` we
-need to know the colours of the *earlier* vertices `u < v`, so the value of `greedy`
+need to know the colours of its *earlier* vertices `u < v`, so the value of `greedy`
 at `v` is defined in terms of its values at strictly smaller arguments.
 
 Concretely, we feed `greedyChoice` the "partial colouring" function
-`fun u ↦ if u < v then greedy u else 0`. The `if u < v` guard is what makes the
+`fun u ↦ if u < v then greedy u else 42`. The `if u < v` guard is what makes the
 recursion well-founded: the recursive call `greedy u` occurs only in the `then`
-branch, so it is guarded by `u < v`, which is exactly the fact Lean's termination
-checker needs to discharge the proof that the call is at a strictly smaller argument.
-The `0` in the `else` branch is just filler; its value is irrelevant, since
+branch, so it is guarded by `u < v`, which is exactly what Lean's termination checker
+needs to discharge the proof that the call is at a strictly smaller argument. The
+`42` in the `else` branch is just filler; its value is irrelevant, since
 `greedyChoice` ignores the values of the partial colouring at `u ≥ v`.
 -/
 /-- The greedy `ℕ`-colouring of `G` as a function. -/
 def greedy : ℕ → ℕ :=
-  fun v => G.greedyChoice (fun u ↦ if u < v then greedy u else 0) v
+  fun v => G.greedyChoice (fun u ↦ if u < v then greedy u else 42) v
 
 /-!
 Notice that we didn't need to prove that `greedy` is well-defined: by working over
@@ -1039,7 +1038,7 @@ lemma Adj.greedy_ne {u v : ℕ} (hadj : G.Adj u v) :
 /-!
 Together these results pin down the greedy colour exactly when the earlier neighbours
 of `v` use precisely the colours `0, 1, ..., k - 1`: the colour of `v` is then `k`.
-(This rather special lemma will be useful when we look at the crown graph later.)
+(This very special lemma will be useful when we look at the crown graph later.)
 -/
 lemma greedy_eq_of_image_eq_range {v k : ℕ}
     (h : (G.neighborLTFinset v).image G.greedy = range k) : G.greedy v = k := by
@@ -1095,8 +1094,8 @@ The classic example of a graph on which greedy colouring performs badly is the
 balanced complete bipartite graph with the obvious perfect matching removed, known as
 the *crown graph*, with its vertices ordered left, right, left, right, ...
 
-We will look at its countably infinite incarnation. We will show that the greedy
-colouring will use arbitrarily large colours, despite the graph being `2`-colourable.
+We will look at its countably infinite incarnation and show that the greedy colouring
+will use arbitrarily large colours, despite the graph being `2`-colourable.
 
 [Figure: Left: the greedy colouring of `crownGraph`, gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
 -/
@@ -1122,7 +1121,7 @@ lemma neighborLTFinset_crownGraph (n : ℕ) :
     crownGraph.neighborLTFinset n = (range (n / 2)).image
         (fun k => if n % 2 = 0 then 2 * k + 1 else 2 * k) := by
   ext m
-  simp only [mem_neighborLTFinset, crownGraph_adj, mem_image]
+  rw [mem_neighborLTFinset, crownGraph_adj, mem_image]
   constructor
   · intro ⟨hlt, hadj⟩
     exact ⟨m / 2, by grind⟩
@@ -1131,8 +1130,7 @@ lemma neighborLTFinset_crownGraph (n : ℕ) :
 /-- The natural `Bool`-colouring of the `crownGraph`, by parity. -/
 def crownGraph.bicoloring : crownGraph.Coloring Bool where
   toFun n := n % 2 = 0
-  map_rel' h := by
-    grind [crownGraph_adj, top_adj]
+  map_rel' h := by grind [crownGraph_adj, top_adj]
 
 /-!
 Colouring each vertex by its parity shows that `crownGraph` is bipartite.
@@ -1152,7 +1150,7 @@ theorem greedy_crownGraph_eq (n : ℕ) :
   induction n using Nat.strong_induction_on with
   | _ n ih =>
   -- by induction the earlier neighbours of `n` use exactly the colours `< n / 2`
-  refine crownGraph.greedy_eq_of_image_eq_range ?_
+  apply crownGraph.greedy_eq_of_image_eq_range
   ext c
   simp only [neighborLTFinset_crownGraph, mem_image, mem_range]
   grind
@@ -1174,19 +1172,19 @@ which satisfies `decode (encode v) = some v` for all `v : V`.
 /-!
 If `G` has an encodable vertex type then we can construct a greedy colouring of `G`
 by first encoding its vertices in `ℕ` and then applying the greedy colouring
-algorithm to `G` as a graph on `ℕ`.
-
-One way to build the encoded graph is to push `G` forward along `Encodable.encode`
-using `SimpleGraph.map` ([Maps](#section-maps)).
+algorithm to `G` as a graph on `ℕ`. To build the encoded graph we push `G` forward
+along `Encodable.encode` using `SimpleGraph.map` ([Maps](#section-maps)).
 -/
-/-- The encoded graph defined via `SimpleGraph.map`. -/
+/-- The `SimpleGraph ℕ` obtained from a graph `G : SimpleGraph V` with encodable
+vertex type `V` by pushing it forward along `Encodable.encode`. -/
 @[simps!]
-abbrev encodeMap {V : Type*} [Encodable V] (G : SimpleGraph V) :
+protected def encode {V : Type*} [Encodable V] (G : SimpleGraph V) :
     SimpleGraph ℕ := G.map Encodable.encode
+
 /-!
 This captures our informal construction above. (To be precise we are not
-claiming that `G.encodeMap` is isomorphic to `G`: in general `encode` need not be
-surjective, in which case `G.encodeMap` will be a copy of `G` with some additional
+claiming that `G.encode` is isomorphic to `G`: in general `encode` need not be
+surjective, in which case `G.encode` will be a copy of `G` with some additional
 isolated vertices.) However, the `SimpleGraph.map` construction leaves us with
 existential quantifiers in the adjacency relation.
 -/
@@ -1194,35 +1192,26 @@ section encode
 open Encodable
 variable {V : Type*} [Encodable V]
 
-example {a b : ℕ} {G : SimpleGraph V} : G.encodeMap.Adj a b ↔
+example {a b : ℕ} {G : SimpleGraph V} : G.encode.Adj a b ↔
     a ≠ b ∧ ∃ u v, G.Adj u v ∧ encode u = a ∧ encode v = b :=
   Iff.rfl
 
 /-!
-This prevents Lean from automatically deciding adjacency, even when `G.Adj` is
-decidable. Since we need decidable adjacency to compute colourings, we instead build
-the graph directly below using `Encodable.decode₂`, which preserves decidability.
+Lean cannot find a `DecidableRel` instance for this relation, even when `G.Adj` is
+decidable, since it has no way to decide the existential over a possibly infinite
+`V`. We need decidable adjacency to compute colourings, so we supply an instance
+ourselves.
 
 Given `[Encodable V]` and `a : ℕ`, the function `Encodable.decode₂ V a` returns
 `some u` such that `Encodable.encode u = a`, if such a `u : V` exists, and `none`
-otherwise. We want `a b : ℕ` to be adjacent in the encoded graph iff there exist
-adjacent `u v : V` with `Encodable.encode u = a` and `Encodable.encode v = b`, so we
-can define it with a `match` statement on `Encodable.decode₂ V a` and
-`Encodable.decode₂ V b`.
+otherwise. So to decide whether `a b : ℕ` are adjacent in `G.encode` we can `match`
+on `Encodable.decode₂ V a` and `Encodable.decode₂ V b`. If these are `some u` and
+`some v` then `a` and `b` are adjacent iff `u` and `v` are adjacent in `G`;
+otherwise one of `a` and `b` is not the encoding of any vertex, so it is isolated.
+(Plain `Encodable.decode` would not work here: `decode a = some u` does not imply
+`encode u = a`.)
 -/
 #check decode₂
-
-/-- The `SimpleGraph ℕ` corresponding to a graph `G : SimpleGraph V` with encodable
-vertex type `V`, using `Encodable.decode₂` to preserve decidability of adjacency. -/
-@[simps!]
-protected def encode (G : SimpleGraph V) : SimpleGraph ℕ where
-    Adj := fun a b =>
-      match decode₂ V a, decode₂ V b with
-      | some u, some v => G.Adj u v
-      | _, _ => False
-    symm := ⟨fun a b => by
-      cases decode₂ V a <;> cases decode₂ V b <;> simp_all [Adj.symm]⟩
-    loopless := ⟨fun a => by cases decode₂ V a <;> simp_all⟩
 
 /-!
 If `G` is a graph on an encodable vertex type with decidable adjacency then its
@@ -1231,19 +1220,31 @@ encoded graph also has decidable adjacency.
 instance {G : SimpleGraph V} [DecidableRel G.Adj] :
     DecidableRel G.encode.Adj := fun a b =>
   match ha : decode₂ V a, hb : decode₂ V b with
-  | some u, some v => decidable_of_iff (G.Adj u v) (by rw [encode_adj, ha, hb])
-  | none, _ => isFalse (by simp [encode_adj, ha])
-  | _, none => isFalse (by simp [encode_adj, hb])
+  | some u, some v => decidable_of_iff (G.Adj u v) (by
+      rw [decode₂_eq_some] at ha hb
+      subst ha hb
+      simpa [Relation.Map, encode_injective.eq_iff] using G.ne_of_adj)
+  | none, _ => isFalse fun ⟨_, u, _, _, hu, _⟩ => by simp [← hu] at ha
+  | _, none => isFalse fun ⟨_, _, v, _, _, hv⟩ => by simp [← hv] at hb
 
 /-!
+We made `SimpleGraph.encode` a `def` rather than an `abbrev` so that this is the
+only instance. Mathlib already has a `DecidableRel` instance for `G.map f` when `V`
+is finite, which decides the existential by checking every vertex. Instance search
+sees through an `abbrev`, so for finite `V` that instance would compete with ours,
+but it does not unfold a `def`.
+
 To transfer a greedy colouring of the graph `G.encode` back to a colouring of `G` we
-use an embedding of `G` into `G.encode`.
+use an embedding of `G` into `G.encode`. Mathlib already provides one: for any
+embedding `f : V ↪ W`, `Embedding.map f G` embeds `G` into `G.map f`, and
+`Encodable.encode' V` is `Encodable.encode` bundled as an embedding `V ↪ ℕ`.
 -/
+#check Embedding.map
+#check encode'
+
 /-- The graph embedding of `G` into `G.encode` via `Encodable.encode`. -/
-def Embedding.encode (G : SimpleGraph V) : G ↪g G.encode where
-  toFun := Encodable.encode
-  inj'  := encode_injective
-  map_rel_iff' := by simp
+def Embedding.encode (G : SimpleGraph V) : G ↪g G.encode :=
+  Embedding.map (encode' V) G
 
 /-!
 We would like to prove the greedy colouring bound for any graph of bounded degree on
@@ -1257,12 +1258,8 @@ lemma neighborLTFinset_encode_subset {G : SimpleGraph V} [DecidableRel G.Adj]
     [G.LocallyFinite] (v : V) : G.encode.neighborLTFinset (encode v)
       ⊆ (G.neighborFinset v).image encode := by
   intro m hm
-  have hadj := ((mem_neighborLTFinset ..).mp hm).2
-  match hdm : decode₂ V m with
-  | none => simp [hdm] at hadj
-  | some u =>
-    simp_all only [encodek₂, encode_adj, Finset.mem_image, mem_neighborFinset]
-    exact ⟨_, hadj, decode₂_eq_some.mp hdm⟩
+  obtain ⟨_, u, w, h, hu, rfl⟩ := ((mem_neighborLTFinset ..).mp hm).2
+  exact mem_image_of_mem _ (by simpa [encode_injective hu] using h)
 
 /-!
 Hence the `degreeLT` of an encoded vertex is at most the degree of the original
@@ -1331,7 +1328,7 @@ a version of `greedy` that prints a `*` each time it is called:
 def greedyTraced : ℕ → ℕ :=
   fun v =>
     dbg_trace "*";
-    G.greedyChoice (fun u ↦ if u < v then greedyTraced u else 0) v
+    G.greedyChoice (fun u ↦ if u < v then greedyTraced u else 42) v
 
 /-!
 Rather than printing thousands of stars and asking you to count them, we can capture
@@ -1349,7 +1346,7 @@ def withTraceCount {α : Type} (f : Unit → α) : IO (α × ℕ) := do
 /-!
 Before looking at the trace counts below, can you work out how bad it is?
 -/
-#eval do -- [1, 3, 13, 69, 431, 3103, 25341, 231689, 2345851]
+#eval do
   -- returns the number of calls made by `greedy` for
   -- the complete graph on `ℕ` when evaluated at `0, 1, ..., 8`
   let counts ← (List.range 9).mapM fun n =>
@@ -1448,7 +1445,7 @@ def greedyList : ℕ → List ℕ
   | 0 => []
   | n + 1 =>
     let l := greedyList n
-    l ++ [G.greedyChoiceMin (fun m => l.getD m 0) n]
+    l ++ [G.greedyChoiceMin (fun m => l.getD m 42) n]
 
 /-!
 The list `greedyList n` has length `n`.
@@ -1459,13 +1456,14 @@ lemma length_greedyList (n : ℕ) : (G.greedyList n).length = n := by
 
 /-!
 We will use `List.getD` to read off the colour of vertex `n` from
-`G.greedyList (n + 1)`.
+`G.greedyList (n + 1)`. As in `greedy`, the fallback value `42` is just filler: we
+only ever look up entries that exist.
 -/
 #check List.getD
 
 /-- The memoized greedy colouring of `G`: build the list of the first `n + 1`
 colours and look up the last entry. -/
-def greedyMemo (n : ℕ) : ℕ := (G.greedyList (n + 1)).getD n 0
+def greedyMemo (n : ℕ) : ℕ := (G.greedyList (n + 1)).getD n 42
 
 /-!
 We now want to prove that this new version computes the same colours as `greedy`.
@@ -1475,7 +1473,7 @@ preserves the earlier entries (`List.getD_append`), and the new entry is the
 correct greedy choice by `greedyChoice_congr`.
 -/
 lemma getD_greedyList {n m : ℕ} (hm : m < n) :
-    (G.greedyList n).getD m 0 = G.greedy m := by
+    (G.greedyList n).getD m 42 = G.greedy m := by
   induction n generalizing m with
   | zero => grind
   | succ n ih =>

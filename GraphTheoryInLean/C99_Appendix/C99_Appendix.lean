@@ -239,11 +239,11 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `crownGraph`: the complete bipartite graph on the even and odd naturals minus the
   perfect matching `2 * n ↦ 2 * n + 1`.
 * `crownGraph.bicoloring`: the natural `Bool`-colouring of `crownGraph` by parity.
-* `encodeMap`: a graph on an encodable vertex type transported to `ℕ` via
-  `SimpleGraph.map`; its adjacency involves existential quantifiers.
-* `SimpleGraph.encode`: a graph on an encodable vertex type transported to a graph on
-  `ℕ` via `Encodable.decode₂`, preserving decidability of adjacency.
-* `Embedding.encode`: the graph embedding of `G` into `G.encode`.
+* `SimpleGraph.encode`: a graph on an encodable vertex type pushed forward to `ℕ`
+  along `Encodable.encode` via `SimpleGraph.map`; its adjacency is decided using
+  `Encodable.decode₂`.
+* `Embedding.encode`: the graph embedding of `G` into `G.encode`, via Mathlib's
+  `Embedding.map`.
 * `greedyColoringFin`: the greedy `Fin (Δ + 1)`-colouring of a locally finite graph
   with all degrees at most `Δ` on an encodable vertex type.
 * `greedyTraced`: a copy of `greedy` that `dbg_trace`s a `*` on every call, used to
