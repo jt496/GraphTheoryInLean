@@ -918,18 +918,24 @@ returns the least such `n`.
 #check Nat.find_min' -- .. (H : ∃ n, p n) {m : ℕ} (h : p m) : Nat.find H ≤ m
 
 /-!
-To use this for the choice of colour at vertex `v`, we simply need to prove that
-there is at least one natural number that is not used by any of the earlier
-neighbours of `v`. Since `ℕ` is infinite this is easy.
+To use this for the choice of colour at vertex `v`, we need a proof that at least one
+natural number is not used by any of the earlier neighbours of `v`. The colours they
+use form the finite set `(G.neighborLTFinset v).image c`, and since `ℕ` is infinite,
+Mathlib's `Finset.exists_notMem` tells us that some natural number lies outside it.
 -/
-lemma greedyChoice_exists (c : ℕ → ℕ) (v : ℕ) :
-    ∃ x, x ∉ (G.neighborLTFinset v).image c :=
-  ((G.neighborLTFinset v).image c).exists_notMem
+#check Finset.exists_notMem -- .. [Infinite α] (s : Finset α) : ∃ a, a ∉ s
 
+/-!
+In this definition we give the set of used colours a name with `let`. Without this,
+the set of used colours sits inside the predicate that `Nat.find` tests, and is
+recomputed for every candidate colour.
+-/
 /-- Given any `c : ℕ → ℕ` and a vertex `v : ℕ`, `G.greedyChoice c v` is the least
 colour that is valid at `v` (in the sense that no earlier neighbour of `v` uses this
 colour). -/
-def greedyChoice (c : ℕ → ℕ) (v : ℕ) : ℕ := Nat.find (G.greedyChoice_exists c v)
+def greedyChoice (c : ℕ → ℕ) (v : ℕ) : ℕ :=
+  let used := (G.neighborLTFinset v).image c
+  Nat.find used.exists_notMem
 
 /-!
 The colour chosen at vertex `v` is at most the number of *distinct* colours used by
@@ -939,7 +945,7 @@ lemma greedyChoice_le_card_image (c : ℕ → ℕ) (v : ℕ) :
     G.greedyChoice c v ≤ #((G.neighborLTFinset v).image c) := by
   have hsub : range (G.greedyChoice c v) ⊆ (G.neighborLTFinset v).image c := by
     intro u hu
-    exact not_not.mp <| Nat.find_min (G.greedyChoice_exists c v) (mem_range.mp hu)
+    exact not_not.mp <| Nat.find_min (Finset.exists_notMem _) (mem_range.mp hu)
   simpa using card_le_card hsub
 
 /-!
@@ -948,7 +954,7 @@ The colour chosen at vertex `v` is never used by any earlier neighbour.
 lemma greedyChoice_ne_of_mem_neighborLTFinset (c : ℕ → ℕ) {v u : ℕ}
     (hu : u ∈ G.neighborLTFinset v) : G.greedyChoice c v ≠ c u := by
   intro hf
-  exact Nat.find_spec (G.greedyChoice_exists c v) (mem_image.mpr ⟨u, hu, hf.symm⟩)
+  exact Nat.find_spec (Finset.exists_notMem _) (mem_image.mpr ⟨u, hu, hf.symm⟩)
 
 /-!
 Finally, `greedyChoice c n` only inspects the partial colouring `c` on the earlier
@@ -977,8 +983,8 @@ needs to discharge the proof that the call is at a strictly smaller argument. Th
 `greedyChoice` ignores the values of the partial colouring at `u ≥ v`.
 -/
 /-- The greedy `ℕ`-colouring of `G` as a function. -/
-def greedy : ℕ → ℕ :=
-  fun v => G.greedyChoice (fun u ↦ if u < v then greedy u else 42) v
+def greedy (v : ℕ) : ℕ :=
+  G.greedyChoice (fun u ↦ if u < v then greedy u else 42) v
 
 /-!
 Notice that we didn't need to prove that `greedy` is well-defined: by working over
@@ -1077,14 +1083,14 @@ graph needs all `Δ(G) + 1` colours only if it is a complete graph or an odd cyc
 Our greedy colouring construction allows us to colour graphs on `ℕ`, for example
 `pathNat`, the infinite path graph on `ℕ`, and `⊤`, the complete graph on `ℕ`.
 -/
-#eval pathNat.greedyColoringNat 9 -- 1
+#eval pathNat.greedyColoringNat 100 -- 0
 
-#eval (⊤ : SimpleGraph ℕ).greedyColoringNat 6 -- 6
+#eval (⊤ : SimpleGraph ℕ).greedyColoringNat 15 -- 15
 end greedy
 
 /-!
-The `#eval`s above are deliberately timid: colouring vertex `6` of `⊤` is fine, but
-vertex `10` would take several minutes. We will see why, and fix it, below.
+Note that evaluating vertex `30` of `⊤` would take several minutes. We will see why,
+and fix it, below.
 -/
 
 /-!
@@ -1142,7 +1148,7 @@ The greedy colouring of `crownGraph` colours vertex `n` with colour `n / 2`. Giv
 that `degreeLT n = n / 2`, this is as bad as it could be! We can see an example via
 `#eval`, and prove it below.
 -/
-#eval crownGraph.greedy 11 -- 5
+#eval crownGraph.greedy 20 -- 10
 
 theorem greedy_crownGraph_eq (n : ℕ) :
     crownGraph.greedy n = n / 2 := by
@@ -1308,136 +1314,78 @@ understand `Subgraph`s.
 
 Our definition of `greedy` has allowed us to prove the greedy colouring bound, but
 how good is `greedy` as an *algorithm*? As promised, we now investigate why
-evaluating it on dense graphs is so slow, and what to do about this. If you have no
+evaluating it on dense graphs is slow, and what to do about this. If you have no
 interest in efficient algorithms or debugging, skip to [Computing Colourings of
 Encodable Graphs](#section-computing-colourings-of-encodable-graphs): all it needs
-from this section is that, by the end of it, `#eval` runs a fast implementation of
+from this section is that, by the end of it, `#eval` runs a faster implementation of
 `greedy`.
--/
-section evaluating
-variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 
-/-!
 ### Debugging `greedy`
 
 Lean provides the debugging tool `dbg_trace`: the expression `dbg_trace "msg"; e`
 evaluates to `e`, printing `msg` as a side effect each time it is evaluated. We make
-a version of `greedy` that prints a `*` each time it is called:
+a version of `greedy` that prints a `*` each time it is called.
 -/
+section evaluating
+variable (G : SimpleGraph ℕ) [DecidableRel G.Adj]
+
 /-- A copy of `greedy` that prints one `*` per call. -/
-def greedyTraced : ℕ → ℕ :=
-  fun v =>
-    dbg_trace "*";
-    G.greedyChoice (fun u ↦ if u < v then greedyTraced u else 42) v
+def greedyTraced (v : ℕ) : ℕ :=
+  dbg_trace "*";
+  G.greedyChoice (fun u ↦ if u < v then greedyTraced u else 42) v
 
 /-!
 Rather than printing thousands of stars and asking you to count them, we can capture
 the trace inside Lean: `IO.FS.withIsolatedStreams` runs an `IO` action with its
-output redirected into a `String`.
+output redirected into a `String`. To count the `*`s in it we turn it into a list of
+characters with `String.toList` and use `List.count`. We pass the computation as a
+function `f : Unit → α` rather than as a value: Lean evaluates arguments before
+calling a function, so a value would already have printed its stars before the
+capture starts.
 -/
-/-- Evaluate `f ()`, capturing everything it `dbg_trace`s; return the value together
-with the number of trace lines (here: the number of calls). -/
-def withTraceCount {α : Type} (f : Unit → α) : IO (α × ℕ) := do
-  let (out, a) ← IO.FS.withIsolatedStreams (IO.lazyPure f)
-  -- each trace ends in a newline, so `splitOn` gives one more piece than there
-  -- are traces
-  return (a, (out.splitOn "\n").length - 1)
+/-- Evaluate `f ()` and return the number of `*`s it prints with `dbg_trace` (here:
+the number of calls). -/
+def withTraceCount {α : Type} (f : Unit → α) : IO ℕ := do
+  let (out, _) ← IO.FS.withIsolatedStreams (IO.lazyPure f)
+  return out.toList.count '*'
 
 /-!
-Before looking at the trace counts below, can you work out how bad it is?
+We can now check the number of calls made to `greedyTraced` when colouring each
+vertex `0, 1, ..., 8` of the complete graph on `ℕ`. Before looking at the trace
+counts below, can you work out how bad it is?
 -/
-#eval do
-  -- returns the number of calls made by `greedy` for
-  -- the complete graph on `ℕ` when evaluated at `0, 1, ..., 8`
-  let counts ← (List.range 9).mapM fun n =>
-    withTraceCount fun _ => (⊤ : SimpleGraph ℕ).greedyTraced n
-  return counts.map Prod.snd
+#eval (List.range 9).mapM fun n =>
+  withTraceCount fun _ => (⊤ : SimpleGraph ℕ).greedyTraced n
 
 /-!
-So colouring vertex `8` of the complete graph, where `8` has eight earlier
-neighbours, takes a truly unreasonable `2,345,851` calls! Even on the path
-`pathNat`, where every vertex has at most one earlier neighbour, colouring vertex
-`8` takes `46` calls. Why is it so bad?
+The number of calls doubles with each vertex: colouring vertex `8` of the complete
+graph takes `256` calls, and colouring vertex `30` would take more than a billion.
+The reason for this is that we don't store anything: each time the algorithm needs
+the colour of an earlier vertex `m`, it recomputes `greedy m` completely from
+scratch. Writing `T(n)` for the number of calls made when colouring `n`, we have
+`T(n) = 1 + ∑ T(m)`, where the sum runs over all earlier neighbours `m` of `n`. On
+the complete graph `⊤` every earlier vertex is a neighbour, so
+`T(n) = 1 + T(0) + T(1) + ⋯ + T(n - 1) = 2 ^ n`. Note that it would be even worse
+without the `let` in `greedyChoice`: each of the `n + 1` colours that `Nat.find`
+tests at vertex `n` would recompute the colours of all the earlier neighbours, and
+colouring vertex `8` would take `2,345,851` rather than `256` calls.
 
-Firstly, nothing is stored: each time the algorithm needs the colour of an earlier
-vertex `m`, it recomputes `greedy m` completely from scratch. Secondly, `Nat.find`
-finds the least valid colour by testing `0, 1, 2, ...` in turn, and every test
-recomputes the finset `(G.neighborLTFinset v).image c`, thereby recomputing the
-colour of *every* earlier neighbour of `v`.
+### Memoization
 
-Writing `C(n)` for the number of calls made when colouring `n`, and `c(n)` for the
-colour that is chosen, we have `C(n) = 1 + (c(n) + 1) * ∑ C(m)`, where the sum runs
-over all earlier neighbours `m` of `n` (there are `c(n) + 1` tests, each recomputing
-the image). On the complete graph `⊤` we have `c(n) = n`, and so
-`C(n) = 1 + (n + 1) * (C(0) + C(1) + ⋯ + C(n - 1))`, which grows faster than `n!`.
-(On the path the colours alternate between `0` and `1`, and `C(n)` grows like
-`2 ^ (n / 2)`.)
+To speed things up we build a list of colours `[c 0, c 1, …, c (n - 1)]` by ordinary
+structural recursion on `n`, so that each colour is computed exactly once, and then
+look up the entry we need. This is a simple form of *memoization*.
 
-### Two Fixes: `Finset.min'` and Memoization
-
-To deal with the second problem we compute the set of used colours *once*, and take
-the smallest colour outside of this finite set. Naively this suggests we would need
-to compute the minimum over an infinite set, namely
-`ℕ \ (G.neighborLTFinset v).image c`, but that isn't the case.
-
-The colours assigned by `c` to the earlier neighbours of `v` form the finite set
-`(G.neighborLTFinset v).image c`. If this set has `k` elements then at least one of
-the `k + 1` colours `0, ..., k` is not in this set, and hence the smallest valid
-colour can be chosen as the minimum of the *finite* set:
-`{0, ..., k} \ (G.neighborLTFinset v).image c`. We can do this using `Finset.min'`.
-
-Given a nonempty `Finset` of natural numbers (or of any type with a linear order),
-`Finset.min'` returns the smallest element of that `Finset`.
+To read entries off a list we use `List.getD`: `l.getD m d` is the `m`-th entry of
+`l` (counting from `0`) if `m < l.length`, and the default value `d` otherwise.
 -/
-#check Finset.min'     -- .. [LinearOrder α] → (s : Finset α) → s.Nonempty → α
-#check Finset.min'_le  -- If `s : Finset α` and `x ∈ s` then `Finset.min' s ≤ x`
-#check Finset.min'_mem -- If `s : Finset α` is nonempty then `Finset.min' s ∈ s`
-/-!
-We first formalize the statement that there exists a valid colour that is at most
-`#((G.neighborLTFinset v).image c)` (our `k` from the discussion above).
--/
-lemma greedyChoiceMin_sdiff_nonempty (c : ℕ → ℕ) (v : ℕ) :
-    (range (#((G.neighborLTFinset v).image c) + 1)
-      \ (G.neighborLTFinset v).image c).Nonempty :=
-  card_pos.1 <| (le_card_sdiff ..).trans' (by simp)
+#check List.getD
 
 /-!
-We can now define a new version of `greedyChoice` using `Finset.min'`.
--/
-/-- Given any `c : ℕ → ℕ` and a vertex `v : ℕ`, `G.greedyChoiceMin c v` is the least
-colour that is valid at `v`, computed by removing the used colours from
-`{0, ..., k}` (where `k` is the number of used colours) and taking the minimum. -/
-def greedyChoiceMin (c : ℕ → ℕ) (v : ℕ) : ℕ := Finset.min'
-  (range (#((G.neighborLTFinset v).image c) + 1) \ (G.neighborLTFinset v).image c)
-    (G.greedyChoiceMin_sdiff_nonempty c v)
-
-/-!
-Our two definitions of the greedy choice agree.
--/
-lemma greedyChoice_eq_greedyChoiceMin (c : ℕ → ℕ) (v : ℕ) :
-    G.greedyChoice c v = G.greedyChoiceMin c v := by
-  simp only [greedyChoiceMin, greedyChoice]
-  apply le_antisymm
-  · -- `greedyChoiceMin c v` is a valid colour, so `Nat.find` returns at most it
-    exact Nat.find_min' _
-      (mem_sdiff.mp (min'_mem _ (G.greedyChoiceMin_sdiff_nonempty c v))).2
-  · -- `greedyChoice c v` lies in the finset that `greedyChoiceMin c v` minimizes
-    apply min'_le
-    rw [mem_sdiff, mem_range, Order.lt_add_one_iff]
-    exact ⟨G.greedyChoice_le_card_image c v,
-             Nat.find_spec (G.greedyChoice_exists c v)⟩
-
-/-!
-If we use `greedyChoiceMin` in place of `greedyChoice` in the definition of `greedy`,
-each call evaluates the partial colouring only once per earlier neighbour. So the
-recurrence loses its `(c(n) + 1)` factor and becomes `C(n) = 1 + ∑ C(m)`, summing
-over the earlier neighbours `m` of `n`. On the path this is linear, but on the
-complete graph it is still exponential because of the first problem:
-`C(n) = 1 + C(0) + ⋯ + C(n - 1) = 2 ^ n`.
-
-To fix the first problem we build a list of colours `[c 0, c 1, …, c (n - 1)]` by
-ordinary structural recursion on `n`, so that each colour is computed exactly once,
-and then look up the entry we need. This is a simple form of *memoization*.
+To compute the next colour we pass `greedyChoice` the partial colouring
+`fun m => l.getD m 42`, where `l` is the list built so far. As in `greedy`, the
+default value `42` is just filler: `greedyChoice` only looks at the colours of
+earlier vertices, and these are all entries of `l`.
 -/
 /-- The list of the first `n` greedy colours `[c 0, c 1, …, c (n - 1)]`,
 built by structural recursion. -/
@@ -1445,7 +1393,7 @@ def greedyList : ℕ → List ℕ
   | 0 => []
   | n + 1 =>
     let l := greedyList n
-    l ++ [G.greedyChoiceMin (fun m => l.getD m 42) n]
+    l ++ [G.greedyChoice (fun m => l.getD m 42) n]
 
 /-!
 The list `greedyList n` has length `n`.
@@ -1455,35 +1403,31 @@ lemma length_greedyList (n : ℕ) : (G.greedyList n).length = n := by
   induction n <;> simp_all [greedyList]
 
 /-!
-We will use `List.getD` to read off the colour of vertex `n` from
-`G.greedyList (n + 1)`. As in `greedy`, the fallback value `42` is just filler: we
-only ever look up entries that exist.
+To colour vertex `n` we build `G.greedyList (n + 1)` and use `List.getD` again to
+read off its last entry.
 -/
-#check List.getD
-
 /-- The memoized greedy colouring of `G`: build the list of the first `n + 1`
 colours and look up the last entry. -/
-def greedyMemo (n : ℕ) : ℕ := (G.greedyList (n + 1)).getD n 42
+def greedyMemo (n : ℕ) : ℕ :=
+  (G.greedyList (n + 1)).getD n 42
 
 /-!
-We now want to prove that this new version computes the same colours as `greedy`.
-The list is correct: its `m`-th entry is `greedy m`. The induction is now the
-ordinary one on the length of the list: extending the list by one entry
-preserves the earlier entries (`List.getD_append`), and the new entry is the
-correct greedy choice by `greedyChoice_congr`.
+We now want to prove that this new version computes the same colours as `greedy`. The
+list is correct: its `m`-th entry is `greedy m`. We use induction on the length of
+the list: extending the list by one entry preserves the earlier entries
+(`List.getD_append`), and the new entry is the correct greedy choice by
+`greedyChoice_congr`.
 -/
 lemma getD_greedyList {n m : ℕ} (hm : m < n) :
     (G.greedyList n).getD m 42 = G.greedy m := by
   induction n generalizing m with
   | zero => grind
   | succ n ih =>
-    simp only [greedyList]
     rcases Nat.lt_succ_iff_lt_or_eq.mp hm with h | rfl
-    · rw [List.getD_append _ _ _ _ (by simpa using h)]
+    · rw [greedyList, List.getD_append _ _ _ _ (by simpa using h)]
       exact ih h
-    · rw [List.getD_append_right _ _ _ _ (by simp)]
-      simp only [length_greedyList, Nat.sub_self, List.getD_cons_zero]
-      rw [greedy_eq_greedyChoice, ← greedyChoice_eq_greedyChoiceMin]
+    · rw [greedyList, List.getD_append_right _ _ _ _ (by simp), length_greedyList,
+         Nat.sub_self, List.getD_cons_zero, greedy_eq_greedyChoice]
       exact G.greedyChoice_congr fun k hk => ih hk
 
 lemma greedyMemo_eq_greedy (n : ℕ) : G.greedyMemo n = G.greedy n :=
@@ -1491,16 +1435,29 @@ lemma greedyMemo_eq_greedy (n : ℕ) : G.greedyMemo n = G.greedy n :=
 
 /-!
 Now each colour is computed exactly once, so colouring vertex `n` makes only `n + 1`
-calls to `greedyChoiceMin`, whatever the graph. (You can check this by tracing
-`greedyList` as we traced `greedy` above.) The number of calls is linear, although
-the running time is not, since appending to a list and looking up its entries take
-time proportional to its length.
+calls to `greedyChoice`, whatever the graph. We can check this by tracing
+`greedyList` as we traced `greedy`. Only the `n + 1` branch calls `greedyChoice`, so
+that is where we print the `*`.
+-/
+/-- A copy of `greedyList` that prints one `*` per call to `greedyChoice`. -/
+def greedyListTraced : ℕ → List ℕ
+  | 0 => []
+  | n + 1 =>
+    dbg_trace "*";
+    let l := greedyListTraced n
+    l ++ [G.greedyChoice (fun m => l.getD m 42) n]
 
-Of our two fixes, memoization is the decisive one: even paired with the original
-`Nat.find`-based `greedyChoice`, it would remove the exponential blow-up, since
-every colour would still be computed only once. Using `greedyChoiceMin` as well
-saves recomputing the image for every candidate colour, which matters for larger
-graphs.
+/-!
+To colour vertex `n` we look up entry `n` of `greedyListTraced (n + 1)`, just as
+`greedyMemo` does. On the complete graph, colouring the vertices `0, 1, ..., 8` now
+takes `1, 2, ..., 9` calls, rather than `1, 2, 4, ..., 256`.
+-/
+#eval (List.range 9).mapM fun n =>
+  withTraceCount fun _ => ((⊤ : SimpleGraph ℕ).greedyListTraced (n + 1)).getD n 42
+
+/-!
+The number of calls is linear, although the running time is not, since appending to
+a list and looking up its entries take time proportional to its length.
 
 ### Correct and Efficient: `csimp`
 
@@ -1529,15 +1486,13 @@ Suddenly `greedy` is much faster!
 end evaluating
 
 /-!
-To be clear: `@[csimp]` rewrites `greedy` in code that is compiled *after* the
-attribute is registered. Code compiled before it keeps its old, super-exponential
-implementation. For example `greedyColoringNat` and `greedyColoringFin`, whose
-`toFun` fields used the original `greedy` when they were defined, are still slow.
-(This is why the computable colourings of the next section are defined only now, and
-directly in terms of our new, efficient version of `greedy`.)
--/
+To be clear: `@[csimp]` does not change `greedy` itself; it changes how code that
+mentions `greedy` is compiled from now on. Code compiled earlier keeps calling the
+exponential implementation, so `greedyColoringNat` and `greedyColoringFin`, which
+were defined before the attribute was registered, are still slow. This is why we
+define the computable colourings of the next section only now: their definitions
+refer to `greedy` exactly as before, but their compiled code runs `greedyMemo`.
 
-/-!
 ## Computing Colourings of Encodable Graphs
 
 With `greedy` now faster, the same construction as `greedyColoringFin` gives
@@ -1575,19 +1530,14 @@ instance hypercubeEncodable (n : ℕ) : Encodable (HypercubeVert n) := by
 We can now compute greedy colourings of many concrete graphs:
 `K₇, C₇, K₅,₅, paleyGraph₁₇, Q₄, mμ(C₅), mμ⁴(C₅)`.
 -/
-#eval K[7].greedyColoring -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 2, 3 ↦ 3, 4 ↦ 4, 5 ↦ 5, 6 ↦ 6}
-
-#eval C[7].greedyColoring  -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 0, 3 ↦ 1, 4 ↦ 0, 5 ↦ 1, 6 ↦ 2}
-
-#eval K[5, 5].greedyColoring -- {Sum.inl 0 ↦ 0, Sum.inl 1 ↦ 0, ..., Sum.inr 4 ↦ 1}
-
-#eval (paleyGraph (ZMod 17)).greedyColoring -- {0 ↦ 0, ..., 11 ↦ 5, ..., 16 ↦ 4}
-
-#eval Q[4].greedyColoring  -- {1111 ↦ 0, 1110 ↦ 1, ..., 0001 ↦ 1, 0000 ↦ 0}
-
-#eval mμ(C[5]).greedyColoring -- {∗ ↦ 0, 0ˡ ↦ 0, ..., 3ˡ ↦ 2, ..., 4ʳ ↦ 1}
-
-#eval mμ^4(C[5]).greedyColoring -- {∗ ↦ 0, ∗ˡ ↦ 0, ∗ˡˡ ↦ 0, ∗ˡˡˡ ↦ 0,..., 4ʳʳʳʳ ↦ 1}
+#eval K[7].greedyColoring       -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 2, 3 ↦ 3, 4 ↦ 4, 5 ↦ 5, 6 ↦ 6}
+#eval C[7].greedyColoring       -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 0, 3 ↦ 1, 4 ↦ 0, 5 ↦ 1, 6 ↦ 2}
+#eval K[5, 5].greedyColoring    -- {Sum.inl 0 ↦ 0, Sum.inl 1 ↦ 0, ..., Sum.inr 4 ↦ 1}
+#eval Q[4].greedyColoring       -- {1111 ↦ 0, 1110 ↦ 1, ..., 0001 ↦ 1, 0000 ↦ 0}
+#eval mμ(C[5]).greedyColoring   -- {∗ ↦ 0, 0ˡ ↦ 0, ..., 4ˡ ↦ 3, ..., 4ʳ ↦ 1}
+#eval mμ^4(C[5]).greedyColoring -- {∗ ↦ 0, ..., 4ˡˡˡˡ ↦ 6,..., 4ʳʳʳʳ ↦ 1}
+#eval (paleyGraph (ZMod 17)).greedyColoring  -- {0 ↦ 0, ..., 11 ↦ 5, ..., 16 ↦ 4}
+#eval (⊤ : SimpleGraph ℕ).greedyColoring 200 -- 200
 
 /-!
 Unlike on the crown graph, `greedy` does well on all of these examples: each

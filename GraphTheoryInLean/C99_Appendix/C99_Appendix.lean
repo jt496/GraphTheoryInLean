@@ -248,15 +248,14 @@ The following custom definitions and abbreviations are introduced in this guide:
   with all degrees at most `Δ` on an encodable vertex type.
 * `greedyTraced`: a copy of `greedy` that `dbg_trace`s a `*` on every call, used to
   count recursive calls.
-* `withTraceCount`: runs a computation with its output captured, returning the value
-  together with the number of trace lines.
-* `greedyChoiceMin`: the greedy choice computed as a `Finset.min'` over the finitely
-  many candidate colours `{0, ..., k}`, where `k` is the number of colours used by
-  earlier neighbours.
+* `withTraceCount`: runs a computation with its output captured, returning the number
+  of `*`s it prints with `dbg_trace`.
 * `greedyList`: the list of the first `n` greedy colours, built by structural
   recursion so that each colour is computed once.
 * `greedyMemo`: the memoized greedy colouring, reading the last entry of
   `greedyList`; `greedy` is compiled to it via `@[csimp]`.
+* `greedyListTraced`: a copy of `greedyList` that `dbg_trace`s a `*` on every call to
+  `greedyChoice`, showing that memoization makes the number of calls linear.
 * `greedyColoring`: the greedy `ℕ`-colouring of a graph on an encodable vertex type,
   colouring each vertex by the `greedy` colour of its encoding.
 
@@ -640,10 +639,9 @@ its exercises:
   original vertex.
 * `colorable_of_degree_le_of_countable`: a locally finite graph on a countable vertex
   type with all degrees at most `Δ` is `(Δ + 1)`-colourable.
-* `greedyChoice_eq_greedyChoiceMin` / `greedyMemo_eq_greedy` /
-  `greedy_eq_greedyMemo`: the `Nat.find`, `Finset.min'` and memoized greedy
-  colourings agree; the last is the `@[csimp]` lemma that makes `#eval greedy` run
-  the memoized version.
+* `greedyMemo_eq_greedy` / `greedy_eq_greedyMemo`: the memoized greedy colouring
+  agrees with `greedy`; the second is the `@[csimp]` lemma that makes `#eval greedy`
+  run the memoized version.
 
 *From the exercises:*
 

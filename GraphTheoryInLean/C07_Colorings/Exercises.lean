@@ -44,7 +44,9 @@ it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouri
 given below: colour a vertex by its least element, merging all the large colours into
 one. This is the hardest exercise in this chapter: the case where both vertices
 receive the merged colour needs a pigeonhole argument which is in Mathlib as
-`Finset.inter_nonempty_of_card_lt_card_add_card`.
+`Finset.inter_nonempty_of_card_lt_card_add_card`. Here `s.min' h` is the least
+element of a nonempty finset `s`, and its basic properties are `Finset.min'_mem` and
+`Finset.min'_le`.
 
 [Figure: The colouring below for the Petersen graph $\mathrm{Kn}(5,2)$, with $5 - 2 \cdot 2 + 2 = 3$ colours: a vertex is red if its least element is $0$, blue if its least element is $1$, and green (the merged colour) otherwise](https://jt496.github.io/GraphTheoryInLean/figures/kneser_colouring.svg)
 -/
@@ -112,6 +114,67 @@ with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
 example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
   sorry
 
+/-!
+11. Show that the greedy colouring really is greedy: if `k` is less than the greedy
+colour of `v`, then some earlier neighbour of `v` has greedy colour `k`. Hint:
+rewrite with `greedy_eq_greedyChoice` and use `Nat.find_min`.
+-/
+lemma exists_greedy_eq_of_lt_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
+    {v k : ℕ} (hk : k < G.greedy v) :
+    ∃ u ∈ G.neighborLTFinset v, G.greedy u = k := by
+  sorry
+
+/-!
+12. The crown graph shows that a bad ordering of the vertices can make the greedy
+colouring use arbitrarily many colours. Conversely, show that a good ordering makes
+it optimal: if `C` is a colouring of `G` in which every vertex comes before all
+vertices of larger colour, then the greedy colour of each vertex `v` is at most
+`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
+greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
+-/
+example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
+    (hC : ∀ u v, C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
+  sorry
+
+/-!
+13. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
+earlier neighbours of every vertex form a clique. (For example, ordering the vertices
+of an interval graph by the left endpoints of their intervals gives such an
+ordering.) Show that if the natural ordering of `G` is a perfect elimination ordering
+and `G` has no `(k + 1)`-clique then `G` is `k`-colourable, so that the greedy
+colouring uses no more colours than the largest clique needs. Hint: `v` together with
+its earlier neighbours forms a `(degreeLT v + 1)`-clique, so `CliqueFree.mono` bounds
+`degreeLT v`; now use `colorable_of_degreeLT_le`.
+-/
+example (G : SimpleGraph ℕ) {k : ℕ}
+    (hG : G.CliqueFree (k + 1)) (h : ∀ v, G.IsClique (G.neighborLTSet v)) :
+    G.Colorable k := by
+  sorry
+
+/-!
+14. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
+`f 0 < f 1 < ⋯ < f k = v`, in which consecutive vertices are adjacent. (We describe
+the path by a function `f : ℕ → ℕ`, since walks only appear in the next chapter.)
+Hint: prove the statement for all `v` with `G.greedy v = k` by induction on `k`.
+Exercise 11 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
+extends the path `f` ending at `u`.
+-/
+lemma exists_increasing_path_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
+    (v : ℕ) : ∃ f : ℕ → ℕ, f (G.greedy v) = v ∧
+      ∀ i < G.greedy v, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1)) := by
+  sorry
+
+/-!
+15. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
+`k`-colourable. In particular, a graph in which no path has `k + 1` vertices is
+`k`-colourable. Hint: as in `colorable_of_degreeLT_le`, use
+`colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
+-/
+example (G : SimpleGraph ℕ) {k : ℕ}
+    (h : ¬ ∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
+    G.Colorable k := by
+  sorry
+
 /-! SOLUTIONS -/
 
 /-!
@@ -163,7 +226,9 @@ it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouri
 given below: colour a vertex by its least element, merging all the large colours into
 one. This is the hardest exercise in this chapter: the case where both vertices
 receive the merged colour needs a pigeonhole argument which is in Mathlib as
-`Finset.inter_nonempty_of_card_lt_card_add_card`.
+`Finset.inter_nonempty_of_card_lt_card_add_card`. Here `s.min' h` is the least
+element of a nonempty finset `s`, and its basic properties are `Finset.min'_mem` and
+`Finset.min'_le`.
 -/
 /-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
 def kneserGraph.coloring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
@@ -283,6 +348,119 @@ example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
   refine (⊤ : SimpleGraph ℕ).greedy_eq_of_image_eq_range ?_
   ext c
   grind [mem_neighborLTFinset, top_adj]
+
+/-!
+11. Show that the greedy colouring really is greedy: if `k` is less than the greedy
+colour of `v`, then some earlier neighbour of `v` has greedy colour `k`. Hint:
+rewrite with `greedy_eq_greedyChoice` and use `Nat.find_min`.
+-/
+lemma exists_greedy_eq_of_lt_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
+    {v k : ℕ} (hk : k < G.greedy v) :
+    ∃ u ∈ G.neighborLTFinset v, G.greedy u = k := by
+  rw [greedy_eq_greedyChoice] at hk
+  -- `k` is below the least colour that no earlier neighbour uses, so one uses it
+  simpa using not_not.mp <| Nat.find_min (Finset.exists_notMem _) hk
+
+/-!
+12. The crown graph shows that a bad ordering of the vertices can make the greedy
+colouring use arbitrarily many colours. Conversely, show that a good ordering makes
+it optimal: if `C` is a colouring of `G` in which every vertex comes before all
+vertices of larger colour, then the greedy colour of each vertex `v` is at most
+`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
+greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
+-/
+example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
+    (hC : ∀ u v, C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
+  induction v using Nat.strong_induction_on with
+  | _ v ih =>
+  refine (G.greedy_le_card_image v).trans ?_
+  -- every earlier neighbour `u` of `v` has `greedy u ≤ C u < C v`
+  have hsub : (G.neighborLTFinset v).image G.greedy ⊆ range (C v) := by
+    intro c hc
+    obtain ⟨u, hu, rfl⟩ := mem_image.mp hc
+    rw [mem_neighborLTFinset] at hu
+    have hne : C u ≠ C v := C.valid hu.2.symm
+    have hle : ¬ C v < C u := fun h => (hC v u h).not_gt hu.1
+    exact mem_range.2 ((ih u hu.1).trans_lt (by grind))
+  simpa using card_le_card hsub
+
+/-!
+13. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
+earlier neighbours of every vertex form a clique. (For example, ordering the vertices
+of an interval graph by the left endpoints of their intervals gives such an
+ordering.) Show that if the natural ordering of `G` is a perfect elimination ordering
+and `G` has no `(k + 1)`-clique then `G` is `k`-colourable, so that the greedy
+colouring uses no more colours than the largest clique needs. Hint: `v` together with
+its earlier neighbours forms a `(degreeLT v + 1)`-clique, so `CliqueFree.mono` bounds
+`degreeLT v`; now use `colorable_of_degreeLT_le`.
+-/
+example (G : SimpleGraph ℕ) {k : ℕ}
+    (hG : G.CliqueFree (k + 1)) (h : ∀ v, G.IsClique (G.neighborLTSet v)) :
+    G.Colorable k := by
+  classical
+  have hdeg : ∀ v, G.degreeLT v + 1 ≤ k := by
+    intro v
+    by_contra! hlt
+    -- `v` and its earlier neighbours form a `(degreeLT v + 1)`-clique
+    have hcl : G.IsNClique (G.degreeLT v + 1) (insert v (G.neighborLTFinset v)) := by
+      refine ⟨?_, ?_⟩
+      · rw [coe_insert, neighborLTFinset, Set.coe_toFinset]
+        refine (h v).insert fun u hu _ => ?_
+        exact ((G.mem_neighborLTSet v u).1 hu).2
+      · rw [card_insert_of_notMem (by simp), degreeLT]
+    exact hG.mono hlt _ hcl
+  -- so `k = Δ + 1`, where every vertex has at most `Δ` earlier neighbours
+  obtain ⟨Δ, rfl⟩ : ∃ Δ, k = Δ + 1 := ⟨k - 1, by grind [hdeg 0]⟩
+  exact G.colorable_of_degreeLT_le fun v => by grind [hdeg v]
+
+/-!
+14. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
+`f 0 < f 1 < ⋯ < f k = v`, in which consecutive vertices are adjacent. (We describe
+the path by a function `f : ℕ → ℕ`, since walks only appear in the next chapter.)
+Hint: prove the statement for all `v` with `G.greedy v = k` by induction on `k`.
+Exercise 11 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
+extends the path `f` ending at `u`.
+-/
+lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
+    (v : ℕ) : ∃ f : ℕ → ℕ, f (G.greedy v) = v ∧
+      ∀ i < G.greedy v, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1)) := by
+  suffices ∀ k v, G.greedy v = k → ∃ f : ℕ → ℕ, f k = v ∧
+      ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1)) from this _ v rfl
+  intro k
+  induction k with
+  | zero => exact fun v _ => ⟨fun _ => v, rfl, by simp⟩
+  | succ k ih =>
+    intro v hv
+    -- an earlier neighbour `u` of `v` has colour `k`, so a path ends at `u`
+    have hk : k < G.greedy v := by grind
+    obtain ⟨u, hu, hgu⟩ := G.exists_greedy_eq_of_lt_greedy hk
+    rw [mem_neighborLTFinset] at hu
+    obtain ⟨f, hfk, hf⟩ := ih u hgu
+    -- and we extend it by `v`
+    refine ⟨Function.update f (k + 1) v, by simp, fun i hi => ?_⟩
+    rcases Nat.lt_succ_iff_lt_or_eq.mp hi with hi | rfl
+    · simpa [Function.update_of_ne (show i ≠ k + 1 by grind),
+        Function.update_of_ne (show i + 1 ≠ k + 1 by grind)] using hf i hi
+    · simpa [Function.update_of_ne (show i ≠ i + 1 by grind), hfk] using
+        ⟨hu.1, hu.2.symm⟩
+
+/-!
+15. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
+`k`-colourable. In particular, a graph in which no path has `k + 1` vertices is
+`k`-colourable. Hint: as in `colorable_of_degreeLT_le`, use
+`colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
+-/
+example (G : SimpleGraph ℕ) {k : ℕ}
+    (h : ¬ ∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
+    G.Colorable k := by
+  classical
+  refine (colorable_iff_exists_bdd_nat_coloring _).2
+    ⟨G.greedyColoringNat, fun v => ?_⟩
+  -- if `k ≤ greedy v` then the first `k + 1` vertices of the path ending at `v`
+  -- contradict `h`
+  by_contra! hk
+  obtain ⟨f, -, hf⟩ := G.exists_increasing_path_greedy v
+  exact h ⟨f, fun i hi => hf i (by grind [greedyColoringNat_apply])⟩
 
 /-! END SOLUTIONS -/
 

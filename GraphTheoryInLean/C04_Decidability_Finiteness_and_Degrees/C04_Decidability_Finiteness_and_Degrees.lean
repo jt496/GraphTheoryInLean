@@ -1939,14 +1939,27 @@ example (n : ℕ) : δ(Q[n]) = n := (IsRegularOfDegree.hypercube n).minDegree_eq
 
 /-!
 Mathlib does not take this route for the box product. Its `boxProdFintypeNeighborSet`
-is a global instance, so when `G` and `H` are finite with decidable adjacency,
+is a global instance. Mathlib has no decidability instance for adjacency in a box
+product, but we gave one, `boxProdDecidableRelAdj`, in [Decidability and Kernel
+Reduction*](#section-decidability-and-kernel-reduction). So when `G` and `H` are
+finite with decidable adjacency, the filtering instance applies to `G □ H` too, and
 `(G □ H).neighborSet x` has two `Fintype` instances, the filtering one and the box
 product one. This is a `Fintype` *diamond*: the situation we warned about in
 [Instance Arguments in Statements](#section-instance-arguments-in-statements) and
 [Cardinality](#section-cardinality), and explored in the proof of
 `sum_degrees_eq_twice_card_edges'`. Inference prefers the box product instance.
+Whatever decidability instance we gave, the filtering instance would be built
+differently from the box product one, so the only way to avoid the diamond would be
+to give up decidable adjacency for box products.
 -/
 #synth (C[5] □ K[2]).LocallyFinite -- fun v ↦ boxProdFintypeNeighborSet v
+/-!
+The same happens for the disjoint union `G ⊕g H`: Mathlib has a `LocallyFinite`
+instance for it, and our decidability instance from [More Decidable Adjacency
+Instances*](#section-more-decidable-adjacency-instances) makes the filtering one
+available too.
+-/
+#synth (C[4] ⊕g K[1]).LocallyFinite -- fun v ↦ instLocallyFiniteSumSumOfDecidableEq v
 /-!
 How much trouble does this cause? Nothing in Mathlib breaks because of it, and the
 reason is visible in `degree_boxProd`: its third instance argument is an *arbitrary*
@@ -2017,12 +2030,12 @@ lemma card_edgeFinset_hypercube (n : ℕ) [Fintype Q[n].edgeSet] :
   | succ n => rw [pow_succ, Nat.add_sub_cancel]; grind
 
 /-!
-All of this leads to two rules that we follow in the rest of the guide. First, we try
-not to create diamonds ourselves: a second `Fintype` instance, such as
-`hypercubeFintypeNeighborSet`, is a `def`, switched on locally where it is needed.
-Second, a statement that depends on a `Fintype` (or `LocallyFinite`) instance on a
-type with more than one, for example through `degree`, `neighborFinset` or
-`edgeFinset`, takes that instance as an argument. If the proof needs a particular
+All of this leads to two rules that we follow in the rest of the guide. Firstly, we
+avoid giving a type a second instance of the same class: a second `Fintype` instance,
+such as `hypercubeFintypeNeighborSet`, is a `def`, switched on locally where it is
+needed. Secondly, a statement that depends on a `Fintype` (or `LocallyFinite`)
+instance on a type with more than one, for example through `degree`, `neighborFinset`
+or `edgeFinset`, takes that instance as an argument. If the proof needs a particular
 instance, it switches to it with `let` and `convert_to`, as above. For a type with a
 single instance, such as `HypercubeVert n`, a statement about it simply uses that
 instance.

@@ -208,22 +208,6 @@
        {"title": "Introduction", "shortTitle": null, "number": "1"},
        {"title": "Use of AI", "shortTitle": null, "number": "6"}]},
      "address": "/Introduction/"}],
-   "section-two-fixes-finset-min-and-memoization":
-   [{"id": "section-two-fixes-finset-min-and-memoization",
-     "data":
-     {"title": "Two Fixes:  Finset.min'  and Memoization",
-      "shortTitle": null,
-      "sectionNum": "7.8.6.2.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Colorings", "shortTitle": null, "number": "7"},
-       {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
-       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"},
-       {"title": "Two Fixes:  Finset.min'  and Memoization",
-        "shortTitle": null,
-        "number": "2"}]},
-     "address": "/Colorings/"}],
    "section-tutte-s-theorem":
    [{"id": "section-tutte-s-theorem",
      "data":
@@ -1715,6 +1699,20 @@
         "shortTitle": null,
         "number": "3"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "section-memoization":
+   [{"id": "section-memoization",
+     "data":
+     {"title": "Memoization",
+      "shortTitle": null,
+      "sectionNum": "7.8.6.2.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Colorings", "shortTitle": null, "number": "7"},
+       {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
+       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"},
+       {"title": "Memoization", "shortTitle": null, "number": "2"}]},
+     "address": "/Colorings/"}],
    "section-maximum-degree-two":
    [{"id": "section-maximum-degree-two",
      "data":
@@ -6776,7 +6774,7 @@
         "Colorings",
         "Greedy Colouring*",
         "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
+        "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.le_vertexConnectivity_iff":
    [{"id": "SimpleGraph___le_vertexConnectivity_iff",
@@ -8601,7 +8599,7 @@
         "Colorings",
         "Greedy Colouring*",
         "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
+        "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyMemo":
    [{"id": "SimpleGraph___greedyMemo",
@@ -8613,7 +8611,19 @@
         "Colorings",
         "Greedy Colouring*",
         "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
+        "Memoization"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.greedyListTraced":
+   [{"id": "SimpleGraph___greedyListTraced",
+     "data":
+     {"/Colorings/#SimpleGraph___greedyListTraced":
+      {"display": "greedyListTraced",
+       "context":
+       ["Graph Theory in Lean",
+        "Colorings",
+        "Greedy Colouring*",
+        "Making  greedy  Fast*",
+        "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyList":
    [{"id": "SimpleGraph___greedyList",
@@ -8625,7 +8635,7 @@
         "Colorings",
         "Greedy Colouring*",
         "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
+        "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyColoringNat":
    [{"id": "SimpleGraph___greedyColoringNat",
@@ -8682,29 +8692,6 @@
         "Greedy Colouring*",
         "Simple Graphs on  ℕ"]}},
      "address": "/Colorings/"}],
-   "SimpleGraph.greedyChoice_exists":
-   [{"id": "SimpleGraph___greedyChoice_exists",
-     "data":
-     {"/Colorings/#SimpleGraph___greedyChoice_exists":
-      {"display": "greedyChoice_exists",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Simple Graphs on  ℕ"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.greedyChoice_eq_greedyChoiceMin":
-   [{"id": "SimpleGraph___greedyChoice_eq_greedyChoiceMin",
-     "data":
-     {"/Colorings/#SimpleGraph___greedyChoice_eq_greedyChoiceMin":
-      {"display": "greedyChoice_eq_greedyChoiceMin",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
-     "address": "/Colorings/"}],
    "SimpleGraph.greedyChoice_congr":
    [{"id": "SimpleGraph___greedyChoice_congr",
      "data":
@@ -8715,30 +8702,6 @@
         "Colorings",
         "Greedy Colouring*",
         "Simple Graphs on  ℕ"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.greedyChoiceMin_sdiff_nonempty":
-   [{"id": "SimpleGraph___greedyChoiceMin_sdiff_nonempty",
-     "data":
-     {"/Colorings/#SimpleGraph___greedyChoiceMin_sdiff_nonempty":
-      {"display": "greedyChoiceMin_sdiff_nonempty",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
-     "address": "/Colorings/"}],
-   "SimpleGraph.greedyChoiceMin":
-   [{"id": "SimpleGraph___greedyChoiceMin",
-     "data":
-     {"/Colorings/#SimpleGraph___greedyChoiceMin":
-      {"display": "greedyChoiceMin",
-       "context":
-       ["Graph Theory in Lean",
-        "Colorings",
-        "Greedy Colouring*",
-        "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyChoice":
    [{"id": "SimpleGraph___greedyChoice",
@@ -8859,7 +8822,7 @@
         "Colorings",
         "Greedy Colouring*",
         "Making  greedy  Fast*",
-        "Two Fixes:  Finset.min'  and Memoization"]}},
+        "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.furedi_step":
    [{"id": "SimpleGraph___furedi_step",
@@ -9132,6 +9095,34 @@
         "Eulerian Circuits and Trails",
         "Extending Trails"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.exists_increasing_path_greedy'":
+   [{"id": "SimpleGraph___exists_increasing_path_greedy___",
+     "data":
+     {"/Colorings/#SimpleGraph___exists_increasing_path_greedy___":
+      {"display": "exists_increasing_path_greedy'",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.exists_increasing_path_greedy":
+   [{"id": "SimpleGraph___exists_increasing_path_greedy",
+     "data":
+     {"/Colorings/#SimpleGraph___exists_increasing_path_greedy":
+      {"display": "exists_increasing_path_greedy",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.exists_greedy_eq_of_lt_greedy'":
+   [{"id": "SimpleGraph___exists_greedy_eq_of_lt_greedy___",
+     "data":
+     {"/Colorings/#SimpleGraph___exists_greedy_eq_of_lt_greedy___":
+      {"display": "exists_greedy_eq_of_lt_greedy'",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.exists_greedy_eq_of_lt_greedy":
+   [{"id": "SimpleGraph___exists_greedy_eq_of_lt_greedy",
+     "data":
+     {"/Colorings/#SimpleGraph___exists_greedy_eq_of_lt_greedy":
+      {"display": "exists_greedy_eq_of_lt_greedy",
+       "context": ["Graph Theory in Lean", "Colorings", "Exercises"]}},
+     "address": "/Colorings/"}],
    "SimpleGraph.exists_eq_subcubeCopy":
    [{"id": "SimpleGraph___exists_eq_subcubeCopy",
      "data":
