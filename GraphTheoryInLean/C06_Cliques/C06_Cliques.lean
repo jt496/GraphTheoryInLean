@@ -396,8 +396,8 @@ lemma one_le_cliqueNum [Finite V] [Nonempty V] : 1 ≤ ω G :=
   (G.cliqueNum_ne_zero_of_finite).bot_lt
 
 /-!
-Every graph has a clique whose size is the clique number. This needs no finiteness
-at all: if the clique sizes are unbounded then `ω G = 0`, and `∅` is a `0`-clique!
+Every graph, finite or not, has a clique whose size is the clique number: if the
+clique sizes are unbounded then `ω G = 0`, and `∅` is a `0`-clique!
 -/
 #check exists_isNClique_cliqueNum -- ∃ s, G.IsNClique (ω G) s
 
@@ -415,8 +415,8 @@ lemma Hom.cliqueNum_le {W : Type*} [Finite W] {H : SimpleGraph W} (f : G →g H)
   exact (hs.image f).le_cliqueNum
 
 /-!
-By contrast, the clique number is invariant under graph isomorphism with no
-finiteness assumptions at all. An isomorphism matches up the cliques of the two
+By contrast, the clique number is invariant under any graph isomorphism. An
+isomorphism matches up the cliques of the two
 graphs, so the two sets of clique sizes are equal, and hence so are their `sSup`s
 (junk values included).
 -/
@@ -429,8 +429,8 @@ lemma Iso.cliqueNum_eq {W : Type*} {H : SimpleGraph W} (e : G ≃g H) : ω G = �
          fun ⟨_, hs⟩ => ⟨_, hs.image e.symm.toHom⟩⟩
 
 /-!
-If `G` is `(n + 1)`-clique-free then `ω G ≤ n`. Once again no finiteness is needed,
-since the clique given by `exists_isNClique_cliqueNum` always exists.
+If `G` is `(n + 1)`-clique-free then `ω G ≤ n`: otherwise the clique of size `ω G`
+given by `exists_isNClique_cliqueNum` would contain an `(n + 1)`-clique.
 -/
 lemma CliqueFree.cliqueNum_le {n : ℕ} (h : G.CliqueFree (n + 1)) : ω G ≤ n := by
   obtain ⟨s, hs⟩ := G.exists_isNClique_cliqueNum
@@ -440,9 +440,9 @@ lemma CliqueFree.cliqueNum_le {n : ℕ} (h : G.CliqueFree (n + 1)) : ω G ≤ n 
 
 /-!
 So to compute the clique number it is enough to find an `n`-clique and show that the
-graph is `(n + 1)`-clique-free. This needs no finiteness either: the clique-free
-hypothesis bounds the size of every clique, so `n` is a genuine largest element of
-the set of clique sizes, and `le_csSup` applies.
+graph is `(n + 1)`-clique-free. The clique-free hypothesis bounds the size of every
+clique, so `n` is the largest element of the set of clique sizes, and `le_csSup`
+applies.
 -/
 theorem IsNClique.cliqueNum_eq_of_cliqueFree {s : Finset V}
     {n : ℕ} (hs : G.IsNClique n s) (h : G.CliqueFree (n + 1)) :
@@ -661,7 +661,7 @@ it is essentially the computation of the independence number of `Kn[n, k]`.
 -/
 #check Finset.erdos_ko_rado
 /-!
-Mathlib states the theorem for a a finite family of finsets
+Mathlib states the theorem for a finite family of finsets
 `𝒜 : Finset (Finset (Fin n))` with three hypotheses:
 * `Set.Intersecting`: no two members of `𝒜` are disjoint. Note that this quantifies
   over *all* pairs `a, b ∈ 𝒜`, including `a = b`. So a family containing `∅` is never
@@ -839,9 +839,8 @@ Recall from [Mycielskian](#section-mycielskian) Mycielski's two facts: if `G` is
 triangle-free then so is `mμ(G)`, and if `G` has chromatic number `k` then `mμ(G)`
 has chromatic number `k + 1`. In this section we prove the first fact, and more
 generally that the Mycielskian preserves the clique number. The second fact is
-`chromaticNumber_mycielskian` in the next chapter. Together they show that the
-clique number can be a very poor lower bound for the chromatic number. We finish by
-computing the independence number of `mμ(G)`.
+`chromaticNumber_mycielskian` in the next chapter. We finish by computing the
+independence number of `mμ(G)`.
 
 ## Triangle-Free Mycielskians
 
@@ -939,10 +938,10 @@ lemma mycielskian_none_notMem_clique {k : ℕ} (h3 : 3 ≤ k)
 If `s` is a clique in the Mycielskian then `s` cannot contain both `vˡ` and `vʳ`
 for any `v ∈ V` (since `mμ(G).Adj vˡ vʳ` would imply `G.Adj v v`, which is
 impossible). Moreover we just proved that any `k`-clique with `3 ≤ k` cannot contain
-`none`. This means that if we define a projection map from the vertices of `mμ(G)` to
-the vertices of `G` by "forgetting" which side (left or right) vertices came from
-(and sending `none` to an arbitrary vertex in `V`) then it will be injective on any
-clique in `mμ(G)` of size at least `3` and also preserve adjacency.
+`none`. So consider the projection map from the vertices of `mμ(G)` to the vertices
+of `G` that "forgets" which side (left or right) a vertex came from, and sends `none`
+to an arbitrary vertex of `V`. This map preserves adjacency, and it is injective on
+any clique in `mμ(G)` of size at least `3`.
 -/
 /-- Projection from the vertex set of `mμ(G)` to that of `G` (preserves `k`-cliques
 for `k ≥ 3`). -/
@@ -970,12 +969,11 @@ lemma IsNClique.of_mycielskian [DecidableEq V] (v₀ : V) {k : ℕ} (h3 : 3 ≤ 
 
 /-!
 This generalizes `CliqueFree.mycielskian`: for every `r ≥ 3`, the Mycielskian of an
-`r`-clique-free graph is `r`-clique-free. No finiteness is needed. To apply
-`IsNClique.of_mycielskian` we need a vertex `v₀ : V`, and the clique itself provides
-one: it has a vertex, which is not `none`, so it is `vˡ` or `vʳ` for some `v ∈ V`.
-The bound `3 ≤ r` cannot be dropped. The empty graph on one vertex is
-`2`-clique-free, but its Mycielskian has an edge from `none` to the right copy of the
-vertex.
+`r`-clique-free graph is `r`-clique-free. To apply `IsNClique.of_mycielskian` we need
+a vertex `v₀ : V`, and the clique itself provides one: it has a vertex, which is not
+`none`, so it is `vˡ` or `vʳ` for some `v ∈ V`. The bound `3 ≤ r` cannot be dropped.
+The empty graph on one vertex is `2`-clique-free, but its Mycielskian has an edge
+from `none` to the right copy of the vertex.
 -/
 theorem CliqueFree.mycielskian_of_three_le {r : ℕ} (hr : 3 ≤ r)
     (h : G.CliqueFree r) : mμ(G).CliqueFree r := by

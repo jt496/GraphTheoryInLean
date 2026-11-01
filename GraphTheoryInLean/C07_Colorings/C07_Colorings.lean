@@ -251,10 +251,10 @@ theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
 
 /-!
 Taking `k = χ G` shows that a finite graph has at most `χ G * ⍺ G` vertices. As
-before, the Lean statement needs no finiteness assumption, since it holds trivially
-when `V` is infinite. Since `χ G` takes values in `ℕ∞`, the statement lives in `ℕ∞`:
-the natural numbers `Nat.card V` and `⍺ G` are silently cast to `ℕ∞` (compare
-[Counting in ℕ∞ : ENat.card](#section-counting-in-enat-card)).
+before, the Lean statement holds trivially when `V` is infinite. Since `χ G` takes
+values in `ℕ∞`, the statement lives in `ℕ∞`: the natural numbers `Nat.card V` and
+`⍺ G` are silently cast to `ℕ∞` (compare [Counting in ℕ∞ :
+ENat.card](#section-counting-in-enat-card)).
 
 For finite `V` we cannot apply `Colorable.natCard_le_mul_indepNum` with `k = χ G`
 directly, since `k` must be a natural number. This is a job for the `lift` tactic,
@@ -765,8 +765,7 @@ theorem chromaticNumber_iterMycielskian_completeGraph_two (n : ℕ) :
 /-!
 Combining this with `cliqueNum_iterMycielskian_completeGraph_two` gives what we
 promised, Mycielski's theorem: the graphs `mμ^n(K[2])` all have clique number `2`,
-but their chromatic numbers are unbounded. So the clique number can be an arbitrarily
-bad lower bound for the chromatic number.
+but their chromatic numbers are unbounded.
 -/
 /-- *Mycielski's theorem*: the nth-iterated Mycielskian of `K[2]` has clique number
 `2` and chromatic number `n + 2`. -/
@@ -781,16 +780,26 @@ So far we have coloured vertices. A *proper edge colouring* of `G` colours the e
 of `G` so that edges sharing an endpoint receive different colours. Mathlib has no
 separate notion of this (its `EdgeLabeling` assigns labels to edges with no
 properness condition), and we don't need one. Two edges share an endpoint exactly
-when they are adjacent vertices of the line graph `L[G]` (`lineGraph`), so a proper
-edge colouring of `G` with colours `γ` is just a colouring `L[G].Coloring γ`, and the
-*chromatic index* `χ'(G)`, the least number of colours in a proper edge colouring, is
-`χ L[G]`.
+when they are adjacent vertices of the line graph `L[G]` (`lineGraph`). So a proper
+edge colouring of `G` with colours `γ` is just a colouring `L[G].Coloring γ`. The
+*chromatic index* of `G` is the least number of colours in a proper edge colouring,
+so it is `χ L[G]`. Mathlib does not have it yet, so we define it as an `abbrev`,
+which Lean unfolds automatically when it needs to, and introduce the standard
+notation `χ' G`.
+-/
+/-- The *chromatic index* of `G`: the least number of colours in a proper edge
+colouring of `G`, that is, the chromatic number `χ L[G]` of its line graph. -/
+noncomputable abbrev chromaticIndex (G : SimpleGraph V) : ℕ∞ := χ L[G]
 
+@[inherit_doc]
+scoped notation "χ'" => SimpleGraph.chromaticIndex
+
+/-!
 The edges at a vertex `v` pairwise share the endpoint `v`, so they form a clique in
 `L[G]`. Hence the chromatic index is at least the degree of any vertex.
 -/
-theorem degree_le_chromaticNumber_lineGraph (v : V) [Fintype (G.neighborSet v)] :
-    G.degree v ≤ χ L[G] := by
+theorem degree_le_chromaticIndex (v : V) [Fintype (G.neighborSet v)] :
+    G.degree v ≤ χ' G := by
   -- the edges `s(v, w)` at `v`, as vertices of `L[G]`
   let f : G.neighborSet v ↪ G.edgeSet :=
     ⟨fun w => ⟨s(v, w), w.2⟩, fun _ _ h => Subtype.ext (Sym2.congr_right.mp
@@ -806,24 +815,24 @@ theorem degree_le_chromaticNumber_lineGraph (v : V) [Fintype (G.neighborSet v)] 
 Taking `v` of maximum degree, the chromatic index of a finite graph is at least its
 maximum degree `Δ(G)`.
 -/
-theorem maxDegree_le_chromaticNumber_lineGraph [Fintype V] [DecidableRel G.Adj] :
-    G.maxDegree ≤ χ L[G] := by
+theorem maxDegree_le_chromaticIndex [Fintype V] [DecidableRel G.Adj] :
+    Δ(G) ≤ χ' G := by
   cases isEmpty_or_nonempty V
   · simp
   · obtain ⟨v, hv⟩ := G.exists_maximal_degree_vertex
-    exact hv ▸ G.degree_le_chromaticNumber_lineGraph v
+    exact hv ▸ G.degree_le_chromaticIndex v
 
 end mycielskian_and_edges
 
 /-!
 Vizing's theorem
 [Vizing 1964](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-vizing-1964)
-says that this lower bound is almost tight: `χ'(G) ≤ Δ(G) + 1` for every finite graph
+says that this lower bound is almost tight: `χ' G ≤ Δ(G) + 1` for every finite graph
 `G`, and Kőnig's line colouring theorem
 [Kőnig 1916](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-konig-1916)
-says that `χ'(G) = Δ(G)` for every finite bipartite graph `G`. Neither is in Mathlib
+says that `χ' G = Δ(G)` for every finite bipartite graph `G`. Neither is in Mathlib
 yet. The greedy bound of the next section, applied to `L[G]`, whose vertices have
-degree at most `2 * Δ(G) - 2`, gives the much weaker `χ'(G) ≤ 2 * Δ(G) - 1`. (Mathlib
+degree at most `2 * Δ(G) - 2`, gives the much weaker `χ' G ≤ 2 * Δ(G) - 1`. (Mathlib
 is also missing many other standard topics of colouring theory such as chromatic
 polynomials and list colourings.)
 
@@ -969,18 +978,18 @@ lemma greedyChoice_congr {c₁ c₂ : ℕ → ℕ} {n : ℕ} (h : ∀ m < n, c�
 /-!
 [Figure: Left: a greedy colouring, with colours $0$, $1$, $2$ and $3$ drawn as red, blue, green and yellow. Right: for each vertex $n$, its earlier neighbours, the colours they forbid, and the least colour not forbidden](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
 
-We will use `greedyChoice` to define a function `greedy` that will give us the greedy
-colouring of `G` using *well-founded recursion* on `ℕ`: to colour a vertex `v` we
-need to know the colours of its *earlier* vertices `u < v`, so the value of `greedy`
-at `v` is defined in terms of its values at strictly smaller arguments.
+We use `greedyChoice` to define the greedy colouring `greedy` of `G` by *well-founded
+recursion* on `ℕ`. To colour a vertex `v` we need to know the colours of its
+*earlier* vertices `u < v`, so the value of `greedy` at `v` is defined in terms of
+its values at strictly smaller arguments.
 
 Concretely, we feed `greedyChoice` the "partial colouring" function
-`fun u ↦ if u < v then greedy u else 42`. The `if u < v` guard is what makes the
-recursion well-founded: the recursive call `greedy u` occurs only in the `then`
-branch, so it is guarded by `u < v`, which is exactly what Lean's termination checker
-needs to discharge the proof that the call is at a strictly smaller argument. The
-`42` in the `else` branch is just filler; its value is irrelevant, since
-`greedyChoice` ignores the values of the partial colouring at `u ≥ v`.
+`fun u ↦ if u < v then greedy u else 42`. The `if u < v` guard makes the recursion
+well-founded. The recursive call `greedy u` occurs only in the `then` branch, where
+`u < v` holds, and this is what Lean's termination checker needs to prove that the
+call is at a strictly smaller argument. The `42` in the `else` branch is just filler;
+its value is irrelevant, since `greedyChoice` ignores the values of the partial
+colouring at `u ≥ v`.
 -/
 /-- The greedy `ℕ`-colouring of `G` as a function. -/
 def greedy (v : ℕ) : ℕ :=
@@ -1103,7 +1112,7 @@ the *crown graph*, with its vertices ordered left, right, left, right, ...
 We will look at its countably infinite incarnation and show that the greedy colouring
 will use arbitrarily large colours, despite the graph being `2`-colourable.
 
-[Figure: Left: the greedy colouring of `crownGraph`, gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
+[Figure: Left: the greedy colouring of `crownGraph` gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
 -/
 
 /-- The *crown graph* is the complete bipartite graph on even and odd naturals,
@@ -1310,7 +1319,7 @@ Later we will use the [*De Bruijn–Erdős theorem*](#section-de-bruijn-erd-s-th
 to show that the countable assumption is also superfluous, but for this we need to
 understand `Subgraph`s.
 
-## Making `greedy` Fast *
+## Making `greedy` Efficient *
 
 Our definition of `greedy` has allowed us to prove the greedy colouring bound, but
 how good is `greedy` as an *algorithm*? As promised, we now investigate why
@@ -1466,7 +1475,7 @@ colouring: `greedy` has the cleanest definition and proofs due to Lean's support
 well-founded recursion on `ℕ` and the simplicity of `Nat.find`, but `greedyMemo` is
 much more efficient. So which should we have chosen to implement?
 
-It turns out that we don't have to choose! Lean's `csimp` attribute ("compiler
+It turns out that we don't have to choose. Lean's `csimp` attribute ("compiler
 simp") registers a *proved* equation between two functions and makes the
 compiler use the right-hand side whenever it compiles code that mentions the
 left-hand side. So by marking the next result with `@[csimp]`, every definition and

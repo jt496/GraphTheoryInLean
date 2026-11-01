@@ -198,10 +198,10 @@ Show that if `G` is connected and `k`-vertex-connected then `G □ K₂` is
 
 Hint: `G □ K₂` has twice as many vertices as `G`, and by
 `IsVertexConnected.of_finset` it is enough to avoid finsets `S`. If `k = 0` then `S`
-is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, given vertices
-`(u, c)` and `(v, d)` not in `S`, pick `b` such that the `G`-fibre at `b` contains
-less than `k` vertices of `S` (Exercise 14), walk from both vertices into the
-`G`-fibre at `b` avoiding `S` (Exercise 15), and join the ends of these walks by a
+is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, take vertices
+`(u, c)` and `(v, d)` not in `S`. Pick `b` such that the `G`-fibre at `b` contains
+less than `k` vertices of `S` (Exercise 14), and walk from both vertices into the
+`G`-fibre at `b` avoiding `S` (Exercise 15). Then join the ends of these walks by a
 walk in `G` avoiding `S.fiberProj b`, copied into the `G`-fibre at `b` with
 `Walk.boxProdLeft`.
 -/
@@ -638,10 +638,10 @@ lemma IsVertexConnected.exists_walk_to_fiber {k : ℕ} (hG : G.IsVertexConnected
 
 Hint: `G □ K₂` has twice as many vertices as `G`, and by
 `IsVertexConnected.of_finset` it is enough to avoid finsets `S`. If `k = 0` then `S`
-is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, given vertices
-`(u, c)` and `(v, d)` not in `S`, pick `b` such that the `G`-fibre at `b` contains
-less than `k` vertices of `S` (Exercise 14), walk from both vertices into the
-`G`-fibre at `b` avoiding `S` (Exercise 15), and join the ends of these walks by a
+is empty and `G □ K₂` is connected by `Connected.boxProd`. Otherwise, take vertices
+`(u, c)` and `(v, d)` not in `S`. Pick `b` such that the `G`-fibre at `b` contains
+less than `k` vertices of `S` (Exercise 14), and walk from both vertices into the
+`G`-fibre at `b` avoiding `S` (Exercise 15). Then join the ends of these walks by a
 walk in `G` avoiding `S.fiberProj b`, copied into the `G`-fibre at `b` with
 `Walk.boxProdLeft`.
 

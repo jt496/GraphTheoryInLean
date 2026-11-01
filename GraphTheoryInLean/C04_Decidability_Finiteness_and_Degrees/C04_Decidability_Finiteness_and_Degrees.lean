@@ -36,9 +36,9 @@ Mycielskians, building the `DecidableRel` and `Fintype` instances needed both to
 evaluate and to prove facts about their degrees and edge counts.
 
 Finally, an advanced section on degree sequences defines the degree multiset of a
-graph, asks which multisets are *graphic*, states, without proof, the Erdős–Gallai
-and Havel–Hakimi characterizations, and uses the latter to give a function that
-computes the edges of a graph with a given graphic degree sequence.
+graph and asks which multisets are *graphic*. It states the Erdős–Gallai and
+Havel–Hakimi characterizations without proof, and uses Havel–Hakimi to give a
+function that computes the edges of a graph with a given graphic degree sequence.
 
 # Decidability
 
@@ -64,7 +64,7 @@ a term `h : p` is a proof of that statement.
 Although `Prop` has many terms, such as `1 = 1`, `2 + 2 = 5` and Goldbach's
 conjecture, Lean treats logically equivalent propositions as equal (`propext`), and
 classically every `p : Prop` is equal to either `True` or `False`
-(`Classical.propComplete`). So, up to equality, `Prop` also has just two values.The
+(`Classical.propComplete`). So, up to equality, `Prop` also has just two values. The
 difference is that a `Bool` is a value that a program can compute and branch on,
 while a `Prop` is a statement that we may or may not be able to prove.
 
@@ -326,10 +326,10 @@ set_option trace.Meta.synthInstance true in
 example : ¬ C[5].Adj 0 2 := by decide
 
 /-!
-We will introduce `Fintype` instances formally later in this chapter, but for now it
-is enough to know that `K[n].edgeFinset` is a computable finite set of the edges of
-the complete graph `K[n]`; while `K[n].edgeFinset.card` is this set's cardinality,
-i.e. the number of edges in `K[n]`.
+We will introduce `Fintype` instances formally later in this chapter. For now it is
+enough to know that `K[n].edgeFinset` is a computable finite set of the edges of the
+complete graph `K[n]`, and `K[n].edgeFinset.card` is its cardinality, the number of
+edges in `K[n]`.
 
 Again `#eval` can compute this quickly.
 -/
@@ -616,8 +616,8 @@ it can read off the `decide` field. Here `h` appears only inside `reflects_decid
 which is a proof that `decide` never needs to reduce. The `decide` field itself
 contains no `Eq.rec` cast, so nothing blocks kernel reduction.
 
-Lean tries the most recently declared instances first, so from now our instance given
-below takes priority over Mathlib's.
+Lean tries the most recently declared instances first, so from now on our instance
+given below takes priority over Mathlib's.
 -/
 /-- Decidability of the adjacency relation for the single-edge graph `edge s t`. -/
 instance edgeDecidableRelAdj {V : Type*} [DecidableEq V] (s t : V) :
@@ -783,10 +783,10 @@ the ambient type. This only makes sense when there is a `[Fintype α]` instance.
 (`Fintype` instances and `Finset.univ` are introduced properly in
 [Fintypes](#section-fintypes).)
 
-Left to its own devices `{x | p x}` defaults to producing a `Set α`, but when the
-expected type is `Finset α` and Lean can find a `Fintype α` instance (so that
-`Finset.univ` exists) together with a `DecidablePred p`, the very same notation
-elaborates to the `Finset α` `{x ∈ Finset.univ | p x}`, i.e. `Finset.univ.filter p`.
+Left to its own devices `{x | p x}` produces a `Set α`. But suppose the expected type
+is `Finset α`, and Lean can find a `Fintype α` instance (so that `Finset.univ`
+exists) and a `DecidablePred p`. Then the same notation elaborates to the `Finset α`
+`{x ∈ Finset.univ | p x}`, that is, `Finset.univ.filter p`.
 -/
 example {α : Type*} [Fintype α] (p : α → Prop) [DecidablePred p] :
     ({x | p x} : Finset α) = Finset.univ.filter (fun x => p x) := rfl
@@ -892,16 +892,15 @@ This is because to form the `edgeFinset` of `G`, Lean needs to infer a `Fintype`
 instance for the `edgeSet` of `G`. But it can't do this with just `Fintype V`.
 
 This can be very confusing: surely a graph on a finite vertex set has finitely many
-edges! But `Fintype` is more than the proposition that a type is finite, it is a
-specific `Finset` of the elements of the type together with a proof that this
-contains every element exactly once.
+edges! But recall that a `Fintype` instance is data: an explicit `Finset` of the
+elements of the type.
 
 The `edgeSet` of a graph `G` is a set of unordered pairs, i.e. a `Set (Sym2 V)`.
-Mathlib's instance `fintypeEdgeSet`, which applies to an arbitrary graph, builds
+Mathlib's instance `fintypeEdgeSet` applies to an arbitrary graph. It builds
 `Fintype G.edgeSet` as a subtype of `Sym2 V`, so it needs a `Fintype` instance for
-`Sym2 V` *and* a way to decide whether or not any given pair of vertices are
-adjacent in `G` (and so whether the corresponding edge belongs to the edge set),
-i.e. an instance of `DecidableRel G.Adj`!
+`Sym2 V` *and* a way to decide whether any given pair of vertices is adjacent in `G`
+(and so whether the corresponding edge belongs to the edge set). That is, it needs
+an instance of `DecidableRel G.Adj`!
 -/
 #source fintypeEdgeSet
 -- instance fintypeEdgeSet [Fintype (Sym2 V)] [DecidableRel G.Adj] :
@@ -980,10 +979,9 @@ such as the empty graph on `ℕ`, can supply the instance directly, with no ment
 -/
 example : ∃ n, (⊥ : SimpleGraph ℕ).edgeFinset.card = n := good_card_edgeFinset ⊥
 /-!
-Overly strong instance arguments don't make a theorem wrong, they just make it less
-useful. (When you don't need to *compute* at all, the cleanest choice is often to
-drop `Fintype` data entirely in favour of `Finite`/`Nat.card`; see
-[Cardinality](#section-cardinality).)
+When you don't need to *compute* at all, the cleanest choice is often to drop
+`Fintype` data entirely in favour of `Finite`/`Nat.card`; see
+[Cardinality](#section-cardinality).
 
 ### Building `Fintype` Instances
 
@@ -1318,10 +1316,8 @@ are finite.
 
 When `V` is finite and adjacency in `G` is decidable, Lean already infers a `Fintype`
 instance for this neighbourhood by filtering the vertices of `G[n]`. When `G` is only
-locally finite it can't, so we build the instance ourselves. As with
-`locallyFiniteOfFintypeEdgeSet`, we make it a `def` rather than an `instance`: for a
-finite graph an instance would give a second route to `Fintype (G[n].neighborSet w)`,
-alongside the filtering one.
+locally finite it can't, so we build the instance ourselves. For the same reason as
+`locallyFiniteOfFintypeEdgeSet`, we make it a `def` rather than an `instance`.
 
 To build it we give the bijection (or more precisely the `Equiv`) to
 `Fintype.ofEquiv` which then returns the instance. An `Equiv` `α ≃ β` is a structure
@@ -1854,8 +1850,7 @@ the box product, which is exactly how `Q[n]` is defined (for `n ≠ 0`).
 We use `inferInstanceAs` to tell Lean to build the neighbourhood through the box
 product. (Here `f <| x` means `f x`; it saves writing brackets around a long
 argument.) As with `locallyFiniteOfFintypeEdgeSet` and `blowUpNFintypeNeighborSet`,
-we make this a `def` rather than an `instance`: as an instance it would give
-`Q[n].neighborSet v` a second `Fintype` instance, alongside the filtering one.
+we make this a `def` rather than an `instance`.
 -/
 /-- An efficient `Fintype` instance for the neighbourhood of a vertex in `Q[n]`,
 built through the box product rather than by filtering all `2 ^ n` vertices. -/
@@ -2326,10 +2321,9 @@ The necessity of this is easy informally: suppose we have a graph with this degr
 sequence and `deg(vᵢ) = dᵢ`. Summing the first `k` terms we count the edges in the
 subgraph induced by `sₖ = {v₁, …, vₖ}` twice and the edges in the bipartite graph
 between `sₖ` and its complement once. No subgraph has more edges than a clique, so
-the induced subgraph on `sₖ` has at most `k * (k - 1) / 2` edges and hence
-contributes at most `k * (k - 1)` to the sum, while the number of edges in the
-bipartite graph can be bounded above by considering how many edges each vertex `vₖ₊ᵢ`
-sends to `sₖ`, which is clearly at most `min(k, dₖ₊ᵢ)`.
+the induced subgraph on `sₖ` has at most `k * (k - 1) / 2` edges and contributes at
+most `k * (k - 1)` to the sum. Each vertex `vₖ₊ᵢ` sends at most `min(k, dₖ₊ᵢ)` edges
+to `sₖ`, and summing these bounds the number of edges in the bipartite graph.
 
 [Figure: The case $k = 3$ for degrees $(4, 4, 4, 4, 2, 2)$. The sum $d_1 + d_2 + d_3 = 12$ counts each edge inside $s_3$ (blue) twice and each edge leaving $s_3$ (orange) once, and is at most $3 \cdot 2 + \min(3, 4) + \min(3, 2) + \min(3, 2) = 13$](https://jt496.github.io/GraphTheoryInLean/figures/erdosGallai.svg)
 

@@ -28,16 +28,15 @@ Two of the constructions we introduce below, the
 [Mycielskian](#section-mycielskian), will serve as running examples throughout
 the remaining chapters.
 
-Beware that in this chapter we are looking at *constructions*, and so we will see
-examples of complete bipartite graphs and cycle graphs etc., but we won't see any
-discussion yet of what it means for a graph to *be* bipartite or to *contain* a cycle
-etc.
+Beware that in this chapter we are looking at *constructions*. We will see examples
+of complete bipartite graphs and cycle graphs, but we won't yet discuss what it means
+for a graph to *be* bipartite or to *contain* a cycle.
 
 To sanity-check our definitions, we will want to perform computations on small
 examples using `#eval` and `decide`. We will look at such computations in much more
 detail in the next chapter, but for them to work we need to provide decidability
 instances for adjacency in the graphs we define. Feel free to ignore these and
-revisit them once you have read the next chapter!
+revisit them once you have read the next chapter.
 
 
 # Basic Families of Graphs
@@ -248,10 +247,9 @@ If we try to check adjacency of two vertices in `K[4, 5]` we get an error.
 
 /-!
 This is because there is currently no instance of decidable adjacency for
-`completeBipartiteGraph` in Mathlib. In this case it is easy to give. (Don't worry if
-this is unfamiliar; we will look at decidability in *much* more detail in
-[Decidability, Finiteness and
-Degrees](#chapter-decidability-finiteness-and-degrees).)
+`completeBipartiteGraph` in Mathlib. In this case it is easy to give. (See
+[Decidability, Finiteness and Degrees](#chapter-decidability-finiteness-and-degrees)
+for more on decidability.)
 -/
 instance (V W : Type*) : DecidableRel (completeBipartiteGraph V W).Adj := by
   intro v w
@@ -605,10 +603,9 @@ viewpoint and we will equip it with the Hamming distance when needed in
 
 The `@[implicit_reducible]` attribute lets Lean unfold `HypercubeVert (n + 1)` to
 `HypercubeVert n × Bool` when it checks that implicit arguments have the expected
-type (as `simp` does before rewriting), while keeping `HypercubeVert` opaque to
-instance search so that the instances we provide for `HypercubeVert n` in
-[Computations with Hypercubes](#section-computations-with-hypercubes) are still
-found.
+type, as `simp` does before rewriting. Instance search still treats `HypercubeVert`
+as opaque, so the instances we provide for `HypercubeVert n` in [Computations with
+Hypercubes](#section-computations-with-hypercubes) are still found.
 -/
 @[simp]
 lemma hypercubeVert_zero : HypercubeVert 0 = Unit := rfl

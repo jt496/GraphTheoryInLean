@@ -76,7 +76,7 @@ theorem IsRegularOfDegree.exists_isPerfectMatching' [G.LocallyFinite] {k : ℕ}
 
 /-!
 8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
-chromatic index `χ'(G) = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
+chromatic index `χ' G = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
 Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
 properly coloured with `k` colours. (The general case reduces to this one, since
 every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
@@ -87,7 +87,7 @@ theorem IsRegularOfDegree.colorable_lineGraph' [G.LocallyFinite] {k : ℕ}
     (hb : G.IsBipartite) (hG : G.IsRegularOfDegree k) : L[G].Colorable k := by
   sorry
 
-example (n : ℕ) : χ L[Q[n]] = n := by
+example (n : ℕ) : χ' Q[n] = n := by
   sorry
 
 /-!
@@ -352,7 +352,7 @@ theorem IsRegularOfDegree.exists_isPerfectMatching [G.LocallyFinite] {k : ℕ}
 
 /-!
 8. *Kőnig's line colouring theorem* says that a finite bipartite graph `G` has
-chromatic index `χ'(G) = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
+chromatic index `χ' G = Δ(G)` (see [Edge Colourings](#section-edge-colourings)).
 Prove it for regular graphs: the edges of a `k`-regular bipartite graph can be
 properly coloured with `k` colours. (The general case reduces to this one, since
 every finite bipartite graph is a subgraph of a `Δ(G)`-regular bipartite graph.)
@@ -414,11 +414,11 @@ theorem IsRegularOfDegree.colorable_lineGraph [G.LocallyFinite] {k : ℕ}
         ⟨by simpa using hne, x, hxe, hxf⟩
       exact Fin.castSucc_injective _ |>.ne (C.valid hadj)
 
-example (n : ℕ) : χ L[Q[n]] = n := by
+example (n : ℕ) : χ' Q[n] = n := by
   have hG := IsRegularOfDegree.hypercube n
   refine le_antisymm (hG.colorable_lineGraph (IsBipartite.hypercube n)
     |>.chromaticNumber_le) ?_
-  have := Q[n].degree_le_chromaticNumber_lineGraph (Classical.arbitrary _)
+  have := Q[n].degree_le_chromaticIndex (Classical.arbitrary _)
   rwa [hG] at this
 
 /-!

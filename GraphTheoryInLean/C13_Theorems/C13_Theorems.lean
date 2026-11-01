@@ -33,11 +33,11 @@ gives Kőnig's theorem), symmetric differences of perfect matchings, and Tutte's
 theorem. We then turn to extremal graph theory: Turán's theorem (with Mantel's
 theorem as a special case), Füredi's stability theorem, the Andrásfai–Erdős–Sós
 theorem and extremal numbers, together with their asymptotic behaviour (Turán density
-and the Erdős–Stone theorem). The last three sections are more advanced: two further
-extremal results, Zykov's theorem on the number of cliques and Szemerédi's regularity
-lemma with the triangle removal lemma (and Roth's theorem on arithmetic progressions
-as an application), and two results about infinite graphs, Kőnig's lemma and the
-existence of ends.
+and the Erdős–Stone theorem). The last three sections are more advanced. The first
+two give further extremal results: Zykov's theorem on the number of cliques, and
+Szemerédi's regularity lemma with the triangle removal lemma, applied to Roth's
+theorem on arithmetic progressions. The third proves two results about infinite
+graphs, Kőnig's lemma and the existence of ends.
 
 Many famous theorems are not (yet) in Mathlib. These include Ramsey's theorem for
 graphs, the Kővári–Sós–Turán theorem, Kirchhoff's matrix-tree theorem
@@ -48,13 +48,17 @@ Euler's circuit theorem, Euler's formula
 [Euler 1758](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-euler-1758)
 and planarity, Menger's theorem, Brooks' theorem, Vizing's theorem, Berge's theorem
 [Berge 1957](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-berge-1957),
-Kőnig's theorem on bipartite matchings and the theorems of Dirac and Ore. (Some of
-these are proved in this guide: the simplest case `R(3, 3) = 6` of Ramsey's theorem
-(`not_cliqueFree_three_and_indepSetFree_three`), Euler's theorem on Eulerian trails
-(`Walk.exists_isEulerian_iff`), the theorems of Dirac
-(`isHamiltonian_of_card_le_two_mul_minDegree`) and Ore (`IsOreGraph.isHamiltonian`),
-Brooks' theorem (`brooks`) and [Kőnig's theorem](#section-k-nig-s-theorem)
-(`IsBipartite.matchingNum_eq_vertexCoverNum`).)
+Kőnig's theorem on bipartite matchings and the theorems of Dirac and Ore. Some of
+these are proved in this guide:
+
+* the simplest case `R(3, 3) = 6` of Ramsey's theorem
+  (`not_cliqueFree_three_and_indepSetFree_three`)
+* Euler's theorem on Eulerian trails (`Walk.exists_isEulerian_iff`)
+* the theorems of Dirac (`isHamiltonian_of_card_le_two_mul_minDegree`) and Ore
+  (`IsOreGraph.isHamiltonian`)
+* Brooks' theorem (`brooks`)
+* [Kőnig's theorem](#section-k-nig-s-theorem)
+  (`IsBipartite.matchingNum_eq_vertexCoverNum`)
 
 # Matchings
 
@@ -488,7 +492,7 @@ have decidable adjacency, so we can compute it.
 #check turanNumber_eq
 
 /-!
-In particular `turanNumber n r` is at most `2 * (1 - 1 / r) n ^ 2`.
+In particular `turanNumber n r` is at most `(1 - 1 / r) n ^ 2 / 2`.
 -/
 #check mul_turanNumber_le -- 2 * r * turanNumber n r ≤ (r - 1) * n ^ 2
 
@@ -497,7 +501,7 @@ In particular `turanNumber n r` is at most `2 * (1 - 1 / r) n ^ 2`.
 
 Mathlib calls a graph `G` *Turán-maximal* if it is `(r + 1)`-clique-free and has at
 least as many edges as any other `(r + 1)`-clique-free graph on the same vertices.
-This is special case of `IsExtremal`, which says that a graph has the most edges
+This is a special case of `IsExtremal`, which says that a graph has the most edges
 among the graphs on its vertex type with a given property.
 -/
 #source IsExtremal
@@ -826,10 +830,11 @@ lemma furedi_step [DecidableRel G.Adj] [DecidableEq V] {N A : Finset V} {c : V �
   grind
 
 /-!
-The local form of Füredi's inequality, proved by induction on `r`: a set `S` with
-no `(r + 1)`-clique has a colouring `c` with values less than `r` on `S` such that
-the edges of `G` in `S`, plus those with both endpoints of the same colour, number at
-most the edges of the complete multipartite graph with the colour classes as parts.
+The local form of Füredi's inequality, proved by induction on `r`. A set `S` with no
+`(r + 1)`-clique has a colouring `c`, taking values less than `r` on `S`, with the
+following property. Count the edges of `G` in `S`, counting twice those whose
+endpoints have the same colour: the total is at most the number of edges of the
+complete multipartite graph whose parts are the colour classes.
 -/
 lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
     ∀ S : Finset V, (∀ t ⊆ S, ¬ G.IsNClique (r + 1) t) →
@@ -1035,7 +1040,7 @@ Mathlib.
 ## Turán Density and the Erdős–Stone Theorem
 
 How does `extremalNumber n H` grow with `n`? Dividing by the number of possible edges
-`n.choose 2`, gives a sequence that is decreasing and so converges. Its limit is the
+`n.choose 2` gives a sequence that is decreasing and so converges. Its limit is the
 *Turán density* (`turanDensity`).
 
 Statements about limits in Mathlib use filters: `Tendsto f atTop (𝓝 a)` says that
@@ -1045,7 +1050,7 @@ Statements about limits in Mathlib use filters: `Tendsto f atTop (𝓝 a)` says 
 #check tendsto_turanDensity
 
 /-!
-When the Turán denisty is nonzero, `extremalNumber n H` is asymptotically
+When the Turán density is nonzero, `extremalNumber n H` is asymptotically
 `turanDensity H * n.choose 2`, which Mathlib writes with `~[atTop]`
 (asymptotic equivalence).
 -/
@@ -1087,10 +1092,10 @@ has at most as many `s`-cliques as the Turán graph `T[n, r]`. Moreover, except 
 the degenerate cases of `s < 2`, `s > r` or `s > n`, the Turán graph is (up to
 isomorphism) the unique maximizer.
 
-For example, the `T[7, 3]` is `4`-clique-free and its parts have sizes `3`, `2` and
-`2`, so it has `3 * 2 * 2 = 12` triangles. Zykov's theorem says that no
-`4`-clique-free graph on `7` vertices has more triangles than this, and any
-`4`-clique-free on `7` vertices with this many triangles is isomorphic to `T[7, 3]`.
+For example, `T[7, 3]` is `4`-clique-free and its parts have sizes `3`, `2` and `2`,
+so it has `3 * 2 * 2 = 12` triangles. Zykov's theorem says that no `4`-clique-free
+graph on `7` vertices has more triangles than this, and any `4`-clique-free graph on
+`7` vertices with this many triangles is isomorphic to `T[7, 3]`.
 -/
 #eval #(T[7, 3].cliqueFinset 3) -- 12
 
@@ -1878,7 +1883,7 @@ example : paleyGraph₉.LocallyLinear := by decide +kernel
 #eval paleyGraph₉.cliqueFinset 3
 
 /-!
-[Figure: The Paley graph on $9$ vertices. Its $6$ triangles drawn as the circles, whose three arcs are edges.](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph9.svg)
+[Figure: The Paley graph on $9$ vertices. It's $6$ triangles are drawn as circles, whose three arcs are edges.](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph9.svg)
 
 Locally linear graphs are behind the proof of the corners theorem: a corner-free set
 `A` gives a locally linear graph with `#A` triangles, and the removal lemma shows

@@ -1258,13 +1258,13 @@ lemma hyperoctahedralToAut_injective (n : ℕ) :
 /-!
 ## Rigidity
 
-The key step in proving surjectivity is a rigidity lemma: an automorphism `g` fixing
-`0` and all the basis vectors is the identity. The point is that the coordinates of a
-vertex can be read off from distances, which automorphisms preserve. Since the graph
-distance in the Hamming cube is the Hamming distance (`edist_hypercubeHamming`),
-every automorphism preserves the Hamming distance, and (if it fixes `0`) the Hamming
-weight (`hammingNorm`), i.e. the number of `true` coordinates, which is the Hamming
-distance to `0`.
+For surjectivity we need a rigidity lemma: an automorphism `g` fixing `0` and all the
+basis vectors is the identity. The point is that the coordinates of a vertex can be
+read off from distances, which automorphisms preserve. Since the graph distance in
+the Hamming cube is the Hamming distance (`edist_hypercubeHamming`), every
+automorphism preserves the Hamming distance. An automorphism fixing `0` therefore
+also preserves the Hamming weight (`hammingNorm`), the number of `true` coordinates,
+since this is the Hamming distance to `0`.
 -/
 lemma hammingDist_aut {n : ℕ} (g : hypercubeHamming n ≃g hypercubeHamming n)
     (x y : Fin n → Bool) : hammingDist (g x) (g y) = hammingDist x y := by
@@ -1888,11 +1888,14 @@ lemma subcubeCopy_injective {n k : ℕ} :
 Every copy of `Q[k]` in `Q[n]` is of the form `subcubeCopy b d`. Note that a copy is
 an *injective homomorphism*: it preserves adjacency in the forward direction only,
 so, unlike for automorphisms, no distance or weight preservation is available. We use
-the parallelogram lemma instead. The proof has two steps: we first read off the
-direction embedding `d` from the images of the basis vectors, and then show that
-`f x = f 0 + extendEmb d x` by strong induction on the Hamming weight of `x`,
-computing `f y` for `y` of weight `m + 2` from the images of the three vertices
-`y + eᵢ`, `y + eⱼ`, `y + eᵢ + eⱼ` below it in the `4`-cycle through `y`.
+the parallelogram lemma instead. The proof has two steps. First we read off the
+direction embedding `d` from the images of the basis vectors. Then we show that
+`f x = f 0 + extendEmb d x` by strong induction on the Hamming weight of `x`.
+Vertices of weight `0` and `1` are `0` and the basis vectors, which are covered by
+the first step. A vertex `y` of weight at least `2` has two `true` coordinates
+`i ≠ j`. So it is the top corner of a `4`-cycle whose other three vertices,
+`y + eᵢ`, `y + eⱼ` and `y + eᵢ + eⱼ`, have smaller weight, and the parallelogram
+lemma determines `f y` from their images.
 
 First we prove a small helper lemma: a vector of Hamming weight at least two has two
 distinct `true` coordinates.

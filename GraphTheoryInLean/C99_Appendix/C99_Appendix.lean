@@ -64,6 +64,7 @@ Mathlib.
 | `βₖ` | `k`-subsets of `β` (Chapter 6) | `{s : Finset β // #s = k}` |
 | `N(s)` | Open neighbourhood of `s` (Chapter 6) | `openNeighborhoodFinset G s` |
 | `χ G` | Chromatic number of a graph `G` | `SimpleGraph.chromaticNumber G` |
+| `χ' G` | Chromatic index of a graph `G` | `SimpleGraph.chromaticIndex G` |
 | `G⟦v⟧` | Connected component of `G` containing `v` | `connectedComponentMk G v` |
 | `λ(G)` | Edge connectivity of a graph `G` | `SimpleGraph.edgeConnectivity G` |
 | `κ(G)` | Vertex connectivity of a graph `G` | `SimpleGraph.vertexConnectivity G` |
@@ -226,6 +227,8 @@ The following custom definitions and abbreviations are introduced in this guide:
   of `mμ(G)`.
 * `Coloring.mycielskian`: the `(k + 1)`-colouring of `mμ(G)` induced by a
   `k`-colouring of `G`.
+* `chromaticIndex`: the chromatic index `χ' G` of a graph, the chromatic number
+  `χ L[G]` of its line graph.
 * `neighborLTSet`: set of neighbours of a vertex `v` that are smaller than `v`.
 * `neighborLTFinset`: finset of neighbours of a vertex `v` that are smaller than `v`.
 * `degreeLT`: the number of earlier neighbours of a vertex `v`.
@@ -477,8 +480,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 # Results
 
-The following key results, theorems, and lemmas are proven throughout this guide and
-its exercises:
+The following results are proved in this guide and its exercises:
 
 ## Chapter 3: Constructions (Results)
 *From the exercises:*
@@ -624,9 +626,9 @@ its exercises:
   number `n + 2`.
 * `mycielski`: Mycielski's theorem, `mμ^n(K[2])` has clique number `2` and chromatic
   number `n + 2`.
-* `degree_le_chromaticNumber_lineGraph` / `maxDegree_le_chromaticNumber_lineGraph`:
-  the chromatic index `χ L[G]` is at least the degree of every vertex, and so at
-  least `Δ(G)` for a finite graph.
+* `degree_le_chromaticIndex` / `maxDegree_le_chromaticIndex`: the chromatic index
+  `χ' G` is at least the degree of every vertex, and so at least `Δ(G)` for a finite
+  graph.
 * `greedy_lt` / `Adj.greedy_ne`: the greedy colour of `v` is at most `degreeLT v`,
   and adjacent vertices receive different greedy colours.
 * `colorable_of_degreeLT_le`: *the greedy bound* for graphs on `ℕ`: if every vertex

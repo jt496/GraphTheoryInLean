@@ -1710,7 +1710,9 @@
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Colorings", "shortTitle": null, "number": "7"},
        {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
-       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"},
+       {"title": "Making  greedy  Efficient*",
+        "shortTitle": null,
+        "number": "6"},
        {"title": "Memoization", "shortTitle": null, "number": "2"}]},
      "address": "/Colorings/"}],
    "section-maximum-degree-two":
@@ -1862,10 +1864,10 @@
        {"title": "Turán's Theorem", "shortTitle": null, "number": "2"},
        {"title": "Mantel's Theorem", "shortTitle": null, "number": "1"}]},
      "address": "/Theorems/"}],
-   "section-making-greedy-fast":
-   [{"id": "section-making-greedy-fast",
+   "section-making-greedy-efficient":
+   [{"id": "section-making-greedy-efficient",
      "data":
-     {"title": "Making  greedy  Fast*",
+     {"title": "Making  greedy  Efficient*",
       "shortTitle": null,
       "sectionNum": "7.8.6.",
       "searchPriority": 50,
@@ -1873,7 +1875,9 @@
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Colorings", "shortTitle": null, "number": "7"},
        {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
-       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"}]},
+       {"title": "Making  greedy  Efficient*",
+        "shortTitle": null,
+        "number": "6"}]},
      "address": "/Colorings/"}],
    "section-lists-multisets-and-finsets":
    [{"id": "section-lists-multisets-and-finsets",
@@ -3266,7 +3270,9 @@
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Colorings", "shortTitle": null, "number": "7"},
        {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
-       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"},
+       {"title": "Making  greedy  Efficient*",
+        "shortTitle": null,
+        "number": "6"},
        {"title": "Debugging  greedy", "shortTitle": null, "number": "1"}]},
      "address": "/Colorings/"}],
    "section-de-bruijn-erd-s-theorem":
@@ -3528,7 +3534,9 @@
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Colorings", "shortTitle": null, "number": "7"},
        {"title": "Greedy Colouring*", "shortTitle": null, "number": "8"},
-       {"title": "Making  greedy  Fast*", "shortTitle": null, "number": "6"},
+       {"title": "Making  greedy  Efficient*",
+        "shortTitle": null,
+        "number": "6"},
        {"title": "Correct and Efficient:  csimp",
         "shortTitle": null,
         "number": "3"}]},
@@ -5252,7 +5260,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Debugging  greedy"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.walkComponent_subset":
@@ -6608,11 +6616,11 @@
         "Decidability, Finiteness and Degrees",
         "Exercises"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.maxDegree_le_chromaticNumber_lineGraph":
-   [{"id": "SimpleGraph___maxDegree_le_chromaticNumber_lineGraph",
+   "SimpleGraph.maxDegree_le_chromaticIndex":
+   [{"id": "SimpleGraph___maxDegree_le_chromaticIndex",
      "data":
-     {"/Colorings/#SimpleGraph___maxDegree_le_chromaticNumber_lineGraph":
-      {"display": "maxDegree_le_chromaticNumber_lineGraph",
+     {"/Colorings/#SimpleGraph___maxDegree_le_chromaticIndex":
+      {"display": "maxDegree_le_chromaticIndex",
        "context": ["Graph Theory in Lean", "Colorings", "Edge Colourings"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.matchingNum_pathNat'":
@@ -6773,7 +6781,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.le_vertexConnectivity_iff":
@@ -8552,7 +8560,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Correct and Efficient:  csimp"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedy_eq_greedyChoice":
@@ -8586,7 +8594,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Debugging  greedy"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyMemo_eq_greedy":
@@ -8598,7 +8606,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyMemo":
@@ -8610,7 +8618,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyListTraced":
@@ -8622,7 +8630,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyList":
@@ -8634,7 +8642,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.greedyColoringNat":
@@ -8821,7 +8829,7 @@
        ["Graph Theory in Lean",
         "Colorings",
         "Greedy Colouring*",
-        "Making  greedy  Fast*",
+        "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.furedi_step":
@@ -9685,11 +9693,11 @@
         "Degrees",
         "Neighbours in a Set"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.degree_le_chromaticNumber_lineGraph":
-   [{"id": "SimpleGraph___degree_le_chromaticNumber_lineGraph",
+   "SimpleGraph.degree_le_chromaticIndex":
+   [{"id": "SimpleGraph___degree_le_chromaticIndex",
      "data":
-     {"/Colorings/#SimpleGraph___degree_le_chromaticNumber_lineGraph":
-      {"display": "degree_le_chromaticNumber_lineGraph",
+     {"/Colorings/#SimpleGraph___degree_le_chromaticIndex":
+      {"display": "degree_le_chromaticIndex",
        "context": ["Graph Theory in Lean", "Colorings", "Edge Colourings"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.degree_coneGraph_some'":
@@ -10973,6 +10981,13 @@
         "Colorings",
         "Colouring Concrete Graphs",
         "Colouring Box Products"]}},
+     "address": "/Colorings/"}],
+   "SimpleGraph.chromaticIndex":
+   [{"id": "SimpleGraph___chromaticIndex",
+     "data":
+     {"/Colorings/#SimpleGraph___chromaticIndex":
+      {"display": "chromaticIndex",
+       "context": ["Graph Theory in Lean", "Colorings", "Edge Colourings"]}},
      "address": "/Colorings/"}],
    "SimpleGraph.chosenSubgraphIso":
    [{"id": "SimpleGraph___chosenSubgraphIso",

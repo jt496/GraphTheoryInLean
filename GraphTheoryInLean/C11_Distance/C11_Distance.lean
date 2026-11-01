@@ -130,11 +130,11 @@ which we defined as an iterated box product (`hypercube`).
 /-!
 ## Distance in the Hypercube
 
-As an application we compute the distance in the hypercube `Q[n]`. Since `Q[n + 1]`
-is by definition the box product `Q[n] □ ⊤` of `Q[n]` with the complete graph on
-`Bool` (`hypercube_succ`), the box product formula `edist_boxProd` splits the
-distance in `Q[n + 1]` into the distance in `Q[n]` plus the distance in `⊤`, which is
-`0` or `1` according to whether the last coordinates agree (`edist_top`). This is
+As an application we compute the distance in the hypercube `Q[n]`. By definition
+`Q[n + 1]` is the box product `Q[n] □ ⊤` of `Q[n]` with the complete graph on `Bool`
+(`hypercube_succ`). So the box product formula `edist_boxProd` splits the distance in
+`Q[n + 1]` into the distance in `Q[n]` plus the distance in `⊤`. The latter is `0` or
+`1` according to whether the last coordinates agree (`edist_top`). This is
 exactly the recursion defining the Hamming distance `HypercubeVert.hammingDist`, so
 by induction the graph distance *is* the Hamming distance.
 -/
@@ -148,9 +148,8 @@ lemma edist_eq_hammingDist {n : ℕ} {u v : HypercubeVert n} :
 
 /-!
 In particular the Hamming distance inherits the properties of the graph distance,
-such as the triangle inequality. And adjacency in `Q[n]` is exactly "Hamming distance
-one", since the adjacent vertices are exactly those at distance one
-(`edist_eq_one_iff_adj`).
+such as the triangle inequality. And since adjacent vertices are those at distance
+one (`edist_eq_one_iff_adj`), adjacency in `Q[n]` means Hamming distance one.
 -/
 lemma hypercube_adj_iff_hammingDist_eq_one {n : ℕ} {u v : HypercubeVert n} :
     Q[n].Adj u v ↔ u.hammingDist v = 1 := by

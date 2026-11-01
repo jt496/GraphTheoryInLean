@@ -112,9 +112,7 @@ example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
 neighbourhood whenever `w.fst` has a finite neighbourhood in `G`. In this exercise we
 generalize this to blow-ups whose classes may have different sizes and need not all
 be finite: it is enough that the classes of the neighbours of `w.fst` are finite. As
-with `blowUpNFintypeNeighborSet`, we make this a `def` rather than an `instance`:
-when `ι` is finite and adjacency in `H` is decidable, an instance would give a second
-route to `Fintype ((H.blowUpGraph V).neighborSet w)`, alongside the filtering one.
+with `blowUpNFintypeNeighborSet`, we make this a `def` rather than an `instance`.
 -/
 @[instance_reducible]
 def blowUpGraphFintypeNeighborSet' {ι : Type*} (H : SimpleGraph ι) (V : ι → Type*)
@@ -402,9 +400,7 @@ example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
 neighbourhood whenever `w.fst` has a finite neighbourhood in `G`. In this exercise we
 generalize this to blow-ups whose classes may have different sizes and need not all
 be finite: it is enough that the classes of the neighbours of `w.fst` are finite. As
-with `blowUpNFintypeNeighborSet`, we make this a `def` rather than an `instance`:
-when `ι` is finite and adjacency in `H` is decidable, an instance would give a second
-route to `Fintype ((H.blowUpGraph V).neighborSet w)`, alongside the filtering one.
+with `blowUpNFintypeNeighborSet`, we make this a `def` rather than an `instance`.
 -/
 /-- A vertex `w` of a blow-up of `H` has a finite neighbourhood if `w.fst` has a
 finite neighbourhood in `H` and the classes of its neighbours are finite. -/

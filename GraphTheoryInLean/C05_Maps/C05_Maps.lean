@@ -11,9 +11,8 @@ Maps, in particular graph homomorphisms, are a fundamental concept in graph theo
 but they are often glossed over in informal treatments. In Lean they play a much more
 central role. For example, to say that a graph contains an induced `5`-cycle we need
 to talk about embeddings of `C[5]` into the graph. Underlying this is the fact that
-any `SimpleGraph V` has a fixed vertex type `V`, so to even express the idea that a
-graph `G` contains a copy of `H`, when `G` and `H` have different vertex types,
-requires the use of a map.
+any `SimpleGraph V` has a fixed vertex type `V`. So even to say that a graph `G`
+contains a copy of `H`, when the two have different vertex types, we need a map.
 
 In this chapter we will study mappings between graphs. We first review functions,
 embeddings, and equivalences of types, and then the construction `SimpleGraph.comap`,
@@ -110,7 +109,7 @@ constructing concrete graphs, but often appears in proofs; we return to it in
 Given `f : V → W` and `G : SimpleGraph W`, `G.comap f` is the `SimpleGraph V` where
 two vertices are adjacent iff their images under `f` are adjacent in `G`.
 
-[Figure: $G$ (right) pulled back back along $f : V \to W$ (dashed arrows), to give `G.comap f` (left)](https://jt496.github.io/GraphTheoryInLean/figures/comap.svg)
+[Figure: $G$ (right) pulled back along $f : V \to W$ (dashed arrows), to give `G.comap f` (left)](https://jt496.github.io/GraphTheoryInLean/figures/comap.svg)
 -/
 #source SimpleGraph.comap
 example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
@@ -118,7 +117,7 @@ example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
 
 /-!
 Two examples of graphs defined using `SimpleGraph.comap` are complete multipartite
-(`completeMultipartiteGraph`)and blow-up graphs (`blowUpGraph`). (If you read the
+(`completeMultipartiteGraph`) and blow-up graphs (`blowUpGraph`). (If you read the
 section [Complete Multipartite Graphs and
 Blow-ups](#section-complete-multipartite-graphs-and-blow-ups), you have already seen
 them.) Two vertices are adjacent in a complete multipartite graph iff they are in
@@ -773,14 +772,14 @@ lemma Iso.isVertexTransitive {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph 
   exact ⟨(f.comp g).comp f.symm, by simp [hg]⟩
 
 /-!
-The complete graph is vertex-transitive, since swapping any pair of vertices gives an
-automorphism of the graph. Obviously any equivalence of the underlying type gives
-an automorphism: this is Mathlib's `Iso.completeGraph`.
+Any equivalence of the underlying type gives an automorphism of the complete graph:
+this is Mathlib's `Iso.completeGraph`.
 -/
 #check Iso.completeGraph -- (f : α ≃ β) : completeGraph α ≃g completeGraph β
 
 /-!
-The complete graph is vertex-transitive.
+In particular, swapping any pair of vertices gives an automorphism, so the complete
+graph is vertex-transitive.
 -/
 lemma isVertexTransitive_top {V : Type*} :
     IsVertexTransitive (⊤ : SimpleGraph V) := by
@@ -1028,11 +1027,10 @@ If `x.1` and `x.2` have finite neighbourhoods in `G` and `H` respectively, then 
 does `x` in `G ⊗g H`, since its neighbourhood is the product `s ×ˢ t` of the two
 neighbourhoods. As with `blowUpNFintypeNeighborSet` (see [Degrees in the n -Uniform
 Blow-up of a Graph](#section-degrees-in-the-n-uniform-blow-up-of-a-graph)), we make
-this a `def` rather than an `instance`: when `V` and `W` are finite and adjacency is
-decidable, Lean already finds a `Fintype` instance for this neighbourhood by
-filtering, and an instance would give a second route to it. (We state it for
-`x : V × W` rather than for a pair `(v, w)`, so that it also applies to a general
-`x : V × W` when we use it as an instance.)
+this a `def` rather than an `instance`, to avoid a second route to the `Fintype`
+instance that Lean finds by filtering. (We state it for `x : V × W` rather than for a
+pair `(v, w)`, so that it also applies to a general `x : V × W` when we use it as an
+instance.)
 -/
 /-- If `G` and `H` have finite neighbourhoods at `x.fst` and `x.snd` respectively,
 then their tensor product has a finite neighbourhood at `x`. -/
@@ -1285,11 +1283,8 @@ lemma claw_isContained {V : Type*} {G : SimpleGraph V} {a b c d : V} (hb : G.Adj
   exact ⟨⟨φ, hom⟩, inj⟩
 
 /-!
-In a locally finite graph, we can characterize the existence of a copy of the claw in
-`G` in terms of the existence of a vertex of degree at least 3.
-
-A graph `G` contains a copy of the claw `K[1, 3]` iff it has a vertex of degree
-at least 3.
+A locally finite graph `G` contains a copy of the claw `K[1, 3]` iff it has a vertex
+of degree at least `3`.
 -/
 theorem claw_isContained_iff {V : Type*} (G : SimpleGraph V) [G.LocallyFinite] :
     K[1, 3] ⊑ G ↔ ∃ v, 3 ≤ G.degree v := by

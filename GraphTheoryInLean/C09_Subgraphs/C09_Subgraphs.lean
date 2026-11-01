@@ -318,9 +318,9 @@ example {v w : V} (s : Set (Sym2 V)) :
 
 A `G.Subgraph` is not a `SimpleGraph`, so results about the latter do not
 automatically apply to the former. In this section we look at how to pass between
-the two: the coercions from a subgraph to a simple graph (and back), spanning
-subgraphs, for which the two points of view essentially agree, and the parts of the
-`SimpleGraph` API that Mathlib duplicates for `Subgraph`.
+the two. We cover the coercions from a subgraph to a simple graph and back, and
+spanning subgraphs, for which the two points of view essentially agree. We also look
+at the parts of the `SimpleGraph` API that Mathlib duplicates for `Subgraph`.
 
 ## Coercions
 
@@ -474,7 +474,6 @@ we choose can make a big difference to how easy a proof is.
 
 * `H ≤ G` with `H : SimpleGraph V` ([Order](#section-order)) keeps the vertex type,
   so the whole `SimpleGraph` API applies and these subgraphs form a Boolean algebra.
-  It is the right choice when all vertices are kept, as for `G.deleteEdges s`.
 * `G.induce s` ([Induced Subgraphs via Comap](#section-induced-subgraphs-via-comap))
   and `H.coe` are genuine `SimpleGraph`s, so every theorem about `SimpleGraph`
   applies to them, but their vertices live in a subtype. We pay for this whenever we
@@ -486,8 +485,7 @@ we choose can make a big difference to how easy a proof is.
   `G.Subgraph`: its vertex set is the set of matched vertices, and a *perfect*
   matching is one that is spanning.
 * `Copy A G` is a labelled copy of a graph `A` whose vertices may have any type, and
-  `A ⊑ G` says that such a copy exists. Use it to talk about containment (or
-  non-containment) of a fixed graph, as in `A.Free G`.
+  `A ⊑ G` says that such a copy exists.
 
 We have already met most of the conversions between these: `toSubgraph H h` turns
 `h : H ≤ G` into a `G.Subgraph`, while `H.spanningCoe` and `H.coe` turn
@@ -587,12 +585,15 @@ restriction identifies the set of homomorphisms from `G` to `F` with this invers
 limit.)
 
 So it is enough to find a consistent family, and for this only three facts matter:
-the finite subgraphs form a *directed* set (any two have a common upper bound, namely
-their union); the set of homomorphisms from each finite subgraph to `F` is finite (as
-`F` is finite) and nonempty (by hypothesis); and the restriction maps are
-*compatible*: restricting a homomorphism from `H` to `H` itself leaves it unchanged,
-and if `H₁ ≤ H₂ ≤ H₃`, then restricting a homomorphism from `H₃` to `H₂` and then to
-`H₁` gives the same result as restricting it from `H₃` to `H₁` directly.
+
+1. The finite subgraphs form a *directed* set: any two have a common upper bound,
+   namely their union.
+2. The set of homomorphisms from each finite subgraph to `F` is finite (as `F` is
+   finite) and nonempty (by hypothesis).
+3. The restriction maps are *compatible*. Restricting a homomorphism from `H` to `H`
+   itself leaves it unchanged. If `H₁ ≤ H₂ ≤ H₃`, then restricting a homomorphism
+   from `H₃` to `H₂` and then to `H₁` gives the same result as restricting it from
+   `H₃` to `H₁` directly.
 
 To find a consistent family we again use Tychonoff's theorem. For each finite
 subgraph `H`, let `X H` be the set of homomorphisms from `H` to `F`, with the
@@ -1261,14 +1262,12 @@ protected def ColoringOn.restrict (C : G.ColoringOn γ s) (h : t ⊆ s) :
   map_rel' := fun ⟨ha, hb, hab⟩ ↦ C.valid ⟨h ha, h hb, hab⟩
 
 /-!
-Notice that whereas `Walk.copy` was the cast `hu ▸ hv ▸ p`, which is stuck until we
-substitute the endpoints, here we reuse the underlying function `C` unchanged and
+`Walk.copy` was the cast `hu ▸ hv ▸ p`, which is stuck until we substitute the
+endpoints. Here, instead, we reuse the underlying function `C` unchanged and
 discharge the validity condition directly: an edge of the subgraph induced by `t` is
 an edge of the subgraph induced by `s`, so `C.valid` applies. Because the underlying
-function is untouched, a restriction agrees with the original at every vertex, by
-`rfl` and with no substitution needed. The `@[simps]` attribute records this as the
-`simp` lemma `restrict_apply`, which lets `simp` rewrite `(C.restrict h) v` to `C v`
-automatically, so downstream proofs need not unfold restrictions by hand.
+function is untouched, a restriction agrees with the original at every vertex by
+`rfl`. The `@[simps]` attribute records this as the `simp` lemma `restrict_apply`.
 -/
 #check ColoringOn.restrict_apply -- (C.restrict h) a = C a
 
@@ -1277,12 +1276,12 @@ In practice the most common use of `restrict` is the trivial one where the subse
 equal to the original set. `ColoringOn` is a type that encodes data, and just as with
 `Walk.copy` we frequently need to change the set on which a colouring is valid to one
 that is equal but not definitionally equal to it, for example `↑(insert a s)` versus
-`insert a ↑s`. This is the idea behind the *range copy pattern* from [Plumbing
-Elsewhere in the API](#section-plumbing-elsewhere-in-the-api), applied, as for
-`Walk.copy`, to data in the type rather than in a field, and it is just restriction
-along `h.ge : t ⊆ s`. We call this `ColoringOn.copy`. (Mathlib's `Subgraph.copy` is
-an instance of the pattern itself: it replaces the `verts` and `Adj` fields of a
-subgraph by propositionally equal ones.)
+`insert a ↑s`. This is the *range copy pattern* from [Plumbing Elsewhere in the
+API](#section-plumbing-elsewhere-in-the-api), applied, as for `Walk.copy`, to data in
+the type rather than in a field. Here it is just restriction along `h.ge : t ⊆ s`,
+and we call it `ColoringOn.copy`. (Mathlib's `Subgraph.copy` is an instance of the
+pattern itself: it replaces the `verts` and `Adj` fields of a subgraph by
+propositionally equal ones.)
 -/
 #check Subgraph.copy
 
@@ -1310,11 +1309,11 @@ practice, however, we almost always colour finite sets. When we pass `ColoringOn
 instance). Depending on how this coercion is applied we may end up with a type
 mismatch that we will need to fix with `copy`.
 
-For example, we might end up with a colouring of `↑s ∪ ↑t` (the `Set V` given by
-coercing each of `s t : Finset V` to `Set V` and then taking their union) when the
-goal asks for a colouring of `↑(s ∪ t)` (the coercion of the `Finset V` that is the
-`Finset` union of `s` and `t`). These two sets are obviously equal but the proof
-is not `rfl` (it is the `simp` lemma `Finset.coe_union`).
+For example, we might end up with a colouring of `↑s ∪ ↑t` when the goal asks for a
+colouring of `↑(s ∪ t)`. For `s t : Finset V`, the first is the union of the two
+coerced sets in `Set V`, and the second is the coercion of their `Finset` union.
+These two sets are obviously equal but the proof is not `rfl` (it is the `simp`
+lemma `Finset.coe_union`).
 -/
 /-- error: Type mismatch -/
 #guard_msgs (substring := true) in
