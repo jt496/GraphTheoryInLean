@@ -521,11 +521,11 @@ example : pathNat = pathNatFromRel := by rfl
 
 /-!
 Here *unfolding* means more than replacing names by their definitions: Lean also
-*computes*, running any recursion or pattern match whose argument it can see is a
-constructor. For example `+` on `ℕ` is defined by recursion on its second argument,
-so `n + 0` computes to `n` even for a variable `n`, and `rfl` proves `n + 0 = n`. But
-in `0 + n` the recursion is on the variable `n`, which is neither `0` nor a
-successor, so the computation is *stuck*: `0 + n = n` is true, but only
+*computes* (or *reduces*), running any recursion or pattern match whose argument it
+can see is a constructor. For example `+` on `ℕ` is defined by recursion on its
+second argument, so `n + 0` reduces to `n` even for a variable `n`, and `rfl` proves
+`n + 0 = n`. But in `0 + n` the recursion is on the variable `n`, which is neither
+`0` nor a successor, so the computation is *stuck*: `0 + n = n` is true, but only
 propositionally, and its proof needs induction on `n`.
 -/
 example (n : ℕ) : n + 0 = n := by rfl

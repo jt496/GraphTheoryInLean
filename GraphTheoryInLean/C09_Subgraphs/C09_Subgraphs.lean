@@ -1276,12 +1276,12 @@ In practice the most common use of `restrict` is the trivial one where the subse
 equal to the original set. `ColoringOn` is a type that encodes data, and just as with
 `Walk.copy` we frequently need to change the set on which a colouring is valid to one
 that is equal but not definitionally equal to it, for example `↑(insert a s)` versus
-`insert a ↑s`. This is the *range copy pattern* from [Plumbing Elsewhere in the
-API](#section-plumbing-elsewhere-in-the-api), applied, as for `Walk.copy`, to data in
-the type rather than in a field. Here it is just restriction along `h.ge : t ⊆ s`,
-and we call it `ColoringOn.copy`. (Mathlib's `Subgraph.copy` is an instance of the
-pattern itself: it replaces the `verts` and `Adj` fields of a subgraph by
-propositionally equal ones.)
+`insert a ↑s`. This is the *range copy pattern* from [Elsewhere in
+Mathlib](#section-elsewhere-in-mathlib), applied, as for `Walk.copy`, to data in the
+type rather than in a field. Here it is just restriction along `h.ge : t ⊆ s`, and we
+call it `ColoringOn.copy`. (Mathlib's `Subgraph.copy` is an instance of the pattern
+itself: it replaces the `verts` and `Adj` fields of a subgraph by propositionally
+equal ones.)
 -/
 #check Subgraph.copy
 

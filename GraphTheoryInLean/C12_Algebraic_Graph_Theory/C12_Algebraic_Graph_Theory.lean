@@ -1141,8 +1141,8 @@ lemma hypercubeHamming.permute_apply {n : ℕ} (σ : Equiv.Perm (Fin n))
 
 /-!
 In the automorphism group the inverse `f⁻¹` is by definition `f.symm`, so the
-inverses of translations and coordinate permutations can be computed by `rfl`. Since
-`-t = t`, the inverse of translation by `t` is translation by `t` itself, so
+formulae for the inverses of translations and coordinate permutations hold by `rfl`.
+Since `-t = t`, the inverse of translation by `t` is translation by `t` itself, so
 translations are involutions (characteristic two again).
 -/
 @[simp]

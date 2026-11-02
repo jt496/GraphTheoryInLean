@@ -7,6 +7,8 @@ exercises with solutions (`Exercises.lean`).
 Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>.
 The HTML is in `docs/`, served by GitHub Pages.
 
+> **Preliminary draft.** Chapters may be incomplete, and the text and code may change.
+
 ## Building
 
     lake exe cache get   # download prebuilt Mathlib (do this first)

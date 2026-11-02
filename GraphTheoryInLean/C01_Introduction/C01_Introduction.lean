@@ -29,6 +29,8 @@ to proofs in Lean based on the classic textbook)
 course in logic and proof using Lean)
 - [Lean Game Portal](https://adam.math.hhu.de/)
 (interactive games such as the Natural Number Game)
+- [Visual Lean](https://leangame.io) (an experimental graphical user interface for
+writing Lean code where you can play the Natural Number Game)
 
 A first course in graph theory is assumed, as is a basic level of Lean proficiency
 (for example chapters 1 to 8 of

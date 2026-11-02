@@ -552,3 +552,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// Work-in-progress notice under every chapter heading, from guide.json's
+// "draft_notice", which the generated GuideMain.lean emits as
+// `window.STIL_DRAFT_NOTICE` ({label: '…', text: '…'}). Links into a page carry
+// the heading's anchor (`Walks/#chapter-walks`), which scrolls the heading to the
+// top, so a banner above it would arrive off screen: the notice goes directly
+// below each chapter heading instead (every `#chapter-*` heading: one on a
+// chapter page, all of them in the single-page HTML), as the PDF does. A page
+// without one (a section page) gets it below its first heading, and the title
+// page already carries the notice as a `:::draft_notice` block
+// (STIL/Tactic/Directives.lean), so it gets no second copy. Same markup as the
+// directive's HTML: div.stil-draft-notice, styled in guide.css. No notice, no banner.
+document.addEventListener('DOMContentLoaded', function () {
+    var notice = window.STIL_DRAFT_NOTICE;
+    if (!notice || !notice.text) return;
+    var main = document.querySelector('main');
+    if (!main) return;
+    function makeNotice() {
+        var div = document.createElement('div');
+        div.className = 'stil-draft-notice';
+        div.setAttribute('role', 'note');
+        if (notice.label) {
+            var strong = document.createElement('strong');
+            strong.textContent = notice.label;
+            div.appendChild(strong);
+        }
+        var p = document.createElement('p');
+        p.textContent = notice.text;
+        div.appendChild(p);
+        return div;
+    }
+    var headings = main.querySelectorAll(':is(h1, h2, h3)[id^="chapter-"]');
+    if (!headings.length) {
+        if (main.querySelector('.stil-draft-notice')) return;
+        var first = main.querySelector('.content-wrapper :is(h1, h2)') ||
+                    main.querySelector(':is(h1, h2)');
+        if (first) {
+            first.insertAdjacentElement('afterend', makeNotice());
+        } else {
+            var target = main.querySelector('.content-wrapper') || main;
+            target.insertBefore(makeNotice(), target.firstChild);
+        }
+        return;
+    }
+    headings.forEach(function (h) {
+        h.insertAdjacentElement('afterend', makeNotice());
+    });
+});

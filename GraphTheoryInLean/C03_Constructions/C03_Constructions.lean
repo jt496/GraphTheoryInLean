@@ -497,12 +497,12 @@ In the proof of `symm` above, `rintro ⟨i, u⟩ ⟨j, v⟩ ⟨rfl, hadj⟩` int
 vertices and splits the adjacency proof into its two parts. The pattern `rfl`
 substitutes `i = j` everywhere, after which `h ▸ v` reduces to `v`.
 
-The substitution is needed because the cast `h ▸ v` only computes (in the sense of
-[Definitional and Propositional
+The substitution is needed because the cast `h ▸ v` only reduces to `v` (in the sense
+of [Definitional and Propositional
 Equalities](#section-definitional-and-propositional-equalities)) when both sides of
-`h` are definitionally equal, in which case it reduces to `v`. While `i` and `j` are
-distinct variables the cast is stuck, just like `0 + n`, and no amount of unfolding
-gets past it to `v`. We will meet this issue again in [Decidability and Kernel
+`h` are definitionally equal. While `i` and `j` are distinct variables the cast is
+stuck, just like `0 + n`, and no amount of unfolding gets past it to `v`. We will
+meet this issue again in [Decidability and Kernel
 Reduction*](#section-decidability-and-kernel-reduction) and when we need to change
 the endpoints of walks in [Copy](#section-copy).
 

@@ -54,46 +54,26 @@
      "data":
      {"title": "Walks in the Mycielskian",
       "shortTitle": null,
-      "sectionNum": "8.7.2.",
+      "sectionNum": "8.8.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Walks in Hypercube and Mycielskian Graphs",
-        "shortTitle": null,
-        "number": "7"},
        {"title": "Walks in the Mycielskian",
         "shortTitle": null,
-        "number": "2"}]},
+        "number": "8"}]},
      "address": "/Walks/"}],
-   "section-walks-in-hypercubes":
-   [{"id": "section-walks-in-hypercubes",
+   "section-walks-in-the-hypercube":
+   [{"id": "section-walks-in-the-hypercube",
      "data":
-     {"title": "Walks in Hypercubes",
-      "shortTitle": null,
-      "sectionNum": "8.7.1.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Walks in Hypercube and Mycielskian Graphs",
-        "shortTitle": null,
-        "number": "7"},
-       {"title": "Walks in Hypercubes", "shortTitle": null, "number": "1"}]},
-     "address": "/Walks/"}],
-   "section-walks-in-hypercube-and-mycielskian-graphs":
-   [{"id": "section-walks-in-hypercube-and-mycielskian-graphs",
-     "data":
-     {"title": "Walks in Hypercube and Mycielskian Graphs",
+     {"title": "Walks in the Hypercube",
       "shortTitle": null,
       "sectionNum": "8.7.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Walks in Hypercube and Mycielskian Graphs",
-        "shortTitle": null,
-        "number": "7"}]},
+       {"title": "Walks in the Hypercube", "shortTitle": null, "number": "7"}]},
      "address": "/Walks/"}],
    "section-vertices-and-edges-of-a-walk":
    [{"id": "section-vertices-and-edges-of-a-walk",
@@ -381,9 +361,7 @@
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Plumbing: Fixing Type Mismatches",
-        "shortTitle": null,
-        "number": "5"},
+       {"title": "Fixing Type Mismatches", "shortTitle": null, "number": "5"},
        {"title": "Transfer", "shortTitle": null, "number": "3"}]},
      "address": "/Walks/"}],
    "section-trails-paths-circuits-and-cycles":
@@ -763,14 +741,14 @@
      "data":
      {"title": "The Closure of a Graph",
       "shortTitle": null,
-      "sectionNum": "8.8.4.2.",
+      "sectionNum": "8.9.4.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "The Bondy–Chvátal Theorem",
         "shortTitle": null,
         "number": "4"},
@@ -781,14 +759,14 @@
      "data":
      {"title": "The Closure is the Least Closed Supergraph",
       "shortTitle": null,
-      "sectionNum": "8.8.6.",
+      "sectionNum": "8.9.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "The Closure is the Least Closed Supergraph",
         "shortTitle": null,
         "number": "6"}]},
@@ -843,14 +821,14 @@
      "data":
      {"title": "The Bondy–Chvátal Theorem",
       "shortTitle": null,
-      "sectionNum": "8.8.4.",
+      "sectionNum": "8.9.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "The Bondy–Chvátal Theorem",
         "shortTitle": null,
         "number": "4"}]},
@@ -1359,37 +1337,6 @@
         "shortTitle": null,
         "number": "3"}]},
      "address": "/Theorems/"}],
-   "section-plumbing-fixing-type-mismatches":
-   [{"id": "section-plumbing-fixing-type-mismatches",
-     "data":
-     {"title": "Plumbing: Fixing Type Mismatches",
-      "shortTitle": null,
-      "sectionNum": "8.5.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Plumbing: Fixing Type Mismatches",
-        "shortTitle": null,
-        "number": "5"}]},
-     "address": "/Walks/"}],
-   "section-plumbing-elsewhere-in-the-api":
-   [{"id": "section-plumbing-elsewhere-in-the-api",
-     "data":
-     {"title": "Plumbing Elsewhere in the API",
-      "shortTitle": null,
-      "sectionNum": "8.5.4.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Plumbing: Fixing Type Mismatches",
-        "shortTitle": null,
-        "number": "5"},
-       {"title": "Plumbing Elsewhere in the API",
-        "shortTitle": null,
-        "number": "4"}]},
-     "address": "/Walks/"}],
    "section-path-graphs":
    [{"id": "section-path-graphs",
      "data":
@@ -1434,14 +1381,14 @@
      "data":
      {"title": "Pósa Rotations",
       "shortTitle": null,
-      "sectionNum": "8.8.1.",
+      "sectionNum": "8.9.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "Pósa Rotations", "shortTitle": null, "number": "1"}]},
      "address": "/Walks/"}],
    "section-ore-s-theorem-and-dirac-s-theorem":
@@ -1449,14 +1396,14 @@
      "data":
      {"title": "Ore's Theorem and Dirac's Theorem",
       "shortTitle": null,
-      "sectionNum": "8.8.5.",
+      "sectionNum": "8.9.5.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "Ore's Theorem and Dirac's Theorem",
         "shortTitle": null,
         "number": "5"}]},
@@ -1466,14 +1413,14 @@
      "data":
      {"title": "Ore's Condition and Closing the Path",
       "shortTitle": null,
-      "sectionNum": "8.8.3.",
+      "sectionNum": "8.9.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "Ore's Condition and Closing the Path",
         "shortTitle": null,
         "number": "3"}]},
@@ -1541,9 +1488,7 @@
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Plumbing: Fixing Type Mismatches",
-        "shortTitle": null,
-        "number": "5"},
+       {"title": "Fixing Type Mismatches", "shortTitle": null, "number": "5"},
        {"title": "Nil", "shortTitle": null, "number": "1"}]},
      "address": "/Walks/"}],
    "section-new-walks-from-old":
@@ -2178,15 +2123,12 @@
      "data":
      {"title": "Hamming Paths",
       "shortTitle": null,
-      "sectionNum": "8.7.1.1.",
+      "sectionNum": "8.7.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Walks in Hypercube and Mycielskian Graphs",
-        "shortTitle": null,
-        "number": "7"},
-       {"title": "Walks in Hypercubes", "shortTitle": null, "number": "1"},
+       {"title": "Walks in the Hypercube", "shortTitle": null, "number": "7"},
        {"title": "Hamming Paths", "shortTitle": null, "number": "1"}]},
      "address": "/Walks/"}],
    "section-hamiltonian-paths-and-cycles":
@@ -2211,14 +2153,14 @@
      "data":
      {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
       "shortTitle": null,
-      "sectionNum": "8.8.",
+      "sectionNum": "8.9.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"}]},
+        "number": "9"}]},
      "address": "/Walks/"}],
    "section-hall-s-marriage-theorem":
    [{"id": "section-hall-s-marriage-theorem",
@@ -2267,15 +2209,12 @@
      "data":
      {"title": "Gray Code",
       "shortTitle": null,
-      "sectionNum": "8.7.1.2.",
+      "sectionNum": "8.7.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Walks in Hypercube and Mycielskian Graphs",
-        "shortTitle": null,
-        "number": "7"},
-       {"title": "Walks in Hypercubes", "shortTitle": null, "number": "1"},
+       {"title": "Walks in the Hypercube", "shortTitle": null, "number": "7"},
        {"title": "Gray Code", "shortTitle": null, "number": "2"}]},
      "address": "/Walks/"}],
    "section-graphic-sequences":
@@ -2403,6 +2342,18 @@
         "shortTitle": null,
         "number": "1"}]},
      "address": "/Connectivity/"}],
+   "section-fixing-type-mismatches":
+   [{"id": "section-fixing-type-mismatches",
+     "data":
+     {"title": "Fixing Type Mismatches",
+      "shortTitle": null,
+      "sectionNum": "8.5.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Walks", "shortTitle": null, "number": "8"},
+       {"title": "Fixing Type Mismatches", "shortTitle": null, "number": "5"}]},
+     "address": "/Walks/"}],
    "section-fintypes":
    [{"id": "section-fintypes",
      "data":
@@ -2554,12 +2505,12 @@
      "data":
      {"title": "Exercises",
       "shortTitle": null,
-      "sectionNum": "8.9.",
+      "sectionNum": "8.10.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Exercises", "shortTitle": null, "number": "9"}]},
+       {"title": "Exercises", "shortTitle": null, "number": "10"}]},
      "address": "/Walks/"}],
    "section-exercises-theorems":
    [{"id": "section-exercises-theorems",
@@ -2831,6 +2782,19 @@
         "shortTitle": null,
         "number": "2"}]},
      "address": "/Maps/"}],
+   "section-elsewhere-in-mathlib":
+   [{"id": "section-elsewhere-in-mathlib",
+     "data":
+     {"title": "Elsewhere in Mathlib",
+      "shortTitle": null,
+      "sectionNum": "8.5.4.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Walks", "shortTitle": null, "number": "8"},
+       {"title": "Fixing Type Mismatches", "shortTitle": null, "number": "5"},
+       {"title": "Elsewhere in Mathlib", "shortTitle": null, "number": "4"}]},
+     "address": "/Walks/"}],
    "section-eigenvalues-of-mycielskians":
    [{"id": "section-eigenvalues-of-mycielskians",
      "data":
@@ -3442,14 +3406,14 @@
      "data":
      {"title": "Counting Bijections and a Crossing Pair",
       "shortTitle": null,
-      "sectionNum": "8.8.2.",
+      "sectionNum": "8.9.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "Counting Bijections and a Crossing Pair",
         "shortTitle": null,
         "number": "2"}]},
@@ -3551,9 +3515,7 @@
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
-       {"title": "Plumbing: Fixing Type Mismatches",
-        "shortTitle": null,
-        "number": "5"},
+       {"title": "Fixing Type Mismatches", "shortTitle": null, "number": "5"},
        {"title": "Copy", "shortTitle": null, "number": "2"}]},
      "address": "/Walks/"}],
    "section-copies-of-complete-graphs":
@@ -4779,14 +4741,14 @@
      "data":
      {"title": "Adding a Single Edge",
       "shortTitle": null,
-      "sectionNum": "8.8.4.1.",
+      "sectionNum": "8.9.4.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Walks", "shortTitle": null, "number": "8"},
        {"title": "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "shortTitle": null,
-        "number": "8"},
+        "number": "9"},
        {"title": "The Bondy–Chvátal Theorem",
         "shortTitle": null,
         "number": "4"},
@@ -7588,10 +7550,7 @@
      {"/Walks/#SimpleGraph___isCycle_mycielskianClosed_of_adj":
       {"display": "isCycle_mycielskianClosed_of_adj",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.isContained_lineGraph_of_triangle":
    [{"id": "SimpleGraph___isContained_lineGraph_of_triangle",
@@ -8195,8 +8154,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.hypercube.isPerfectMatching_matching":
@@ -8218,8 +8176,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.hypercube.isHamiltonian_grayPath":
@@ -8230,8 +8187,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.hypercube.isHamiltonianCycle_grayCycle'":
@@ -8284,8 +8240,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.hypercube.grayCycle":
@@ -11828,10 +11783,7 @@
      {"/Walks/#SimpleGraph___Walk___snd_mem_support_mycielskianZigZag":
       {"display": "Walk.snd_mem_support_mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.reachable_deleteEdges_of_avoids":
    [{"id": "SimpleGraph___Walk___reachable_deleteEdges_of_avoids",
@@ -11872,10 +11824,7 @@
      {"/Walks/#SimpleGraph___Walk___none_notMem_support_mycielskianZigZag":
       {"display": "Walk.none_notMem_support_mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianZigZag_cons_nil":
    [{"id": "SimpleGraph___Walk___mycielskianZigZag_cons_nil",
@@ -11883,10 +11832,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianZigZag_cons_nil":
       {"display": "Walk.mycielskianZigZag_cons_nil",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianZigZag_cons_cons":
    [{"id": "SimpleGraph___Walk___mycielskianZigZag_cons_cons",
@@ -11894,10 +11840,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianZigZag_cons_cons":
       {"display": "Walk.mycielskianZigZag_cons_cons",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianZigZag":
    [{"id": "SimpleGraph___Walk___mycielskianZigZag",
@@ -11905,10 +11848,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianZigZag":
       {"display": "Walk.mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianClosed_nil":
    [{"id": "SimpleGraph___Walk___mycielskianClosed_nil",
@@ -11916,10 +11856,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianClosed_nil":
       {"display": "Walk.mycielskianClosed_nil",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianClosed_cons_cons":
    [{"id": "SimpleGraph___Walk___mycielskianClosed_cons_cons",
@@ -11927,10 +11864,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianClosed_cons_cons":
       {"display": "Walk.mycielskianClosed_cons_cons",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskianClosed":
    [{"id": "SimpleGraph___Walk___mycielskianClosed",
@@ -11938,10 +11872,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskianClosed":
       {"display": "Walk.mycielskianClosed",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mycielskian":
    [{"id": "SimpleGraph___Walk___mycielskian",
@@ -11949,10 +11880,7 @@
      {"/Walks/#SimpleGraph___Walk___mycielskian":
       {"display": "Walk.mycielskian",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.mem_support_tail_iff'":
    [{"id": "SimpleGraph___Walk___mem_support_tail_iff___",
@@ -12040,10 +11968,7 @@
      {"/Walks/#SimpleGraph___Walk___length_mycielskianZigZag":
       {"display": "Walk.length_mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.length_mycielskianClosed":
    [{"id": "SimpleGraph___Walk___length_mycielskianClosed",
@@ -12051,10 +11976,7 @@
      {"/Walks/#SimpleGraph___Walk___length_mycielskianClosed":
       {"display": "Walk.length_mycielskianClosed",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.length_mycielskian":
    [{"id": "SimpleGraph___Walk___length_mycielskian",
@@ -12062,10 +11984,7 @@
      {"/Walks/#SimpleGraph___Walk___length_mycielskian":
       {"display": "Walk.length_mycielskian",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.isHamiltonian_of_isMaximumPath'":
    [{"id": "SimpleGraph___Walk___isHamiltonian_of_isMaximumPath___",
@@ -12098,10 +12017,7 @@
      {"/Walks/#SimpleGraph___Walk___isCycle_mycielskianClosed":
       {"display": "Walk.isCycle_mycielskianClosed",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.exists_of_mem_support_mycielskianZigZag":
    [{"id": "SimpleGraph___Walk___exists_of_mem_support_mycielskianZigZag",
@@ -12109,10 +12025,7 @@
      {"/Walks/#SimpleGraph___Walk___exists_of_mem_support_mycielskianZigZag":
       {"display": "Walk.exists_of_mem_support_mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.exists_odd_isCycle_toSubgraph_le'":
    [{"id": "SimpleGraph___Walk___exists_odd_isCycle_toSubgraph_le___",
@@ -12270,10 +12183,7 @@
      {"/Walks/#SimpleGraph___Walk___end_right_notMem_support_mycielskianZigZag":
       {"display": "Walk.end_right_notMem_support_mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.edges_mem_edgeSet_of_notMem":
    [{"id": "SimpleGraph___Walk___edges_mem_edgeSet_of_notMem",
@@ -12329,10 +12239,7 @@
      {"/Walks/#SimpleGraph___Walk___concat_copy":
       {"display": "Walk.concat_copy",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Plumbing: Fixing Type Mismatches",
-        "Copy"]}},
+       ["Graph Theory in Lean", "Walks", "Fixing Type Mismatches", "Copy"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsTrail.takeUntil_append_append_dropUntil":
    [{"id": "SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil",
@@ -12464,10 +12371,7 @@
      {"/Walks/#SimpleGraph___Walk___IsPath___mycielskianZigZag":
       {"display": "Walk.IsPath.mycielskianZigZag",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsPath.mycielskian":
    [{"id": "SimpleGraph___Walk___IsPath___mycielskian",
@@ -12475,10 +12379,7 @@
      {"/Walks/#SimpleGraph___Walk___IsPath___mycielskian":
       {"display": "Walk.IsPath.mycielskian",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsPath.isCycle_posaClosed":
    [{"id": "SimpleGraph___Walk___IsPath___isCycle_posaClosed",
@@ -12659,10 +12560,7 @@
      {"/Walks/#SimpleGraph___Walk___IsHamiltonianCycle___mycielskianClosed":
       {"display": "Walk.IsHamiltonianCycle.mycielskianClosed",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonianCycle.exists_isHamiltonian_walk_of_mem_edges":
    [{"id":
@@ -12683,10 +12581,7 @@
      {"/Walks/#SimpleGraph___Walk___IsHamiltonian___mycielskian":
       {"display": "Walk.IsHamiltonian.mycielskian",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.IsHamiltonian.isHamiltonianCycle_posaClosed'":
    [{"id":
@@ -13931,10 +13826,7 @@
      {"/Walks/#SimpleGraph___IsHamiltonian___mycielskian":
       {"display": "IsHamiltonian.mycielskian",
        "context":
-       ["Graph Theory in Lean",
-        "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in the Mycielskian"]}},
+       ["Graph Theory in Lean", "Walks", "Walks in the Mycielskian"]}},
      "address": "/Walks/"}],
    "SimpleGraph.IsEdgeConnected.anti":
    [{"id": "SimpleGraph___IsEdgeConnected___anti",
@@ -14307,8 +14199,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.isPath_hammingPath":
@@ -14319,8 +14210,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.hammingPath":
@@ -14331,8 +14221,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.hammingDist_zero":
@@ -14343,8 +14232,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.hammingDist_succ":
@@ -14355,8 +14243,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.hammingDist_equivPi":
@@ -14391,9 +14278,19 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Hamming Paths"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.HypercubeVert.grayStart_succ":
+   [{"id": "SimpleGraph___HypercubeVert___grayStart_succ",
+     "data":
+     {"/Walks/#SimpleGraph___HypercubeVert___grayStart_succ":
+      {"display": "HypercubeVert.grayStart_succ",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in the Hypercube",
+        "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.grayStart":
    [{"id": "SimpleGraph___HypercubeVert___grayStart",
@@ -14403,8 +14300,18 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
+        "Gray Code"]}},
+     "address": "/Walks/"}],
+   "SimpleGraph.HypercubeVert.grayEnd_succ":
+   [{"id": "SimpleGraph___HypercubeVert___grayEnd_succ",
+     "data":
+     {"/Walks/#SimpleGraph___HypercubeVert___grayEnd_succ":
+      {"display": "HypercubeVert.grayEnd_succ",
+       "context":
+       ["Graph Theory in Lean",
+        "Walks",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.grayEnd":
@@ -14415,8 +14322,7 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Walks in Hypercube and Mycielskian Graphs",
-        "Walks in Hypercubes",
+        "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
    "SimpleGraph.HypercubeVert.equivPi_succ_apply":

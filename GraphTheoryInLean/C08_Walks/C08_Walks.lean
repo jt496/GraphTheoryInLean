@@ -12,18 +12,20 @@ import Mathlib.Order.Closure
 namespace SimpleGraph
 /-!
 Walks are a fundamental concept in graph theory. In this chapter we look at how they
-are defined in Mathlib. We will consider operations on walks such as concatenation
+are defined in Mathlib. We consider operations on walks such as concatenation
 (`Walk.append`) and reversal (`Walk.reverse`), as well as the `Walk.length` (number
 of edges) and `Walk.support` (list of vertices visited) of walks. We then meet the
 kinds of walks that arise most frequently in graph theory: trails, paths, circuits
 and cycles, together with Eulerian trails and Hamiltonian paths and cycles. Along the
 way we show that a graph is bipartite iff it has no odd cycle.
 
-The type of a walk records its endpoints, which in many situations is very useful.
-But it is also where dependent types show their less appealing side: we need some
-plumbing with no informal analogue, namely `Walk.Nil`, `Walk.copy` and
-`Walk.transfer`. We then map walks along graph homomorphisms, and return to our
-running examples: Hamming paths and the Gray code in the hypercube, and walks in the
+The type of a walk records its endpoints, which in many situations is very useful,
+but it is also where dependent types show their less appealing side. In order to deal
+with type mismatches we need to introduce some "plumbing" that has no informal
+analogue (`Walk.Nil`, `Walk.copy` and `Walk.transfer`).
+
+We then look at maps of walks along graph homomorphisms, and return to our running
+examples: Hamming paths and the Gray code in the hypercube, and walks in the
 Mycielskian. Finally we look at Hamiltonian graphs: we define Pósa rotations and
 prove the Bondy–Chvátal theorem, with Ore's and Dirac's theorems as corollaries.
 
@@ -43,12 +45,12 @@ type but a *family* of types, one for each pair of endpoints, and walks with
 different endpoints live in different types. In many respects this is an advantage,
 but it does mean that we sometimes need to deal with type mismatches that have no
 counterpart in informal graph theory. We look at this in detail in
-[Plumbing: Fixing Type Mismatches](#section-plumbing-fixing-type-mismatches).
+[Fixing Type Mismatches](#section-fixing-type-mismatches).
 
 Notice also that `G.Walk u v` is a `Type`, not a `Prop`: two walks with the same
-endpoints can be different, and we can compute with them. The proposition that there
-is *some* walk from `u` to `v` is `G.Reachable u v`, which we meet in
-[Reachability](#section-reachability).
+endpoints can be different, and we can perform computations with them. The
+proposition that there is *some* walk from `u` to `v` is `G.Reachable u v`, which we
+meet in [Reachability](#section-reachability).
 -/
 open Walk
 section basics
@@ -58,8 +60,8 @@ variable {V : Type*} {G : SimpleGraph V} {u v w : V}
               --   | nil {u : V} : Walk u u
               --   | cons {u v w : V} (h : G.Adj u v) (p : Walk v w) : Walk u w
 /-!
-So we see that `SimpleGraph.Walk` has two constructors: `Walk.nil` and `Walk.cons`
-(in this respect it is very similar to `List`, which may be worth reviewing if it is
+So `SimpleGraph.Walk` has two constructors: `Walk.nil` and `Walk.cons` (in this
+respect it is very similar to `List`, which may be worth reviewing if it is
 unfamiliar).
 -/
 #source List
@@ -84,7 +86,7 @@ the walk `p`.
 /-!
 Recall the path graph we defined on `ℕ`.
 -/
-#source pathNat
+#check pathNat
 /-!
 We give some examples of walks in this graph below. Notice that we have to specify
 very little: Lean can infer many of the details from the type of walk we are building
@@ -100,7 +102,7 @@ to the constructor `nil`.
 
 In our next example we are building a walk from `2` to `3`, as a `cons h nil` walk.
 So the implicit `u` input to `nil` is `3` and the single edge `h` must be
-`G.Adj 2 3`, which Lean can infer (and simp can prove).
+`G.Adj 2 3`, which Lean can infer (and `simp` can prove).
 -/
 example : pathNat.Walk 2 3 := cons (by simp) nil
 
@@ -109,8 +111,8 @@ In the next example we are building a `cons h₁ (cons h₂ nil)` walk from `3` 
 so the first edge must be `h₁ : G.Adj 3 v` and the second edge must be
 `h₂ : G.Adj v 5`, for some vertex `v`. We need to tell Lean what `v` is in at least
 one case, but once we do this for the first edge the second edge is determined (again
-the actual existence of both edges is easily proved by simp). There are a few ways to
-do this; we show two below.
+the actual existence of both edges is easily proved by `simp`). There are a few ways
+to do this; we show two below.
 
 First we use type ascription notation `(by simp : ...)` which tells Lean what we want
 to prove and then gets `simp` to prove it.
@@ -166,7 +168,9 @@ The length of the meandering walk `meander35` defined above is `6`.
 
 /-!
 Since `Walk.append` is defined inductively on its first argument, proofs involving
-`append` will often follow by induction on this argument. For example:
+`append` will often follow by induction on this argument. For example: the length of
+the concatenation of two walks is the sum of their lengths. (This is also in Mathlib
+as `Walk.length_append`.)
 -/
 example (p : G.Walk u v) (q : G.Walk v w) :
     (p.append q).length = p.length + q.length := by
@@ -176,15 +180,6 @@ example (p : G.Walk u v) (q : G.Walk v w) :
     rfl
   | cons h p ih =>
     rw [cons_append, length_cons, ih, length_cons, add_right_comm]
-
-/-!
-Given two walks `p` and `q` and an edge `h` from the end of `p` to the start of `q`,
-we can form a new walk, `p.append (q.cons h)`, which has length
-`p.length + q.length + 1`.
--/
-example {z} {h : G.Adj v w} {p : G.Walk u v} {q : G.Walk w z} :
-    (p.append <| q.cons h).length = p.length + q.length + 1 := by
-  simp [add_assoc]
 
 /-!
 If we want to add an edge at the end of a walk rather than at the start, we can use
@@ -226,8 +221,7 @@ The *support* of a walk is the sequence of vertices it visits in order, as a
 #source Walk.support
 /-!
 A `nil` walk has length `0` and support `[u]`. So in particular every walk has at
-least one vertex in its support. (Note that if walks were defined in terms of lists
-of vertices then we would have to decide what to do with the empty list.)
+least one vertex in its support.
 -/
 example : (Walk.nil : G.Walk u u).support = [u] := rfl
 
@@ -240,8 +234,7 @@ example (h : G.Adj u v) (p : G.Walk v w) :
     (Walk.cons h p).support = u :: p.support := Walk.support_cons h p
 
 /-!
-A walk is determined by its support, so nothing is lost compared with the list-based
-model we considered at the start of the chapter.
+A walk is determined by its support.
 -/
 #check Walk.ext_support -- (h : p.support = q.support) : p = q
 
@@ -269,7 +262,7 @@ lemma pathNat.support_path (i j : ℕ) :
   | succ n ih => simp [pathNat.path, support_concat, ih, List.range'_1_concat]
 
 /-!
-The `i`-th vertex of a walk can be obtained with `getVert`.
+The `i`-th vertex of a walk can be obtained with `Walk.getVert`.
 -/
 #source Walk.getVert
 
@@ -353,6 +346,7 @@ Since edges in a `SimpleGraph` are undirected, we can reverse a walk `p : G.Walk
 to get a walk `p' : G.Walk v u`.
 -/
 #check Walk.reverse --  (p : G.Walk u v) : G.Walk v u
+
 /-!
 The reversed walk has the same length as the original walk.
 -/
@@ -360,7 +354,8 @@ example (p : G.Walk u v) : p.reverse.length = p.length := Walk.length_reverse p
 
 /-!
 Given a vertex `u` that appears in a walk `p : G.Walk v w`, we can split the walk at
-the first occurrence of `u` to get walks from `v` to `u` and from `u` to `w`.
+the first occurrence of `u` to get walks from `v` to `u` (`takeUntil`) and from `u`
+to `w` (`dropUntil`).
 -/
 
 #check Walk.takeUntil  -- (p : G.Walk v w) (u : V) : u ∈ p.support → G.Walk v u
@@ -375,7 +370,7 @@ actually defined for walks but is just useful informal notation for `Walk.append
 
 /-!
 Given a closed walk `c₁ : G.Walk v v` and a vertex `u` in its support, we can rotate
-the walk to get a new closed walk `c₂ : G.Walk u u` (built as
+the walk to get a new closed walk `c₂ : G.Walk u u` (`rotate`) (built as
 `dropUntil ++ takeUntil`).
 -/
 #check Walk.rotate  -- (c : G.Walk v v) (u : V) (h : u ∈ c.support) : G.Walk u u
@@ -402,10 +397,8 @@ their type so, when there is a choice, the `takeUntil`, `dropUntil` or `rotate` 
 may be easier to work with. A vertex such as `p.getVert n` is often only
 *propositionally* (not definitionally) equal to the vertex we want, and the resulting
 type mismatches are the subject of
-[Plumbing: Fixing Type Mismatches](#section-plumbing-fixing-type-mismatches).
--/
+[Fixing Type Mismatches](#section-fixing-type-mismatches).
 
-/-!
 # Trails, Paths, Circuits and Cycles
 
 There are a number of important special kinds of walks, such as paths, cycles, trails
@@ -421,9 +414,7 @@ defined in Mathlib. We gather a summary of these below.
 | Eulerian | trail using every edge of the graph | `Walk.IsEulerian` |
 | Hamiltonian | path visiting every vertex of the graph | `Walk.IsHamiltonian` |
 | Hamiltonian cycle | cycle visiting every vertex | `Walk.IsHamiltonianCycle` |
--/
 
-/-!
 ## Trails and Paths
 
 Recall that `List.Nodup` means that a list has no duplicated elements i.e. its
@@ -434,6 +425,7 @@ elements are pairwise distinct.
 A trail is a walk without duplicated edges.
 -/
 example (p : G.Walk u v) : p.IsTrail ↔ p.edges.Nodup := isTrail_def p
+
 /-!
 A path is a walk without duplicated vertices. Although the proof below is
 `isPath_def`, if you look at the definition of `IsPath` you will see it
@@ -449,9 +441,7 @@ example (p : G.Walk u v) : p.IsPath ↔ p.support.Nodup := isPath_def p
 
 /-!
 [Figure: A trail that is not a path, and a path, in the same graph](https://jt496.github.io/GraphTheoryInLean/figures/trail_vs_path.svg)
--/
 
-/-!
 Any path is a trail.
 -/
 #check IsPath.isTrail   -- Walk.IsPath.isTrail : p.IsPath → p.IsTrail
@@ -506,10 +496,10 @@ A walk is a path iff `getVert` is injective on the set `{i | i ≤ p.length}`.
 
 /-!
 If there is a walk from `u` to `v` in a graph `G`, then there is a path from `u` to
-`v`. Informally we might prove this by taking a shortest walk and proving that it is
-a path. In Mathlib given any walk `p : G.Walk u v` we can get a path from `u` to `v`
-using `Walk.bypass`. Note that this need not be a shortest path; it is simply the
-walk constructed from `p` by removing closed subwalks between repeated vertices.
+`v`. Informally we might prove this by considering a shortest walk and proving that
+it is a path. In Mathlib given any walk `p : G.Walk u v` we can get a path from `u`
+to `v` using `Walk.bypass`. This need not be a shortest path; it is simply the walk
+constructed from `p` by removing closed subwalks between repeated vertices.
 
 [Figure: `Walk.bypass` removes closed subwalks to produce a path](https://jt496.github.io/GraphTheoryInLean/figures/walk_bypass.svg)
 -/
@@ -562,19 +552,18 @@ We study reachability and connectivity in detail in
 A *circuit* is a closed trail `p` (i.e. a walk from a vertex to itself without
 repeated edges) that is not `nil`.
 -/
-#source Walk.IsCircuit -- Prop extends isTrail : IsTrail p where
-                       --               ne_nil : p ≠ nil
+#source Walk.IsCircuit -- .. Prop extends isTrail : IsTrail p where
+                       --      ne_nil : p ≠ nil
+
 /-!
 A cycle is defined in Mathlib as a circuit in which the `tail` of its `support` has
 no repeated vertices.
 -/
-#source Walk.IsCycle  -- Prop extends isCircuit : IsCircuit p where
-                      --          support_nodup : p.support.tail.Nodup
+#source Walk.IsCycle  -- .. Prop extends isCircuit : IsCircuit p where
+                      --      support_nodup : p.support.tail.Nodup
 /-!
 [Figure: A circuit that is not a cycle, and a cycle, in the same graph](https://jt496.github.io/GraphTheoryInLean/figures/circuit_vs_cycle.svg)
--/
 
-/-!
 Any cycle is a circuit.
 -/
 example (c : G.Walk u u) (hc : c.IsCycle) : c.IsCircuit := hc.isCircuit
@@ -598,13 +587,12 @@ follows the edges `0 — 1`, `1 — 2` and `2 — 0`, so it is the cycle `0 1 2 
 remaining vertex `3` of `K[4]` is not used.
 
 [Figure: The 3-cycle 0 1 2 0 in the complete graph $K_4$](https://jt496.github.io/GraphTheoryInLean/figures/k4_3cycle.svg)
--/
 
-/-!
 A closed walk is a cycle if and only if it has length at least 3 and its tail is a
 path.
 -/
 #check isCycle_iff_isPath_tail_and_le_length
+
 /-!
 If `c` is a cycle then `getVert` is injective on `{i | 1 ≤ i ∧ i ≤ c.length}`.
 -/
@@ -621,18 +609,19 @@ happen if the edge corresponding to `h` is already present. Mathlib has this as
 `cons_isCycle_iff`.
 -/
 #check cons_isCycle_iff --  (cons h p).IsCycle ↔ p.IsPath ∧ s(u, v) ∉ p.edges
+
 /-!
 In fact the only way that the path `p` could already contain this edge is if `p` is
 the walk consisting of the single edge `h.symm`. This gives the following variant of
 `cons_isCycle_iff`, which we will need later: `cons h p` is a cycle iff `p` is a path
-of length not equal to 1. (The `simp only` call in the proof uses `tail_cons` and
-`isPath_copy`, which involve `Walk.copy`: see [Copy](#section-copy).)
+of length not equal to 1. (The `simp_rw` call in the proof uses `tail_cons` and
+`isPath_copy`, which both involve `Walk.copy`: see [Copy](#section-copy).)
 -/
 lemma Walk.cons_isCycle_iff_length_ne_one {u v : V} (p : G.Walk v u)
     (h : G.Adj u v) : (cons h p).IsCycle ↔ p.IsPath ∧ p.length ≠ 1 := by
   have h0 : p.length ≠ 0 := fun h0 => h.ne (p.eq_of_length_eq_zero h0).symm
-  simp only [isCycle_iff_isPath_tail_and_le_length, getVert_cons_succ, tail_cons,
-    isPath_copy, length_cons, Nat.reduceLeDiff, ne_eq, and_congr_right_iff]
+  simp_rw [isCycle_iff_isPath_tail_and_le_length, getVert_cons_succ, tail_cons,
+    isPath_copy, length_cons]
   grind
 
 /-!
@@ -693,10 +682,9 @@ theorem Walk.exists_odd_isCycle {u : V} (w : G.Walk u u) (hw : Odd w.length) :
   cases w with
   | nil => simp at hw
   | cons h p =>
-    refine p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
-    have hqe : Even q.length := by grind [length_cons]
-    exact ⟨_, cons h q, (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq, by grind⟩,
-      by grind [length_cons]⟩
+    apply p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
+    exact ⟨_, _, (cons_isCycle_iff_length_ne_one _ h).mpr
+      ⟨hq, by grind [length_cons]⟩, by grind [length_cons]⟩
 
 /-!
 Hence a graph is bipartite iff it has no odd cycle.
@@ -704,10 +692,10 @@ Hence a graph is bipartite iff it has no odd cycle.
 theorem isBipartite_iff_forall_isCycle_even :
     G.IsBipartite ↔ ∀ u (c : G.Walk u u), c.IsCycle → Even c.length := by
   refine ⟨fun h u c _ => two_colorable_iff_forall_loop_even.mp h u c, fun h => ?_⟩
-  refine two_colorable_iff_forall_loop_even.mpr fun u w => ?_
+  apply two_colorable_iff_forall_loop_even.mpr fun u w => ?_
   by_contra hw
   obtain ⟨v, c, hc, hodd⟩ := w.exists_odd_isCycle (Nat.not_even_iff_odd.mp hw)
-  exact Nat.not_even_iff_odd.mpr hodd (h v c hc)
+  grind
 
 /-!
 ## Eulerian Trails
@@ -780,6 +768,7 @@ if `p` is an Eulerian trail in `G`, then every vertex of `G` has even degree, ex
 possibly the endpoints, which have even degree iff they are equal.
 -/
 #check Walk.IsEulerian.even_degree_iff
+
 /-!
 In a form more familiar to graph theorists: a graph with an Eulerian trail has either
 no vertices of odd degree or exactly two.
@@ -813,8 +802,7 @@ example {x} {p : G.Walk u u} [DecidableEq V] [Fintype (G.neighborSet x)]
 /-!
 We will revisit the more interesting question of which graphs admit Eulerian trails
 in [Eulerian Circuits and Trails](#section-eulerian-circuits-and-trails).
--/
-/-!
+
 ## Hamiltonian Paths and Cycles
 
 A *Hamiltonian path* is a walk that visits every vertex of the graph exactly once.
@@ -831,10 +819,12 @@ A Hamiltonian walk is a path. (Notice that this is a theorem, not part of the
 definition.)
 -/
 #check Walk.IsHamiltonian.isPath
+
 /-!
 A path is Hamiltonian iff it contains every vertex of the graph.
 -/
 #check Walk.IsPath.isHamiltonian_iff
+
 /-!
 The length of a Hamiltonian path is exactly one less than the number of vertices in
 the graph.
@@ -855,7 +845,7 @@ A Hamiltonian *cycle* is a cycle containing every vertex of the graph. In Mathli
 this is defined as a cycle whose tail is a Hamiltonian path.
 -/
 #source Walk.IsHamiltonianCycle -- structure IsHamiltonianCycle (p : G.Walk a a) :
-                                --      Prop extends p.IsCycle where
+                                --   Prop extends p.IsCycle where
                                 --   isHamiltonian_tail : p.tail.IsHamiltonian
 /-!
 The figure below shows a Hamiltonian path and a Hamiltonian cycle on the same
@@ -864,8 +854,7 @@ need not use every edge: the grey chords are left untraversed (contrast this wit
 Eulerian trail, which must use every edge).
 
 [Figure: A Hamiltonian path and a Hamiltonian cycle on the same graph](https://jt496.github.io/GraphTheoryInLean/figures/hamiltonian.svg)
--/
-/-!
+
 A rotation of a walk is a Hamiltonian cycle iff the walk is a Hamiltonian cycle.
 -/
 #check Walk.isHamiltonianCycle_rotate
@@ -880,7 +869,7 @@ it contains a Hamiltonian cycle or is a single vertex.
                                   --     ∃ a, ∃ p : G.Walk a a, p.IsHamiltonianCycle
 
 /-!
-# Plumbing: Fixing Type Mismatches
+# Fixing Type Mismatches
 
 The topics we will cover in this section don't appear in informal graph theory, but
 they are vital when working with walks in Lean. The common theme they share is that
@@ -889,7 +878,7 @@ they allow us to fix type mismatches.
 All of these mismatches come from the difference between definitional and
 propositional equality, which we met in [Definitional and Propositional
 Equalities](#section-definitional-and-propositional-equalities): for a variable
-`n : ℕ`, `n + 0` computes to `n`, so the two are defeq, while `0 + n` is stuck on the
+`n : ℕ`, `n + 0` reduces to `n`, so the two are defeq, while `0 + n` is stuck on the
 variable `n` and is only propositionally equal to `n`. Lean identifies two types when
 they are defeq, but not when they are merely propositionally equal. So a walk of type
 `G.Walk u (n + 0)` is also a walk of type `G.Walk u n`, but a walk of type
@@ -943,6 +932,7 @@ but is expected to have type
   G.Walk v w -/
 #guard_msgs (substring := true) in
 example (p : G.Walk v w) (h : p ≠ nil) : 0 < p.length := by sorry
+
 /-!
 The solution is to use the predicate `¬ p.Nil` instead.
 -/
@@ -970,9 +960,10 @@ for *every* `p : G.Walk v w`, whatever its endpoints: so we have replaced an equ
 that may not type-check with a predicate that always does. Secondly, the only way to
 build a proof of `Nil p` is via this constructor, which applies precisely when `p` is
 `nil`. There is no constructor mentioning `cons`, so `Nil (cons h q)` is simply
-uninhabited. So given `h : p.Nil`, `cases h` leaves a single case, in which Lean
-unifies the indices `v, w` with the constructor's `u`. In this case `v` and `w` *are*
-defeq.
+uninhabited. So given `h : p.Nil`, `cases h` leaves a single case, `nil`. In it, Lean
+has matched `p : G.Walk v w` against `nil : G.Walk u u`, so `p` becomes `nil` and
+`v`, `w` and `u` all become a single vertex. Lean keeps the name `v` for it, so in
+the example below `w` disappears and the goal becomes `v = v`.
 -/
 example (p : G.Walk v w) (h : p.Nil) : v = w := by
   cases h with
@@ -995,7 +986,7 @@ example {h : G.Adj u v} {p : G.Walk v w} : ¬ (cons h p).Nil := by nofun
 types indexed by values, whose single constructor forces the indices to coincide.
 -/
 #source Eq  -- inductive Eq : α → α → Prop where
-            --  | refl (a : α) : Eq a a
+            --   | refl (a : α) : Eq a a
 
 /-!
 Finally, we can prove that a non-nil walk has positive length as follows.
@@ -1013,10 +1004,10 @@ The Mathlib API also relates `Nil` to `length` directly.
 /-!
 ## Copy
 
-Having solved the problem of type mismatches involving `nil`, we now turn to the more
+Having solved the problem of type mismatches involving `nil`, we now turn to the
 general problem of type mismatches between arbitrary walks. For example if
 `p : G.Walk u v₁` and `q : G.Walk v₂ w` where `v₁` and `v₂` are provably, but not
-definitionally, equal then we can't directly form `Walk.append p q` since `append`
+definitionally, equal then we can't directly form `p.append q` since `Walk.append`
 has a signature that expects compatible walks. If we try to write `p.append q` we get
 a type error.
 -/
@@ -1038,35 +1029,42 @@ example {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁
   G.Walk u w :=  p.append (h ▸ q)
 
 /-!
-This changes the type of `q` without changing the walk itself.
-
-Mathlib's `Walk.copy` packages this cast with a name, so we can state lemmas about
-it, and it lets both endpoints be changed at once.
+This changes the type of `q` without changing the walk itself. Mathlib's `Walk.copy`
+packages this cast with a name, so we can state lemmas about it, and it allows us to
+change both endpoints simultaneously.
 -/
 #source Walk.copy
 example {v₁ v₂ : V} (p : G.Walk u v₁) (q : G.Walk v₂ w) (h : v₂ = v₁) :
   G.Walk u w :=  p.append (q.copy h rfl)
+
+section snd
+variable {u v w : V} {h : G.Adj u v} {p : G.Walk v w}
+#check (p.cons h).tail -- G.Walk (cons h p).snd w
+
+end snd
 
 /-!
 A simple example of where we need to introduce a `Walk.copy` is in the proof that
 `(p.cons h).tail = p`.
 
 On paper this is completely obvious: `Walk.tail` is the walk obtained by dropping its
-first edge, so `(p.cons h).tail` first adds and then drops the edge `h` to the start
-of `p`. However the type of `(p.cons h).tail` is `G.Walk (p.cons h).snd w` while `p`
-has type `G.Walk v w`. The vertex `(p.cons h).snd` unfolds to `p.getVert 0`, which is
-provably but not definitionally equal to `v`. So the obvious equality does not type
-check. Instead we have to state this using `Walk.copy`. (The definition of
-`getVert` matches on the walk before the index, so even `p.getVert 0` is stuck until
-Lean knows whether `p` is `nil` or a `cons`, although both cases give `v`.)
+first edge, so `(p.cons h).tail` first adds the edge `h` to the start of `p` and then
+drops it. However the type of `(p.cons h).tail` is `G.Walk (p.cons h).snd w` while
+`p` has type `G.Walk v w`. The vertex `(p.cons h).snd` reduces to `p.getVert 0`,
+which is provably but not definitionally equal to `v`. So the obvious equality does
+not type check. Instead we have to state this using `Walk.copy`. (The
+definition of `getVert` matches on the walk before the index, so Lean cannot reduce
+`p.getVert 0` until it knows whether `p` is `nil` or a `cons`, although both cases
+give `v`.)
 -/
 #check tail_cons -- (cons h p).tail = p.copy ⋯ ⋯
+
 /-!
-Having introduced `Walk.copy` it's instructive to look at its API. Since
-`hu : u = u'` and `hv : v = v'` are proofs of equality, `p.copy hu hv` is the walk
-`p` itself, retyped as a walk from `u'` to `v'`. So every statement about `p` has a
-counterpart for `p.copy hu hv`, saying the same thing. In each case the proof is
-simply `subst_vars` followed by `rfl`.
+Having introduced `Walk.copy` it's instructive to look at its API. Given
+`p : G.Walk u v` together with proofs of equality `hu : u = u'` and `hv : v = v'`,
+`p.copy hu hv` is the walk `p` itself, retyped as a walk from `u'` to `v'`. So every
+statement about `p` has a counterpart for `p.copy hu hv`, saying the same thing. In
+each case the proof is simply `subst_vars` followed by `rfl`.
 
 For example `length_copy`, `support_copy`, `edges_copy` and `isPath_copy`.
 -/
@@ -1079,7 +1077,7 @@ For example `length_copy`, `support_copy`, `edges_copy` and `isPath_copy`.
 The `subst_vars` is essential. As its source shows, `copy` is just the cast
 `hu ▸ hv ▸ p`, and like the cast `h ▸ v` in the disjoint union `Σg`
 (`SimpleGraph.sigma`), it is stuck while the endpoints are distinct variables. So not
-even the length of a copied walk can be computed, and `rfl` fails.
+even the length of a copied walk reduces, and `rfl` fails.
 -/
 /-- error: Tactic `rfl` failed: The left-hand side
   (p.copy hu hv).length
@@ -1100,9 +1098,9 @@ example {u' v'} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
   rfl
 
 /-!
-Notice that the four `copy` lemmas listed above are all simp lemmas with `p.copy` on
-the LHS so that simp will systematically remove `.copy` when possible by rewriting to
-the original walk.
+Notice that the four `copy` lemmas listed above are all `simp` lemmas with `p.copy`
+on the LHS so that `simp` will systematically remove `.copy` when possible by
+rewriting to the original walk.
 
 Another class of results involving `Walk.copy` are those that allow us to manipulate
 a copied walk. For example if we add an edge to a `copy` using `cons` then this is
@@ -1111,18 +1109,18 @@ the same as taking a copy of the equivalent `cons` walk.
 #check Walk.cons_copy --  cons h (p.copy hv hw) = (cons ⋯ p).copy ⋯ hw
 
 /-!
-Some, but certainly not all, such results are simp lemmas. To understand why, we need
-to read the doc-string for `Walk.copy`, in particular the following comment:
+Some, but certainly not all, such results are `simp` lemmas. To understand why, we
+need to read the doc-string for `Walk.copy`, in particular the following comment:
 
 > The simp-normal form is for the `copy` to be pushed outward. That way calculations
 can occur within the "copy context".
 
 What this means is that lemmas involving `Walk.copy` are only marked as `@[simp]` if
-they push the `copy` outwards. The simp normal form is
-`(some_walk_not_involving_copy).copy hv hw`. (With `copy` on the outside, simp can
-apply other walk simp lemmas freely to the inner walk without `copy` interfering.)
+they push the `copy` outwards. The `simp` normal form is
+`(some_walk_not_involving_copy).copy hv hw`. (With `copy` on the outside, `simp` can
+apply other walk `simp` lemmas freely to the inner walk without `copy` interfering.)
 
-For example `cons_copy` and `append_copy_copy` are both good simp lemmas while
+For example `cons_copy` and `append_copy_copy` are both good `simp` lemmas while
 `copy_cons` is not.
 -/
 #source cons_copy --  cons h (p.copy hv hw) = (cons (hv ▸ h) p).copy rfl hw
@@ -1133,7 +1131,7 @@ For example `cons_copy` and `append_copy_copy` are both good simp lemmas while
 
 /-!
 To see what this means in practice, we consider the following concrete example.
-Suppose that simp encounters `cons h₁ (cons h₂ (p.copy hv hw))`. In this case
+Suppose that `simp` encounters `cons h₁ (cons h₂ (p.copy hv hw))`. In this case
 `cons_copy` fires on the inner walk `cons h₂ (p.copy hv hw)`, rewriting to
 `cons h₁ ((cons (hv ▸ h₂) p).copy rfl hw)`. Now there is again a `copy` inside a
 `cons` so `cons_copy` fires again to give:
@@ -1149,7 +1147,7 @@ the `copy` entirely!
 
 /-!
 The following lemma (the `concat` analogue of `cons_copy` from above, not currently
-in Mathlib) is a good simp lemma.
+in Mathlib) is a good `simp` lemma.
 -/
 @[simp]
 lemma Walk.concat_copy {v w y v' w'} (h : G.Adj w y) (p : G.Walk v' w') (hv : v' = v)
@@ -1168,9 +1166,11 @@ example {a b c d x y} (hub : u = b) (hvx : v = x) (hyc : y = c)
     (p : G.Walk u v) (q : G.Walk v y) (h₁ : G.Adj a b) (h₂ : G.Adj c d) :
     ((cons h₁ ((p.copy hub hvx).append (q.copy hvx hyc))).concat h₂).length
       = p.length + q.length + 2 := by
-  -- simp would prove this, but it's nice to see the individual steps.
-  rw [append_copy_copy, cons_copy, concat_copy, length_copy, length_concat,
-    length_cons, length_append]
+  -- simp proves this, but it's nice to see the individual steps
+  rw [append_copy_copy, cons_copy, concat_copy]
+  -- the walk is now in simp normal form with copy on the outside
+  -- ⊢ (((cons ⋯ (p.append q)).concat ⋯).copy ⋯ ⋯).length = p.length + q.length + 2
+  rw  [length_copy, length_concat, length_cons, length_append]
 
 /-!
 ## Transfer
@@ -1196,7 +1196,7 @@ example (p : G.Walk u v) (H : SimpleGraph V) : (G ⊔ H).Walk u v :=
   p.transfer _ fun _ he => edgeSet_mono le_sup_left (p.edges_subset_edgeSet he)
 
 /-!
-It is tempting to assume that `Walk.transfer` follows the same simp normal form as
+It is tempting to assume that `Walk.transfer` follows the same `simp` normal form as
 `Walk.copy`, but in fact the opposite is true. The difference is visible in the
 definition itself: `Walk.copy` is *not* marked `@[simp]` (it is just the cast
 `hu ▸ hv ▸ p`, which is stuck while the endpoints are variables), whereas the
@@ -1205,14 +1205,15 @@ recursive definition of `Walk.transfer` *is* tagged `@[simp]`.
 #source Walk.transfer --| nil => nil
                       --| cons' .. => cons _ (p.transfer ..)
 /-!
-So simp unfolds `transfer` through the structure of the walk: `(nil).transfer = nil`
-and `(cons h p).transfer = cons _ (p.transfer ..)`. So unlike `copy`, which can never
-be removed (except by `copy_rfl_rfl`) and is therefore collected on the *outside*,
-`transfer` is pushed *inwards* until it vanishes at the `nil` leaves. The simp normal
-form of `transfer` is therefore to *eliminate* it entirely; a `transfer` only
-survives when it is applied to an opaque walk whose constructor simp cannot see.
+So `simp` unfolds `Walk.transfer` through the structure of the walk:
+`(nil).transfer = nil` and `(cons h p).transfer = cons _ (p.transfer ..)`. So unlike
+`copy`, which can never be removed (except by `copy_rfl_rfl`) and is therefore
+collected on the *outside*, `transfer` is pushed *inwards* until it vanishes at the
+`nil` leaves. The `simp` normal form of `transfer` is therefore to *eliminate* it
+entirely; a `transfer` only survives when it is applied to an opaque walk whose
+constructor `simp` cannot see.
 
-The simp lemmas all serve this purpose: `transfer_append` distributes `transfer`
+The `simp` lemmas all serve this purpose: `transfer_append` distributes `transfer`
 inwards over `append`, moving it towards the leaves:
 -/
 #check transfer_append -- (p ++ q).transfer = (p.transfer ..) ++ (q.transfer ..)
@@ -1221,18 +1222,19 @@ Two nested transfers fuse into a single one via `transfer_transfer`.
 -/
 #check transfer_transfer -- (p.transfer H hp).transfer K hp' = p.transfer K ⋯
 /-!
-Finally, simp lemmas such as `length_transfer`, `support_transfer` and
-`edges_transfer` allow us to transfer properties of the walk across the transfer.
+Finally, `length_transfer`, `support_transfer` and `edges_transfer` say that
+transferring a walk does not change its length, support or edges. So `simp` removes a
+`transfer` sitting inside any of these, even when the walk itself is opaque.
 -/
 #check length_transfer  -- (p.transfer H hp).length = p.length
 #check support_transfer -- (p.transfer H hp).support = p.support
 #check edges_transfer   -- (p.transfer H hp).edges = p.edges
 
 /-!
-## Plumbing Elsewhere in the API
+## Elsewhere in Mathlib
 
 `Walk.copy` and `Walk.transfer` have no informal counterparts, but the problem they
-solve is not special to walks. It arises whenever a type encodes data and we need
+solve is not specific to walks. It arises whenever a type encodes data and we need
 to reconcile two versions of that data that are equal but not definitionally so.
 
 `Walk.copy` shares its name and purpose with the `copy` functions found on many
@@ -1273,12 +1275,19 @@ is the last `n` vertices of `P[n + k]`.
 
 /-!
 We can use this embedding and `Walk.map` to define a walk from `0` to `n` in
-`P[n + 1]`. Notice that we use `Walk.copy` to ensure its type is correct. (To be
-precise, in the `succ n` case we want to get a walk that is `cons h p` where `p` is a
-walk from `1` to `Fin.last (n + 1)`, rather than from `toHom 0` to
-`toHom (Fin.last n)`. Without the use of `Walk.copy` the definition would still work,
-but proofs would be more painful. You can remove the `.copy (by simp) (by simp)` and
-see what happens!)
+`P[n + 1]`. In the `n + 1` case the recursive call gives a walk
+`pathGraph.path n : P[n + 1].Walk 0 (Fin.last n)`. Writing `f` for
+`(pathGraph.embedding (n + 1) 1).toHom`, mapping this walk along `f` gives a walk of
+type `P[n + 2].Walk (f 0) (f (Fin.last n))`, whereas to prepend the edge from `0` to
+`1` we need one of type `P[n + 2].Walk 1 (Fin.last (n + 1))`. These two types are in
+fact definitionally equal, so Lean would accept the definition without `Walk.copy`.
+However, seeing this requires unfolding ordinary `def`s such as `pathGraph.embedding`
+and `Fin.addNat`. When `rw` and `simp` check that a term is well typed they unfold
+`@[implicit_reducible]` definitions such as `HypercubeVert` (see
+[Hypercube](#section-hypercube)) but not ordinary `def`s, so they would fail on the
+resulting walk. The `.copy` replaces this hidden definitional equality with two
+explicit equations, each proved by `simp`, and `simp` lemmas such as `length_copy`
+then see straight through the `copy`.
 -/
 /-- The walk from `0` to `n` in the `pathGraph` on `Fin (n + 1)`. -/
 def pathGraph.path (n : ℕ) : P[n + 1].Walk 0 (Fin.last n) :=
@@ -1296,8 +1305,7 @@ that the vertex type of each `P[n]` is different so the induction would be more
 painful, and we would have fewer results to rely on in subsequent proofs. From the
 `Walk.map` definition the proof that this is a Hamiltonian path will drop out very
 easily below.
--/
-/-!
+
 First we show that this walk has length `n`.
 -/
 @[simp]
@@ -1335,43 +1343,38 @@ lemma pathGraph.isHamiltonian_path {n} : (pathGraph.path n).IsHamiltonian :=
 
 end basics
 /-!
-# Walks in Hypercube and Mycielskian Graphs
-
-We now return to two of our running examples, the hypercube `Q[n]` and the
-Mycielskian `mμ(G)`, and build walks in each of them.
-
-## Walks in Hypercubes
+# Walks in the Hypercube
 
 We will consider the two most natural walks in the hypercube: canonical shortest
 paths and Gray code paths.
 
-### Hamming Paths
+## Hamming Paths
 
-Between any two vertices in the hypercube there may exist many different shortest
-paths, each obtained by successively flipping one of the coordinates in which the two
+Between any two vertices in the hypercube there exist many different shortest paths,
+each obtained by successively flipping one of the coordinates in which the two
 vertices differ. More precisely if `u` and `v` differ in `k` coordinates then there
 are `k!` different shortest paths between `u` and `v` obtained by flipping these
-coordinates in different orders.
-
-Clearly the length of any such path is the number of coordinates which need to be
-flipped, which is the *Hamming distance* between the two vertices.
+coordinates in different orders. The length of any such path is the number of
+coordinates which need to be flipped, which is the *Hamming distance* between the two
+vertices.
 
 We will define a canonical choice of such a path, which we will then call
 *the Hamming path* between the two vertices, by flipping coordinates from left to
-right.
-
-We will use induction on `n` and `Walk.map` to lift a path in `Q[n]` to `Q[n + 1]`
-via the `embedBool` embedding we defined earlier. (Recall that `embedBool n b` sends
-`v ↦ (v, b)`.)
+right. We will use induction on `n` and `Walk.map` to lift a path in `Q[n]` to
+`Q[n + 1]` via the `embedBool` embedding we defined earlier. (Recall that
+`embedBool n b` sends `v ↦ (v, b)`.)
 -/
 #check hypercube.embedBool
 
 /-!
 We can define Hamming paths using `if-then-else` syntax to split on the value of the
 last coordinate. The walk obtained from `Walk.map` starts at `(embedBool n b) u`,
-which is `(u, b)` by definition but not syntactically. So in both cases we use
-`Walk.copy` to convert it to the expected type `Q[n + 1].Walk (u, b) (v, c)`. In the
-`b = c` case the end vertex `(v, b)` also needs the hypothesis `h : b = c`.
+which is `(u, b)` by definition, but only after unfolding the ordinary `def`
+`embedBool`. As with `pathGraph.path`, Lean would accept this walk as it stands, but
+`rw` and `simp` would fail on it, so in both cases we use `Walk.copy` to convert it
+to the expected type `Q[n + 1].Walk (u, b) (v, c)`. In the `b = c` case the `copy` is
+needed anyway, since the end vertex `(v, b)` equals `(v, c)` only via the hypothesis
+`h : b = c`.
 
 Since a Hamming path is a path between two `HypercubeVert n` vertices, we choose to
 put it, and related definitions and results, in the `HypercubeVert` namespace.
@@ -1401,14 +1404,12 @@ def HypercubeVert.hammingPath : {n : ℕ} → (u v : HypercubeVert n) → Q[n].W
 
 /-!
 We will also need a notion of the Hamming distance between two vertices in the
-hypercube.
-
-Mathlib has a `hammingDist` function for finite Pi-types, but we can't use this for
-`HypercubeVert` (it isn't a Pi-type!) so we define a version for `HypercubeVert`
-directly below.
+hypercube. Mathlib has a `hammingDist` function for finite Pi-types, but we can't use
+this for `HypercubeVert` (it isn't a Pi-type!) so we define a version for
+`HypercubeVert` directly below.
 -/
 #check hammingDist -- [Fintype ι] [(i : ι) → DecidableEq (β i)]
-                   --         (x y : (i : ι) → β i) : ℕ
+                   --   (x y : (i : ι) → β i) : ℕ
 
 /-- Hamming distance in `Q[n]` defined for `HypercubeVert n` directly. -/
 protected def HypercubeVert.hammingDist : {n : ℕ} → (u v : HypercubeVert n) → ℕ
@@ -1478,26 +1479,41 @@ Hypercube](#section-distance-in-the-hypercube) we will see that the Hamming dist
 is the graph distance in `Q[n]`.
 -/
 /-!
-### Gray Code
+## Gray Code
 
 The hypercube contains a canonical Hamiltonian path called the *Gray code*
 [Gray 1953](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-gray-1953)
 which we will now define. Its endpoints are marked `@[implicit_reducible]` (as
-`HypercubeVert` is) so that `grayStart (n + 1)` unfolds to `(grayStart n, false)`
-when Lean checks the endpoints of the `Walk.copy`s below.
+`HypercubeVert` is). Lean would accept the definition of `grayPath` below without
+this, but checking that its `Walk.copy`s are well typed requires unfolding
+`grayStart (n + 1)` to `(grayStart n, false)`, and similarly for `grayEnd`. Without
+the attribute `rw` and `simp` cannot do this, and the proof of `isPath_grayPath`
+fails.
 -/
 /-- The first vertex of the Gray code walk is a nested tuple of `false`. -/
-@[simp, implicit_reducible]
+@[implicit_reducible]
 def HypercubeVert.grayStart : (n : ℕ) → HypercubeVert n
   | 0 => ()
   | n + 1 => (grayStart n, false)
 
 /-- The last vertex of the Gray code walk is the same as the first, but flipped to
 `true` in the new dimension. -/
-@[simp, implicit_reducible]
+@[implicit_reducible]
 def HypercubeVert.grayEnd : (n : ℕ) → HypercubeVert n
   | 0 => ()
   | n + 1 => (grayStart n, true)
+
+/-!
+The following `simp` lemmas unfold both endpoints in dimension `n + 1`. We use them
+to discharge the side conditions of the `Walk.copy`s below.
+-/
+@[simp]
+lemma HypercubeVert.grayStart_succ (n : ℕ) :
+    grayStart (n + 1) = (grayStart n, false) := rfl
+
+@[simp]
+lemma HypercubeVert.grayEnd_succ (n : ℕ) :
+    grayEnd (n + 1) = (grayStart n, true) := rfl
 
 /-- The Gray code walk in `Q[n]`. -/
 def hypercube.grayPath : (n : ℕ) → Q[n].Walk (grayStart n) (grayEnd n)
@@ -1510,8 +1526,7 @@ def hypercube.grayPath : (n : ℕ) → Q[n].Walk (grayStart n) (grayEnd n)
     -- There is an edge joining the two halves of the
     -- walk and the two slices of `Q[n + 1]`:
     -- `(grayEnd n, false)` is adjacent to `(grayEnd n, true)`.
-    let crossAdj : Q[n + 1].Adj (grayEnd n, false) (grayEnd n, true) := by
-      simp
+    let crossAdj : Q[n + 1].Adj (grayEnd n, false) (grayEnd n, true) := by simp
     -- Second half: reverse the `n`-dim walk, and map it onto the `true` slice. This
     -- is a walk from `(grayEnd n, true)` to `(grayStart n, true)` in `Q[n + 1]`.
     let secondHalf := ((grayPath n).reverse.map (embedTrue n).toHom).copy
@@ -1554,7 +1569,7 @@ lemma hypercube.isPath_grayPath (n) : (grayPath n).IsPath := by
     intro y hy hz
     rw [Walk.support_copy, Walk.support_map, List.mem_map] at hy hz
     -- the first half lies in the `false` slice and the second in the `true` slice,
-    -- so `y = (a, false) = (b, true)`, and the last coordinates clash
+    -- so `y = (a, false) = (b, true)`, which is impossible
     obtain ⟨a, -, rfl⟩ := hy
     obtain ⟨b, -, hb⟩ := hz
     have hlast : true = false := congrArg Prod.snd hb
@@ -1574,7 +1589,7 @@ end hypercube
 From here it is a short step to getting a Hamiltonian cycle in `Q[n]` (for `n > 1`);
 see the [Exercises](#section-exercises-walks) for details.
 
-## Walks in the Mycielskian
+# Walks in the Mycielskian
 
 Recall `mμ(G)`, the `mycielskian` of a graph `G`. Given any non-nil walk in `G`,
 there is a natural way to define a walk in `mμ(G)`. We explore this construction in
@@ -1614,12 +1629,12 @@ def Walk.mycielskianZigZag {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
   | nil => (hn .nil).elim  -- This case is ruled out by the `¬ p.Nil` hypothesis
   | cons' u v w h p =>
     -- the last edge of the walk `vˡ — uʳ`
-    have hl : mμ(G).Adj vˡ uʳ := by simpa using h.symm
+    have hl : mμ(G).Adj vˡ uʳ := h.symm
     match p with
-    | nil => cons (by simpa using h) <| cons hl nil -- `uˡ — vˡ — uʳ`
-    | cons' _ x _ h' p' =>
+    | nil => cons' _ vˡ _ h <| cons hl nil -- `uˡ — vˡ — uʳ`
+    | cons h' p' =>
       have hn' : ¬ (p'.cons h').Nil := nofun
-      cons (by simpa using h) ((mycielskianZigZag hn').reverse.concat hl)
+      cons' _ vʳ _ h ((mycielskianZigZag hn').reverse.concat hl)
 
 /-!
 If we had marked the definition of `mycielskianZigZag` with the `@[simp]` attribute
@@ -1629,18 +1644,15 @@ that have more meaningful names.
 -/
 @[simp]
 lemma Walk.mycielskianZigZag_cons_nil {u v} (h : G.Adj u v)
-    (hn : ¬ (cons h nil).Nil) :
-    mycielskianZigZag hn =
-      have hl : mμ(G).Adj vˡ uʳ := by simpa using h.symm
-      cons (by simpa using h) (cons hl nil) := rfl
+    (hn : ¬ (cons h nil).Nil) : mycielskianZigZag hn = cons (by simpa using h)
+      (cons (by simpa using h.symm : mμ(G).Adj vˡ uʳ) nil) := rfl
 
 @[simp]
 lemma Walk.mycielskianZigZag_cons_cons {u v x w} (h : G.Adj u v) (h' : G.Adj v x)
     (p' : G.Walk x w) (hn : ¬ (cons h (cons h' p')).Nil) :
-    mycielskianZigZag hn =
-      have hn' : ¬ (cons h' p').Nil := nofun
-      cons (by simpa using h)
-        ((mycielskianZigZag hn').reverse.concat (by simpa using h.symm)) := rfl
+    mycielskianZigZag hn = cons (by simpa using h)
+      ((mycielskianZigZag (nofun : ¬ (cons h' p').Nil)).reverse.concat
+        (by simpa using h.symm)) := rfl
 
 /-!
 From the definition of `mycielskianZigZag`, Lean automatically generates a
@@ -1683,7 +1695,6 @@ Using this walk we can also map closed walks in `G` to closed walks in the
 Mycielskian. This preserves the property of being a cycle and in particular maps
 Hamiltonian cycles to Hamiltonian cycles in the Mycielskian.
 -/
-
 /-- Given a closed walk from `u` to `u` in `G`, there is a walk from `uʳ` to `uʳ`
 in `mμ(G)`. If the original walk was a (Hamiltonian) cycle then so is this new walk.
 -/
@@ -1694,9 +1705,6 @@ def Walk.mycielskianClosed {u} (c : Walk G u u) : mμ(G).Walk uʳ uʳ :=
   | cons' _ v _ h <| cons' _ w _ h' p =>
     Walk.mycielskian (not_nil_cons (h := h') (p := p)) |>.cons (by simpa using h)
 
-/-!
-The `mycielskianClosed` of a nil walk is nil.
--/
 @[simp]
 lemma Walk.mycielskianClosed_nil {u} :
     mycielskianClosed (nil : Walk G u u) = nil := rfl
@@ -1709,14 +1717,14 @@ lemma Walk.mycielskianClosed_cons_cons {u v w} (h : G.Adj u v) (h' : G.Adj v w)
 
 /-!
 [Figure: Converting a cycle in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_cycle.svg)
--/
-/-!
+
 The `Walk.mycielskian` of a non-nil walk `p` has length `2 * p.length + 2`.
 -/
 @[simp]
 lemma Walk.length_mycielskian {u w} (p : Walk G u w) (hn : ¬ p.Nil) :
     (p.mycielskian hn).length = 2 * p.length + 2 := by
   simp [Walk.mycielskian]
+
 /-!
 The `Walk.mycielskianClosed` of a non-nil closed walk `c` has length
 `2 * c.length + 1`.
@@ -1734,9 +1742,7 @@ lemma Walk.length_mycielskianClosed {u} {c : Walk G u u} (hn : ¬ c.Nil) :
 Our next goal is to show that the `Walk.mycielskian` preserves the property of being
 a path. It will be useful to first establish some simple properties of the zig-zag
 walk `mycielskianZigZag`.
--/
 
-/-!
 The zig-zag walk only visits left or right copies of vertices from the original
 walk.
 -/
@@ -1772,7 +1778,7 @@ The second vertex of the `Walk.mycielskian` is in the zig-zag walk.
 lemma Walk.snd_mem_support_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
   (p.mycielskian hn).snd ∈ (mycielskianZigZag hn).support := by
   induction hn using mycielskianZigZag.induct
-    <;> rw [Walk.mycielskian] <;> aesop
+    <;> simp_all [Walk.mycielskian]
 
 /-!
 If the original walk `p : G.Walk u w` is a path, then the zig-zag walk is also a
@@ -1784,12 +1790,10 @@ lemma Walk.IsPath.mycielskianZigZag {u w} {p : G.Walk u w} (hp : p.IsPath)
   apply IsPath.mk'
   induction hn using mycielskianZigZag.induct with
   | case1 u v h hl hn => simpa using h.ne
-  | case2 u v h hl w x h' p' hn hnp' ih =>
-    -- Using `simp` we can reduce this to a "simple" fact about lists
-    -- of vertices that `grind` can solve
-    simp only [mycielskianZigZag_cons_cons, support_cons, support_concat,
-              support_reverse, List.nodup_cons]
-    grind [isPath_def, exists_of_mem_support_mycielskianZigZag hnp']
+  | case2 u v h hl w x h' p' hn hnp ih =>
+    -- `grind` can solve this with a little help
+    grind [mycielskianZigZag_cons_cons, support_concat, support_reverse, isPath_def,
+      exists_of_mem_support_mycielskianZigZag hnp]
 
 /-!
 If the original walk `p : G.Walk u w` is a path, then the `Walk.mycielskian` is a
@@ -1799,10 +1803,9 @@ path.
 lemma Walk.IsPath.mycielskian {u w} {p : G.Walk u w} (hp : p.IsPath) (hn : ¬ p.Nil) :
     (p.mycielskian hn).IsPath := by
   apply IsPath.mk'
-  simp only [Walk.mycielskian, Walk.concat, support_append,
-              support_cons, support_nil, List.append_assoc]
-  apply List.nodup_append.mpr ⟨(hp.mycielskianZigZag hn).support_nodup, ?_⟩
-  aesop
+  have := (hp.mycielskianZigZag hn).support_nodup
+  grind [Walk.mycielskian, Walk.concat, end_right_notMem_support_mycielskianZigZag,
+    support_append, support_nil, none_notMem_support_mycielskianZigZag]
 
 /-!
 If the original walk `p : G.Walk u u` is a cycle then the `Walk.mycielskianClosed` is
@@ -1854,7 +1857,7 @@ If the original walk `p : G.Walk u u` is a Hamiltonian cycle, then the
 lemma Walk.IsHamiltonianCycle.mycielskianClosed [DecidableEq V] {u} {p : G.Walk u u}
     (hp : p.IsHamiltonianCycle) : p.mycielskianClosed.IsHamiltonianCycle := by
   have : Fintype V := hp.isHamiltonian_tail.fintype
-  refine isHamiltonianCycle_iff_isCycle_and_length_eq.2
+  apply isHamiltonianCycle_iff_isCycle_and_length_eq.2
     ⟨isCycle_mycielskianClosed hp.isCycle.not_nil hp.isCycle.support_nodup, ?_⟩
   grind [length_mycielskianClosed hp.isCycle.not_nil, hp.length_eq,
         Fintype.card_option, Fintype.card_sum]
@@ -1879,10 +1882,10 @@ Hamiltonian. The oldest two are *Ore's theorem*
 [Ore 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-ore-1960) and
 its immediate (but earlier) corollary *Dirac's theorem*
 [Dirac 1952](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-dirac-1952).
-Ore's theorem says that a finite graph on at least `3` vertices is Hamiltonian if the
-sum of the degrees of every pair of non-adjacent vertices is at least the number of
-vertices in the graph. The special case when the minimum degree is at least half the
-number of vertices is Dirac's theorem.
+Call a finite graph an *Ore graph* if the sum of the degrees of every pair of
+non-adjacent vertices is at least the number of vertices in the graph. Ore's theorem
+says that every Ore graph on at least `3` vertices is Hamiltonian. The special case
+when the minimum degree is at least half the number of vertices is Dirac's theorem.
 
 Rather than prove Ore's theorem directly we prove the Bondy–Chvátal theorem
 [Bondy–Chvátal 1976](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-bondy-chvatal-1976):
@@ -1898,7 +1901,7 @@ The proof has four steps.
 
 1. A *maximal* path (one that cannot be extended at either end) whose endpoints
    satisfy Ore's degree condition can be closed up into a cycle visiting exactly the
-   same vertices. The tools are Pósa rotations and a counting argument.
+   same vertices. This uses Pósa rotations and a counting argument.
 2. If `u` and `v` are distinct non-adjacent vertices whose degree sum is at least
    `|V|`, then `G ⊔ edge u v` is Hamiltonian iff `G` is. Adding an edge can only
    help, so the hard part is the converse: a Hamiltonian cycle of `G ⊔ edge u v`
@@ -1957,7 +1960,7 @@ obvious from the type of this walk.
 
 /-!
 So to give the definition of Pósa rotation we need to use `Walk.copy` and give a
-proof that `(p.drop i).snd = p.getVert (i + 1)` (which simp can provide).
+proof that `(p.drop i).snd = p.getVert (i + 1)` (which `simp` can provide).
 -/
 /-- The `i`-th Pósa rotation of a walk `p`. -/
 def Walk.posaRotate (p : G.Walk u v) (h : G.Adj (p.getVert i) v) :
@@ -1983,7 +1986,7 @@ theorem Walk.IsPath.posaRotate (hp : p.IsPath) (h : G.Adj (p.getVert i) v) :
 /-!
 The length of a walk is preserved under Pósa rotations.
 -/
-@[simp, grind =]
+@[simp]
 lemma Walk.length_posaRotate (p : G.Walk u v) (h : G.Adj (p.getVert i) v) :
     (p.posaRotate h).length = p.length := by
   grind [lt_length_of_adj_getVert_end h, posaRotate, length_append, length_cons,
@@ -2055,10 +2058,10 @@ If `p` is a path of length at least 2 then the `posaClosed` walk is a cycle.
 -/
 lemma Walk.IsPath.isCycle_posaClosed (hp : p.IsPath) (h2 : 2 ≤ p.length)
     (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
-    (p.posaClosed h₁ h₂).IsCycle :=
-  (concat_isCycle_iff_length_ne_one ..).mpr ⟨hp.posaRotate h₁, by grind⟩
-end posa
+    (p.posaClosed h₁ h₂).IsCycle := (concat_isCycle_iff_length_ne_one ..).mpr
+      ⟨hp.posaRotate h₁, by grind [length_posaRotate]⟩
 
+end posa
 /-!
 The key idea in all of the Hamiltonicity theorems we prove below goes back to Dirac.
 We state it here with Ore's degree condition. Suppose `p = v₀, v₁, ..., vₖ` (with
