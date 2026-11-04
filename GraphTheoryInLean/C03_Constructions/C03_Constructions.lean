@@ -785,7 +785,7 @@ summands of the `Sum` type are the same. -/
 @[scoped delab app.Option.some]
 private def delabMycielskianVert : Delab := whenPPOption getPPNotation do
   -- the argument of `some`, which should be `@Sum.inl V V v` or `@Sum.inr V V v`
-  let x := (← getExpr).appArg!
+  let .app _ x ← getExpr | failure
   guard <| x.getAppNumArgs == 3 && x.getArg! 0 == x.getArg! 1
   let v ← withAppArg <| withAppArg delab
   if x.isAppOf ``Sum.inl then `($vˡ)

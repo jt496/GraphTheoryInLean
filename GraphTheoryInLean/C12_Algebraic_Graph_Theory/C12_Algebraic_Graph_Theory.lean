@@ -312,16 +312,22 @@ A graph can also be studied via matrices indexed by its vertices. Mathlib's
 is needed.
 -/
 section adjmatrix
+open Finset Polynomial Matrix
 variable {V : Type*} {G : SimpleGraph V}
 
-#source adjMatrix -- of fun i j =>  if G.Adj i j then (1 : α) else 0
+#source adjMatrix -- Matrix.of fun i j => if G.Adj i j then (1 : α) else 0
 /-!
-The *adjacency matrix* (`G.adjMatrix`), has `(i, j)` entry `1` if `i` and `j` are
-adjacent in `G` and `0` otherwise. (Informally we will denote it by `A`.)
+The *adjacency matrix* `G.adjMatrix R` of `G` over a type `R` with a zero and a one
+(`[Zero R], [One R]`) has `(i, j)` entry `1` if `i` and `j` are adjacent in `G` and
+`0` otherwise. (Informally we will denote it by `A`.)
 
-[Figure: A graph $G$ and its adjacency matrix $A(G)$](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
+[Figure: A graph $G$ and its adjacency matrix](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
+
+Mathlib writes a matrix row by row with the `!![⋯]` notation, separating the entries
+of a row by commas and the rows by semicolons.
 -/
-#eval C[4].adjMatrix ℕ -- !![0, 1, 0, 1; 1, 0, 1, 0; 0, 1, 0, 1; 1, 0, 1, 0]
+#check !![0, 1; 2, 3; 0, 0] -- !![0, 1; 2, 3; 0, 0] : Matrix (Fin 3) (Fin 2) ℕ
+#eval C[4].adjMatrix ℕ      -- !![0, 1, 0, 1; 1, 0, 1, 0; 0, 1, 0, 1; 1, 0, 1, 0]
 
 /-!
 Since a `SimpleGraph` is symmetric and loopless, its adjacency matrix is symmetric
@@ -339,8 +345,7 @@ matrix product sums over all of `V`, so results that multiply adjacency matrices
 assume `[Fintype V]`, and powers also need `[DecidableEq V]`, since the identity
 matrix `1` is defined by comparing indices. `[G.LocallyFinite]` is not enough: it
 makes the number of walks of each length between two vertices finite, which is all
-`finsetWalkLength` needs, but Mathlib's matrix product needs a finite index
-type.)
+`finsetWalkLength` needs, but Mathlib's matrix product needs a finite index type.)
 
 [Figure: The two length-2 walks from vertex 1 to vertex 3 and the entry $(A^2)_{1,3}=2$](https://jt496.github.io/GraphTheoryInLean/figures/walkcount.svg)
 -/
@@ -351,7 +356,6 @@ type.)
 
 #eval (C[5].adjMatrix ℕ ^ 5) 0 0                    -- 2
 #eval (C[5].finsetWalkLength 5 0 0).card            -- 2
-#eval (K[5].finsetWalkLength 2 0 1).card            -- 3
 #eval (K[2, 4].adjMatrix ℕ ^ 2) (.inl 0) (.inl 0)   -- 4
 
 /-!
@@ -360,7 +364,6 @@ of length `k`. We count the walks with `finsetWalkLength` rather than the set us
 `adjMatrix_pow_apply_eq_card_walk`: `card_set_walk_length_eq` relates the two, and
 `simp` rewrites the set form into the `Finset` form using `Fintype.card_ofFinset`.
 -/
-open Finset
 theorem trace_adjMatrix_pow_eq_sum_card_walk [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] {R : Type*} [Semiring R] (k : ℕ) :
     (G.adjMatrix R ^ k).trace = ∑ v, (#(G.finsetWalkLength k v v) : R) := by
@@ -392,11 +395,12 @@ theorem adjMatrix_submatrix_eq_iff [DecidableRel G.Adj] {R : Type*} [Semiring R]
 
 /-!
 For an automorphism `f`, Mathlib's `Iso.reindex_adjMatrix` already gives
-`(G.adjMatrix R).reindex f f = G.adjMatrix R`, and so do its powers, since
-relabelling rows and columns is a ring isomorphism (`Matrix.reindexRingEquiv`).
-Combined with the walk-counting formula, this shows that automorphisms preserve the
-number of walks of each length between two vertices. In a vertex-transitive graph it
-follows that every vertex lies on the same number of closed walks of length `k`.
+`(G.adjMatrix R).reindex f f = G.adjMatrix R`. Relabelling rows and columns is a
+ring isomorphism (`Matrix.reindexRingEquiv`), so it commutes with taking powers, and
+hence every power `G.adjMatrix R ^ k` is fixed by `f` as well. Combined with the
+walk-counting formula, this shows that automorphisms preserve the number of walks
+of each length between two vertices. In a vertex-transitive graph it follows that
+every vertex lies on the same number of closed walks of length `k`.
 
 In a vertex-transitive graph the diagonal entries of each power of the adjacency
 matrix are all equal.
@@ -489,7 +493,6 @@ with `ring`.
 
 [Figure: Left: the star $K_{4,1}$. Right: the disjoint union of $C_4$ and $K_1$. Vertices are numbered by `finSumFinEquiv` as in the matrices below. Both graphs have characteristic polynomial $x^5 -4x^3$](https://jt496.github.io/GraphTheoryInLean/figures/cospectral.svg)
 -/
-open Polynomial in
 example : (K[4, 1].adjMatrix ℤ).charpoly = X ^ 5 - 4 * X ^ 3 := by
   rw [← Matrix.charpoly_reindex finSumFinEquiv]
   have hM : (K[4, 1].adjMatrix ℤ).reindex finSumFinEquiv finSumFinEquiv =
@@ -504,7 +507,6 @@ example : (K[4, 1].adjMatrix ℤ).charpoly = X ^ 5 - 4 * X ^ 3 := by
       Matrix.submatrix_apply, Fin.succAbove]
   ring
 
-open Polynomial in
 example : ((C[4] ⊕g K[1]).adjMatrix ℤ).charpoly = X ^ 5 - 4 * X ^ 3 := by
   rw [← Matrix.charpoly_reindex finSumFinEquiv]
   have hM : ((C[4] ⊕g K[1]).adjMatrix ℤ).reindex finSumFinEquiv finSumFinEquiv =
@@ -538,15 +540,14 @@ example : IsEmpty (K[4, 1] ≃g C[4] ⊕g K[1]) := ⟨fun e => by
 /-!
 ## Eigenvalues of Mycielskians
 
-Apart from the eigenvalue `d` of a `d`-regular graph (and the Laplacian eigenvalue
-`0`), Mathlib has no eigenvalues of particular graphs. But we can often find them by
-exhibiting eigenvectors, as Mathlib does for `d`. As an example we show that
-eigenvalues of `G` give eigenvalues of its Mycielskian `mμ(G)`, scaled by the golden
-ratio.
+Apart from the eigenvalue `d` of a `d`-regular graph, Mathlib has no eigenvalues of
+particular graphs. But we can often find them by exhibiting eigenvectors, as Mathlib
+does for `d`. As an example we show that eigenvalues of `G` give eigenvalues of its
+Mycielskian `mμ(G)`, scaled by the golden ratio.
 
 Mathlib writes `M *ᵥ x` (`Matrix.mulVec`) for the product of a matrix `M` and a
-vector `x`, whose entry at `i` is `∑ j, M i j * x j`. So a nonzero vector `x` is an
-eigenvector of `M` with eigenvalue `ξ` iff `M *ᵥ x = ξ • x`.
+column vector `x`, whose entry at `i` is `∑ j, M i j * x j`. So a nonzero vector `x`
+is an eigenvector of `M` with eigenvalue `ξ` iff `M *ᵥ x = ξ • x`.
 
 We list the vertices of `mμ(G)` in the order given by their type `Option (V ⊕ V)`:
 first the apex `none`, then the left copies `vˡ`, then the right copies `vʳ`. Let
@@ -571,8 +572,8 @@ the vector `y` with blocks `0`, `t • x` and `x` is sent to the vector with blo
 `Real.goldenRatio` and `Real.goldenConj`, with notation `φ` and `ψ` in the
 `goldenRatio` scope, and `Real.goldenRatio_sq` and `Real.goldenConj_sq` say that they
 are these roots. (An eigenvalue `ξ` of `G` need not have an eigenvector whose
-entries sum to zero, and then the construction says nothing about `φ * ξ` and
-`ψ * ξ`. For example, the only eigenvectors of `K[2]` with eigenvalue `1` are the
+entries sum to zero, and then `φ * ξ` and `ψ * ξ` need not be eigenvalues of
+`mμ(G)`. For example, the only eigenvectors of `K[2]` with eigenvalue `1` are the
 constant vectors, and neither `φ` nor `ψ` is an eigenvalue of `mμ(K[2])`, which is
 the `5`-cycle (see below). In a `d`-regular graph, however, every eigenvalue other
 than `d` has such an eigenvector: eigenvectors of a symmetric matrix with distinct
@@ -602,7 +603,6 @@ If `A *ᵥ x = ξ • x`, the entries of `x` sum to zero and `t ^ 2 = t + 1`, th
 `mycielskianLift t x` satisfies the corresponding equation for `mμ(G)`, with
 eigenvalue `t * ξ`.
 -/
-open Matrix in
 theorem adjMatrix_mycielskian_mulVec_mycielskianLift [Fintype V]
     [DecidableRel G.Adj] {R : Type*} [CommRing R] {t ξ : R} (ht : t ^ 2 = t + 1)
     {x : V → R} (hx : G.adjMatrix R *ᵥ x = ξ • x) (hsum : ∑ v, x v = 0) :
@@ -630,17 +630,18 @@ lemma mycielskianLift_ne_zero {R : Type*} [Zero R] [Mul R] (t : R) {x : V → R}
   simpa using congrFun hx vʳ
 
 /-!
-An eigenvector gives an element of the spectrum. As in Mathlib's proof of
-`IsRegularOfDegree.mem_spectrum_adjMatrix`, we pass from the matrix to the linear map
-`Matrix.toLin'` it defines, which has the same spectrum (`Matrix.spectrum_toLin'`),
-and use the fact that eigenvalues of a linear map lie in its spectrum
-(`Module.End.HasEigenvalue.mem_spectrum`). Taking `t = φ` and `t = ψ` gives the
-following.
+An eigenvector gives an element of the spectrum. Mathlib's eigenvalue API
+(`Module.End.HasEigenvalue`) is stated for linear maps rather than matrices, so, as
+in Mathlib's proof of `IsRegularOfDegree.mem_spectrum_adjMatrix`, we pass from the
+matrix to the linear map `Matrix.toLin'` it defines. This map has the same spectrum
+(`Matrix.spectrum_toLin'`), and eigenvalues of a linear map lie in its spectrum
+(`Module.End.HasEigenvalue.mem_spectrum`). The proof first shows that `t * ξ` lies in
+the spectrum for every real root `t` of `t ^ 2 = t + 1`, and then applies this to
+`φ` and `ψ`, using `Real.goldenRatio_sq` and `Real.goldenConj_sq`.
 
 If `x ≠ 0` is an eigenvector of `A` with eigenvalue `ξ` whose entries sum to zero,
 then `φ * ξ` and `ψ * ξ` are eigenvalues of `mμ(G)`.
 -/
-open Matrix in
 open scoped goldenRatio in
 theorem mem_spectrum_adjMatrix_mycielskian [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] {ξ : ℝ} {x : V → ℝ} (hx0 : x ≠ 0)
@@ -663,7 +664,6 @@ entries sum to zero. Since `mμ(K[2])` is isomorphic to `C[5]`
 (`mycielskianCompleteTwoIsoCycleFive`), the `5`-cycle has eigenvalues `-φ` and
 `-ψ`.
 -/
-open Matrix in
 open scoped goldenRatio in
 example :
     -φ ∈ spectrum ℝ (C[5].adjMatrix ℝ) ∧ -ψ ∈ spectrum ℝ (C[5].adjMatrix ℝ) := by
@@ -674,18 +674,10 @@ example :
   simpa using mem_spectrum_adjMatrix_mycielskian (by simp) hK (by simp)
 
 /-!
-Mathlib's `spectrum` is a set, so it does not record multiplicities. But for a
-`d`-regular graph `G` on `n` vertices this construction accounts for most of the
-spectrum of `mμ(G)`, with multiplicities. The adjacency matrix of `G` is symmetric,
-so it has an orthogonal basis of eigenvectors that contains `1`, and the other
-`n - 1` basis vectors are orthogonal to `1`. They give `2 * (n - 1)` independent
-eigenvectors of `mμ(G)`. The remaining three eigenvectors are constant on the left
-copies and on the right copies, and their eigenvalues are the roots of
-`X ^ 3 - d * X ^ 2 - (d ^ 2 + n) * X + d * n`. For `G = K[2]` we have `d = 1` and
-`n = 2` so this cubic is `(X - 2) * (X ^ 2 + X - 1)`, whose quadratic factor gives
-`-φ` and `-ψ` a second time, so the eigenvalues of `C[5]` are `2`, and `-φ` and `-ψ`
-each with multiplicity two. (This is a coincidence: for a `d`-regular `G` on `n`
-vertices this happens only when `n = 2 * d ^ 2`.)
+For a `d`-regular graph `G` the construction accounts for all but three eigenvalues
+of `mμ(G)`, counted with multiplicity; the other three come from eigenvectors that
+are constant on the left and on the right copies. For `C[5]` these are `2`, `-φ` and
+`-ψ`, so `-φ` and `-ψ` in fact have multiplicity two (Exercise 9).
 
 # The Laplacian
 
@@ -716,12 +708,15 @@ Over `ℝ`, this form is a sum of squares, so the Laplacian is positive semidefi
 It vanishes iff `x` is constant along every edge, and hence on every connected
 component. For a positive semidefinite matrix the form vanishes exactly on the
 *kernel*, the set of vectors `x` with `L *ᵥ x = 0`, so the kernel of `L` consists of
-the functions that are constant on components.
+the functions that are constant on components. In particular the all-ones vector `1`
+lies in the kernel, so `0` is always an eigenvalue of the Laplacian.
 -/
 #check posSemidef_lapMatrix -- (G.lapMatrix R).PosSemidef
 
 #check lapMatrix_mulVec_eq_zero_iff_forall_reachable
 -- G.lapMatrix ℝ *ᵥ x = 0 ↔ ∀ i j, G.Reachable i j → x i = x j
+
+#check zero_mem_spectrum_lapMatrix -- 0 ∈ spectrum R (G.lapMatrix R)
 
 /-!
 Counting dimensions gives the first theorem of spectral graph theory: the number of
@@ -756,7 +751,6 @@ theorem IsRegularOfDegree.finrank_eigenspace_adjMatrix [Fintype V] [DecidableEq 
     ext i j
     simp [Matrix.toLin'_apply, Pi.single_apply, Matrix.natCast_apply, eq_comm]
   rw [this, LinearMap.ker_neg]
-
 
 end adjmatrix
 

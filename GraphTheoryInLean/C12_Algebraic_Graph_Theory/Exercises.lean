@@ -101,14 +101,25 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
   sorry
 
 /-!
-9. Show that the entries in each row of the Laplacian sum to `0`.
+9. Show that the characteristic polynomial of `C[5]` is
+`(X - 2) * (X ^ 2 + X - 1) ^ 2`, so `-φ` and `-ψ` are eigenvalues of `C[5]` of
+multiplicity two. (Hint: proceed as for the cospectral graphs in
+[Eigenvalues](#section-eigenvalues). The vertex type of `C[5]` is already `Fin 5`, so
+no relabelling is needed.)
+-/
+open Polynomial in
+example : (C[5].adjMatrix ℤ).charpoly = (X - 2) * (X ^ 2 + X - 1) ^ 2 := by
+  sorry
+
+/-!
+10. Show that the entries in each row of the Laplacian sum to `0`.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
     ∑ j, G.lapMatrix ℤ i j = 0 := by
   sorry
 
 /-!
-10. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
+11. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
 the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
@@ -117,21 +128,21 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
   sorry
 
 /-!
-11. Show that `C[5]` is strongly regular with parameters `(5, 2, 0, 1)`, and deduce
+12. Show that `C[5]` is strongly regular with parameters `(5, 2, 0, 1)`, and deduce
 that its diameter is `2`.
 -/
 example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
   sorry
 
 /-!
-12. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
+13. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
 example [Fintype V] [DecidableRel G.Adj] :
     ¬ G.IsSRGWith 10 4 0 1 := by
   sorry
 
 /-!
-13. Show that the Hamming cube is isomorphic to the third construction of the
+14. Show that the Hamming cube is isomorphic to the third construction of the
 hypercube, the Hasse diagram `hypercubeHasse` of the subsets of `Fin n`, by sending a
 vertex `x` to the set of coordinates `i` with `x i = true`. (Hint: adding the basis
 vector `e i` to `x` removes `i` from this set if it is there, and inserts it
@@ -143,7 +154,7 @@ def hypercubeHammingIsoHasse' (n : ℕ) : hypercubeHamming n ≃g hypercubeHasse
   sorry
 
 /-!
-14. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
+15. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
 `u — v` there is an automorphism sending `x` to `u` and `y` to `v`. (Hint: if
 `y = x + e i` and `v = u + e j`, compose a translation, the coordinate permutation
 `Equiv.swap i j` and another translation.)
@@ -155,7 +166,7 @@ lemma exists_aut_hypercubeHamming_of_adj' {n : ℕ} {x y u v : Fin n → Bool}
   sorry
 
 /-!
-15. Show that the copies of any graph `A` in a complete graph are just the injective
+16. Show that the copies of any graph `A` in a complete graph are just the injective
 maps between the vertex types. Deduce that `K[n]` contains
 `n.descFactorial (k + 3) = n * (n - 1) * ⋯ * (n - k - 2)` labelled copies of
 `C[k + 3]`. (Hint: `Fintype.card_embedding_eq`.)
@@ -169,7 +180,7 @@ lemma labelledCopyCount_completeGraph_cycleGraph' (n k : ℕ) :
   sorry
 
 /-!
-16. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
+17. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
 i.e. unlabelled copies of `C[n + 3]`. (Hint: `labelledCopyCount_cycleGraph`.)
 -/
 lemma copyCount_completeGraph_cycleGraph' (n : ℕ) :
@@ -177,7 +188,7 @@ lemma copyCount_completeGraph_cycleGraph' (n : ℕ) :
   sorry
 
 /-!
-17. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
+18. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
 `n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
 `labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
@@ -193,7 +204,7 @@ lemma copyCount_hypercube_cycleGraph_four' (n : ℕ) (hn : 2 ≤ n) :
   sorry
 
 /-!
-18. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
+19. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
 -/
 lemma labelledCopyCount_cycleGraph_five_self' :
     C[5].labelledCopyCount C[5] = 10 := by
@@ -381,7 +392,29 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
     ring
 
 /-!
-9. Show that the entries in each row of the Laplacian sum to `0`.
+9. Show that the characteristic polynomial of `C[5]` is
+`(X - 2) * (X ^ 2 + X - 1) ^ 2`, so `-φ` and `-ψ` are eigenvalues of `C[5]` of
+multiplicity two. (Hint: proceed as for the cospectral graphs in
+[Eigenvalues](#section-eigenvalues). The vertex type of `C[5]` is already `Fin 5`, so
+no relabelling is needed.)
+-/
+open Polynomial in
+example : (C[5].adjMatrix ℤ).charpoly = (X - 2) * (X ^ 2 + X - 1) ^ 2 := by
+  have hM : C[5].adjMatrix ℤ = !![0, 1, 0, 0, 1; 1, 0, 1, 0, 0; 0, 1, 0, 1, 0;
+      0, 0, 1, 0, 1; 1, 0, 0, 1, 0] := by
+    decide
+  rw [hM, Matrix.charpoly, Matrix.det_succ_row_zero]
+  -- expanding the determinant along its rows leaves a polynomial identity
+  suffices (X : ℤ[X]) * (X * (X * (X * X + -1) + -X) + (1 + -(X * X))) +
+      (X + -(X * (X * X + -1)) + -1 +
+        -((-1) ^ 4 * (1 + (-(X * (-(X * X) + 1)) + -X)))) =
+      (X - 2) * (X ^ 2 + X - 1) ^ 2 by
+    simpa [Fin.sum_univ_succ, Matrix.det_succ_row_zero, Matrix.charmatrix_apply,
+      Matrix.submatrix_apply, Fin.succAbove]
+  ring
+
+/-!
+10. Show that the entries in each row of the Laplacian sum to `0`.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
     ∑ j, G.lapMatrix ℤ i j = 0 := by
@@ -389,7 +422,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
     congr_fun (G.lapMatrix_mulVec_one_eq_zero ℤ) i
 
 /-!
-10. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
+11. Show that if `G` has no isolated vertices, then the kernel of the Laplacian of
 the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
@@ -400,7 +433,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
   exact card_connectedComponent_eq_one_iff.2 (connected_mycielskian_iff.2 h)
 
 /-!
-11. Show that `C[5]` is strongly regular with parameters `(5, 2, 0, 1)`, and deduce
+12. Show that `C[5]` is strongly regular with parameters `(5, 2, 0, 1)`, and deduce
 that its diameter is `2`.
 -/
 example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
@@ -414,7 +447,7 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
   exact hne (by rw [h', top_adj]; decide)
 
 /-!
-12. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
+13. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
 example [Fintype V] [DecidableRel G.Adj] :
     ¬ G.IsSRGWith 10 4 0 1 := fun h => by
@@ -422,7 +455,7 @@ example [Fintype V] [DecidableRel G.Adj] :
   norm_num at this
 
 /-!
-13. Show that the Hamming cube is isomorphic to the third construction of the
+14. Show that the Hamming cube is isomorphic to the third construction of the
 hypercube, the Hasse diagram `hypercubeHasse` of the subsets of `Fin n`, by sending a
 vertex `x` to the set of coordinates `i` with `x i = true`. (Hint: adding the basis
 vector `e i` to `x` removes `i` from this set if it is there, and inserts it
@@ -477,7 +510,7 @@ def hypercubeHammingIsoHasse (n : ℕ) : hypercubeHamming n ≃g hypercubeHasse 
     · exact .inl (Finset.covBy_insert (by simpa [boolVecEquivFinset] using hi))
 
 /-!
-14. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
+15. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
 `u — v` there is an automorphism sending `x` to `u` and `y` to `v`. (Hint: if
 `y = x + e i` and `v = u + e j`, compose a translation, the coordinate permutation
 `Equiv.swap i j` and another translation.)
@@ -501,7 +534,7 @@ lemma exists_aut_hypercubeHamming_of_adj {n : ℕ} {x y u v : Fin n → Bool}
     simp [this]
 
 /-!
-15. Show that the copies of any graph `A` in a complete graph are just the injective
+16. Show that the copies of any graph `A` in a complete graph are just the injective
 maps between the vertex types. Deduce that `K[n]` contains
 `n.descFactorial (k + 3) = n * (n - 1) * ⋯ * (n - k - 2)` labelled copies of
 `C[k + 3]`. (Hint: `Fintype.card_embedding_eq`.)
@@ -522,7 +555,7 @@ lemma labelledCopyCount_completeGraph_cycleGraph (n k : ℕ) :
   simp
 
 /-!
-16. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
+17. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
 i.e. unlabelled copies of `C[n + 3]`. (Hint: `labelledCopyCount_cycleGraph`.)
 -/
 lemma copyCount_completeGraph_cycleGraph (n : ℕ) :
@@ -532,7 +565,7 @@ lemma copyCount_completeGraph_cycleGraph (n : ℕ) :
   rw [h, mul_comm]
 
 /-!
-17. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
+18. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
 `n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
 `labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
@@ -554,7 +587,7 @@ lemma copyCount_hypercube_cycleGraph_four (n : ℕ) (hn : 2 ≤ n) :
   rw [← hypercubeTwoIsoCycleFour.copyCount_eq_left Q[n], copyCount_hypercube n 2 hn]
 
 /-!
-18. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
+19. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
 -/
 lemma labelledCopyCount_cycleGraph_five_self :
     C[5].labelledCopyCount C[5] = 10 := by

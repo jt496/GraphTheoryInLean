@@ -20,7 +20,7 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "1df8067a8085b91c97a15373e1cf2d3c643ddbeb"
+rev = "a1f757688f06e193dde6155dd240b893f2e4a8ca"
 
 [[lean_lib]]
 name = "GraphTheoryInLean"
