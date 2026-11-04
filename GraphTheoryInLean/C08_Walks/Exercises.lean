@@ -188,7 +188,7 @@ abbrev chordedC5 : SimpleGraph (Fin 5) := C[5] ⊔ edge 0 2 ⊔ edge 0 3
 
 /-!
 20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
-have degree `2`. Hint: `decide`.
+have degree `2`.
 -/
 example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   sorry
@@ -270,7 +270,8 @@ structure Walk.IsMaximumPath {u v : V} (p : G.Walk u v) : Prop extends
   length_le : ∀ ⦃x y : V⦄ ⦃q : G.Walk x y⦄, q.IsPath → q.length ≤ p.length
 
 /-!
-27. Restate Mathlib's existence result compactly.
+27. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
+compactly.
 -/
 variable (G) in
 lemma Walk.exists_isMaximumPath' [Nonempty V] [Finite G.edgeSet] :
@@ -324,8 +325,9 @@ lemma Walk.mem_support_tail_iff' {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V}
 /-!
 33. A cycle can be cut at any of its vertices to give a path from that vertex
 visiting exactly the cycle's vertices, of length one less than the cycle. Hint:
-rotate the cycle to start at `y` and take the reversed tail, as in the proof of the
-chapter's `IsCycle.exists_isPath_of_mem_edges`.
+deduce it from the chapter's `IsCycle.exists_isPath_of_mem_edges`, cutting the cycle
+at the first edge of `c.rotate y hy` (`Walk.mk_start_snd_mem_edges`,
+`Walk.rotate_edges`).
 -/
 lemma Walk.IsCycle.exists_isPath_spanning' {a : V} {c : G.Walk a a}
     (hc : c.IsCycle) {y : V} (hy : y ∈ c.support) :
@@ -334,13 +336,13 @@ lemma Walk.IsCycle.exists_isPath_spanning' {a : V} {c : G.Walk a a}
   sorry
 
 /-!
-34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`,
-and some cycle through `u` of length one more than `p` visits exactly the vertices
-of `p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
+34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
+some cycle through `u` of length one more than `p` visits exactly the vertices of
+`p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
 Hint: if `p` missed a vertex, a walk from `u` to it and `exists_cross_adj` would
-yield an edge leaving the cycle. Break the cycle with `exists_isPath_spanning` and
-extend the resulting path with this edge to give a strictly longer path,
-contradicting maximality.
+yield an edge leaving the cycle. Break the cycle with
+`IsCycle.exists_isPath_spanning'` and extend the resulting path with this edge to
+give a strictly longer path, contradicting maximality.
 -/
 lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle' [DecidableEq V] {u v : V}
     {p : G.Walk u v} (hmax : p.IsMaximumPath) (hreach : ∀ w, G.Reachable u w)
@@ -350,9 +352,10 @@ lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle' [DecidableEq V] {u v : V}
 
 /-!
 35. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
-`isHamiltonian_of_isCycle`. Ore's condition supplies the cycle, via
-`two_le_length_of_isMaximumPath` and `IsMaximalPath.exists_cycle_spanning` (from the
-chapter), and the reachability, via `exists_walk_length_le_two`.
+`IsMaximumPath.isHamiltonian_of_isCycle'`. Ore's condition supplies the cycle, via
+`IsOreGraph.two_le_length_of_isMaximumPath'` and
+`IsMaximalPath.exists_cycle_spanning` (from the chapter), and the reachability, via
+`IsOreGraph.exists_walk_length_le_two'`.
 -/
 lemma Walk.isHamiltonian_of_isMaximumPath' [Fintype V] [DecidableEq V]
     [G.LocallyFinite] (h : G.IsOreGraph)
@@ -519,19 +522,11 @@ lemma HypercubeVert.hammingDist_comm {n : ℕ} (u v : HypercubeVert n) :
 is always in the `false` slice of `Q[n + 2]`.
 -/
 lemma hypercube.grayPath_snd_false (n : ℕ) : (grayPath (n + 2)).snd.2 = false := by
-  -- the first half of `grayPath (n + 2)`, exactly as in its definition
-  let fH : Q[n + 2].Walk (grayStart (n + 2)) (grayEnd (n + 1), false) :=
-    ((grayPath (n + 1)).map (hypercube.embedFalse (n + 1)).toHom).copy
-      (by simp) (by simp)
-  have : fH.length = 2 ^ (n + 1) - 1 := by
-    rw [length_copy, length_map, length_grayPath]
-  have hstep : (grayPath (n + 2)).snd = (fH.append _).getVert 1 := rfl
-  cases n with
-  | zero => rfl
-  | succ n =>
-    have : 1 < fH.length := by grind
-    rw [hstep, Walk.getVert_append, ite_eq_left this]
-    simp [fH, getVert_map]
+  -- the first half of the walk has length `1 ≤ 2 ^ (n + 1) - 1` and lies in the
+  -- `false` slice; `getVert_append'`, says that `snd` takes vertex `1` from it
+  have h : 1 ≤ (grayPath (n + 1)).length := by grind [length_grayPath]
+  rw [grayPath, snd, getVert_append']
+  simp_all
 
 /-!
 16. Show that `hypercube.grayCycle n` is indeed a cycle.
@@ -573,7 +568,7 @@ example : grotzschGraph.IsHamiltonian :=
 
 /-!
 20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
-have degree `2`. Hint: `decide`.
+have degree `2`.
 -/
 example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   decide
@@ -617,7 +612,7 @@ lemma IsOreGraph.adj_or_exists_adj_adj [Fintype V] [G.LocallyFinite]
   -- The union of the neighbourhoods of `u` and `v` lives in `V \ {u, v}`
   have h_sub : G.neighborFinset u ∪ G.neighborFinset v ⊆ univ \ {u, v} := by
     intro x hx
-    simp only [mem_union, mem_neighborFinset, mem_sdiff, mem_univ, true_and,
+    simp_rw [mem_union, mem_neighborFinset, mem_sdiff, mem_univ, true_and,
       mem_insert, mem_singleton] at hx ⊢
     grind [adj_symm]
   -- So the cardinality of the union of the neighbourhoods is at most `|V| - 2`
@@ -683,7 +678,8 @@ lemma Walk.exists_isPath_of_two_le_degree [G.LocallyFinite] {v : V}
   exact ⟨x, y, cons hx.symm (cons hy nil), by simp_all [hx.symm.ne, hy.ne]⟩
 
 /-!
-27. Restate Mathlib's existence result compactly.
+27. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
+compactly.
 -/
 variable (G) in
 lemma Walk.exists_isMaximumPath [Nonempty V] [Finite G.edgeSet] :
@@ -753,34 +749,30 @@ lemma Walk.mem_support_tail_iff {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V} 
 /-!
 33. A cycle can be cut at any of its vertices to give a path from that vertex
 visiting exactly the cycle's vertices, of length one less than the cycle. Hint:
-rotate the cycle to start at `y` and take the reversed tail, as in the proof of the
-chapter's `IsCycle.exists_isPath_of_mem_edges`.
+deduce it from the chapter's `IsCycle.exists_isPath_of_mem_edges`, cutting the cycle
+at the first edge of `c.rotate y hy` (`Walk.mk_start_snd_mem_edges`,
+`Walk.rotate_edges`).
 -/
 lemma Walk.IsCycle.exists_isPath_spanning {a : V} {c : G.Walk a a}
     (hc : c.IsCycle) {y : V} (hy : y ∈ c.support) :
     ∃ (z : V) (q : G.Walk y z), q.IsPath ∧ q.length + 1 = c.length ∧
       (∀ x, x ∈ q.support ↔ x ∈ c.support) := by
   classical
-  -- Rotate the cycle to start at `y`.
-  have hd : (c.rotate y hy).IsCycle := (isCycle_rotate hy).mpr hc
-  -- The rotated cycle is not nil, and has the same length as the original cycle
-  have hdnn : ¬ (c.rotate y hy).Nil := hd.not_nil
-  have hlen : (c.rotate y hy).length = c.length := c.length_rotate _ hy
-  -- The path we want is the reversed tail of the rotated cycle, which has
-  -- the correct length and contains the same vertices as the original cycle.
-  refine ⟨_, (c.rotate y hy).tail.reverse, hd.isPath_tail.reverse, ?_, fun x => ?_⟩
-  · grind [length_tail_add_one, length_reverse]
-  · grind [support_reverse, support_tail_of_not_nil _ hdnn, ← mem_support_rotate_iff,
-            mem_support_tail_iff]
+  -- Rotating the cycle to start at `y` gives an edge of `c` at `y`.
+  have he := mk_start_snd_mem_edges (hc.rotate hy).not_nil
+  rw [(c.rotate_edges y hy).perm.mem_iff] at he
+  -- Cutting `c` open at this edge gives the required path.
+  obtain ⟨q, hq, hlen, hsupp, _⟩ := hc.exists_isPath_of_mem_edges he
+  exact ⟨_, q, hq, hlen, hsupp⟩
 
 /-!
-34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`,
-and some cycle through `u` of length one more than `p` visits exactly the vertices
-of `p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
+34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
+some cycle through `u` of length one more than `p` visits exactly the vertices of
+`p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
 Hint: if `p` missed a vertex, a walk from `u` to it and `exists_cross_adj` would
-yield an edge leaving the cycle. Break the cycle with `exists_isPath_spanning` and
-extend the resulting path with this edge to give a strictly longer path,
-contradicting maximality.
+yield an edge leaving the cycle. Break the cycle with
+`IsCycle.exists_isPath_spanning` and extend the resulting path with this edge to give
+a strictly longer path, contradicting maximality.
 -/
 lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle [DecidableEq V] {u v : V}
     {p : G.Walk u v} (hmax : p.IsMaximumPath) (hreach : ∀ w, G.Reachable u w)
@@ -803,9 +795,10 @@ lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle [DecidableEq V] {u v : V}
 
 /-!
 35. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
-`isHamiltonian_of_isCycle`. Ore's condition supplies the cycle, via
-`two_le_length_of_isMaximumPath` and `IsMaximalPath.exists_cycle_spanning` (from the
-chapter), and the reachability, via `exists_walk_length_le_two`.
+`IsMaximumPath.isHamiltonian_of_isCycle`. Ore's condition supplies the cycle, via
+`IsOreGraph.two_le_length_of_isMaximumPath` and
+`IsMaximalPath.exists_cycle_spanning` (from the chapter), and the reachability, via
+`IsOreGraph.exists_walk_length_le_two`.
 -/
 lemma Walk.isHamiltonian_of_isMaximumPath [Fintype V] [DecidableEq V]
     [G.LocallyFinite] (h : G.IsOreGraph)

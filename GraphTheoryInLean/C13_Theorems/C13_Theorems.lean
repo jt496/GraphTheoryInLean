@@ -53,7 +53,7 @@ these are proved in this guide:
 
 * the simplest case `R(3, 3) = 6` of Ramsey's theorem
   (`not_cliqueFree_three_and_indepSetFree_three`)
-* Euler's theorem on Eulerian trails (`Walk.exists_isEulerian_iff`)
+* Euler's theorem on Eulerian trails (`exists_isEulerian_iff`)
 * the theorems of Dirac (`isHamiltonian_of_card_le_two_mul_minDegree`) and Ore
   (`IsOreGraph.isHamiltonian`)
 * Brooks' theorem (`brooks`)
@@ -765,8 +765,8 @@ whether `v` and `w` lie in `N` or in `Vᵣ`.
 
 [Figure: The inductive step, unfolded. Left: the non-neighbours $V_r$ of $x$ in $S$, all of colour $r$ (orange). The neighbours $N$ of $x$ are coloured recursively. A vertex $x'$ of maximum degree in $N$ and its non-neighbours get colour $r - 1$ (green), and the neighbours $N'$ of $x'$ in $N$ are coloured recursively again (right, blue). Dashed edges join vertices of the same colour](https://jt496.github.io/GraphTheoryInLean/figures/furedi.svg)
 -/
-lemma sum_card_filter_union [DecidableEq V] {s t : Finset V} (h : Disjoint s t)
-    (p : V → V → Prop) [DecidableRel p] :
+lemma _root_.Finset.sum_card_filter_union [DecidableEq V] {s t : Finset V}
+    (h : Disjoint s t) (p : V → V → Prop) [DecidableRel p] :
     ∑ v ∈ s ∪ t, #{w ∈ s ∪ t | p v w} =
       ∑ v ∈ s, #{w ∈ s | p v w} + ∑ v ∈ s, #{w ∈ t | p v w} +
         ∑ v ∈ t, #{w ∈ s | p v w} + ∑ v ∈ t, #{w ∈ t | p v w} := by
@@ -789,8 +789,9 @@ most `#N` neighbours in `S`, which holds because `x` has maximum degree. We stat
 for any disjoint `N` and `A` and a colouring `c` that is less than `r` on `N` and
 equal to `r` on `A`.
 -/
-lemma furedi_step [DecidableRel G.Adj] [DecidableEq V] {N A : Finset V} {c : V → ℕ}
-    {r : ℕ} (hNA : Disjoint N A) (hN : ∀ v ∈ N, c v < r) (hA : ∀ v ∈ A, c v = r)
+private lemma furedi_step [DecidableRel G.Adj] [DecidableEq V] {N A : Finset V}
+    {c : V → ℕ} {r : ℕ} (hNA : Disjoint N A) (hN : ∀ v ∈ N, c v < r)
+    (hA : ∀ v ∈ A, c v = r)
     (hdeg : ∀ v ∈ A, G.degIn (N ∪ A) v ≤ #N)
     (hc : ∑ v ∈ N, (G.degIn N v + #{w ∈ N | G.Adj v w ∧ c w = c v}) ≤
       ∑ v ∈ N, #{w ∈ N | c w ≠ c v}) :
@@ -836,7 +837,7 @@ following property. Count the edges of `G` in `S`, counting twice those whose
 endpoints have the same colour: the total is at most the number of edges of the
 complete multipartite graph whose parts are the colour classes.
 -/
-lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
+private lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
     ∀ S : Finset V, (∀ t ⊆ S, ¬ G.IsNClique (r + 1) t) →
       ∃ c : V → ℕ, (∀ v ∈ S, c v < r) ∧
         ∑ v ∈ S, (G.degIn S v + #{w ∈ S | G.Adj v w ∧ c w = c v}) ≤

@@ -182,7 +182,8 @@ double-counting argument like those in this chapter. Show that the degrees of an
 `∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
 degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
 part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
-`sum_degIn_comm`, as in the proof of Füredi's theorem (`furedi_step`).
+`sum_degIn_comm`, as in the proof of
+[Füredi's theorem](#section-f-redi-s-stability-theorem).
 -/
 theorem sum_degree_le_erdosGallai' [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (S : Finset V) :
@@ -546,7 +547,8 @@ double-counting argument like those in this chapter. Show that the degrees of an
 `∑ v ∈ S, G.degree v ≤ k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`. Hint: split each
 degree into the neighbours in `S` and in `Sᶜ` with `degIn_union`, bound the first
 part by `k - 1`, and count the edges between `S` and `Sᶜ` from the other side with
-`sum_degIn_comm`, as in the proof of Füredi's theorem (`furedi_step`).
+`sum_degIn_comm`, as in the proof of
+[Füredi's theorem](#section-f-redi-s-stability-theorem).
 -/
 theorem sum_degree_le_erdosGallai [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
     (S : Finset V) :
@@ -651,7 +653,7 @@ example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
       exact ComponentCompl.mem_of_hom hP (col _) (hcol _ hN1) (u := b) (this _) _
   · have (n : ℤ) : Fintype ((hasse ℤ).neighborSet n) :=
       Fintype.ofFinset {n - 1, n + 1} fun m => by
-        simp [hasse_adj, Order.covBy_iff_add_one_eq]; grind
+        grind [hasse_adj, Order.covBy_iff_add_one_eq, mem_neighborSet]
     have : Fact (hasse ℤ □ hasse ℤ).Preconnected := ⟨hP.boxProd hP⟩
     exact (nonempty_ends_of_infinite _).to_subtype
 

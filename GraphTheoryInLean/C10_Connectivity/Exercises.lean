@@ -12,8 +12,8 @@ open Walk
 
 1. Show that for any graph `G` on a nonempty vertex type, either `G` or its
 complement `Gᶜ` is connected. Hint: if `u` and `v` are not reachable from each other
-in `G`, show that any two vertices are joined in `Gᶜ`, either directly or through `u`
-or `v`. (Mathlib has this as `connected_or_connected_compl`, but try to prove it
+in `G`, show that any two vertices are joined in `Gᶜ`, either directly or via `u` or
+`v`. (Mathlib has this as `connected_or_connected_compl`, but try to prove it
 directly.)
 -/
 example [Nonempty V] : G.Connected ∨ Gᶜ.Connected := by
@@ -38,7 +38,7 @@ def botComponentEquiv' : (⊥ : SimpleGraph V).ConnectedComponent ≃ V :=
 `G i →g H` into a common graph `H` gives a homomorphism `Σg G →g H`. Hint: adjacent
 vertices of the disjoint union have the same index.
 -/
-def Hom.sigmaDesc' {ι : Type*} {V : ι → Type*} {W : Type*}
+def Hom.sigmaElim' {ι : Type*} {V : ι → Type*} {W : Type*}
     (G : (i : ι) → SimpleGraph (V i))
     {H : SimpleGraph W} (f : (i : ι) → G i →g H) : SimpleGraph.sigma G →g H :=
   sorry
@@ -112,8 +112,8 @@ example [G.LocallyFinite] (hT : G.IsTree) {v : V}
   sorry
 
 /-!
-12. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that the
-complete graph `K[2 * n + 3]` has an Eulerian circuit, and so does the hypercube
+12. Use Euler's theorem (`Connected.exists_closed_isEulerian`) to show that the
+complete graph `K[2 * n + 3]` has a closed Eulerian walk, and so does the hypercube
 `Q[2 * n + 2]`.
 -/
 example (n : ℕ) : ∃ u, ∃ p : K[2 * n + 3].Walk u u, p.IsEulerian := by
@@ -306,8 +306,8 @@ lemma edgeConnectivity_hypercube_zero' : λ(Q[0]) = ⊤ := by
 /-!
 23. Show that in a forest the block of an edge `u — v` is `G.subgraphOfAdj h`, the
 subgraph consisting of that edge and its two endpoints. Hint: show that
-block-equivalent edges of a forest are equal, by induction on `BlockEquivalent`, and
-use `blockMk_eq_blockMk_iff`.
+block-equivalent potential edges of a forest are equal, by induction on
+`BlockEquivalent`, and use `blockMk_eq_blockMk_iff`.
 -/
 lemma IsAcyclic.toSubgraph_blockMk' (hG : G.IsAcyclic) {u v : V} (h : G.Adj u v) :
     h.block.toSubgraph = G.subgraphOfAdj h := by
@@ -332,8 +332,8 @@ theorem colorable_iff_forall_block' {n : ℕ} (hn : 1 ≤ n) :
 /-!
 1. Show that for any graph `G` on a nonempty vertex type, either `G` or its
 complement `Gᶜ` is connected. Hint: if `u` and `v` are not reachable from each other
-in `G`, show that any two vertices are joined in `Gᶜ`, either directly or through `u`
-or `v`. (Mathlib has this as `connected_or_connected_compl`, but try to prove it
+in `G`, show that any two vertices are joined in `Gᶜ`, either directly or via `u` or
+`v`. (Mathlib has this as `connected_or_connected_compl`, but try to prove it
 directly.)
 
 If `G` is not preconnected, pick vertices `u` and `v` that are not reachable from
@@ -389,7 +389,6 @@ def botComponentEquiv : (⊥ : SimpleGraph V).ConnectedComponent ≃ V where
     | cons h _ => exact h.elim
   invFun := (⊥ : SimpleGraph V).connectedComponentMk
   left_inv := ConnectedComponent.ind fun v => rfl
-  right_inv v := rfl
 
 /-!
 4. Prove the universal property of the disjoint union: a family of homomorphisms
@@ -400,9 +399,9 @@ An edge `⟨i, u⟩ — ⟨i, v⟩` of the disjoint union is an edge of `G i`, w
 preserves.
 -/
 /-- The universal property of the disjoint union: a family of homomorphisms
-`G i →g H` into a common graph descends to a single homomorphism `Σg G →g H` out of
-the coproduct. -/
-def Hom.sigmaDesc {ι : Type*} {V : ι → Type*} {W : Type*}
+`G i →g H` into a common graph combines into a single homomorphism `Σg G →g H` out of
+the disjoint union. -/
+def Hom.sigmaElim {ι : Type*} {V : ι → Type*} {W : Type*}
     (G : (i : ι) → SimpleGraph (V i))
     {H : SimpleGraph W} (f : (i : ι) → G i →g H) : SimpleGraph.sigma G →g H where
   toFun p := f p.1 p.2
@@ -421,7 +420,7 @@ of its own component.
 -/
 example {W : Type*} {H : SimpleGraph W}
     (f : (C : G.ConnectedComponent) → C.toSimpleGraph →g H) : G →g H :=
-  (Hom.sigmaDesc _ f).comp isoSigmaConnectedComponents.toHom
+  (Hom.sigmaElim _ f).comp isoSigmaConnectedComponents.toHom
 
 /-!
 6. Show that if `G` has no isolated vertices then the Mycielskian `mμ(G)` has no
@@ -450,24 +449,23 @@ We can also prove that the path graph is a tree by showing that it has the corre
 number of edges (`isTree_iff_connected_and_card`).
 -/
 example (n : ℕ) : P[n + 1].IsTree := by
-  apply isTree_iff_connected_and_card.2 ⟨connected_pathGraph_add_one _,?_⟩
+  refine isTree_iff_connected_and_card.2 ⟨connected_pathGraph_add_one _, ?_⟩
   simp only [Nat.card_eq_fintype_card, card_edgeSet, Fintype.card_fin,
-            Nat.add_right_cancel_iff]
+    Nat.add_right_cancel_iff]
   -- show `P[n + 1].edgeFinset.card = n` by exhibiting a bijection from `Fin n`
-  have he : P[n + 1].edgeFinset = Finset.univ.image
-      (fun i : Fin n ↦ s(⟨i.val, by grind⟩, ⟨i.val + 1, by grind⟩)) := by
+  have he : P[n + 1].edgeFinset =
+      Finset.univ.image fun i : Fin n ↦ s(i.castSucc, i.succ) := by
     ext e
-    refine e.ind fun a b ↦ ?_
+    induction e using Sym2.ind with | _ a b => ?_
     simp only [mem_edgeFinset, mem_edgeSet, pathGraph_adj, Finset.mem_image,
-                Sym2.eq, Sym2.rel_iff',  Prod.swap_prod_mk]
+      Finset.mem_univ, true_and]
     constructor
     · rintro (h | h)
-      · exact ⟨⟨a.val, by grind⟩, by grind⟩
-      · exact ⟨⟨b.val, by grind⟩, by grind⟩
+      · exact ⟨⟨a, by grind⟩, by grind⟩
+      · exact ⟨⟨b, by grind⟩, by grind⟩
     · grind
-  rw [he, Finset.card_image_of_injective _ ?_, Finset.card_univ, Fintype.card_fin]
-  intro a b hab
-  grind
+  rw [he, Finset.card_image_of_injective _ fun a b h ↦ by grind, Finset.card_univ,
+    Fintype.card_fin]
 
 /-!
 8. Show that a tree has at most one connected component.
@@ -505,8 +503,7 @@ lemma IsTree.degree_le_card_leaves [Fintype V] [G.LocallyFinite] (h : G.IsTree)
   have htot : ∑ u, (G.degree u + if G.degree u = 1 then 1 else 0)
       = 2 * #G.edgeFinset + #{u | G.degree u = 1} := by
     rw [sum_add_distrib, G.sum_degrees_eq_twice_card_edges', card_filter]
-  have hcard := h.card_edgeFinset
-  grind
+  grind [h.card_edgeFinset]
 
 /-!
 10. Show that every finite connected graph with at least two vertices has a vertex
@@ -540,14 +537,14 @@ example [G.LocallyFinite] (hT : G.IsTree) {v : V}
   ⟨hT.connected.induce_compl_singleton_of_degree_eq_one hv, hT.isAcyclic.induce _⟩
 
 /-!
-12. Use Euler's theorem (`Connected.exists_isEulerian_circuit`) to show that the
-complete graph `K[2 * n + 3]` has an Eulerian circuit, and so does the hypercube
+12. Use Euler's theorem (`Connected.exists_closed_isEulerian`) to show that the
+complete graph `K[2 * n + 3]` has a closed Eulerian walk, and so does the hypercube
 `Q[2 * n + 2]`.
 
 Both graphs are connected with all degrees even, so Euler's theorem applies directly.
 -/
 example (n : ℕ) : ∃ u, ∃ p : K[2 * n + 3].Walk u u, p.IsEulerian := by
-  apply Connected.exists_isEulerian_circuit
+  apply Connected.exists_closed_isEulerian
   · exact connected_top_iff.mpr inferInstance
   · intro v
     have : (⊤ : SimpleGraph (Fin (2 * n + 3))).degree v = 2 * n + 2 := by
@@ -556,7 +553,7 @@ example (n : ℕ) : ∃ u, ∃ p : K[2 * n + 3].Walk u u, p.IsEulerian := by
     exact ⟨n + 1, by grind⟩
 
 example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian :=
-  (connected_hypercube _).exists_isEulerian_circuit fun v => by
+  (connected_hypercube _).exists_closed_isEulerian fun v => by
     rw [IsRegularOfDegree.hypercube]
     exact ⟨n + 1, by grind⟩
 
@@ -571,7 +568,9 @@ lemma IsVertexConnected.le_minDegree {k : ℕ∞} [Fintype V] [Nonempty V]
   exact hG.le_degree v
 
 /-!
-14. Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre
+14. For a finset `S` of vertices of `G □ K₂` and `b : Bool`, let `S.fiberProj b` be
+the finset of vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at `b` lies in
+`S`. Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre
 contains less than `k` vertices of `S`.
 
 Hint: the sizes of `S.fiberProj false` and `S.fiberProj true` add up to the size of
@@ -796,15 +795,15 @@ lemma edgeConnectivity_hypercube_zero : λ(Q[0]) = ⊤ :=
 /-!
 23. Show that in a forest the block of an edge `u — v` is `G.subgraphOfAdj h`, the
 subgraph consisting of that edge and its two endpoints. Hint: show that
-block-equivalent edges of a forest are equal, by induction on `BlockEquivalent`, and
-use `blockMk_eq_blockMk_iff`.
+block-equivalent potential edges of a forest are equal, by induction on
+`BlockEquivalent`, and use `blockMk_eq_blockMk_iff`.
 
 Two distinct edges of a forest never lie on a common cycle, so cycle-equivalence, and
 hence block-equivalence, is just equality.
 -/
 lemma IsAcyclic.toSubgraph_blockMk (hG : G.IsAcyclic) {u v : V} (h : G.Adj u v) :
     h.block.toSubgraph = G.subgraphOfAdj h := by
-  -- block-equivalent edges of a forest are equal
+  -- block-equivalent potential edges of a forest are equal
   have key {f g : Sym2 V} (h : G.BlockEquivalent f g) : f = g := by
     induction h with
     | rel x y hxy => exact hxy.resolve_right fun ⟨_, c, hc, _⟩ => hG c hc

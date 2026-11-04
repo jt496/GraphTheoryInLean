@@ -374,8 +374,7 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
   obtain ⟨h₁, h₂⟩ := h φ Real.goldenRatio_sq
   obtain ⟨h₃, h₄⟩ := h ψ Real.goldenConj_sq
   refine ⟨?_, ?_, ?_⟩
-  · norm_num at h₃
-    exact h₃
+  · simpa using h₃
   · convert h₁
     ring
   · convert h₄

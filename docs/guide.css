@@ -179,6 +179,19 @@ figure.stil-figure img {
     font-size: 1rem;
 }
 
+/* Word spacing for the Lato prose (and tooltip) text.
+   Google Fonts serves Lato 1, whose space is only 0.193em wide (Arial's is
+   0.278em, Times' 0.25em; Lato 2 widened it to 0.256em). At that width the gap
+   after a full stop or comma looks cramped, most visibly next to inline code,
+   whose monospaced spaces are 0.6em wide. Adding 0.06em restores the Lato 2
+   width. Code, including inline math (`code.math`), keeps its own spacing. */
+:is(p, dt, dd) {
+    word-spacing: 0.06em;
+}
+:is(p, dt, dd) :is(code, pre) {
+    word-spacing: normal;
+}
+
 /* Block code (Verso emits highlighted Lean as `code.hl.lean.block`, plus generic
    `<pre>` blocks for non-highlighted fences). Give them a subtle warm background
    so they stand out from prose. */

@@ -17,28 +17,30 @@ import Mathlib.Combinatorics.SimpleGraph.StronglyRegular
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
 import Mathlib.NumberTheory.Real.GoldenRatio
 namespace SimpleGraph
+variable {V : Type*} {G : SimpleGraph V}
 /-!
 *Algebraic graph theory* studies a graph via algebraic objects attached to it, above
-all its *automorphism group*, which measures how symmetric the graph is, and its
-*adjacency matrix*, whose powers count walks in the graph. The two are related in an
-obvious way: a permutation of the vertices is an automorphism iff it preserves the
-adjacency matrix.
+all its *automorphism group* (`Group (G ≃g G)`), which measures how symmetric the
+graph is, and its *adjacency matrix* (`adjMatrix`), whose powers count walks in the
+graph. The two are related in an obvious way: a permutation of the vertices is an
+automorphism iff it preserves the adjacency matrix.
 
-In this chapter we start from Mathlib's group structure on the automorphisms `G ≃g G`
-of a graph, and show that isomorphic graphs have isomorphic automorphism groups. We
-compute the automorphism groups of the infinite path `pathNat` (it is trivial) and
-of the cycle graph `C[n]` (for `n ≥ 3` it is the dihedral group).
+In this chapter we start from Mathlib's group structure on the automorphisms of a
+graph, and show that isomorphic graphs have isomorphic automorphism groups. We
+compute the automorphism groups of the infinite path `pathNat` (it is trivial) and of
+the cycle graph `C[n]` (for `n ≥ 3` it is the dihedral group).
 
 Next we introduce the adjacency matrix. We show that every vertex of a
 vertex-transitive graph lies on the same number of closed walks of each length, and
-that isomorphic graphs have the same characteristic polynomial, although
-non-isomorphic graphs can share one. We then show that eigenvalues of `G` give
-eigenvalues of its Mycielskian, scaled by the golden ratio. We also survey Mathlib's
-results on the Laplacian, whose kernel has dimension equal to the number of connected
-components, and on strongly regular graphs such as the Petersen graph. To prepare for
-the advanced sections, we show that the Hamming cube model `hypercubeHamming` of the
-hypercube is isomorphic to our recursive box product construction.
-
+that isomorphic graphs have the same characteristic polynomial (`Matrix.charpoly`),
+although non-isomorphic graphs can share one. We then show that eigenvalues
+(`spectrum`) of `G` give eigenvalues of its Mycielskian, scaled by the golden ratio.
+We also survey Mathlib's results on the Laplacian (`lapMatrix`), whose kernel has
+dimension equal to the number of connected components, and on strongly regular graphs
+(`IsSRGWith`) such as the Petersen graph (`petersenGraph`) and the Hoffman–Singleton
+graph (`hoffmanSingletonGraph`). To prepare for the later sections, we show that the
+Hamming cube model `hypercubeHamming` of the hypercube is isomorphic to our recursive
+box product construction `Q[n]`.
 
 The final three sections are more advanced. Using the Hamming cube model of `Q[n]`,
 we prove that its automorphism group is the hyperoctahedral group `ℤ/2 ≀ Sₙ`, of
@@ -54,8 +56,7 @@ Mathlib provides a `Group` instance on the automorphisms `G ≃g G` of any graph
 multiplication given by composition: `(e * f) v = e (f v)`. (Recall that
 `SimpleGraph.Iso` is an abbrev for `RelIso`, which has a `Group` instance.)
 -/
-
-#synth Group (C[5] ≃g C[5]) -- RelIso.instGroup
+#synth Group (G ≃g G) -- RelIso.instGroup
 
 /-!
 An isomorphism `e : G ≃g H` transports automorphisms of `G` to automorphisms of `H`
@@ -65,9 +66,8 @@ an automorphism group using whichever model of a graph is most convenient.
 
 The underlying bijection is Mathlib's `RelIso.relIsoCongr e e`, which transports
 isomorphisms along isomorphisms by pre- and post-composition, so we only need to
-check that it is multiplicative. We follow Mathlib's naming for such maps (compare
-`MulAut.congr`, which does the same for automorphisms of groups). Mathlib writes `≃*`
-(`MulEquiv`) for an isomorphism of groups, and `→*` (`MonoidHom`) for a homomorphism.
+check that it is multiplicative. Mathlib writes `≃*` (`MulEquiv`) for an isomorphism
+of groups, and `→*` (`MonoidHom`) for a homomorphism.
 -/
 #check RelIso.relIsoCongr -- (r₁ ≃r r₂) → (s₁ ≃r s₂) → ((r₁ ≃r s₁) ≃ (r₂ ≃r s₂))
 
@@ -82,12 +82,13 @@ def Iso.autCongr {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} (e : G �
 /-!
 ## Automorphisms of the Infinite Path
 
-At the opposite extreme from vertex-transitive graphs are graphs with no symmetry at
-all: a graph is *asymmetric* if its only automorphism is the identity, i.e. its
-automorphism group is trivial. A simple example is the infinite path `pathNat`. This
-may seem surprising since, as we saw in [Maps](#chapter-maps), `pathNat` has
-many embeddings into itself: for each `j : ℕ` the embedding `pathNat.translate j`
-sends `i` to `i + j`. However, none of these is surjective, except for the identity
+A vertex-transitive graph has lots of symmetry: any vertex can be sent to any other
+by an automorphism. At the opposite extreme are graphs with no symmetry at all: a
+graph is *asymmetric* if its only automorphism is the identity, i.e. its automorphism
+group is trivial. A simple example is the infinite path `pathNat`. This may seem
+surprising since, as we saw in [Maps](#chapter-maps), `pathNat` has many
+embeddings into itself: for each `j : ℕ` the embedding `pathNat.translate j` sends
+`i` to `i + j`. However, none of these is surjective, except for the identity
 `pathNat.translate 0`.
 
 The key observation is that `0` is the only vertex of `pathNat` of degree one (all
@@ -168,17 +169,15 @@ def cycleGraph.reflect {n : ℕ} : C[n] ≃g C[n] where
     | 0 | 1 => simp
     | n + 2 =>
       intro a b
-      change -a - -b = 1 ∨ -b - -a = 1 ↔ a - b = 1 ∨ b - a = 1
-      simp [sub_eq_add_neg, add_comm, or_comm]
+      grind [cycleGraph_adj, Equiv.coe_fn_mk]
+
 
 /-!
 If `e : C[n + 2] ≃g C[n + 2]` is an automorphism of the cycle graph and
 `e 1 - e 0 = 1` then `e` is a rotation, namely the one sending the vertex `e.symm 0`
 to `0`. (We work with `C[n + 2]` throughout since `cycleGraph_adj` only
 describes adjacency in `C[n + 2]`. The statements would remain (trivially) true for
-`C[n + 1]`, but the classification of automorphisms below is *false* for `C[0]`:
-the empty map is an automorphism, yet `Fin 0` has no element to witness the
-existential.)
+`C[n + 1]`, but the classification of automorphisms below is *false* for `C[0]`.)
 -/
 lemma aut_cycleGraph_eq_rotate {n : ℕ} (e : C[n + 2] ≃g C[n + 2])
     (h : e 1 - e 0 = 1) : e = cycleGraph.rotate (e.symm 0) := by
@@ -228,7 +227,7 @@ lemma aut_cycleGraph_eq_rotate_trans_reflect {n : ℕ} (e : C[n + 2] ≃g C[n + 
   let f := e.trans cycleGraph.reflect
   have hf : f 1 - f 0 = 1 := by
     simpa [f, sub_eq_add_neg, add_comm] using h
-  have hsymm : e.symm 0 = f.symm 0 := e.symm_apply_eq.2 (by simp [f])
+  have hsymm : e.symm 0 = f.symm 0 := by simp [f]
   rw [hsymm, ← aut_cycleGraph_eq_rotate f hf]
   ext k
   simp [f]
@@ -266,7 +265,7 @@ the index `i` is the vertex sent to `0`, i.e. `e.symm 0`.
 /-!
 Multiplicativity is easiest to check in the direction from `DihedralGroup (n + 3)`,
 where it amounts to four short computations with rotations and reflections, so we
-build the isomorphism in that direction and then take its inverse.
+build the isomorphism in that direction and then take its inverse (`MulEquiv.symm`).
 -/
 /-- The automorphism group of the cycle graph `C[n + 3]` is isomorphic to the
 dihedral group of order `2 * (n + 3)`. -/
@@ -292,13 +291,12 @@ def autCycleGraphMulEquivDihedral (n : ℕ) :
             (aut_cycleGraph_eq_rotate_trans_reflect e (h0.resolve_right h)).symm
       map_mul' := by
         rintro (i | i) (j | j) <;> ext k <;>
-          simp [map_add, map_sub, sub_sub, sub_sub_eq_add_sub, add_comm] }
+          simp [sub_sub, sub_sub_eq_add_sub, add_comm] }
 
 /-!
-Combining this with the isomorphism `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]` from
-the exercises of [Maps](#chapter-maps), the automorphism group of the square `Q[2]`
-is the dihedral group of order `8`. (We identify the automorphism group of every
-hypercube in [The Automorphism Group of the
+Combining this with the isomorphism `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]` the
+automorphism group of the square `Q[2]` is the dihedral group of order `8`. (We
+identify the automorphism group of every hypercube in [The Automorphism Group of the
 Hypercube*](#section-the-automorphism-group-of-the-hypercube).)
 -/
 /-- The automorphism group of the square `Q[2]` is the dihedral group of
@@ -312,17 +310,17 @@ def autHypercubeTwoMulEquivDihedral : (Q[2] ≃g Q[2]) ≃* DihedralGroup 4 :=
 A graph can also be studied via matrices indexed by its vertices. Mathlib's
 `Matrix V V R` is the type of functions `V → V → R`, so no ordering of the vertices
 is needed.
-
-The *adjacency matrix* `G.adjMatrix R`, which we also write `A`, has `(u, v)` entry
-`1` if `u` and `v` are adjacent and `0` otherwise. (`!![a, b; c, d]` is Mathlib's
-notation for a matrix written row by row.)
-
-[Figure: A graph $G$ and its adjacency matrix $A(G)$](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
 -/
 section adjmatrix
 variable {V : Type*} {G : SimpleGraph V}
 
-#source adjMatrix
+#source adjMatrix -- of fun i j =>  if G.Adj i j then (1 : α) else 0
+/-!
+The *adjacency matrix* (`G.adjMatrix`), has `(i, j)` entry `1` if `i` and `j` are
+adjacent in `G` and `0` otherwise. (Informally we will denote it by `A`.)
+
+[Figure: A graph $G$ and its adjacency matrix $A(G)$](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
+-/
 #eval C[4].adjMatrix ℕ -- !![0, 1, 0, 1; 1, 0, 1, 0; 0, 1, 0, 1; 1, 0, 1, 0]
 
 /-!
@@ -337,15 +335,19 @@ The `(u, v)` entry of the `n`-th power of the adjacency matrix counts the walks 
 length `n` from `u` to `v` (`adjMatrix_pow_apply_eq_card_walk`). The walks of a given
 length between two vertices form a `Finset`, `finsetWalkLength`, so both sides can
 be computed. (Defining `G.adjMatrix R` only needs `DecidableRel G.Adj`, but a
-matrix product sums over all of `V`, so from here on we assume `[Fintype V]`.
-`[G.LocallyFinite]` is not enough: the entries of powers of the adjacency matrix
-count walks and so are finite, but Mathlib's matrix product needs a finite index
+matrix product sums over all of `V`, so results that multiply adjacency matrices
+assume `[Fintype V]`, and powers also need `[DecidableEq V]`, since the identity
+matrix `1` is defined by comparing indices. `[G.LocallyFinite]` is not enough: it
+makes the number of walks of each length between two vertices finite, which is all
+`finsetWalkLength` needs, but Mathlib's matrix product needs a finite index
 type.)
 
 [Figure: The two length-2 walks from vertex 1 to vertex 3 and the entry $(A^2)_{1,3}=2$](https://jt496.github.io/GraphTheoryInLean/figures/walkcount.svg)
 -/
 #source finsetWalkLength
 #check adjMatrix_pow_apply_eq_card_walk
+#check adjMatrix_mul_self_apply_self
+
 
 #eval (C[5].adjMatrix ℕ ^ 5) 0 0                    -- 2
 #eval (C[5].finsetWalkLength 5 0 0).card            -- 2
@@ -353,23 +355,12 @@ type.)
 #eval (K[2, 4].adjMatrix ℕ ^ 2) (.inl 0) (.inl 0)   -- 4
 
 /-!
-The two closed walks of length `5` from `0` in `C[5]` go once round the cycle in
-either direction. Walks of length `2` from `u` to `v` correspond to common
-neighbours of `u` and `v`; in particular the diagonal entries of `A²` are the
-degrees.
--/
-#check walkLengthTwoEquivCommonNeighbors
--- {p : G.Walk u v // p.length = 2} ≃ G.commonNeighbors u v
-
-#check adjMatrix_mul_self_apply_self -- (A * A) i i = G.degree i
-
-/-!
 Summing the diagonal entries, the trace of `Aᵏ` is the total number of closed walks
 of length `k`. We count the walks with `finsetWalkLength` rather than the set used by
 `adjMatrix_pow_apply_eq_card_walk`: `card_set_walk_length_eq` relates the two, and
 `simp` rewrites the set form into the `Finset` form using `Fintype.card_ofFinset`.
 -/
-open Finset in
+open Finset
 theorem trace_adjMatrix_pow_eq_sum_card_walk [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] {R : Type*} [Semiring R] (k : ℕ) :
     (G.adjMatrix R ^ k).trace = ∑ v, (#(G.finsetWalkLength k v v) : R) := by
@@ -424,7 +415,6 @@ theorem IsVertexTransitive.adjMatrix_pow_apply_self [Fintype V] [DecidableEq V]
 So, in a vertex-transitive graph, the `tr(Aᵏ)` closed walks of length `k` are shared
 equally among its vertices.
 -/
-open Finset in
 theorem IsVertexTransitive.card_walk_self_eq_trace_div [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] (h : G.IsVertexTransitive) (k : ℕ) (v : V) :
     #(G.finsetWalkLength k v v) = (G.adjMatrix ℕ ^ k).trace / Fintype.card V := by
@@ -443,7 +433,6 @@ them: the two directions round the cycle.
 -/
 #eval (C[5].adjMatrix ℕ ^ 5).trace -- 10
 
-open Finset in
 example (v : Fin 5) : #(C[5].finsetWalkLength 5 v v) = 2 := by
   rw [(isVertexTransitive_cycleGraph 5).card_walk_self_eq_trace_div]
   decide
@@ -801,10 +790,12 @@ neighbours.
 #source IsSRGWith
 
 /-!
-The Petersen graph (`petersenGraph`) is strongly regular with parameters
-`(10, 3, 0, 1)`: it has girth `5`, so adjacent vertices have no common neighbours and
-non-adjacent vertices have at most one, and its diameter is `2`, so they have at
-least one. We can check each field with `decide`, but two need an initial `intro`
+The Petersen graph `petersenGraph = Kn[5, 2]` is strongly regular with parameters
+`(10, 3, 0, 1)`. Two adjacent vertices are disjoint `2`-subsets of `Fin 5`, and no
+third `2`-subset is disjoint from both, so they have no common neighbours. Two
+distinct non-adjacent vertices share exactly one element, so their union has three
+elements, and the remaining two elements of `Fin 5` form their only common
+neighbour. We can check each field with `decide`, but two need an initial `intro`
 since `decide` needs a `Decidable` instance for the exact statement and neither
 `IsRegularOfDegree` nor `Pairwise` has one.
 -/
@@ -825,11 +816,16 @@ adjacent to `v` in two different ways shows that the parameters satisfy
 
 /-!
 The diameter of a strongly regular graph with `μ ≠ 0` that is not complete is `2`.
-This recovers `ediam_petersenGraph`, which we proved by hand.
 -/
 #check IsSRGWith.ediam_eq_two -- G.IsSRGWith n k ℓ μ → G ≠ ⊤ → μ ≠ 0 → G.ediam = 2
 
-example : petersenGraph.ediam = 2 := by
+/-!
+This gives us the diameter of the Petersen graph. We cannot ask `decide` for it
+directly, since `edist` is not computable ([Distance
+Layers](#section-distance-layers)), but `decide` can check the adjacency facts behind
+`IsSRGWith.petersenGraph`.
+-/
+lemma ediam_petersenGraph : petersenGraph.ediam = 2 := by
   have : Nontrivial {s : Finset (Fin 5) // s.card = 2} :=
     Fintype.one_lt_card_iff_nontrivial.mp (by decide)
   have hne : ¬ petersenGraph.Adj ⟨{0, 1}, rfl⟩ ⟨{0, 2}, rfl⟩ := by decide
@@ -885,6 +881,119 @@ and `μ = 1`. For such a graph the equation reads `A ^ 2 + A - (k - 1) • 1 = J
 linear-algebra argument then shows that its degree `k` must be `2`, `3`, `7` or `57`.
 (Existence of such a graph with `k = 57` is currently an open problem.)
 
+## Moore Graphs of Diameter Two
+
+For each of `k = 2`, `3` and `7` there is exactly one Moore graph of diameter `2`
+(see [Moore Graphs](#section-moore-graphs)). For `k = 2` and `k = 3` these are `C[5]`
+and the Petersen graph, and for `k = 7` it is the *Hoffman–Singleton graph*
+[Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960).
+
+Strongly regular graphs with `ℓ = 0` and `μ = 1` have girth at least `5`. Since
+`ℓ = 0`, adjacent vertices have no common neighbours, so there are no triangles.
+Since `ℓ = 0` and `μ = 1`, two distinct vertices have at most one common neighbour,
+so by `cycleGraph_four_free_iff_common_neighbor_unique` there is no copy of `C[4]`.
+-/
+lemma IsSRGWith.five_le_egirth {V : Type*} [Fintype V] {G : SimpleGraph V}
+    [DecidableRel G.Adj] {n k : ℕ} (hG : G.IsSRGWith n k 0 1) : 5 ≤ G.egirth := by
+  refine five_le_egirth_of_cliqueFree_three_of_free (fun t ht => ?_) ?_
+  · classical
+    obtain ⟨a, b, c, hab, hac, hbc, rfl⟩ := is3Clique_iff.mp ht
+    exact (Fintype.card_eq_zero_iff.mp (hG.of_adj a b hab)).false ⟨c, hac, hbc⟩
+  · refine cycleGraph_four_free_iff_common_neighbor_unique.mpr
+      fun x y u v hxu huy hxv hvy hxy => ?_
+    have h1 : Fintype.card (G.commonNeighbors x y) ≤ 1 := by
+      by_cases hadj : G.Adj x y
+      · simp [hG.of_adj x y hadj]
+      · simp [hG.of_not_adj hxy hadj]
+    exact congrArg Subtype.val <|
+      Fintype.card_le_one_iff.mp h1 ⟨u, hxu, huy.symm⟩ ⟨v, hxv, hvy.symm⟩
+
+/-!
+The Petersen graph has `10 = 1 + 3 * (1 + 2)` vertices, is `3`-regular and has
+diameter `2` (`ediam_petersenGraph`), so it attains the Moore bound with `d = 2` and
+`k = 2`. Its girth is `5`, so it attains the cage bound as well. The lower bound
+comes from `IsSRGWith.five_le_egirth`. For the upper bound we exhibit a copy of
+`C[5]`: the pentagon `{0, 1} — {2, 3} — {0, 4} — {1, 2} — {3, 4} — {0, 1}`, and
+`decide` checks that the map is an injective homomorphism.
+-/
+lemma egirth_petersenGraph : petersenGraph.egirth = 5 := by
+  refine le_antisymm ?_ IsSRGWith.petersenGraph.five_le_egirth
+  have h5 : C[5] ⊑ petersenGraph :=
+    ⟨⟨⟨![⟨{0, 1}, rfl⟩, ⟨{2, 3}, rfl⟩, ⟨{0, 4}, rfl⟩, ⟨{1, 2}, rfl⟩,
+      ⟨{3, 4}, rfl⟩], by decide⟩, by decide⟩⟩
+  exact h5.egirth_le.trans ((egirth_cycleGraph 2).trans_le (by norm_num))
+
+/-!
+The Hoffman–Singleton graph has `50 = 1 + 7 * (1 + 6)` vertices. We build it from
+five pentagons `P₀, …, P₄` and five pentagrams `Q₀, …, Q₄`, each
+with vertex set `ZMod 5`. Vertex `j` of the pentagon `Pₕ` is adjacent to `j - 1` and
+`j + 1` in `Pₕ`, vertex `j` of the pentagram `Qᵢ` is adjacent to `j - 2` and `j + 2`
+in `Qᵢ`, and vertex `j` of `Pₕ` is adjacent to vertex `h * i + j` of `Qᵢ` for every
+`i`. So each vertex has `2` neighbours in its own pentagon or pentagram and one in
+each of the five of the other kind, and the graph is `7`-regular. The vertex type is
+a sum of two copies of `ZMod 5 × ZMod 5`, one for the pentagons and one for the
+pentagrams, and we define adjacency by cases, as for the Mycielskian.
+-/
+/-- The vertex type of the Hoffman–Singleton graph: `.inl (h, j)` is vertex `j` of
+the pentagon `Pₕ` and `.inr (i, j)` is vertex `j` of the pentagram `Qᵢ`. -/
+abbrev HoffmanSingletonVert := (ZMod 5 × ZMod 5) ⊕ (ZMod 5 × ZMod 5)
+
+/-- The Hoffman–Singleton graph: vertex `j` of the pentagon `Pₕ` is adjacent to
+`j ± 1` in `Pₕ` and to `h * i + j` in the pentagram `Qᵢ`, and vertex `j` of `Qᵢ` is
+adjacent to `j ± 2` in `Qᵢ`. -/
+def hoffmanSingletonGraph : SimpleGraph HoffmanSingletonVert where
+  Adj x y := match x, y with
+    | .inl (h, j), .inl (h', j') => h = h' ∧ (j' = j + 1 ∨ j = j' + 1)
+    | .inr (i, j), .inr (i', j') => i = i' ∧ (j' = j + 2 ∨ j = j' + 2)
+    | .inl (h, j), .inr (i, k) => k = h * i + j
+    | .inr (i, k), .inl (h, j) => k = h * i + j
+  symm := ⟨by rintro (⟨_, _⟩ | ⟨_, _⟩) (⟨_, _⟩ | ⟨_, _⟩) <;> grind⟩
+  loopless := ⟨by rintro (⟨_, _⟩ | ⟨_, _⟩) <;> decide +revert⟩
+
+/-!
+As for `mycielskianDecidableRelAdj` in
+[Computations with Mycielskians](#section-computations-with-mycielskians), we
+get decidable adjacency by splitting into cases.
+-/
+/-- The Hoffman–Singleton graph has decidable adjacency. -/
+instance hoffmanSingletonGraphDecidableRelAdj :
+    DecidableRel hoffmanSingletonGraph.Adj := fun x y => by
+  rcases x with ⟨_, _⟩ | ⟨_, _⟩ <;> rcases y with ⟨_, _⟩ | ⟨_, _⟩ <;>
+    unfold hoffmanSingletonGraph <;> infer_instance
+
+/-!
+The Hoffman–Singleton graph is strongly regular with parameters `(50, 7, 0, 1)`, and
+as for the Petersen graph `decide` can check each field. The two fields about common
+neighbours range over all `2500` pairs of vertices, so for these we use
+`decide +kernel`. This leaves the check to the kernel alone, instead of first
+evaluating the statement in the elaborator, and saves several seconds.
+-/
+lemma IsSRGWith.hoffmanSingletonGraph :
+    hoffmanSingletonGraph.IsSRGWith 50 7 0 1 where
+  card := by decide
+  regular := by intro v; decide +revert
+  of_adj := by decide +kernel
+  of_not_adj := by intro u v; decide +kernel +revert
+
+/-!
+So, as for the Petersen graph, it has diameter `2` by `IsSRGWith.ediam_eq_two` and
+girth `5` by `IsSRGWith.five_le_egirth`, with the pentagon `P₀` giving a copy of
+`C[5]`. Hence it attains both the Moore bound and the cage bound with `d = 6` and
+`k = 2`.
+-/
+lemma ediam_hoffmanSingletonGraph : hoffmanSingletonGraph.ediam = 2 := by
+  have hne : ¬ hoffmanSingletonGraph.Adj (.inl (0, 0)) (.inl (0, 2)) := by decide
+  refine IsSRGWith.hoffmanSingletonGraph.ediam_eq_two (fun h => hne ?_) one_ne_zero
+  rw [h, top_adj]
+  decide
+
+lemma egirth_hoffmanSingletonGraph : hoffmanSingletonGraph.egirth = 5 := by
+  refine le_antisymm ?_ IsSRGWith.hoffmanSingletonGraph.five_le_egirth
+  have h5 : C[5] ⊑ hoffmanSingletonGraph :=
+    ⟨⟨⟨fun j => .inl (0, j), by decide⟩, by decide⟩⟩
+  exact h5.egirth_le.trans ((egirth_cycleGraph 2).trans_le (by norm_num))
+
+/-!
 # The Hypercube and the Hamming Cube
 
 When we first introduced the hypercube we gave two other constructions. One of these
@@ -928,7 +1037,7 @@ this mirrors the recursion in `HypercubeVert.hammingDist`.) To prove this we wri
 the Hamming distance as a sum of indicators, using `Finset.card_filter`, and split
 off the last coordinate with `Fin.sum_univ_castSucc`.
 -/
-lemma hammingDist_snoc {n : ℕ} {β : Type*} [DecidableEq β] (x y : Fin n → β)
+lemma _root_.hammingDist_snoc {n : ℕ} {β : Type*} [DecidableEq β] (x y : Fin n → β)
     (a b : β) :
     hammingDist (Fin.snoc x a : Fin (n + 1) → β) (Fin.snoc y b) =
       hammingDist x y + if a = b then 0 else 1 := by
@@ -1041,7 +1150,8 @@ example {n : ℕ} (x : Fin n → Bool) : -x = x := by simp
 example {n : ℕ} (x : Fin n → Bool) : x + x = 0 := by simp
 
 @[simp]
-lemma boolVec_add_add_cancel {n : ℕ} (x y : Fin n → Bool) : x + (x + y) = y := by
+lemma _root_.boolVec_add_add_cancel {n : ℕ} (x y : Fin n → Bool) :
+    x + (x + y) = y := by
   rw [← add_assoc, BooleanRing.add_self, zero_add]
 
 /-!
@@ -1055,11 +1165,11 @@ scoped[SimpleGraph.hypercubeHamming] notation:lead "e " i:max => Pi.single i tru
 open scoped hypercubeHamming
 
 @[simp]
-lemma hammingNorm_single {n : ℕ} (i : Fin n) :
+lemma _root_.hammingNorm_single {n : ℕ} (i : Fin n) :
     hammingNorm (e i : Fin n → Bool) = 1 := by
   simp [hammingNorm, Pi.single_apply, Finset.filter_eq']
 
-lemma hammingNorm_eq_one_iff {n : ℕ} {x : Fin n → Bool} :
+lemma _root_.hammingNorm_eq_one_iff {n : ℕ} {x : Fin n → Bool} :
     hammingNorm x = 1 ↔ ∃ i, x = e i := by
   constructor
   · -- the set of `true` coordinates of `x` is a singleton `{i}`
@@ -1120,7 +1230,7 @@ lemma hypercubeHamming.translate_apply {n : ℕ} (t x : Fin n → Bool) :
 Permuting the coordinates by `σ : Equiv.Perm (Fin n)` also preserves the Hamming
 distance, and hence is an automorphism of the Hamming cube.
 -/
-lemma hammingDist_comp_perm {ι : Type*} [Fintype ι] {β : Type*}
+lemma _root_.hammingDist_comp_perm {ι : Type*} [Fintype ι] {β : Type*}
     [DecidableEq β] (σ : Equiv.Perm ι) (x y : ι → β) :
     hammingDist (x ∘ σ) (y ∘ σ) = hammingDist x y := Finset.card_equiv σ (by simp)
 
@@ -1266,21 +1376,24 @@ automorphism preserves the Hamming distance. An automorphism fixing `0` therefor
 also preserves the Hamming weight (`hammingNorm`), the number of `true` coordinates,
 since this is the Hamming distance to `0`.
 -/
-lemma hammingDist_aut {n : ℕ} (g : hypercubeHamming n ≃g hypercubeHamming n)
-    (x y : Fin n → Bool) : hammingDist (g x) (g y) = hammingDist x y := by
+lemma hammingDist_aut_hypercubeHamming {n : ℕ}
+    (g : hypercubeHamming n ≃g hypercubeHamming n) (x y : Fin n → Bool) :
+    hammingDist (g x) (g y) = hammingDist x y := by
   have h := g.edist_eq x y
   rw [edist_hypercubeHamming, edist_hypercubeHamming] at h
   exact_mod_cast h
 
-lemma hammingNorm_aut {n : ℕ} {g : hypercubeHamming n ≃g hypercubeHamming n}
-    (hg : g 0 = 0) (x : Fin n → Bool) : hammingNorm (g x) = hammingNorm x := by
-  rw [← hammingDist_zero_right, ← hg, hammingDist_aut, hammingDist_zero_right]
+lemma hammingNorm_aut_hypercubeHamming {n : ℕ}
+    {g : hypercubeHamming n ≃g hypercubeHamming n} (hg : g 0 = 0)
+    (x : Fin n → Bool) : hammingNorm (g x) = hammingNorm x := by
+  rw [← hammingDist_zero_right, ← hg, hammingDist_aut_hypercubeHamming,
+    hammingDist_zero_right]
 
 /-!
 Adding a basis vector `e i` flips the `i`-th coordinate; if that
 coordinate was `true` this decreases the weight by one.
 -/
-lemma hammingNorm_add_single {n : ℕ} {x : Fin n → Bool} {i : Fin n}
+lemma _root_.hammingNorm_add_single {n : ℕ} {x : Fin n → Bool} {i : Fin n}
     (h : x i = true) : hammingNorm (x + e i) + 1 = hammingNorm x := by
   have hset : ({k | (x + e i : Fin n → Bool) k ≠ 0} : Finset _) =
       ({k | x k ≠ 0} : Finset _).erase i := by
@@ -1297,8 +1410,8 @@ less than that of `x` if `x k = true`, and one more otherwise. Since the distanc
 from `x` to `eₖ` is the weight of `x + eₖ`, we see that `x k = true` exactly when `x`
 is closer to `eₖ` than to `0`.
 -/
-lemma apply_eq_true_iff_hammingDist_lt {n : ℕ} (x : Fin n → Bool) (k : Fin n) :
-    x k = true ↔ hammingDist x (e k) < hammingDist x 0 := by
+lemma _root_.apply_eq_true_iff_hammingDist_lt {n : ℕ} (x : Fin n → Bool)
+    (k : Fin n) : x k = true ↔ hammingDist x (e k) < hammingDist x 0 := by
   rw [hammingDist_zero_right, hammingDist_eq_hammingNorm, BooleanRing.neg_eq]
   cases hk : x k
   · have h : (x + e k : Fin n → Bool) k = true := by
@@ -1313,16 +1426,16 @@ An automorphism `g` fixing `0` and every `eₖ` preserves the distances from any
 to `0` and to each `eₖ`, so by the previous lemma `g x` and `x` agree in every
 coordinate `k`, i.e. `g x = x`.
 -/
-lemma aut_eq_id_of_fix_zero_and_singles {n : ℕ}
+lemma aut_hypercubeHamming_eq_id_of_fix_zero_and_singles {n : ℕ}
     {g : hypercubeHamming n ≃g hypercubeHamming n} (h0 : g 0 = 0)
     (h1 : ∀ i, g (e i) = e i) (x : Fin n → Bool) :
     g x = x := by
   funext k
   -- `g` preserves Hamming distance and fixes `0` and `e k`
   have h₀ : hammingDist (g x) 0 = hammingDist x 0 := by
-    simpa [h0] using hammingDist_aut g x 0
+    simpa [h0] using hammingDist_aut_hypercubeHamming g x 0
   have hₖ : hammingDist (g x) (e k) = hammingDist x (e k) := by
-    simpa [h1 k] using hammingDist_aut g x (e k)
+    simpa [h1 k] using hammingDist_aut_hypercubeHamming g x (e k)
   rw [Bool.eq_iff_iff, apply_eq_true_iff_hammingDist_lt,
     apply_eq_true_iff_hammingDist_lt, h₀, hₖ]
 
@@ -1344,7 +1457,8 @@ lemma hyperoctahedralToAut_surjective (n : ℕ) :
     simp [g]
   have hsingle : ∀ i : Fin n, ∃ j, g (e i) = e j := by
     intro i
-    exact hammingNorm_eq_one_iff.mp (by rw [hammingNorm_aut hg0, hammingNorm_single])
+    exact hammingNorm_eq_one_iff.mp
+      (by rw [hammingNorm_aut_hypercubeHamming hg0, hammingNorm_single])
   choose p hp using hsingle
   have hpinj : Function.Injective p := by
     intro i j hij
@@ -1361,7 +1475,7 @@ lemma hyperoctahedralToAut_surjective (n : ℕ) :
     ext k; simp [hp i, σ, Pi.single_apply, hpinj.eq_iff]
   have hone : (hypercubeHamming.permuteHom n σ)⁻¹ * g = 1 := by
     ext x : 1
-    simpa using aut_eq_id_of_fix_zero_and_singles hh0 hhsingle x
+    simpa using aut_hypercubeHamming_eq_id_of_fix_zero_and_singles hh0 hhsingle x
   -- so `g` is the permutation by `σ`
   have hg : g = hypercubeHamming.permuteHom n σ := (inv_mul_eq_one.mp hone).symm
   -- and `g` is `f` followed by undoing the translation by `f 0`, so `f` is the
@@ -1801,6 +1915,8 @@ and is `false` elsewhere.
 
 [Figure: Left: $Q_2$. Right: the canonical copy `subcubeCopy b d` of $Q_2$ in $Q_4$, with base point $b = \mathtt{FTFF}$ and free directions `d 0 = 0` and `d 1 = 3`](https://jt496.github.io/GraphTheoryInLean/figures/subcube.svg)
 -/
+namespace hypercubeHamming
+
 /-- Extend a `k`-vector to an `n`-vector along an embedding `d : Fin k ↪ Fin n`,
 placing `x i` in position `d i` and `false` elsewhere. -/
 noncomputable def extendEmb {n k : ℕ} (d : Fin k ↪ Fin n) (x : Fin k → Bool) :
@@ -1840,7 +1956,7 @@ lemma extendEmb_injective {n k : ℕ} (d : Fin k ↪ Fin n) :
 /-- The homomorphism `hypercubeHamming k →g hypercubeHamming n` induced by an
 embedding of directions. -/
 @[simps]
-noncomputable def hypercubeHamming.extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
+noncomputable def extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
     hypercubeHamming k →g hypercubeHamming n where
   toFun := extendEmb d
   map_rel' := by
@@ -1848,6 +1964,10 @@ noncomputable def hypercubeHamming.extendHom {n k : ℕ} (d : Fin k ↪ Fin n) :
     obtain ⟨i, rfl⟩ := hypercubeHamming_adj_iff_exists.1 hxy
     exact hypercubeHamming_adj_iff_exists.2
       ⟨d i, by rw [extendEmb_add, extendEmb_single]⟩
+
+end hypercubeHamming
+
+open hypercubeHamming
 
 /-- The canonical copy of `Q[k]` in `Q[n]` with base point `b` and free directions
 selected by `d`: the subcube `{ b + extendEmb d x | x : Fin k → Bool }`. -/
@@ -1900,7 +2020,7 @@ lemma determines `f y` from their images.
 First we prove a small helper lemma: a vector of Hamming weight at least two has two
 distinct `true` coordinates.
 -/
-lemma exists_ne_true_true_of_one_lt_hammingNorm {n : ℕ} {y : Fin n → Bool}
+private lemma exists_ne_true_true_of_one_lt_hammingNorm {n : ℕ} {y : Fin n → Bool}
     (hy : 1 < hammingNorm y) : ∃ i j, i ≠ j ∧ y i = true ∧ y j = true := by
   obtain ⟨i, hi, j, hj, hij⟩ := Finset.one_lt_card.mp hy
   use i, j, hij
@@ -1911,7 +2031,7 @@ A copy maps each square `y, y + eᵢ, y + eᵢ + eⱼ, y + eⱼ` of `Q[k]` to a 
 in `Q[n]`, so by the parallelogram lemma the image of any corner is the sum of the
 images of the other three.
 -/
-lemma copy_apply_eq_add_add {n k : ℕ}
+private lemma copy_apply_eq_add_add {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) (y : Fin k → Bool)
     {i j : Fin k} (hij : i ≠ j) :
     f y = f (y + e i + e j) + f (y + e i) + f (y + e j) := by
@@ -1939,7 +2059,7 @@ neighbour of `f 0` and differs from it in a single coordinate, which we call `d 
 Two basis vectors with the same direction would have the same image, so `d` is
 injective because `f` is.
 -/
-lemma exists_apply_single_eq_add_single {n k : ℕ}
+private lemma exists_apply_single_eq_add_single {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
     ∃ d : Fin k ↪ Fin n, ∀ i, f (e i) = f 0 + e (d i) := by
   -- each basis vector is mapped to a neighbour of `f 0`, defining the
@@ -1963,7 +2083,7 @@ For the second step we show that the images of `0` and of the basis vectors
 determine the whole copy. Here the direction embedding `d` is an input rather than
 an output, so the statement applies to any `d` satisfying `hd`.
 -/
-lemma copy_apply_eq_add_extendEmb_of_single {n k : ℕ}
+private lemma copy_apply_eq_add_extendEmb_of_single {n k : ℕ}
     {f : Copy (hypercubeHamming k) (hypercubeHamming n)} {d : Fin k ↪ Fin n}
     (hd : ∀ i, f (e i) = f 0 + e (d i))
     (x : Fin k → Bool) : f x = f 0 + extendEmb d x := by
@@ -2005,7 +2125,7 @@ lemma copy_apply_eq_add_extendEmb_of_single {n k : ℕ}
 /-!
 Combining the two steps:
 -/
-lemma exists_apply_eq_add_extendEmb {n k : ℕ}
+private lemma exists_apply_eq_add_extendEmb {n k : ℕ}
     (f : Copy (hypercubeHamming k) (hypercubeHamming n)) :
     ∃ d : Fin k ↪ Fin n, ∀ x, f x = f 0 + extendEmb d x := by
   obtain ⟨d, hd⟩ := exists_apply_single_eq_add_single f
@@ -2094,8 +2214,8 @@ and `extendEmb d` preserves the Hamming weight since the coordinates outside the
 image of `d` are all `false`. So a canonical copy preserves graph distances, i.e. it
 is an *isometric* embedding.
 -/
-lemma hammingNorm_extendEmb {n k : ℕ} (d : Fin k ↪ Fin n) (z : Fin k → Bool) :
-    hammingNorm (extendEmb d z) = hammingNorm z := by
+lemma hypercubeHamming.hammingNorm_extendEmb {n k : ℕ} (d : Fin k ↪ Fin n)
+    (z : Fin k → Bool) : hammingNorm (extendEmb d z) = hammingNorm z := by
   simp only [hammingNorm]
   rw [← Finset.card_map d]
   congr 1
@@ -2105,7 +2225,8 @@ lemma hammingNorm_extendEmb {n k : ℕ} (d : Fin k ↪ Fin n) (z : Fin k → Boo
     simp
   · simp_all [extendEmb_apply_of_not_exists _ hj, Bool.zero_eq_false]
 
-lemma hammingDist_extendEmb {n k : ℕ} (d : Fin k ↪ Fin n) (x y : Fin k → Bool) :
+lemma hypercubeHamming.hammingDist_extendEmb {n k : ℕ} (d : Fin k ↪ Fin n)
+    (x y : Fin k → Bool) :
     hammingDist (extendEmb d x) (extendEmb d y) = hammingDist x y := by
   rw [hammingDist_eq_hammingNorm, hammingDist_eq_hammingNorm,
     BooleanRing.neg_eq, BooleanRing.neg_eq, ← extendEmb_add, hammingNorm_extendEmb]
@@ -2114,8 +2235,8 @@ lemma edist_subcubeCopy {n k : ℕ} (b : Fin n → Bool) (d : Fin k ↪ Fin n)
     (x y : Fin k → Bool) :
     (hypercubeHamming n).edist (subcubeCopy b d x) (subcubeCopy b d y) =
       (hypercubeHamming k).edist x y := by
-  have h := hammingDist_aut (hypercubeHamming.translate b) (extendEmb d x)
-    (extendEmb d y)
+  have h := hammingDist_aut_hypercubeHamming (hypercubeHamming.translate b)
+    (extendEmb d x) (extendEmb d y)
   simp only [hypercubeHamming.translate_apply] at h
   rw [edist_hypercubeHamming, edist_hypercubeHamming, subcubeCopy_apply,
     subcubeCopy_apply, h, hammingDist_extendEmb]

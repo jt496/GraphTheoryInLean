@@ -48,6 +48,9 @@ import GraphTheoryInLean.Common
 * [Dirac 1952] G. A. Dirac, “Some theorems on abstract graphs”, Proc. London Math.
   Soc. (3) **2** (1952), no. 1, 69–81. <https://doi.org/10.1112/plms/s3-2.1.69>
 
+* [Erdős 1959] P. Erdős, “Graph theory and probability”, Canad. J. Math. **11**
+  (1959), 34–38. <https://doi.org/10.4153/CJM-1959-003-9>
+
 * [Erdős 1970] P. Erdős, “Turán Pál gráf tételéről” [On the graph theorem of Turán],
   Mat. Lapok **21** (1970), 249–251. <https://www.renyi.hu/~p_erdos/1971-27.pdf>
 
@@ -197,6 +200,9 @@ import GraphTheoryInLean.Common
 
 * [Whitney 1932] H. Whitney, “Congruent graphs and the connectivity of graphs”, Amer.
   J. Math. **54** (1932), no. 1, 150–168. <https://doi.org/10.2307/2371086>
+
+* [Zając 2018] M. Zając, “A short proof of Brooks' theorem”, 2018, arXiv:1805.11176.
+  <https://arxiv.org/abs/1805.11176>
 
 * [Zarankiewicz 1951] K. Zarankiewicz,
   “Problem P 101”, Colloq. Math. **2** (1951), 301.

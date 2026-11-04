@@ -25,8 +25,9 @@ example (h3 : G.CliqueFree 3) {u v w : V} (huw : G.Adj u w) (hwv : G.Adj w v)
 /-!
 3. Deduce from `Hom.edist_le` that adding edges cannot increase distances (this is
 Mathlib's `edist_anti`), and that the distance between two vertices of an induced
-subgraph is at least their distance in `G`. Hint: `Hom.ofLE` and
-`Embedding.induce`.
+subgraph is at least their distance in `G`.
+
+Hint: `Hom.ofLE` and `Embedding.induce`.
 -/
 example {H : SimpleGraph V} (h : G ≤ H) (u v : V) : H.edist u v ≤ G.edist u v := by
   sorry
@@ -37,8 +38,9 @@ example (s : Set V) (u v : s) : G.edist u v ≤ (G.induce s).edist u v := by
 /-!
 4. Show that `dist` does not satisfy the triangle inequality in general: find a
 graph `G` on `Fin 3` and vertices `u`, `v`, `w` with
-`G.dist u v + G.dist v w < G.dist u w`. Hint: an edge plus an isolated vertex, and
-`dist_eq_zero_iff_eq_or_not_reachable`.
+`G.dist u v + G.dist v w < G.dist u w`.
+
+Hint: an edge plus an isolated vertex, and `dist_eq_zero_iff_eq_or_not_reachable`.
 -/
 example : ∃ (G : SimpleGraph (Fin 3)) (u v w : Fin 3),
     G.dist u v + G.dist v w < G.dist u w := by
@@ -113,18 +115,7 @@ example [Fintype V] [DecidableRel G.Adj]
   sorry
 
 /-!
-13. Show that the Moore bound holds with local finiteness as the only finiteness
-assumption: a locally finite graph with maximum degree at most `d + 1` and diameter
-at most `k` is finite, and has at most `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))`
-vertices. Hint: `finite_of_eccent_le` and `moore_bound`.
--/
-example [G.LocallyFinite] (d k : ℕ)
-    (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
-    Finite V ∧ Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
-  sorry
-
-/-!
-14. Use the cage bound to show that a graph with minimum degree at least `3` and
+13. Use the cage bound to show that a graph with minimum degree at least `3` and
 girth at least `5` has at least `10` vertices. (The Petersen graph shows that this
 is best possible.)
 -/
@@ -172,8 +163,9 @@ example (s : Set V) (u v : s) : G.edist u v ≤ (G.induce s).edist u v :=
 /-!
 4. Show that `dist` does not satisfy the triangle inequality in general: find a
 graph `G` on `Fin 3` and vertices `u`, `v`, `w` with
-`G.dist u v + G.dist v w < G.dist u w`. Hint: an edge plus an isolated vertex, and
-`dist_eq_zero_iff_eq_or_not_reachable`.
+`G.dist u v + G.dist v w < G.dist u w`.
+
+Hint: an edge plus an isolated vertex, and `dist_eq_zero_iff_eq_or_not_reachable`.
 
 Take the edge `0 — 1` and the isolated vertex `2`. No walk leaves `2`, so `2` is
 reachable only from itself, and the junk value `0` gives
@@ -314,29 +306,12 @@ at most `10` vertices. (The Petersen graph shows that this is best possible.)
 -/
 example [Fintype V] [DecidableRel G.Adj]
     (h : G.IsRegularOfDegree 3) (hd : G.ediam ≤ 2) : Fintype.card V ≤ 10 := by
-  simpa [Finset.sum_range_succ] using moore_bound G 2 2 (fun v => (h v).le) hd
+  have := moore_bound G 2 2 (fun v => (h v).le) hd
+  rw [ENat.card_eq_coe_fintype_card, Nat.cast_le] at this
+  simpa [Finset.sum_range_succ] using this
 
 /-!
-13. Show that the Moore bound holds with local finiteness as the only finiteness
-assumption: a locally finite graph with maximum degree at most `d + 1` and diameter
-at most `k` is finite, and has at most `1 + (d + 1) * (1 + d + ⋯ + d ^ (k - 1))`
-vertices. Hint: `finite_of_eccent_le` and `moore_bound`.
--/
-/-!
-A graph with no vertices is finite. Otherwise any vertex `r` has eccentricity at most
-the diameter, so `V` is finite by `finite_of_eccent_le`, and we can apply
-`moore_bound`.
--/
-example [G.LocallyFinite] (d k : ℕ)
-    (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
-    Finite V ∧ Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
-  rcases isEmpty_or_nonempty V with hV | ⟨⟨r⟩⟩
-  · exact ⟨inferInstance, by simp⟩
-  have hfin : Finite V := finite_of_eccent_le (eccent_le_ediam (u := r) |>.trans h)
-  exact ⟨hfin, moore_bound G d k h_deg h⟩
-
-/-!
-14. Use the cage bound to show that a graph with minimum degree at least `3` and
+13. Use the cage bound to show that a graph with minimum degree at least `3` and
 girth at least `5` has at least `10` vertices. (The Petersen graph shows that this
 is best possible.)
 -/

@@ -771,6 +771,28 @@ scoped postfix:max "ˡ" => mycielskian.left
 scoped postfix:max "ʳ" => mycielskian.right
 
 /-!
+Lean prints `vˡ` only for a term of the form `mycielskian.left v`. Tactics that
+split a vertex into cases, such as `rintro (_ | v | v)`, use the constructors
+themselves and produce `some (Sum.inl v)`, so without help the same vertex can appear
+in both forms in a single goal. The following *delaborator* (an extension of Lean's
+pretty-printer) prints `some (Sum.inl v)` as `vˡ` and `some (Sum.inr v)` as `vʳ`.
+Like the notation it is `scoped`, so it applies only when the `SimpleGraph`
+namespace is open.
+-/
+open Lean PrettyPrinter.Delaborator SubExpr in
+/-- Print `some (Sum.inl v)` as `vˡ` and `some (Sum.inr v)` as `vʳ`, provided the two
+summands of the `Sum` type are the same. -/
+@[scoped delab app.Option.some]
+private def delabMycielskianVert : Delab := whenPPOption getPPNotation do
+  -- the argument of `some`, which should be `@Sum.inl V V v` or `@Sum.inr V V v`
+  let x := (← getExpr).appArg!
+  guard <| x.getAppNumArgs == 3 && x.getArg! 0 == x.getArg! 1
+  let v ← withAppArg <| withAppArg delab
+  if x.isAppOf ``Sum.inl then `($vˡ)
+  else if x.isAppOf ``Sum.inr then `($vʳ)
+  else failure
+
+/-!
 The `@[simps]` attribute on our definition of `mycielskian` generated a `@[simp]`
 lemma `mycielskian_adj`, which rewrites `mμ(G).Adj x y` to the `match` in its
 definition. Once both vertices are named, as in `vˡ`, `wʳ` or `none`, `simp`

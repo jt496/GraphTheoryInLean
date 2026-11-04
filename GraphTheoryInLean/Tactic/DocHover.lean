@@ -21,6 +21,19 @@ decide` does not show `Decidable.decide`, while the `decide` of `decide p` does)
 identifiers right after a `.` (as in `.inl`), shell commands (so that `get` in `lake
 exe cache get` does not show `MonadState.get`) and fenced code blocks.
 
+A name declared further down the same file, as in a proof sketch that comes before
+its lemmas, is not a constant yet when the linter runs. It is looked for in the text
+of the file instead (see `sourceDecls`), in the namespaces that the `namespace`,
+`section` and `end` lines there set up: if exactly one later declaration has a full
+name that the identifier can stand for in the comment's scope (as in Lean, a
+`protected` one needs more than the last component), Ctrl-click goes to its line and
+hovering it shows the declaration as Lean shows a constant, with its section
+variables: the hover is only worked out when it is shown, in the environment just
+after the declaration, which the linter keeps (see `laterDeclHover`). Until the
+declaration has been elaborated, the hover shows its header and docstring as the text
+has them. (The guide's `{smart}` role resolves such names at the end of the file
+instead.)
+
 A span that is a single keyword, such as `#eval`, `simp` or `def`, shows the
 docstring of its syntax instead, and Ctrl-click goes to the declaration of the
 syntax: the span is treated as the guide's `{smart}` role renders it, using the same
@@ -708,6 +721,264 @@ def notationTokenKind? (env : Environment) (tok : String) :
       found := found <|> some (k, doc)
   return found.map (·.1)
 
+/-- The nesting depth of block comments after the line `line`, given the depth
+`depth` before it. A `--` outside block comments ends the line. -/
+def commentDepth (depth : Nat) (line : String) : Nat := Id.run do
+  let cs := line.toList.toArray
+  let mut d := depth
+  let mut i := 0
+  while i + 1 < cs.size do
+    if cs[i]! == '/' && cs[i + 1]! == '-' then
+      d := d + 1
+      i := i + 2
+    else if cs[i]! == '-' && cs[i + 1]! == '/' && d > 0 then
+      d := d - 1
+      i := i + 2
+    else if d == 0 && cs[i]! == '-' && cs[i + 1]! == '-' then
+      break
+    else
+      i := i + 1
+  return d
+
+/-- The words of the line `line` after any attribute list `@[…]` at its start. -/
+def lineWords (line : String) : List String :=
+  let cs := line.toList
+  let cs := if cs.take 2 == ['@', '['] then (cs.dropWhile (· != ']')).drop 1 else cs
+  ((String.ofList cs).splitOn " ").filter (!·.isEmpty)
+
+/-- The words that can come before the keyword of a declaration. -/
+def declModifiers : List String :=
+  ["private", "protected", "noncomputable", "partial", "unsafe", "nonrec", "scoped"]
+
+/-- The keywords of the declarations whose name follows the keyword. -/
+def declKeywords : List String :=
+  ["theorem", "lemma", "def", "abbrev", "instance", "structure", "class",
+    "inductive", "opaque", "axiom"]
+
+/-- The name that the line `line` declares, as written, if it starts a declaration:
+`foo` for `private lemma foo (x : α) : …`, say. -/
+def declaredName? (line : String) : Option Name := do
+  let kw :: rest := (lineWords line).dropWhile (declModifiers.contains ·) | none
+  guard (declKeywords.contains kw)
+  let rest := if kw == "class" && rest.head? == some "inductive" then rest.drop 1
+    else rest
+  let word :: _ := rest | none
+  -- `foo` in `foo.{u}`, `foo(x : α)` or `foo:`
+  let name := (word.toList.takeWhile (!"([{⦃:".contains ·)).reverse
+    |>.dropWhile (· == '.') |>.reverse
+  guard (name.head?.any isIdFirst)
+  return (String.ofList name).toName
+
+/-- The scope that a line with the words `words` opens, if any: the namespace of
+`namespace`, or `none` for `section` and `mutual`. `end` closes it. -/
+def scopeOpened? (words : List String) : Option (Option Name) :=
+  match words with
+  | "namespace" :: ns :: _ => some (some ns.toName)
+  | "section" :: _ | "noncomputable" :: "section" :: _ | "mutual" :: _ => some none
+  | _ => none
+
+/-- A declaration that the text of a file makes. -/
+structure SourceDecl where
+  /-- Its full name: the namespaces around it and its name. -/
+  name : Name
+  /-- Its first line, counting from 0. -/
+  line : Nat
+  /-- Whether it is `protected`, so that no identifier with one component refers to
+  it. -/
+  isProtected : Bool
+
+/-- The declarations that the text `lines` of a file makes, read from the text alone:
+each line outside comments that starts with a declaration keyword (after any
+attributes and modifiers such as `private`), in the namespaces of the `namespace`,
+`section`, `mutual` and `end` lines around it. Only lines that start in the first
+column count. -/
+def sourceDecls (lines : Array String) : Array SourceDecl := Id.run do
+  let mut out := #[]
+  let mut depth := 0
+  let mut scopes : Array (Option Name) := #[]
+  for h : n in [0:lines.size] do
+    let line := lines[n]
+    let inComment := depth > 0 || line.startsWith "/-"
+    depth := commentDepth depth line
+    if inComment || line.toList.head?.all Char.isWhitespace then
+      continue
+    let words := lineWords line
+    if let some scope := scopeOpened? words then
+      scopes := scopes.push scope
+    else if words.head? == some "end" then
+      scopes := scopes.pop
+    else if let some name := declaredName? line then
+      let ns := scopes.foldl (fun ns s => s.elim ns (ns ++ ·)) .anonymous
+      let name := if name.getRoot == `_root_ then
+          name.replacePrefix `_root_ .anonymous
+        else ns ++ name
+      let isProtected :=
+        (words.takeWhile (declModifiers.contains ·)).contains "protected"
+      out := out.push { name, line := n, isProtected }
+  return out
+
+/-- The hash of the text of the file that `sourceDecls` last read, with its lines and
+the declarations they make. -/
+initialize sourceDeclsCache : IO.Ref (UInt64 × Array String × Array SourceDecl) ←
+  IO.mkRef (0, #[], #[])
+
+/-- The lines of the text `source` of the current file and the declarations they make
+(see `sourceDecls`), read again only when the text has changed. -/
+def currentSourceDecls (source : String) : IO (Array String × Array SourceDecl) := do
+  let (h, cached) ← sourceDeclsCache.get
+  if h == hash source then
+    return cached
+  let lines := (source.splitOn "\n").toArray
+  let result := (lines, sourceDecls lines)
+  sourceDeclsCache.set (hash source, result)
+  return result
+
+/-- The header of the declaration at line `n` (counting from 0) of the text `lines`:
+its text up to the `:=` or `where` outside brackets, or up to a line that starts with
+`|`, or its first twenty lines. -/
+def declHeader (lines : Array String) (n : Nat) : String := Id.run do
+  let mut out : Array String := #[]
+  let mut depth : Int := 0
+  for line in lines.extract n (n + 20) do
+    let cs := line.toList.toArray
+    let mut stop? : Option Nat := none
+    for h : i in [0:cs.size] do
+      let c := cs[i]
+      if "([{⦃⟨".contains c then
+        depth := depth + 1
+      else if ")]}⦄⟩".contains c then
+        depth := depth - 1
+      else if depth == 0 && (c == ':' && cs[i + 1]? == some '=' ||
+          c == '|' && (cs.extract 0 i).all Char.isWhitespace ||
+          startsAt cs i "where" && !(i > 0 && isIdRest cs[i - 1]!) &&
+            !(cs[i + 5]?.any isIdRest)) then
+        stop? := some i
+        break
+    match stop? with
+    | some i =>
+      out := out.push (String.ofList (cs.extract 0 i).toList)
+      break
+    | none => out := out.push line
+  return trim ("\n".intercalate out.toList)
+
+/-- The docstring `/-- … -/` of the declaration at line `n` (counting from 0) of the
+text `lines`, without its delimiters: the comment just above the declaration and any
+attribute and `open … in` lines. -/
+def declDoc? (lines : Array String) (n : Nat) : Option String := Id.run do
+  let mut k := n
+  while k > 0 &&
+      (lines[k - 1]!.startsWith "@[" || lines[k - 1]!.startsWith "open ") do
+    k := k - 1
+  if k == 0 || !(trim lines[k - 1]!).endsWith "-/" then
+    return none
+  let mut j := k - 1
+  while j > 0 && !lines[j]!.startsWith "/-" do
+    j := j - 1
+  let text := trim ("\n".intercalate (lines.extract j k).toList)
+  unless text.startsWith "/--" do
+    return none
+  return trim (String.ofList ((text.toList.drop 3).reverse.drop 2).reverse)
+
+/-- The header `header` of the declaration of `name` (see `declHeader`) as Lean's
+hover writes a constant: the full name `name` in place of the attributes, modifiers,
+keyword and name as written, so `Foo.bar (x : α) : β` for
+`private lemma bar (x : α) : β` in the namespace `Foo`. Universe parameters `.{u}`
+stay after the name. -/
+def signature (name : Name) (header : String) : String := Id.run do
+  let mut cs := header.toList
+  if cs.take 2 == ['@', '['] then
+    cs := (cs.dropWhile (· != ']')).drop 1
+  -- the modifiers and the keyword
+  repeat
+    cs := cs.dropWhile Char.isWhitespace
+    let word := String.ofList (cs.takeWhile (!·.isWhitespace))
+    unless declModifiers.contains word || declKeywords.contains word do
+      break
+    cs := cs.drop word.length
+  -- the name as written, less the `.` of a following `.{u}`
+  let written := cs.takeWhile (!"([{⦃: \n".contains ·)
+  let written := if written.getLast? == some '.' then written.dropLast else written
+  return toString name ++ String.ofList (cs.drop written.length)
+
+/-- What hovering over a use of the declaration `d` in the text `lines` shows: its
+`signature` and docstring as the text has them, and its line. -/
+def declHover (lines : Array String) (d : SourceDecl) : String :=
+  let doc := (declDoc? lines d.line).map (s!"\n***\n" ++ ·) |>.getD ""
+  let sig := signature d.name (declHeader lines d.line)
+  s!"```lean\n{sig}\n```{doc}\n***\n*declared below, at line {d.line + 1}*"
+
+/-- `ns` and the namespaces around it, out to the root namespace. -/
+def namespacesAround : Name → List Name
+  | .anonymous => [.anonymous]
+  | ns@(.str p _) => ns :: namespacesAround p
+  | ns@(.num p _) => ns :: namespacesAround p
+
+/-- The full names that the identifier `id` can stand for in the current scope: `id`
+in the current namespace or a namespace around it, or in an open namespace. -/
+def candidateNames (id : Name) : TermElabM (List Name) := do
+  if id.getRoot == `_root_ then
+    return [id.replacePrefix `_root_ .anonymous]
+  let opened := (← getOpenDecls).filterMap fun
+    | .simple ns except => if except.contains id then none else some (ns ++ id)
+    | .explicit alias decl => if alias == id then some decl else none
+  return (namespacesAround (← getCurrNamespace)).map (· ++ id) ++ opened
+
+/-- The environment just after each declaration that the linter has seen in this
+process, by the full name of the declaration (as `SourceDecl.name` has it), so that
+the hover of a name used before its declaration can show the declaration as Lean
+does. The editor keeps these environments anyway, for its snapshots. -/
+initialize declEnvs : IO.Ref (Std.HashMap Name Environment) ← IO.mkRef {}
+
+/-- The full name of the declaration that the command `stx` makes, if any: its name
+in the current namespace, or without `_root_`. -/
+def declFullName? (stx : Syntax) : CommandElabM (Option Name) := do
+  let some declId := stx.find? (·.isOfKind ``Parser.Command.declId)
+    | return none
+  let id := declId[0].getId
+  if id.isAnonymous then
+    return none
+  if id.getRoot == `_root_ then
+    return some (id.replacePrefix `_root_ .anonymous)
+  return some ((← getCurrNamespace) ++ id)
+
+/-- What hovering over a use of the declaration `d`, which comes later in the file,
+shows: once the declaration has been elaborated, its signature and docstring as
+Lean's hover of a constant shows them, worked out in the environment just after it
+(see `declEnvs`) with the namespace, `open`s and options of `ppCtx`, and its line.
+Until then, or if that fails, `fallback`. -/
+def laterDeclHover (d : SourceDecl) (fallback : String) (ppCtx : PPContext) :
+    IO String := do
+  let some env := (← declEnvs.get)[d.name]?
+    | return fallback
+  let env := env.setExporting false
+  let c := if env.contains d.name then d.name else mkPrivateName env d.name
+  unless env.contains c do
+    return fallback
+  let hover : MetaM String := do
+    let sig := (← PrettyPrinter.ppSignature c).fmt.pretty
+    let doc := (← findDocString? env c).map (s!"\n***\n" ++ ·) |>.getD ""
+    let line := (← findDeclarationRanges? c).map (·.selectionRange.pos.line)
+      |>.getD (d.line + 1)
+    return s!"```lean\n{sig}\n```{doc}\n***\n*declared below, at line {line}*"
+  try
+    (·.1) <$> (withOptions (fun _ => ppCtx.opts)
+      (hover.run' { lctx := ppCtx.lctx } { mctx := ppCtx.mctx })).toIO
+      { currNamespace := ppCtx.currNamespace, openDecls := ppCtx.openDecls
+        fileName := "<DocHover>", fileMap := default }
+      { env }
+  catch _ => return fallback
+
+/-- Records an info node over `ref` for a use of the declaration `d`, which comes
+later in the file, whose text is `lines`: its hover is `laterDeclHover`, with
+`declHover` as the fallback, and Ctrl-click goes to its line. -/
+def pushSourceDeclInfo (ref : Syntax) (lines : Array String) (d : SourceDecl) :
+    TermElabM Unit := do
+  pushInfoLeaf <| .ofDelabTermInfo {
+    elaborator := .anonymous, stx := ref, lctx := ← getLCtx
+    expectedType? := none, expr := mkStrLit ref.getAtomVal
+    location? := some ⟨(← getEnv).mainModule, lineRange (d.line + 1) lines[d.line]!⟩
+    mkDocString? := some (laterDeclHover d (declHover lines d)) }
+
 /-- Runs `k` on the command inside the `set_option … in` and `open … in` prefixes of
 `stx`, in the scope they set up. -/
 partial def withInPrefixes (k : Syntax → CommandElabM Unit) (stx : Syntax) :
@@ -759,6 +1030,8 @@ def docHoverLinter : Linter where
   run := withInPrefixes fun stx => do
     unless linter.docHover.get (← getOptions) && (← getInfoState).enabled do
       return
+    if let some name ← declFullName? stx then
+      declEnvs.modify (·.insert name (← getEnv))
     let docs := docComments stx
     if docs.isEmpty then
       return
@@ -767,9 +1040,15 @@ def docHoverLinter : Linter where
     -- The headings of the guide, read only for a comment with a cross-reference.
     let index? ← if docs.any fun doc => !(refs (commentBody doc).getAtomVal).isEmpty
       then currentHeadingIndex? else pure none
+    let fileMap ← getFileMap
     -- `liftTermElabM` records the info nodes with the context the server needs.
     liftTermElabM do
+      -- The lines of the file and the declarations they make, read only for a name
+      -- that is not a constant.
+      let mut source? : Option (Array String × Array SourceDecl) := none
       for doc in docs do
+        -- The line of the end of the comment, counting from 1.
+        let endLine := (fileMap.toPosition (doc.getTailPos?.getD 0)).line
         -- The opening delimiter, and the text with the closing one.
         pushBlankInfo doc[0]
         pushBlankInfo doc[1]
@@ -826,10 +1105,25 @@ def docHoverLinter : Linter where
             let b : String.Pos.Raw := ⟨start.byteIdx + spanOff + off⟩
             let e : String.Pos.Raw := ⟨b.byteIdx + name.utf8ByteSize⟩
             let ref := Syntax.atom (.synthetic b e (canonical := true)) name
-            try
-              discard <| realizeGlobalConstNoOverloadWithInfo
-                (mkIdentFrom ref name.toName (canonical := true))
-            catch _ => pure ()
+            let isConst ← try
+                discard <| realizeGlobalConstNoOverloadWithInfo
+                  (mkIdentFrom ref name.toName (canonical := true))
+                pure true
+              catch _ => pure false
+            if isConst then
+              continue
+            -- A name declared further down the file is not a constant yet.
+            if source?.isNone then
+              source? := some (← currentSourceDecls fileMap.source)
+            let some (lines, decls) := source?
+              | continue
+            let id := name.toName
+            let names ← candidateNames id
+            let found := decls.filter fun d =>
+              endLine ≤ d.line && names.contains d.name &&
+                !(d.isProtected && id.isAtomic)
+            if h : found.size = 1 then
+              pushSourceDeclInfo ref lines found[0]
         for (off, len) in links body.getAtomVal do
           let b : String.Pos.Raw := ⟨start.byteIdx + off⟩
           let e : String.Pos.Raw := ⟨b.byteIdx + len⟩

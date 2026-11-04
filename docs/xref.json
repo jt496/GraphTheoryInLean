@@ -501,13 +501,13 @@
      "data":
      {"title": "The Moore Bound",
       "shortTitle": null,
-      "sectionNum": "11.4.3.",
+      "sectionNum": "11.5.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
-       {"title": "The Moore Bound", "shortTitle": null, "number": "3"}]},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
+       {"title": "The Moore Bound", "shortTitle": null, "number": "4"}]},
      "address": "/Distance/"}],
    "section-the-laplacian":
    [{"id": "section-the-laplacian",
@@ -632,51 +632,6 @@
         "shortTitle": null,
         "number": "3"}]},
      "address": "/Colorings/"}],
-   "section-the-girth-of-the-mycielskian":
-   [{"id": "section-the-girth-of-the-mycielskian",
-     "data":
-     {"title": "The Girth of the Mycielskian",
-      "shortTitle": null,
-      "sectionNum": "11.3.4.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Girth", "shortTitle": null, "number": "3"},
-       {"title": "The Girth of the Mycielskian",
-        "shortTitle": null,
-        "number": "4"}]},
-     "address": "/Distance/"}],
-   "section-the-girth-of-the-hypercube":
-   [{"id": "section-the-girth-of-the-hypercube",
-     "data":
-     {"title": "The Girth of the Hypercube",
-      "shortTitle": null,
-      "sectionNum": "11.3.3.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Girth", "shortTitle": null, "number": "3"},
-       {"title": "The Girth of the Hypercube",
-        "shortTitle": null,
-        "number": "3"}]},
-     "address": "/Distance/"}],
-   "section-the-girth-of-complete-bipartite-graphs":
-   [{"id": "section-the-girth-of-complete-bipartite-graphs",
-     "data":
-     {"title": "The Girth of Complete Bipartite Graphs",
-      "shortTitle": null,
-      "sectionNum": "11.3.2.",
-      "searchPriority": 50,
-      "context":
-      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
-       {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Girth", "shortTitle": null, "number": "3"},
-       {"title": "The Girth of Complete Bipartite Graphs",
-        "shortTitle": null,
-        "number": "2"}]},
-     "address": "/Distance/"}],
    "section-the-finset-of-n-cliques":
    [{"id": "section-the-finset-of-n-cliques",
      "data":
@@ -776,12 +731,12 @@
      "data":
      {"title": "The Cage Bound for Odd Girth",
       "shortTitle": null,
-      "sectionNum": "11.4.6.",
+      "sectionNum": "11.5.6.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
        {"title": "The Cage Bound for Odd Girth",
         "shortTitle": null,
         "number": "6"}]},
@@ -789,15 +744,15 @@
    "section-the-cage-bound-for-even-girth":
    [{"id": "section-the-cage-bound-for-even-girth",
      "data":
-     {"title": "The Cage Bound for Even Girth*",
+     {"title": "The Cage Bound for Even Girth",
       "shortTitle": null,
-      "sectionNum": "11.4.8.",
+      "sectionNum": "11.5.8.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
-       {"title": "The Cage Bound for Even Girth*",
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
+       {"title": "The Cage Bound for Even Girth",
         "shortTitle": null,
         "number": "8"}]},
      "address": "/Distance/"}],
@@ -1165,12 +1120,12 @@
      "data":
      {"title": "Short Cycles Between Layers",
       "shortTitle": null,
-      "sectionNum": "11.4.5.",
+      "sectionNum": "11.5.5.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
        {"title": "Short Cycles Between Layers",
         "shortTitle": null,
         "number": "5"}]},
@@ -1602,30 +1557,45 @@
         "shortTitle": null,
         "number": "2"}]},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "section-moore-graphs-of-diameter-two":
+   [{"id": "section-moore-graphs-of-diameter-two",
+     "data":
+     {"title": "Moore Graphs of Diameter Two",
+      "shortTitle": null,
+      "sectionNum": "12.4.1.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Algebraic Graph Theory", "shortTitle": null, "number": "12"},
+       {"title": "Strongly Regular Graphs", "shortTitle": null, "number": "4"},
+       {"title": "Moore Graphs of Diameter Two",
+        "shortTitle": null,
+        "number": "1"}]},
+     "address": "/Algebraic-Graph-Theory/"}],
    "section-moore-graphs":
    [{"id": "section-moore-graphs",
      "data":
      {"title": "Moore Graphs",
       "shortTitle": null,
-      "sectionNum": "11.4.7.",
+      "sectionNum": "11.5.7.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
        {"title": "Moore Graphs", "shortTitle": null, "number": "7"}]},
      "address": "/Distance/"}],
    "section-moore-and-cage-bounds":
    [{"id": "section-moore-and-cage-bounds",
      "data":
-     {"title": "Moore and Cage Bounds",
+     {"title": "Moore and Cage Bounds*",
       "shortTitle": null,
-      "sectionNum": "11.4.",
+      "sectionNum": "11.5.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"}]},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"}]},
      "address": "/Distance/"}],
    "section-minimum-and-maximum-degree":
    [{"id": "section-minimum-and-maximum-degree",
@@ -2283,32 +2253,75 @@
        {"title": "Distance", "shortTitle": null, "number": "11"},
        {"title": "Graph Distance", "shortTitle": null, "number": "1"}]},
      "address": "/Distance/"}],
+   "section-girth-of-the-mycielskian":
+   [{"id": "section-girth-of-the-mycielskian",
+     "data":
+     {"title": "Girth of the Mycielskian",
+      "shortTitle": null,
+      "sectionNum": "11.4.5.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Distance", "shortTitle": null, "number": "11"},
+       {"title": "Girth", "shortTitle": null, "number": "4"},
+       {"title": "Girth of the Mycielskian",
+        "shortTitle": null,
+        "number": "5"}]},
+     "address": "/Distance/"}],
+   "section-girth-of-the-hypercube":
+   [{"id": "section-girth-of-the-hypercube",
+     "data":
+     {"title": "Girth of the Hypercube",
+      "shortTitle": null,
+      "sectionNum": "11.4.4.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Distance", "shortTitle": null, "number": "11"},
+       {"title": "Girth", "shortTitle": null, "number": "4"},
+       {"title": "Girth of the Hypercube", "shortTitle": null, "number": "4"}]},
+     "address": "/Distance/"}],
+   "section-girth-of-complete-bipartite-graphs":
+   [{"id": "section-girth-of-complete-bipartite-graphs",
+     "data":
+     {"title": "Girth of Complete Bipartite Graphs",
+      "shortTitle": null,
+      "sectionNum": "11.4.2.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Distance", "shortTitle": null, "number": "11"},
+       {"title": "Girth", "shortTitle": null, "number": "4"},
+       {"title": "Girth of Complete Bipartite Graphs",
+        "shortTitle": null,
+        "number": "2"}]},
+     "address": "/Distance/"}],
    "section-girth-and-diameter-of-cycle-graphs":
    [{"id": "section-girth-and-diameter-of-cycle-graphs",
      "data":
      {"title": "Girth and Diameter of Cycle Graphs",
       "shortTitle": null,
-      "sectionNum": "11.3.1.",
+      "sectionNum": "11.4.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Girth", "shortTitle": null, "number": "3"},
+       {"title": "Girth", "shortTitle": null, "number": "4"},
        {"title": "Girth and Diameter of Cycle Graphs",
         "shortTitle": null,
-        "number": "1"}]},
+        "number": "3"}]},
      "address": "/Distance/"}],
    "section-girth":
    [{"id": "section-girth",
      "data":
      {"title": "Girth",
       "shortTitle": null,
-      "sectionNum": "11.3.",
+      "sectionNum": "11.4.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Girth", "shortTitle": null, "number": "3"}]},
+       {"title": "Girth", "shortTitle": null, "number": "4"}]},
      "address": "/Distance/"}],
    "section-functions-embeddings-and-equivalences":
    [{"id": "section-functions-embeddings-and-equivalences",
@@ -2421,13 +2434,13 @@
      "data":
      {"title": "Finite Eccentricity",
       "shortTitle": null,
-      "sectionNum": "11.4.4.",
+      "sectionNum": "11.5.2.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
-       {"title": "Finite Eccentricity", "shortTitle": null, "number": "4"}]},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
+       {"title": "Finite Eccentricity", "shortTitle": null, "number": "2"}]},
      "address": "/Distance/"}],
    "section-finite-cliques":
    [{"id": "section-finite-cliques",
@@ -2646,6 +2659,19 @@
        {"title": "Algebraic Graph Theory", "shortTitle": null, "number": "12"},
        {"title": "Exercises", "shortTitle": null, "number": "9"}]},
      "address": "/Algebraic-Graph-Theory/"}],
+   "section-excluding-short-cycles":
+   [{"id": "section-excluding-short-cycles",
+     "data":
+     {"title": "Excluding Short Cycles",
+      "shortTitle": null,
+      "sectionNum": "11.4.1.",
+      "searchPriority": 50,
+      "context":
+      [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
+       {"title": "Distance", "shortTitle": null, "number": "11"},
+       {"title": "Girth", "shortTitle": null, "number": "4"},
+       {"title": "Excluding Short Cycles", "shortTitle": null, "number": "1"}]},
+     "address": "/Distance/"}],
    "section-every-copy-is-induced":
    [{"id": "section-every-copy-is-induced",
      "data":
@@ -2970,12 +2996,12 @@
      "data":
      {"title": "Distance Layers",
       "shortTitle": null,
-      "sectionNum": "11.4.1.",
+      "sectionNum": "11.5.1.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
        {"title": "Distance Layers", "shortTitle": null, "number": "1"}]},
      "address": "/Distance/"}],
    "section-distance-invariants-under-isomorphism":
@@ -3423,15 +3449,15 @@
      "data":
      {"title": "Counting Between Layers",
       "shortTitle": null,
-      "sectionNum": "11.4.2.",
+      "sectionNum": "11.5.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Moore and Cage Bounds", "shortTitle": null, "number": "4"},
+       {"title": "Moore and Cage Bounds*", "shortTitle": null, "number": "5"},
        {"title": "Counting Between Layers",
         "shortTitle": null,
-        "number": "2"}]},
+        "number": "3"}]},
      "address": "/Distance/"}],
    "section-counting-a-type-fintype-card":
    [{"id": "section-counting-a-type-fintype-card",
@@ -4725,16 +4751,16 @@
    "section-albertson-s-precolouring-extension-theorem":
    [{"id": "section-albertson-s-precolouring-extension-theorem",
      "data":
-     {"title": "Albertson's Precolouring Extension Theorem*",
+     {"title": "Albertson's Precolouring Extension Theorem",
       "shortTitle": null,
-      "sectionNum": "11.5.",
+      "sectionNum": "11.3.",
       "searchPriority": 50,
       "context":
       [{"title": "Graph Theory in Lean", "shortTitle": null, "number": null},
        {"title": "Distance", "shortTitle": null, "number": "11"},
-       {"title": "Albertson's Precolouring Extension Theorem*",
+       {"title": "Albertson's Precolouring Extension Theorem",
         "shortTitle": null,
-        "number": "5"}]},
+        "number": "3"}]},
      "address": "/Distance/"}],
    "section-adding-a-single-edge":
    [{"id": "section-adding-a-single-edge",
@@ -4977,7 +5003,164 @@
  {"title": "Verso.Genre.Manual.example",
   "description": null,
   "contents":
-  {"_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.regular_case":
+  {"hammingNorm_single":
+   [{"id": "hammingNorm_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#hammingNorm_single":
+      {"display": "_root_.hammingNorm_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "hammingNorm_eq_one_iff":
+   [{"id": "hammingNorm_eq_one_iff",
+     "data":
+     {"/Algebraic-Graph-Theory/#hammingNorm_eq_one_iff":
+      {"display": "_root_.hammingNorm_eq_one_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "hammingNorm_add_single":
+   [{"id": "hammingNorm_add_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#hammingNorm_add_single":
+      {"display": "_root_.hammingNorm_add_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Rigidity"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "hammingDist_snoc":
+   [{"id": "hammingDist_snoc",
+     "data":
+     {"/Algebraic-Graph-Theory/#hammingDist_snoc":
+      {"display": "_root_.hammingDist_snoc",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Hypercube and the Hamming Cube"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "hammingDist_comp_perm":
+   [{"id": "hammingDist_comp_perm",
+     "data":
+     {"/Algebraic-Graph-Theory/#hammingDist_comp_perm":
+      {"display": "_root_.hammingDist_comp_perm",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Translations and Coordinate Permutations"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "boolVec_add_add_cancel":
+   [{"id": "boolVec_add_add_cancel",
+     "data":
+     {"/Algebraic-Graph-Theory/#boolVec_add_add_cancel":
+      {"display": "_root_.boolVec_add_add_cancel",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "apply_eq_true_iff_hammingDist_lt":
+   [{"id": "apply_eq_true_iff_hammingDist_lt",
+     "data":
+     {"/Algebraic-Graph-Theory/#apply_eq_true_iff_hammingDist_lt":
+      {"display": "_root_.apply_eq_true_iff_hammingDist_lt",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "The Automorphism Group of the Hypercube*",
+        "Rigidity"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C13_Theorems.0.SimpleGraph.furedi_step":
+   [{"id":
+     "_private___GTILVerso___Guide___C13_Theorems___0___SimpleGraph___furedi_step",
+     "data":
+     {"/Theorems/#_private___GTILVerso___Guide___C13_Theorems___0___SimpleGraph___furedi_step":
+      {"display": "furedi_step",
+       "context":
+       ["Graph Theory in Lean",
+        "Theorems",
+        "Turán's Theorem, Stability and Asymptotics",
+        "Füredi's Stability Theorem"]}},
+     "address": "/Theorems/"}],
+   "_private.GTILVerso.Guide.C13_Theorems.0.SimpleGraph.furedi_aux":
+   [{"id":
+     "_private___GTILVerso___Guide___C13_Theorems___0___SimpleGraph___furedi_aux",
+     "data":
+     {"/Theorems/#_private___GTILVerso___Guide___C13_Theorems___0___SimpleGraph___furedi_aux":
+      {"display": "furedi_aux",
+       "context":
+       ["Graph Theory in Lean",
+        "Theorems",
+        "Turán's Theorem, Stability and Asymptotics",
+        "Füredi's Stability Theorem"]}},
+     "address": "/Theorems/"}],
+   "_private.GTILVerso.Guide.C12_Algebraic_Graph_Theory.0.SimpleGraph.exists_ne_true_true_of_one_lt_hammingNorm":
+   [{"id":
+     "_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_ne_true_true_of_one_lt_hammingNorm",
+     "data":
+     {"/Algebraic-Graph-Theory/#_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_ne_true_true_of_one_lt_hammingNorm":
+      {"display": "exists_ne_true_true_of_one_lt_hammingNorm",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C12_Algebraic_Graph_Theory.0.SimpleGraph.exists_apply_single_eq_add_single":
+   [{"id":
+     "_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_apply_single_eq_add_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_apply_single_eq_add_single":
+      {"display": "exists_apply_single_eq_add_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C12_Algebraic_Graph_Theory.0.SimpleGraph.exists_apply_eq_add_extendEmb":
+   [{"id":
+     "_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_apply_eq_add_extendEmb",
+     "data":
+     {"/Algebraic-Graph-Theory/#_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___exists_apply_eq_add_extendEmb":
+      {"display": "exists_apply_eq_add_extendEmb",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C12_Algebraic_Graph_Theory.0.SimpleGraph.copy_apply_eq_add_extendEmb_of_single":
+   [{"id":
+     "_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___copy_apply_eq_add_extendEmb_of_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___copy_apply_eq_add_extendEmb_of_single":
+      {"display": "copy_apply_eq_add_extendEmb_of_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C12_Algebraic_Graph_Theory.0.SimpleGraph.copy_apply_eq_add_add":
+   [{"id":
+     "_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___copy_apply_eq_add_add",
+     "data":
+     {"/Algebraic-Graph-Theory/#_private___GTILVerso___Guide___C12_Algebraic_Graph_Theory___0___SimpleGraph___copy_apply_eq_add_add":
+      {"display": "copy_apply_eq_add_add",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Rigidity: Every Copy is Canonical"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.regular_case":
    [{"id":
      "_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___regular_case",
      "data":
@@ -5115,18 +5298,18 @@
         "Maximum Degree at Least Three",
         "Completing the Proof"]}},
      "address": "/Connectivity/"}],
-   "_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.ColoringOn.exists_free_color":
+   "_private.GTILVerso.Guide.C10_Connectivity.0.SimpleGraph.brooks_of_finite":
    [{"id":
-     "_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___ColoringOn___exists_free_color",
+     "_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___brooks_of_finite",
      "data":
-     {"/Connectivity/#_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___ColoringOn___exists_free_color":
-      {"display": "ColoringOn.exists_free_color",
+     {"/Connectivity/#_private___GTILVerso___Guide___C10_Connectivity___0___SimpleGraph___brooks_of_finite":
+      {"display": "brooks_of_finite",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
         "Brooks' Theorem*",
         "Maximum Degree at Least Three",
-        "Free Colours and Neighbours in a Set"]}},
+        "Completing the Proof"]}},
      "address": "/Connectivity/"}],
    "_private.GTILVerso.Guide.C08_Walks.0.SimpleGraph.modAux":
    [{"id":
@@ -5212,6 +5395,14 @@
      {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___kneserGraphFintype":
       {"display": "kneserGraphFintype",
        "context": ["Graph Theory in Lean", "Constructions", "Kneser Graphs*"]}},
+     "address": "/Constructions/"}],
+   "_private.GTILVerso.Guide.C03_Constructions.0.SimpleGraph.delabMycielskianVert":
+   [{"id":
+     "_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___delabMycielskianVert",
+     "data":
+     {"/Constructions/#_private___GTILVerso___Guide___C03_Constructions___0___SimpleGraph___delabMycielskianVert":
+      {"display": "delabMycielskianVert",
+       "context": ["Graph Theory in Lean", "Constructions", "Mycielskian"]}},
      "address": "/Constructions/"}],
    "SimpleGraph.withTraceCount":
    [{"id": "SimpleGraph___withTraceCount",
@@ -5476,17 +5667,6 @@
         "Turán's Theorem, Stability and Asymptotics",
         "Füredi's Stability Theorem"]}},
      "address": "/Theorems/"}],
-   "SimpleGraph.sum_card_filter_union":
-   [{"id": "SimpleGraph___sum_card_filter_union",
-     "data":
-     {"/Theorems/#SimpleGraph___sum_card_filter_union":
-      {"display": "sum_card_filter_union",
-       "context":
-       ["Graph Theory in Lean",
-        "Theorems",
-        "Turán's Theorem, Stability and Asymptotics",
-        "Füredi's Stability Theorem"]}},
-     "address": "/Theorems/"}],
    "SimpleGraph.subsingleton_end_of_common_vertex":
    [{"id": "SimpleGraph___subsingleton_end_of_common_vertex",
      "data":
@@ -5568,11 +5748,11 @@
         "Cut Vertices and Blocks*",
         "Colouring a Graph from its Blocks"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.splitsAt_of_not_near":
-   [{"id": "SimpleGraph___splitsAt_of_not_near",
+   "SimpleGraph.splitsAt_of_forall_walk_mem_support":
+   [{"id": "SimpleGraph___splitsAt_of_forall_walk_mem_support",
      "data":
-     {"/Connectivity/#SimpleGraph___splitsAt_of_not_near":
-      {"display": "splitsAt_of_not_near",
+     {"/Connectivity/#SimpleGraph___splitsAt_of_forall_walk_mem_support":
+      {"display": "splitsAt_of_forall_walk_mem_support",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
@@ -5704,8 +5884,8 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
-        "The Cage Bound for Even Girth*"]}},
+        "Moore and Cage Bounds*",
+        "The Cage Bound for Even Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.piTensorProd_adj_of_nonempty":
    [{"id": "SimpleGraph___piTensorProd_adj_of_nonempty",
@@ -5751,17 +5931,6 @@
         "Tensor Products*",
         "Indexed Tensor Products"]}},
      "address": "/Maps/"}],
-   "SimpleGraph.petersenGraph_exists_adj_adj":
-   [{"id": "SimpleGraph___petersenGraph_exists_adj_adj",
-     "data":
-     {"/Distance/#SimpleGraph___petersenGraph_exists_adj_adj":
-      {"display": "petersenGraph_exists_adj_adj",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.petersenGraph":
    [{"id": "SimpleGraph___petersenGraph",
      "data":
@@ -5997,17 +6166,6 @@
       {"display": "not_cliqueFree_three_and_indepSetFree_three",
        "context": ["Graph Theory in Lean", "Cliques", "Exercises"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.notMem_support_of_length_eq_edist":
-   [{"id": "SimpleGraph___notMem_support_of_length_eq_edist",
-     "data":
-     {"/Distance/#SimpleGraph___notMem_support_of_length_eq_edist":
-      {"display": "notMem_support_of_length_eq_edist",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Short Cycles Between Layers"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.nonempty_iso_completeGraph_two_of_regular_mycielskian":
    [{"id":
      "SimpleGraph___nonempty_iso_completeGraph_two_of_regular_mycielskian",
@@ -6235,7 +6393,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.mycielskianDecidableRelAdj":
    [{"id": "SimpleGraph___mycielskianDecidableRelAdj",
@@ -6363,7 +6521,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Counting Between Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.mul_card_layer_le":
@@ -6374,7 +6532,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Cage Bound for Odd Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.mul_card_inter_layer_le":
@@ -6385,8 +6543,8 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
-        "The Cage Bound for Even Girth*"]}},
+        "Moore and Cage Bounds*",
+        "The Cage Bound for Even Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.moore_bound_of_radius_le":
    [{"id": "SimpleGraph___moore_bound_of_radius_le",
@@ -6396,7 +6554,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Moore Bound"]}},
      "address": "/Distance/"}],
    "SimpleGraph.moore_bound":
@@ -6407,7 +6565,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Moore Bound"]}},
      "address": "/Distance/"}],
    "SimpleGraph.minDegree_mycielskian_of_one_le'":
@@ -6525,7 +6683,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.mem_end_iff":
@@ -6732,7 +6890,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.length_greedyList":
    [{"id": "SimpleGraph___length_greedyList",
@@ -6787,7 +6945,11 @@
      "data":
      {"/Distance/#SimpleGraph___le_egirth_of_free":
       {"display": "le_egirth_of_free",
-       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Girth",
+        "Excluding Short Cycles"]}},
      "address": "/Distance/"}],
    "SimpleGraph.le_edgeConnectivity_iff":
    [{"id": "SimpleGraph___le_edgeConnectivity_iff",
@@ -6844,7 +7006,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Cage Bound for Odd Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.layer_zero":
@@ -6855,7 +7017,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.layer_one":
@@ -6866,7 +7028,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.layer":
@@ -6877,7 +7039,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.labelledCopyCount_hypercube_cycleGraph_four'":
@@ -7542,7 +7704,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.isCycle_mycielskianClosed_of_adj":
    [{"id": "SimpleGraph___isCycle_mycielskianClosed_of_adj",
@@ -8044,11 +8206,110 @@
         "The Automorphism Group of the Hypercube*",
         "Translations and Coordinate Permutations"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.hammingNorm_extendEmb":
+   [{"id": "SimpleGraph___hypercubeHamming___hammingNorm_extendEmb",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___hammingNorm_extendEmb":
+      {"display": "hypercubeHamming.hammingNorm_extendEmb",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Every Copy is Induced"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.hammingDist_extendEmb":
+   [{"id": "SimpleGraph___hypercubeHamming___hammingDist_extendEmb",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___hammingDist_extendEmb":
+      {"display": "hypercubeHamming.hammingDist_extendEmb",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Every Copy is Induced"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.hypercubeHamming.extendHom":
    [{"id": "SimpleGraph___hypercubeHamming___extendHom",
      "data":
      {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendHom":
-      {"display": "hypercubeHamming.extendHom",
+      {"display": "extendHom",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_zero":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_zero",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_zero":
+      {"display": "extendEmb_zero",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_single":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_single",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_single":
+      {"display": "extendEmb_single",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_injective":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_injective",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_injective":
+      {"display": "extendEmb_injective",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_apply_of_not_exists":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_apply_of_not_exists",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_apply_of_not_exists":
+      {"display": "extendEmb_apply_of_not_exists",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_apply":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_apply",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_apply":
+      {"display": "extendEmb_apply",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb_add":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb_add",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb_add":
+      {"display": "extendEmb_add",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Subcubes of the Hypercube*",
+        "Canonical Subcube Copies"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hypercubeHamming.extendEmb":
+   [{"id": "SimpleGraph___hypercubeHamming___extendEmb",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hypercubeHamming___extendEmb":
+      {"display": "extendEmb",
        "context":
        ["Graph Theory in Lean",
         "Algebraic Graph Theory",
@@ -8326,6 +8587,28 @@
       {"display": "hypercube",
        "context": ["Graph Theory in Lean", "Constructions", "Hypercube"]}},
      "address": "/Constructions/"}],
+   "SimpleGraph.hoffmanSingletonGraphDecidableRelAdj":
+   [{"id": "SimpleGraph___hoffmanSingletonGraphDecidableRelAdj",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hoffmanSingletonGraphDecidableRelAdj":
+      {"display": "hoffmanSingletonGraphDecidableRelAdj",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.hoffmanSingletonGraph":
+   [{"id": "SimpleGraph___hoffmanSingletonGraph",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hoffmanSingletonGraph":
+      {"display": "hoffmanSingletonGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.havel_hakimi":
    [{"id": "SimpleGraph___havel_hakimi",
      "data":
@@ -8370,96 +8653,22 @@
         "Degree Sequences*",
         "The Havel–Hakimi Theorem: a Computable Constructor for Graphic Sequences"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.hammingNorm_single":
-   [{"id": "SimpleGraph___hammingNorm_single",
+   "SimpleGraph.hammingNorm_aut_hypercubeHamming":
+   [{"id": "SimpleGraph___hammingNorm_aut_hypercubeHamming",
      "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_single":
-      {"display": "hammingNorm_single",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingNorm_extendEmb":
-   [{"id": "SimpleGraph___hammingNorm_extendEmb",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_extendEmb":
-      {"display": "hammingNorm_extendEmb",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Every Copy is Induced"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingNorm_eq_one_iff":
-   [{"id": "SimpleGraph___hammingNorm_eq_one_iff",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_eq_one_iff":
-      {"display": "hammingNorm_eq_one_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingNorm_aut":
-   [{"id": "SimpleGraph___hammingNorm_aut",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_aut":
-      {"display": "hammingNorm_aut",
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_aut_hypercubeHamming":
+      {"display": "hammingNorm_aut_hypercubeHamming",
        "context":
        ["Graph Theory in Lean",
         "Algebraic Graph Theory",
         "The Automorphism Group of the Hypercube*",
         "Rigidity"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingNorm_add_single":
-   [{"id": "SimpleGraph___hammingNorm_add_single",
+   "SimpleGraph.hammingDist_aut_hypercubeHamming":
+   [{"id": "SimpleGraph___hammingDist_aut_hypercubeHamming",
      "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingNorm_add_single":
-      {"display": "hammingNorm_add_single",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Rigidity"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingDist_snoc":
-   [{"id": "SimpleGraph___hammingDist_snoc",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingDist_snoc":
-      {"display": "hammingDist_snoc",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Hypercube and the Hamming Cube"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingDist_extendEmb":
-   [{"id": "SimpleGraph___hammingDist_extendEmb",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingDist_extendEmb":
-      {"display": "hammingDist_extendEmb",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Every Copy is Induced"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingDist_comp_perm":
-   [{"id": "SimpleGraph___hammingDist_comp_perm",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingDist_comp_perm":
-      {"display": "hammingDist_comp_perm",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Translations and Coordinate Permutations"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.hammingDist_aut":
-   [{"id": "SimpleGraph___hammingDist_aut",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingDist_aut":
-      {"display": "hammingDist_aut",
+     {"/Algebraic-Graph-Theory/#SimpleGraph___hammingDist_aut_hypercubeHamming":
+      {"display": "hammingDist_aut_hypercubeHamming",
        "context":
        ["Graph Theory in Lean",
         "Algebraic Graph Theory",
@@ -8787,41 +8996,27 @@
         "Making  greedy  Efficient*",
         "Memoization"]}},
      "address": "/Colorings/"}],
-   "SimpleGraph.furedi_step":
-   [{"id": "SimpleGraph___furedi_step",
-     "data":
-     {"/Theorems/#SimpleGraph___furedi_step":
-      {"display": "furedi_step",
-       "context":
-       ["Graph Theory in Lean",
-        "Theorems",
-        "Turán's Theorem, Stability and Asymptotics",
-        "Füredi's Stability Theorem"]}},
-     "address": "/Theorems/"}],
-   "SimpleGraph.furedi_aux":
-   [{"id": "SimpleGraph___furedi_aux",
-     "data":
-     {"/Theorems/#SimpleGraph___furedi_aux":
-      {"display": "furedi_aux",
-       "context":
-       ["Graph Theory in Lean",
-        "Theorems",
-        "Turán's Theorem, Stability and Asymptotics",
-        "Füredi's Stability Theorem"]}},
-     "address": "/Theorems/"}],
    "SimpleGraph.four_le_egirth_of_cliqueFree_three":
    [{"id": "SimpleGraph___four_le_egirth_of_cliqueFree_three",
      "data":
      {"/Distance/#SimpleGraph___four_le_egirth_of_cliqueFree_three":
       {"display": "four_le_egirth_of_cliqueFree_three",
-       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Girth",
+        "Excluding Short Cycles"]}},
      "address": "/Distance/"}],
    "SimpleGraph.five_le_egirth_of_cliqueFree_three_of_free":
    [{"id": "SimpleGraph___five_le_egirth_of_cliqueFree_three_of_free",
      "data":
      {"/Distance/#SimpleGraph___five_le_egirth_of_cliqueFree_three_of_free":
       {"display": "five_le_egirth_of_cliqueFree_three_of_free",
-       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Girth",
+        "Excluding Short Cycles"]}},
      "address": "/Distance/"}],
    "SimpleGraph.finite_setOf_edist_le":
    [{"id": "SimpleGraph___finite_setOf_edist_le",
@@ -8831,7 +9026,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Finite Eccentricity"]}},
      "address": "/Distance/"}],
    "SimpleGraph.finite_of_eccent_le":
@@ -8842,7 +9037,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Finite Eccentricity"]}},
      "address": "/Distance/"}],
    "SimpleGraph.filter_adj_eq_inter":
@@ -8868,83 +9063,6 @@
         "Circulant Graphs",
         "Paley Graphs"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.extendEmb_zero":
-   [{"id": "SimpleGraph___extendEmb_zero",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_zero":
-      {"display": "extendEmb_zero",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb_single":
-   [{"id": "SimpleGraph___extendEmb_single",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_single":
-      {"display": "extendEmb_single",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb_injective":
-   [{"id": "SimpleGraph___extendEmb_injective",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_injective":
-      {"display": "extendEmb_injective",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb_apply_of_not_exists":
-   [{"id": "SimpleGraph___extendEmb_apply_of_not_exists",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_apply_of_not_exists":
-      {"display": "extendEmb_apply_of_not_exists",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb_apply":
-   [{"id": "SimpleGraph___extendEmb_apply",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_apply":
-      {"display": "extendEmb_apply",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb_add":
-   [{"id": "SimpleGraph___extendEmb_add",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb_add":
-      {"display": "extendEmb_add",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.extendEmb":
-   [{"id": "SimpleGraph___extendEmb",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___extendEmb":
-      {"display": "extendEmb",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Canonical Subcube Copies"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.exists_walk_mem_walkComponent":
    [{"id": "SimpleGraph___exists_walk_mem_walkComponent",
      "data":
@@ -8977,17 +9095,6 @@
         "Decidability, Finiteness and Degrees",
         "Exercises"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.exists_ne_true_true_of_one_lt_hammingNorm":
-   [{"id": "SimpleGraph___exists_ne_true_true_of_one_lt_hammingNorm",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_ne_true_true_of_one_lt_hammingNorm":
-      {"display": "exists_ne_true_true_of_one_lt_hammingNorm",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.exists_isMatching_of_injective_sum":
    [{"id": "SimpleGraph___exists_isMatching_of_injective_sum",
      "data":
@@ -9047,6 +9154,50 @@
       {"display": "exists_isMatching_encard_eq_top",
        "context": ["Graph Theory in Lean", "Subgraphs", "Exercises"]}},
      "address": "/Subgraphs/"}],
+   "SimpleGraph.exists_isEulerian_trail_of_two_odd":
+   [{"id": "SimpleGraph___exists_isEulerian_trail_of_two_odd",
+     "data":
+     {"/Connectivity/#SimpleGraph___exists_isEulerian_trail_of_two_odd":
+      {"display": "exists_isEulerian_trail_of_two_odd",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Euler's Theorem"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.exists_isEulerian_of_isTrail":
+   [{"id": "SimpleGraph___exists_isEulerian_of_isTrail",
+     "data":
+     {"/Connectivity/#SimpleGraph___exists_isEulerian_of_isTrail":
+      {"display": "exists_isEulerian_of_isTrail",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Euler's Theorem"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.exists_isEulerian_isCircuit":
+   [{"id": "SimpleGraph___exists_isEulerian_isCircuit",
+     "data":
+     {"/Connectivity/#SimpleGraph___exists_isEulerian_isCircuit":
+      {"display": "exists_isEulerian_isCircuit",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Euler's Theorem"]}},
+     "address": "/Connectivity/"}],
+   "SimpleGraph.exists_isEulerian_iff":
+   [{"id": "SimpleGraph___exists_isEulerian_iff",
+     "data":
+     {"/Connectivity/#SimpleGraph___exists_isEulerian_iff":
+      {"display": "exists_isEulerian_iff",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Euler's Theorem"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.exists_isCircuit_of_even":
    [{"id": "SimpleGraph___exists_isCircuit_of_even",
      "data":
@@ -9097,6 +9248,17 @@
         "Subcubes of the Hypercube*",
         "Rigidity: Every Copy is Canonical"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.exists_closed_isEulerian":
+   [{"id": "SimpleGraph___exists_closed_isEulerian",
+     "data":
+     {"/Connectivity/#SimpleGraph___exists_closed_isEulerian":
+      {"display": "exists_closed_isEulerian",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Eulerian Circuits and Trails",
+        "Euler's Theorem"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.exists_aut_hypercubeHamming_of_adj'":
    [{"id": "SimpleGraph___exists_aut_hypercubeHamming_of_adj___",
      "data":
@@ -9112,28 +9274,6 @@
       {"display": "exists_aut_hypercubeHamming_of_adj",
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.exists_apply_single_eq_add_single":
-   [{"id": "SimpleGraph___exists_apply_single_eq_add_single",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_apply_single_eq_add_single":
-      {"display": "exists_apply_single_eq_add_single",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.exists_apply_eq_add_extendEmb":
-   [{"id": "SimpleGraph___exists_apply_eq_add_extendEmb",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___exists_apply_eq_add_extendEmb":
-      {"display": "exists_apply_eq_add_extendEmb",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
      "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.exists_adj_notMem_of_matchingNum_eq_top'":
    [{"id": "SimpleGraph___exists_adj_notMem_of_matchingNum_eq_top___",
@@ -9157,7 +9297,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.even_degree_of_isVertexTransitive'":
@@ -9195,7 +9335,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.encode":
@@ -9212,14 +9352,14 @@
    "SimpleGraph.egirth_petersenGraph":
    [{"id": "SimpleGraph___egirth_petersenGraph",
      "data":
-     {"/Distance/#SimpleGraph___egirth_petersenGraph":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___egirth_petersenGraph":
       {"display": "egirth_petersenGraph",
        "context":
        ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.egirth_mycielskian_eq_four":
    [{"id": "SimpleGraph___egirth_mycielskian_eq_four",
      "data":
@@ -9229,7 +9369,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.egirth_mycielskian_eq_five":
    [{"id": "SimpleGraph___egirth_mycielskian_eq_five",
@@ -9240,7 +9380,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.egirth_le_edist_add_edist_add_two":
    [{"id": "SimpleGraph___egirth_le_edist_add_edist_add_two",
@@ -9250,7 +9390,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.egirth_hypercube":
@@ -9262,8 +9402,19 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Hypercube"]}},
+        "Girth of the Hypercube"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.egirth_hoffmanSingletonGraph":
+   [{"id": "SimpleGraph___egirth_hoffmanSingletonGraph",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___egirth_hoffmanSingletonGraph":
+      {"display": "egirth_hoffmanSingletonGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.egirth_cycleGraph":
    [{"id": "SimpleGraph___egirth_cycleGraph",
      "data":
@@ -9284,7 +9435,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of Complete Bipartite Graphs"]}},
+        "Girth of Complete Bipartite Graphs"]}},
      "address": "/Distance/"}],
    "SimpleGraph.edist_subcubeCopy":
    [{"id": "SimpleGraph___edist_subcubeCopy",
@@ -9359,20 +9510,19 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Short Cycles Between Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.ediam_petersenGraph":
    [{"id": "SimpleGraph___ediam_petersenGraph",
      "data":
-     {"/Distance/#SimpleGraph___ediam_petersenGraph":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___ediam_petersenGraph":
       {"display": "ediam_petersenGraph",
        "context":
        ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.ediam_pathNat":
    [{"id": "SimpleGraph___ediam_pathNat",
      "data":
@@ -9405,6 +9555,17 @@
         "Eccentricity, Diameter and Radius",
         "Diameter and Radius of the Hypercube"]}},
      "address": "/Distance/"}],
+   "SimpleGraph.ediam_hoffmanSingletonGraph":
+   [{"id": "SimpleGraph___ediam_hoffmanSingletonGraph",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___ediam_hoffmanSingletonGraph":
+      {"display": "ediam_hoffmanSingletonGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.ediam_cycleGraph":
    [{"id": "SimpleGraph___ediam_cycleGraph",
      "data":
@@ -9522,7 +9683,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.diam_pathNat":
@@ -9932,17 +10093,6 @@
        "context":
        ["Graph Theory in Lean", "Cliques", "The Finset of n-Cliques"]}},
      "address": "/Cliques/"}],
-   "SimpleGraph.cycleGraph_four_free_petersenGraph":
-   [{"id": "SimpleGraph___cycleGraph_four_free_petersenGraph",
-     "data":
-     {"/Distance/#SimpleGraph___cycleGraph_four_free_petersenGraph":
-      {"display": "cycleGraph_four_free_petersenGraph",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.cycleGraph_four_free_mycielskian":
    [{"id": "SimpleGraph___cycleGraph_four_free_mycielskian",
      "data":
@@ -9952,14 +10102,18 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.cycleGraph_four_free_iff_common_neighbor_unique":
    [{"id": "SimpleGraph___cycleGraph_four_free_iff_common_neighbor_unique",
      "data":
      {"/Distance/#SimpleGraph___cycleGraph_four_free_iff_common_neighbor_unique":
       {"display": "cycleGraph_four_free_iff_common_neighbor_unique",
-       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Girth",
+        "Excluding Short Cycles"]}},
      "address": "/Distance/"}],
    "SimpleGraph.cycleGraph.rotate":
    [{"id": "SimpleGraph___cycleGraph___rotate",
@@ -10026,28 +10180,6 @@
         "Algebraic Graph Theory",
         "Subcubes of the Hypercube*",
         "Every Copy is Induced"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.copy_apply_eq_add_extendEmb_of_single":
-   [{"id": "SimpleGraph___copy_apply_eq_add_extendEmb_of_single",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_apply_eq_add_extendEmb_of_single":
-      {"display": "copy_apply_eq_add_extendEmb_of_single",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.copy_apply_eq_add_add":
-   [{"id": "SimpleGraph___copy_apply_eq_add_add",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___copy_apply_eq_add_add":
-      {"display": "copy_apply_eq_add_add",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "Subcubes of the Hypercube*",
-        "Rigidity: Every Copy is Canonical"]}},
      "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.copyTopEquiv'":
    [{"id": "SimpleGraph___copyTopEquiv___",
@@ -10464,11 +10596,11 @@
         "Partial Colourings*",
         "Building Partial Colourings"]}},
      "address": "/Subgraphs/"}],
-   "SimpleGraph.colorableOn_of_cliqueFree":
-   [{"id": "SimpleGraph___colorableOn_of_cliqueFree",
+   "SimpleGraph.colorableOn_of_cliqueFree_of_degree_le":
+   [{"id": "SimpleGraph___colorableOn_of_cliqueFree_of_degree_le",
      "data":
-     {"/Connectivity/#SimpleGraph___colorableOn_of_cliqueFree":
-      {"display": "colorableOn_of_cliqueFree",
+     {"/Connectivity/#SimpleGraph___colorableOn_of_cliqueFree_of_degree_le":
+      {"display": "colorableOn_of_cliqueFree_of_degree_le",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
@@ -10799,18 +10931,11 @@
      "data":
      {"/Distance/#SimpleGraph___cliqueFree_three_iff_free_cycleGraph":
       {"display": "cliqueFree_three_iff_free_cycleGraph",
-       "context": ["Graph Theory in Lean", "Distance", "Girth"]}},
-     "address": "/Distance/"}],
-   "SimpleGraph.cliqueFree_petersenGraph_three":
-   [{"id": "SimpleGraph___cliqueFree_petersenGraph_three",
-     "data":
-     {"/Distance/#SimpleGraph___cliqueFree_petersenGraph_three":
-      {"display": "cliqueFree_petersenGraph_three",
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
+        "Girth",
+        "Excluding Short Cycles"]}},
      "address": "/Distance/"}],
    "SimpleGraph.cliqueFree_paleyGraph_seventeen_four'":
    [{"id": "SimpleGraph___cliqueFree_paleyGraph_seventeen_four___",
@@ -10973,17 +11098,6 @@
         "Algebraic Constructions",
         "Cayley Graphs"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.card_petersenGraph":
-   [{"id": "SimpleGraph___card_petersenGraph",
-     "data":
-     {"/Distance/#SimpleGraph___card_petersenGraph":
-      {"display": "card_petersenGraph",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.card_mycielskianVert_one":
    [{"id": "SimpleGraph___card_mycielskianVert_one",
      "data":
@@ -11037,7 +11151,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Moore Bound"]}},
      "address": "/Distance/"}],
    "SimpleGraph.card_le_mul_card_of_adj":
@@ -11048,7 +11162,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Counting Between Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.card_layer_le":
@@ -11059,7 +11173,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Moore Bound"]}},
      "address": "/Distance/"}],
    "SimpleGraph.card_layer_add_two_le":
@@ -11070,7 +11184,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Moore Bound"]}},
      "address": "/Distance/"}],
    "SimpleGraph.card_image_left_union_image_right":
@@ -11290,7 +11404,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "The Cage Bound for Odd Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.cage_bound_even":
@@ -11301,8 +11415,8 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
-        "The Cage Bound for Even Girth*"]}},
+        "Moore and Cage Bounds*",
+        "The Cage Bound for Even Girth"]}},
      "address": "/Distance/"}],
    "SimpleGraph.brooks_two":
    [{"id": "SimpleGraph___brooks_two",
@@ -11315,17 +11429,6 @@
         "Brooks' Theorem*",
         "Maximum Degree Two"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.brooks_general":
-   [{"id": "SimpleGraph___brooks_general",
-     "data":
-     {"/Connectivity/#SimpleGraph___brooks_general":
-      {"display": "brooks_general",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Brooks' Theorem*",
-        "Brooks' Theorem Full Version"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.brooks":
    [{"id": "SimpleGraph___brooks",
      "data":
@@ -11335,8 +11438,7 @@
        ["Graph Theory in Lean",
         "Connectivity",
         "Brooks' Theorem*",
-        "Maximum Degree at Least Three",
-        "Completing the Proof"]}},
+        "Brooks' Theorem Full Version"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.boxProdDecidableRelAdj":
    [{"id": "SimpleGraph___boxProdDecidableRelAdj",
@@ -11371,16 +11473,6 @@
       {"display": "botComponentEquiv",
        "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.boolVec_add_add_cancel":
-   [{"id": "SimpleGraph___boolVec_add_add_cancel",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___boolVec_add_add_cancel":
-      {"display": "boolVec_add_add_cancel",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.boolVecEquivFinset_add_single":
    [{"id": "SimpleGraph___boolVecEquivFinset_add_single",
      "data":
@@ -11579,11 +11671,11 @@
         "Automorphism Groups",
         "Automorphisms of the Infinite Path"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.aut_eq_id_of_fix_zero_and_singles":
-   [{"id": "SimpleGraph___aut_eq_id_of_fix_zero_and_singles",
+   "SimpleGraph.aut_hypercubeHamming_eq_id_of_fix_zero_and_singles":
+   [{"id": "SimpleGraph___aut_hypercubeHamming_eq_id_of_fix_zero_and_singles",
      "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___aut_eq_id_of_fix_zero_and_singles":
-      {"display": "aut_eq_id_of_fix_zero_and_singles",
+     {"/Algebraic-Graph-Theory/#SimpleGraph___aut_hypercubeHamming_eq_id_of_fix_zero_and_singles":
+      {"display": "aut_hypercubeHamming_eq_id_of_fix_zero_and_singles",
        "context":
        ["Graph Theory in Lean",
         "Algebraic Graph Theory",
@@ -11715,17 +11807,6 @@
        "context":
        ["Graph Theory in Lean", "Algebraic Graph Theory", "Exercises"]}},
      "address": "/Algebraic-Graph-Theory/"}],
-   "SimpleGraph.apply_eq_true_iff_hammingDist_lt":
-   [{"id": "SimpleGraph___apply_eq_true_iff_hammingDist_lt",
-     "data":
-     {"/Algebraic-Graph-Theory/#SimpleGraph___apply_eq_true_iff_hammingDist_lt":
-      {"display": "apply_eq_true_iff_hammingDist_lt",
-       "context":
-       ["Graph Theory in Lean",
-        "Algebraic Graph Theory",
-        "The Automorphism Group of the Hypercube*",
-        "Rigidity"]}},
-     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.adj_mem_walkComponent":
    [{"id": "SimpleGraph___adj_mem_walkComponent",
      "data":
@@ -11818,6 +11899,17 @@
         "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
         "Pósa Rotations"]}},
      "address": "/Walks/"}],
+   "SimpleGraph.Walk.notMem_support_of_length_eq_edist":
+   [{"id": "SimpleGraph___Walk___notMem_support_of_length_eq_edist",
+     "data":
+     {"/Distance/#SimpleGraph___Walk___notMem_support_of_length_eq_edist":
+      {"display": "Walk.notMem_support_of_length_eq_edist",
+       "context":
+       ["Graph Theory in Lean",
+        "Distance",
+        "Moore and Cage Bounds*",
+        "Short Cycles Between Layers"]}},
+     "address": "/Distance/"}],
    "SimpleGraph.Walk.none_notMem_support_mycielskianZigZag":
    [{"id": "SimpleGraph___Walk___none_notMem_support_mycielskianZigZag",
      "data":
@@ -11932,14 +12024,14 @@
    "SimpleGraph.Walk.length_takeUntil_append_append_dropUntil":
    [{"id": "SimpleGraph___Walk___length_takeUntil_append_append_dropUntil",
      "data":
-     {"/Connectivity/#SimpleGraph___Walk___length_takeUntil_append_append_dropUntil":
-      {"display": "length_takeUntil_append_append_dropUntil",
+     {"/Walks/#SimpleGraph___Walk___length_takeUntil_append_append_dropUntil":
+      {"display": "Walk.length_takeUntil_append_append_dropUntil",
        "context":
        ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Extending Trails"]}},
-     "address": "/Connectivity/"}],
+        "Walks",
+        "Trails, Paths, Circuits and Cycles",
+        "Circuits and Cycles"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.Walk.length_posaRotate":
    [{"id": "SimpleGraph___Walk___length_posaRotate",
      "data":
@@ -12119,50 +12211,6 @@
       {"display": "Walk.exists_isMaximumPath",
        "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.Walk.exists_isEulerian_trail_of_two_odd":
-   [{"id": "SimpleGraph___Walk___exists_isEulerian_trail_of_two_odd",
-     "data":
-     {"/Connectivity/#SimpleGraph___Walk___exists_isEulerian_trail_of_two_odd":
-      {"display": "exists_isEulerian_trail_of_two_odd",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Euler's Theorem"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.Walk.exists_isEulerian_of_isTrail":
-   [{"id": "SimpleGraph___Walk___exists_isEulerian_of_isTrail",
-     "data":
-     {"/Connectivity/#SimpleGraph___Walk___exists_isEulerian_of_isTrail":
-      {"display": "exists_isEulerian_of_isTrail",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Euler's Theorem"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.Walk.exists_isEulerian_iff":
-   [{"id": "SimpleGraph___Walk___exists_isEulerian_iff",
-     "data":
-     {"/Connectivity/#SimpleGraph___Walk___exists_isEulerian_iff":
-      {"display": "exists_isEulerian_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Euler's Theorem"]}},
-     "address": "/Connectivity/"}],
-   "SimpleGraph.Walk.exists_isEulerian_circuit":
-   [{"id": "SimpleGraph___Walk___exists_isEulerian_circuit",
-     "data":
-     {"/Connectivity/#SimpleGraph___Walk___exists_isEulerian_circuit":
-      {"display": "exists_isEulerian_circuit",
-       "context":
-       ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Euler's Theorem"]}},
-     "address": "/Connectivity/"}],
    "SimpleGraph.Walk.exists_cross_adj'":
    [{"id": "SimpleGraph___Walk___exists_cross_adj___",
      "data":
@@ -12230,8 +12278,8 @@
        "context":
        ["Graph Theory in Lean",
         "Walks",
-        "Hamiltonian Graphs: Ore, Dirac and Bondy–Chvátal*",
-        "Pósa Rotations"]}},
+        "Trails, Paths, Circuits and Cycles",
+        "Circuits and Cycles"]}},
      "address": "/Walks/"}],
    "SimpleGraph.Walk.concat_copy":
    [{"id": "SimpleGraph___Walk___concat_copy",
@@ -12244,14 +12292,14 @@
    "SimpleGraph.Walk.IsTrail.takeUntil_append_append_dropUntil":
    [{"id": "SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil",
      "data":
-     {"/Connectivity/#SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil":
-      {"display": "IsTrail.takeUntil_append_append_dropUntil",
+     {"/Walks/#SimpleGraph___Walk___IsTrail___takeUntil_append_append_dropUntil":
+      {"display": "Walk.IsTrail.takeUntil_append_append_dropUntil",
        "context":
        ["Graph Theory in Lean",
-        "Connectivity",
-        "Eulerian Circuits and Trails",
-        "Extending Trails"]}},
-     "address": "/Connectivity/"}],
+        "Walks",
+        "Trails, Paths, Circuits and Cycles",
+        "Circuits and Cycles"]}},
+     "address": "/Walks/"}],
    "SimpleGraph.Walk.IsTrail.length_le_of_toSubgraph_le'":
    [{"id": "SimpleGraph___Walk___IsTrail___length_le_of_toSubgraph_le___",
      "data":
@@ -12799,11 +12847,7 @@
      "data":
      {"/Subgraphs/#SimpleGraph___Subgraph___isPerfectMatching_top_iff":
       {"display": "Subgraph.isPerfectMatching_top_iff",
-       "context":
-       ["Graph Theory in Lean",
-        "Subgraphs",
-        "Matching Number",
-        "Matching Number of the Hypercube"]}},
+       "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
      "address": "/Subgraphs/"}],
    "SimpleGraph.Subgraph.isMatching_bot":
    [{"id": "SimpleGraph___Subgraph___isMatching_bot",
@@ -12815,14 +12859,21 @@
    "SimpleGraph.Subgraph.homOfMapLE":
    [{"id": "SimpleGraph___Subgraph___homOfMapLE",
      "data":
-     {"/Connectivity/#SimpleGraph___Subgraph___homOfMapLE":
-      {"display": "_root_.SimpleGraph.Subgraph.homOfMapLE",
+     {"/Subgraphs/#SimpleGraph___Subgraph___homOfMapLE":
+      {"display": "Subgraph.homOfMapLE",
+       "context": ["Graph Theory in Lean", "Subgraphs", "Maps and Comaps"]}},
+     "address": "/Subgraphs/"}],
+   "SimpleGraph.Subgraph.deleteVerts_adj'":
+   [{"id": "SimpleGraph___Subgraph___deleteVerts_adj___",
+     "data":
+     {"/Subgraphs/#SimpleGraph___Subgraph___deleteVerts_adj___":
+      {"display": "Subgraph.deleteVerts_adj'",
        "context":
        ["Graph Theory in Lean",
-        "Connectivity",
-        "Cut Vertices and Blocks*",
-        "Blocks as a Quotient of Edges"]}},
-     "address": "/Connectivity/"}],
+        "Subgraphs",
+        "Constructing Subgraphs",
+        "Deleting Vertices and Edges"]}},
+     "address": "/Subgraphs/"}],
    "SimpleGraph.Subgraph.comap_mycielskianLeft":
    [{"id": "SimpleGraph___Subgraph___comap_mycielskianLeft",
      "data":
@@ -12834,17 +12885,17 @@
         "Maps and Comaps",
         "Subgraphs of Mycielskians"]}},
      "address": "/Subgraphs/"}],
-   "SimpleGraph.Subgraph.colorable_of_forall_adj":
-   [{"id": "SimpleGraph___Subgraph___colorable_of_forall_adj",
+   "SimpleGraph.Subgraph.colorable_spanningCoe_iff":
+   [{"id": "SimpleGraph___Subgraph___colorable_spanningCoe_iff",
      "data":
-     {"/Connectivity/#SimpleGraph___Subgraph___colorable_of_forall_adj":
-      {"display": "_root_.SimpleGraph.Subgraph.colorable_of_forall_adj",
+     {"/Subgraphs/#SimpleGraph___Subgraph___colorable_spanningCoe_iff":
+      {"display": "Subgraph.colorable_spanningCoe_iff",
        "context":
        ["Graph Theory in Lean",
-        "Connectivity",
-        "Cut Vertices and Blocks*",
-        "Blocks as a Quotient of Edges"]}},
-     "address": "/Connectivity/"}],
+        "Subgraphs",
+        "Subgraphs as Simple Graphs",
+        "Spanning Subgraphs"]}},
+     "address": "/Subgraphs/"}],
    "SimpleGraph.Subgraph.boxProdLeft":
    [{"id": "SimpleGraph___Subgraph___boxProdLeft",
      "data":
@@ -12959,6 +13010,13 @@
      "data":
      {"/Subgraphs/#SimpleGraph___Subgraph___IsMatching___eq_of_mem_edge":
       {"display": "Subgraph.IsMatching.eq_of_mem_edge",
+       "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
+     "address": "/Subgraphs/"}],
+   "SimpleGraph.Subgraph.IsMatching.adj_of_toEdge_eq":
+   [{"id": "SimpleGraph___Subgraph___IsMatching___adj_of_toEdge_eq",
+     "data":
+     {"/Subgraphs/#SimpleGraph___Subgraph___IsMatching___adj_of_toEdge_eq":
+      {"display": "Subgraph.IsMatching.adj_of_toEdge_eq",
        "context": ["Graph Theory in Lean", "Subgraphs", "Matching Number"]}},
      "address": "/Subgraphs/"}],
    "SimpleGraph.SplitsAt":
@@ -13397,6 +13455,28 @@
         "Algebraic Graph Theory",
         "Strongly Regular Graphs"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.IsSRGWith.hoffmanSingletonGraph":
+   [{"id": "SimpleGraph___IsSRGWith___hoffmanSingletonGraph",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___IsSRGWith___hoffmanSingletonGraph":
+      {"display": "IsSRGWith.hoffmanSingletonGraph",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
+   "SimpleGraph.IsSRGWith.five_le_egirth":
+   [{"id": "SimpleGraph___IsSRGWith___five_le_egirth",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___IsSRGWith___five_le_egirth":
+      {"display": "IsSRGWith.five_le_egirth",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.IsRegularOfDegree.two_mul_card_edgeFinset":
    [{"id": "SimpleGraph___IsRegularOfDegree___two_mul_card_edgeFinset",
      "data":
@@ -13408,17 +13488,6 @@
         "Degrees",
         "Regular Graphs"]}},
      "address": "/Decidability___-Finiteness-and-Degrees/"}],
-   "SimpleGraph.IsRegularOfDegree.petersenGraph":
-   [{"id": "SimpleGraph___IsRegularOfDegree___petersenGraph",
-     "data":
-     {"/Distance/#SimpleGraph___IsRegularOfDegree___petersenGraph":
-      {"display": "IsRegularOfDegree.petersenGraph",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Moore and Cage Bounds",
-        "Moore Graphs"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.IsRegularOfDegree.hypercube":
    [{"id": "SimpleGraph___IsRegularOfDegree___hypercube",
      "data":
@@ -14352,18 +14421,18 @@
       {"display": "HypercubeVert",
        "context": ["Graph Theory in Lean", "Constructions", "Hypercube"]}},
      "address": "/Constructions/"}],
-   "SimpleGraph.Hom.sigmaDesc'":
-   [{"id": "SimpleGraph___Hom___sigmaDesc___",
+   "SimpleGraph.Hom.sigmaElim'":
+   [{"id": "SimpleGraph___Hom___sigmaElim___",
      "data":
-     {"/Connectivity/#SimpleGraph___Hom___sigmaDesc___":
-      {"display": "Hom.sigmaDesc'",
+     {"/Connectivity/#SimpleGraph___Hom___sigmaElim___":
+      {"display": "Hom.sigmaElim'",
        "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Hom.sigmaDesc":
-   [{"id": "SimpleGraph___Hom___sigmaDesc",
+   "SimpleGraph.Hom.sigmaElim":
+   [{"id": "SimpleGraph___Hom___sigmaElim",
      "data":
-     {"/Connectivity/#SimpleGraph___Hom___sigmaDesc":
-      {"display": "Hom.sigmaDesc",
+     {"/Connectivity/#SimpleGraph___Hom___sigmaElim":
+      {"display": "Hom.sigmaElim",
        "context": ["Graph Theory in Lean", "Connectivity", "Exercises"]}},
      "address": "/Connectivity/"}],
    "SimpleGraph.Hom.mapMycielskian_id":
@@ -14413,6 +14482,17 @@
       {"display": "Hom.cliqueNum_le",
        "context": ["Graph Theory in Lean", "Cliques", "Clique Number"]}},
      "address": "/Cliques/"}],
+   "SimpleGraph.HoffmanSingletonVert":
+   [{"id": "SimpleGraph___HoffmanSingletonVert",
+     "data":
+     {"/Algebraic-Graph-Theory/#SimpleGraph___HoffmanSingletonVert":
+      {"display": "HoffmanSingletonVert",
+       "context":
+       ["Graph Theory in Lean",
+        "Algebraic Graph Theory",
+        "Strongly Regular Graphs",
+        "Moore Graphs of Diameter Two"]}},
+     "address": "/Algebraic-Graph-Theory/"}],
    "SimpleGraph.Graphic.exists_card_eq":
    [{"id": "SimpleGraph___Graphic___exists_card_eq",
      "data":
@@ -14554,7 +14634,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.EdgesFormMatching":
    [{"id": "SimpleGraph___EdgesFormMatching",
@@ -14565,7 +14645,7 @@
        ["Graph Theory in Lean",
         "Distance",
         "Girth",
-        "The Girth of the Mycielskian"]}},
+        "Girth of the Mycielskian"]}},
      "address": "/Distance/"}],
    "SimpleGraph.EdgeDisjointTriangles.card_cliqueFinset_lt":
    [{"id": "SimpleGraph___EdgeDisjointTriangles___card_cliqueFinset_lt",
@@ -14645,18 +14725,18 @@
    [{"id": "SimpleGraph___Connected___exists_isEulerian_trail",
      "data":
      {"/Connectivity/#SimpleGraph___Connected___exists_isEulerian_trail":
-      {"display": "_root_.SimpleGraph.Connected.exists_isEulerian_trail",
+      {"display": "Connected.exists_isEulerian_trail",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
         "Eulerian Circuits and Trails",
         "Euler's Theorem"]}},
      "address": "/Connectivity/"}],
-   "SimpleGraph.Connected.exists_isEulerian_circuit":
-   [{"id": "SimpleGraph___Connected___exists_isEulerian_circuit",
+   "SimpleGraph.Connected.exists_closed_isEulerian":
+   [{"id": "SimpleGraph___Connected___exists_closed_isEulerian",
      "data":
-     {"/Connectivity/#SimpleGraph___Connected___exists_isEulerian_circuit":
-      {"display": "_root_.SimpleGraph.Connected.exists_isEulerian_circuit",
+     {"/Connectivity/#SimpleGraph___Connected___exists_closed_isEulerian":
+      {"display": "Connected.exists_closed_isEulerian",
        "context":
        ["Graph Theory in Lean",
         "Connectivity",
@@ -14782,6 +14862,18 @@
         "Maximum Degree at Least Three",
         "Free Colours and Neighbours in a Set"]}},
      "address": "/Connectivity/"}],
+   "SimpleGraph.ColoringOn.exists_free_color":
+   [{"id": "SimpleGraph___ColoringOn___exists_free_color",
+     "data":
+     {"/Connectivity/#SimpleGraph___ColoringOn___exists_free_color":
+      {"display": "ColoringOn.exists_free_color",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Brooks' Theorem*",
+        "Maximum Degree at Least Three",
+        "Free Colours and Neighbours in a Set"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.ColoringOn.empty":
    [{"id": "SimpleGraph___ColoringOn___empty",
      "data":
@@ -14804,6 +14896,18 @@
         "Partial Colourings*",
         "Restricting and Copying Partial Colourings"]}},
      "address": "/Subgraphs/"}],
+   "SimpleGraph.ColoringOn.card_image_le_degIn":
+   [{"id": "SimpleGraph___ColoringOn___card_image_le_degIn",
+     "data":
+     {"/Connectivity/#SimpleGraph___ColoringOn___card_image_le_degIn":
+      {"display": "ColoringOn.card_image_le_degIn",
+       "context":
+       ["Graph Theory in Lean",
+        "Connectivity",
+        "Brooks' Theorem*",
+        "Maximum Degree at Least Three",
+        "Free Colours and Neighbours in a Set"]}},
+     "address": "/Connectivity/"}],
    "SimpleGraph.ColoringOn":
    [{"id": "SimpleGraph___ColoringOn",
      "data":
@@ -14943,7 +15047,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Albertson's Precolouring Extension Theorem*"]}},
+        "Albertson's Precolouring Extension Theorem"]}},
      "address": "/Distance/"}],
    "SimpleGraph.Colorable.boxProd":
    [{"id": "SimpleGraph___Colorable___boxProd",
@@ -15233,7 +15337,7 @@
        "context":
        ["Graph Theory in Lean",
         "Distance",
-        "Moore and Cage Bounds",
+        "Moore and Cage Bounds*",
         "Distance Layers"]}},
      "address": "/Distance/"}],
    "SimpleGraph.Adj.block_symm":
@@ -15293,6 +15397,17 @@
         "The Automorphism Group of the Hypercube*",
         "The Hyperoctahedral Group"]}},
      "address": "/Algebraic-Graph-Theory/"}],
+   "Finset.sum_card_filter_union":
+   [{"id": "Finset___sum_card_filter_union",
+     "data":
+     {"/Theorems/#Finset___sum_card_filter_union":
+      {"display": "_root_.Finset.sum_card_filter_union",
+       "context":
+       ["Graph Theory in Lean",
+        "Theorems",
+        "Turán's Theorem, Stability and Asymptotics",
+        "Füredi's Stability Theorem"]}},
+     "address": "/Theorems/"}],
    "Finset.mem_fiberProj":
    [{"id": "Finset___mem_fiberProj",
      "data":
@@ -15397,6 +15512,8 @@
    [{"id": "bib-zykov-1949", "data": null, "address": "/Bibliography/"}],
    "zarankiewicz-1951":
    [{"id": "bib-zarankiewicz-1951", "data": null, "address": "/Bibliography/"}],
+   "zajac-2018":
+   [{"id": "bib-zajac-2018", "data": null, "address": "/Bibliography/"}],
    "whitney-1932":
    [{"id": "bib-whitney-1932", "data": null, "address": "/Bibliography/"}],
    "vizing-1964":
@@ -15483,6 +15600,8 @@
    [{"id": "bib-erdos-gallai-1960", "data": null, "address": "/Bibliography/"}],
    "erdos-1970":
    [{"id": "bib-erdos-1970", "data": null, "address": "/Bibliography/"}],
+   "erdos-1959":
+   [{"id": "bib-erdos-1959", "data": null, "address": "/Bibliography/"}],
    "dirac-1952":
    [{"id": "bib-dirac-1952", "data": null, "address": "/Bibliography/"}],
    "diestel-kuhn-2003":

@@ -1621,7 +1621,7 @@ finite set `s`. We call this number `G.degIn s v`. We define it as the size of
 comes from Mathlib's double-counting library, so facts about `degIn` can be fed
 straight into Mathlib's double-counting lemmas. We prove a few simple lemmas about
 `degIn`, which we will use in [Brooks' Theorem*](#section-brooks-theorem), for the
-[Moore and Cage Bounds](#section-moore-and-cage-bounds), and in the proof of
+[Moore and Cage Bounds*](#section-moore-and-cage-bounds), and in the proof of
 [Füredi's Stability Theorem](#section-f-redi-s-stability-theorem).
 -/
 section degIn

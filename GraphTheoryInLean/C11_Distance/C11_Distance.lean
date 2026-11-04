@@ -11,23 +11,28 @@ import Mathlib.Combinatorics.SimpleGraph.Girth
 import Mathlib.Combinatorics.SimpleGraph.Diam
 namespace SimpleGraph
 /-!
-The *distance* between two vertices of a graph measures how far apart they are: it is
-the length of a shortest walk between them. In a connected graph it makes the vertex
-set into a metric space, and many important graph parameters are defined in terms of
-it: the *eccentricity* of a vertex as well as the *diameter* and *radius* of a graph.
-Distance is also closely related to the *girth*.
+The *distance* between two vertices of a graph is the length of a shortest walk
+between them. In a connected graph it makes the vertex set into a metric space, and
+many important graph parameters are defined in terms of it: the *eccentricity*
+(`eccent`) of a vertex as well as the *diameter* (`diam`, `ediam`) and *radius*
+(`radius`) of a graph. Distance is also closely related to the *girth* (`girth`,
+`egirth`).
 
 In this chapter we introduce Mathlib's distance `edist` and its basic properties,
 and show that the distance in the hypercube `Q[n]` is the Hamming distance. We study
 eccentricity, diameter and radius, with vertex-transitive graphs, the hypercube and
-the Mycielskian as examples. We then focus on girth, which we compute for cycle
-graphs, complete bipartite graphs, hypercubes and Mycielskians.
+the Mycielskian as examples. As an application of distance to colouring we prove
+*Albertson's theorem*: a precolouring of vertices that are pairwise far apart extends
+to a colouring with one extra colour (`Colorable.extend_precoloring`). We then focus
+on girth, which we compute for complete bipartite graphs, cycle graphs, hypercubes
+and Mycielskians.
 
-Counting the vertices in the distance layers around a vertex gives the *Moore bound*
-and the *cage bound*, which relate the number of vertices of a graph to its degrees,
-diameter and girth. The Petersen graph shows that both bounds can be attained.
-Finally we prove *Albertson's theorem*: a precolouring of vertices that are pairwise
-far apart extends to a colouring with one extra colour.
+The final section looks at counting vertices in the distance layers from a fixed
+vertex. This gives the *Moore bound* (`moore_bound`) and the *cage bound*
+(`cage_bound_odd`, `cage_bound_even`), which relate the number of vertices of a graph
+to its degrees, diameter and girth. Complete graphs and odd cycles show that both
+bounds can be attained. Rarer examples, the Petersen graph and the Hoffman–Singleton
+graph, appear in [Algebraic Graph Theory](#chapter-algebraic-graph-theory).
 
 # Graph Distance
 
@@ -103,7 +108,7 @@ distances. Consequently a graph isomorphism preserves distances. Mathlib has bot
 facts, as `Hom.edist_le` and `Iso.edist_eq`, and we will use them repeatedly: to
 show that automorphisms preserve eccentricities, and in
 [Algebraic Graph Theory](#chapter-algebraic-graph-theory) to transport the
-distance between two constructions of the hypercube. Both are easy to prove.
+distance between two constructions of the hypercube.
 -/
 example {W : Type*} {H : SimpleGraph W} (e : G →g H) (u v : V) :
     H.edist (e u) (e v) ≤ G.edist u v := e.edist_le ..
@@ -117,12 +122,11 @@ example {W : Type*} {H : SimpleGraph W} (e : G ≃g H) (u v : V) :
 /-!
 ## Distance in Box Products
 
-The distance in a box product is the sum of the distances in its two factors: a walk
-in `G □ H` moves in one coordinate at a time, so it projects to a walk in each
-factor, and conversely walks in the two factors lift to walks in `G □ H` that can be
-appended. Mathlib records this as `edist_boxProd`. Together with the distance in a
-complete graph, `edist_top`, it will let us compute distances in the hypercube,
-which we defined as an iterated box product (`hypercube`).
+The distance in a box product is the sum of the distances in its two factors
+(`edist_boxProd`): a walk in `G □ H` moves in one coordinate at a time, so it
+projects to a walk in each factor, and conversely walks in the two factors lift to
+walks in `G □ H` that can be appended. In order to use this in our hypercube
+construction `Q[n]` we also need distances in a complete graph (`edist_top`).
 -/
 #check edist_boxProd  -- (G □ H).edist x y = G.edist x.1 y.1 + H.edist x.2 y.2
 #check edist_top      -- (⊤ : SimpleGraph V).edist u v = if u = v then 0 else 1
@@ -130,13 +134,13 @@ which we defined as an iterated box product (`hypercube`).
 /-!
 ## Distance in the Hypercube
 
-As an application we compute the distance in the hypercube `Q[n]`. By definition
-`Q[n + 1]` is the box product `Q[n] □ ⊤` of `Q[n]` with the complete graph on `Bool`
-(`hypercube_succ`). So the box product formula `edist_boxProd` splits the distance in
-`Q[n + 1]` into the distance in `Q[n]` plus the distance in `⊤`. The latter is `0` or
-`1` according to whether the last coordinates agree (`edist_top`). This is
-exactly the recursion defining the Hamming distance `HypercubeVert.hammingDist`, so
-by induction the graph distance *is* the Hamming distance.
+By definition `Q[n + 1]` is the box product `Q[n] □ ⊤` of `Q[n]` with the complete
+graph on `Bool` (`hypercube_succ`). So the box product formula `edist_boxProd` splits
+the distance in `Q[n + 1]` into the distance in `Q[n]` plus the distance in `⊤`. The
+latter is `0` or `1` according to whether the last coordinates agree (`edist_top`).
+This is exactly the recursion defining the Hamming distance
+`HypercubeVert.hammingDist`, so by induction the graph distance *is* the Hamming
+distance.
 -/
 lemma edist_eq_hammingDist {n : ℕ} {u v : HypercubeVert n} :
     Q[n].edist u v = u.hammingDist v := by
@@ -237,8 +241,8 @@ lemma diam_pathNat : pathNat.diam = 0 :=
 /-!
 The radius is at most the diameter, provided that there is at least one vertex: a
 graph with no vertices has radius `⊤`, an infimum over no vertices, but diameter
-`0`. And the diameter is at most twice the radius (by the triangle inequality via a
-central vertex).
+`0`, a supremum over no vertices. And the diameter is at most twice the radius (by
+the triangle inequality via a central vertex).
 -/
 #check SimpleGraph.radius_le_eccent         -- G.radius ≤ G.eccent u
 #check SimpleGraph.radius_le_ediam          -- [Nonempty α] : G.radius ≤ G.ediam
@@ -303,7 +307,7 @@ write each diameter as a single supremum over pairs of vertices (`ediam_def`) an
 -/
 lemma ediam_boxProd {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β}
     [Nonempty α] [Nonempty β] : (G □ H).ediam = G.ediam + H.ediam := by
-  refine le_antisymm (ediam_le_of_edist_le fun x y => ?_) ?_
+  refine (ediam_le_of_edist_le fun x y => ?_).antisymm ?_
   · rw [edist_boxProd]
     exact add_le_add edist_le_ediam edist_le_ediam
   · rw [ediam_def, ediam_def]
@@ -316,8 +320,8 @@ lemma ediam_boxProd {α β : Type*} {G : SimpleGraph α} {H : SimpleGraph β}
 Diameters add under box products (`ediam_boxProd`) and the complete graph on `Bool`
 has diameter `1` (`ediam_top`), so by induction the diameter of `Q[n]` is `n`. The
 base case is the one-vertex graph `Q[0]`, whose diameter is `0`
-(`ediam_eq_zero_of_subsingleton`); we gave `HypercubeVert 0` a `Subsingleton`
-instance, `hypercubeZeroSubsingleton`.
+(`ediam_eq_zero_of_subsingleton`), conveniently we already gave `HypercubeVert 0` a
+`Subsingleton` instance, `hypercubeZeroSubsingleton`.
 -/
 lemma ediam_hypercube {n : ℕ} : Q[n].ediam = n := by
   induction n with
@@ -390,6 +394,70 @@ theorem diam_mycielskian_le_four : mμ(G).diam ≤ 4 := by
       rcases x with _ | x | x <;> simp_all [IsIsolated]
 
 /-!
+# Albertson's Precolouring Extension Theorem
+
+Albertson's precolouring extension theorem
+[Albertson 1998](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-albertson-1998)
+says that if `G` is `k`-colourable and `s` is a set of vertices that are pairwise at
+distance at least `4`, then any assignment `f : s → Fin (k + 1)` of colours to the
+vertices of `s` extends to a proper `(k + 1)`-colouring of `G`. (In general a
+*precolouring* must be a proper colouring of the subgraph induced by `s`, but here no
+two vertices of `s` are adjacent, so every assignment of colours is allowed.)
+
+The hypothesis is stated with `edist`. Had we written `4 ≤ G.dist u w` instead, the
+junk value `0` for unreachable pairs would forbid precoloured vertices in different
+components, giving a strictly weaker theorem.
+
+Take any `k`-colouring `c` of `G`, so the extra colour `Fin.last k` is unused. Build
+the extension `c₁` by recolouring only near `s`: every `w ∈ s` gets its target colour
+`f w`, and whenever `f w` is one of the original `k` colours, each neighbour of `w`
+that already used that colour is swapped to the spare colour `Fin.last k`. The
+distance hypothesis guarantees that the recoloured neighbourhoods of distinct
+vertices of `s` are non-adjacent (any edge between them would give a walk of length
+`≤ 3` between two vertices of `s`), so no new monochromatic edge is created.
+-/
+theorem Colorable.extend_precoloring {k : ℕ} (hk : G.Colorable k) {s : Set V}
+    (hs : s.Pairwise fun u w ↦ 4 ≤ G.edist u w) (f : s → Fin (k + 1)) :
+    ∃ C : G.Coloring (Fin (k + 1)), ∀ w : s, C w = f w := by
+  classical
+  obtain ⟨c⟩ := hk
+  -- Two vertices of `s` joined by a walk of length at most `3` are equal; we use
+  -- this for walks of length `1`, `2` and `3`.
+  have close {a b : V} (ha : a ∈ s) (hb : b ∈ s) (p : G.Walk a b)
+      (hp : p.length ≤ 3) : a = b := by
+    by_contra hne
+    have := (hs ha hb hne).trans (edist_le p)
+    grind [Nat.cast_le.mp this]
+  have h1 {a b : V} (ha : a ∈ s) (hb : b ∈ s) (h : G.Adj a b) : False :=
+    h.ne (close ha hb (cons h nil) (by simp))
+  have h2 {a b x : V} (ha : a ∈ s) (hb : b ∈ s) (h₁ : G.Adj a x) (h₂ : G.Adj x b) :
+      a = b := close ha hb (cons h₁ (cons h₂ nil)) (by simp)
+  have h3 {a b x y : V} (ha : a ∈ s) (hb : b ∈ s) (h₁ : G.Adj a x)
+      (h₂ : G.Adj x y) (h₃ : G.Adj y b) : a = b :=
+    close ha hb (cons h₁ (cons h₂ (cons h₃ nil))) (by simp)
+  -- `P v`: a neighbour `w ∈ s` of `v` has target colour `f w` equal to `c v`.
+  let P (v : V) : Prop := ∃ w : s, G.Adj w v ∧ f w = (c v).castSucc
+  -- A vertex `v ∈ s` gets its target colour `f v`. Any other `v` gets the spare
+  -- colour `Fin.last k` if `P v` holds, and otherwise keeps its colour `c v` (cast
+  -- into `Fin (k + 1)`).
+  let c₁ : V → Fin (k + 1) := fun v ↦
+    if hv : v ∈ s then f ⟨v, hv⟩ else if P v then Fin.last k else (c v).castSucc
+  refine ⟨Coloring.mk c₁ fun {x y} hxy => ?_, fun w => by simp [c₁, Coloring.mk]⟩
+  simp only [c₁, P]
+  split_ifs <;> grind [c.valid hxy, Adj.symm]
+
+/-!
+Distance at least `4` cannot be replaced by `3`. Take `K[3, 3]` and attach a pendant
+vertex to each of its six vertices; the pendants are pairwise at distance at least
+`3`. On each side, colour the three pendants `0`, `1` and `2`, so the vertices on
+that side can only use the colours `{1, 2}`, `{0, 2}` and `{0, 1}` respectively. No
+colour is available to all three, so each side needs to use at least two colours; but
+the two sides of `K[3, 3]` need disjoint sets of colours, which is impossible with
+three colours. The graph is bipartite, so this precolouring of a `2`-colourable graph
+does not extend to a `3`-colouring.
+
+[Figure: $K_{3,3}$ with a precoloured pendant at each vertex, and the colours still available to each vertex of $K_{3,3}$](https://jt496.github.io/GraphTheoryInLean/figures/precolouring_k33.svg)
+
 # Girth
 
 The *girth* of a graph is the length of its shortest cycle. Mathlib again provides
@@ -397,7 +465,7 @@ two versions: `G.egirth : ℕ∞`, which is `⊤` for an acyclic graph, and `G.g
 which is `0` for an acyclic graph. Girth is the natural counterpart of the diameter:
 if the maximum degree is bounded, small diameter forces *few* vertices, while if the
 minimum degree is bounded below, large girth forces *many* vertices. These are the
-Moore and cage bounds of [Moore and Cage Bounds](#section-moore-and-cage-bounds).
+Moore and cage bounds of [Moore and Cage Bounds*](#section-moore-and-cage-bounds).
 Girth also enters the Mycielski construction: `mμ(G)` raises the chromatic number
 (`chromaticNumber_mycielskian`) while staying triangle-free
 (`CliqueFree.mycielskian`), and below we compute its girth exactly.
@@ -445,6 +513,8 @@ preserve the girth.
 #check Iso.egirth_eq                   -- G ≃g H → G.egirth = H.egirth
 
 /-!
+## Excluding Short Cycles
+
 A graph has no cycle of length at most `k` exactly when it contains no copy of `C[n]`
 for `3 ≤ n ≤ k`, i.e. when it is `C[n]`-free (in the sense of `Free`). Mathlib's
 `cycleGraph_isContained_iff` says that `G` contains a copy of `C[n]` (for `n ≥ 3`)
@@ -469,8 +539,8 @@ lemma cliqueFree_three_iff_free_cycleGraph : G.CliqueFree 3 ↔ C[3].Free G := b
   rw [cycleGraph_three_eq_top, cliqueFree_iff_free_top_fin]
 
 /-!
-So a triangle-free graph has girth at least `4`, and if it also contains no copy of
-`C[4]` then its girth is at least `5`.
+So a triangle-free graph has girth at least `4`, and if it is also `C[4]`-free then
+its girth is at least `5`.
 -/
 lemma four_le_egirth_of_cliqueFree_three (h : G.CliqueFree 3) : 4 ≤ G.egirth :=
   le_egirth_of_free fun n h3 hn => by
@@ -484,12 +554,12 @@ lemma five_le_egirth_of_cliqueFree_three_of_free (h3 : G.CliqueFree 3)
     exacts [cliqueFree_three_iff_free_cycleGraph.mp h3, h4]
 
 /-!
-A graph `G` contains no `4`-cycle exactly when any two distinct vertices have at most
-one common neighbour. If distinct vertices `x` and `y` had two distinct common
-neighbours `u` and `v`, then `x`, `u`, `y` and `v` would be four distinct vertices
-(adjacent vertices are distinct), so `![x, u, y, v]` would be a copy of `C[4]`.
-Conversely, a copy `f` of `C[4]` gives distinct vertices `f 0` and `f 2` with two
-distinct common neighbours `f 1` and `f 3`.
+A graph `G` is `C[4].Free` precisely when any two distinct vertices have at most one
+common neighbour. If distinct vertices `x` and `y` had two distinct common neighbours
+`u` and `v`, then `x`, `u`, `y` and `v` would be four distinct vertices (adjacent
+vertices are distinct), so `![x, u, y, v]` would be a copy of `C[4]`. Conversely, a
+copy `f` of `C[4]` gives distinct vertices `f 0` and `f 2` with two distinct common
+neighbours `f 1` and `f 3`.
 -/
 lemma cycleGraph_four_free_iff_common_neighbor_unique :
     C[4].Free G ↔
@@ -511,30 +581,53 @@ lemma cycleGraph_four_free_iff_common_neighbor_unique :
     exact absurd (f.injective heq) (by decide)
 
 /-!
+## Girth of Complete Bipartite Graphs
+
+A bipartite graph is triangle-free, so its girth is at least `4`. When both sides
+have at least two vertices, the complete bipartite graph contains a copy of `C[4]`:
+the vertices `Sum.inl 0` and `Sum.inl 1` have the two common neighbours `Sum.inr 0`
+and `Sum.inr 1`, so `cycleGraph_four_free_iff_common_neighbor_unique` applies. A
+graph containing a copy of `H` has girth at most that of `H` (Mathlib's
+`IsContained.egirth_le`), and `C[4]` has girth at most `4`, since it contains the
+cycle `cycleGraph.cycle 1` of length `4` (`cycleGraph.isCycle_cycle`). So the girth
+is exactly `4`.
+-/
+lemma egirth_completeBipartiteGraph (s t : ℕ) : K[s + 2, t + 2].egirth = 4 := by
+  -- bipartite, so triangle-free
+  have h2 : K[s + 2, t + 2].Colorable 2 :=
+    (completeBipartiteGraph.bicoloring _ _).colorable
+  have h3 : K[s + 2, t + 2].CliqueFree 3 := h2.cliqueFree (by norm_num)
+  -- `.inl 0` and `.inl 1` have the two common neighbours `.inr 0` and `.inr 1`
+  -- (the four adjacencies and `.inl 0 ≠ .inl 1` are checked by `simp`)
+  have h4 : C[4] ⊑ K[s + 2, t + 2] := not_free.mp fun h => by
+    simpa using cycleGraph_four_free_iff_common_neighbor_unique.mp h
+      (.inl 0) (.inl 1) (.inr 0) (.inr 1) (by simp) (by simp) (by simp) (by simp)
+      (by simp)
+  refine (four_le_egirth_of_cliqueFree_three h3).antisymm' <| h4.egirth_le.trans ?_
+  simpa using (cycleGraph.isCycle_cycle (n := 1)).egirth_le_length
+
+/-!
 ## Girth and Diameter of Cycle Graphs
 
 The cycle graph `C[n + 3]` contains the cycle `cycleGraph.cycle n` of length `n + 3`,
-so its girth is at most `n + 3`. For the reverse inequality we use the fact that in a
-connected graph in which every vertex has degree at most `2`, every cycle is a
-Hamiltonian cycle (`Walk.IsCycle.isHamiltonianCycle_of_degree_le_two`). The cycle
-graph is connected (`connected_cycleGraph_add_one`), and each vertex `v` has degree
-at most `2`, since Mathlib's `cycleGraph_degree_two_le` says that its neighbours are
-`v - 1` and `v + 1`. A Hamiltonian cycle has length equal to the number of vertices
-(`Walk.IsHamiltonianCycle.length_eq`), so every cycle in `C[n + 3]` has length
-exactly `n + 3`.
+so its girth is at most `n + 3`. For the reverse inequality we use the fact from
+[Cycles in Graphs of Maximum Degree
+Two](#section-cycles-in-graphs-of-maximum-degree-two) that in a connected graph in
+which every vertex has degree at most `2`, every cycle is a Hamiltonian cycle
+(`Walk.IsCycle.isHamiltonianCycle_of_degree_le_two`). The cycle graph is connected
+(`connected_cycleGraph_add_one`) and `2`-regular (Mathlib's
+`cycleGraph_degree_three_le`). A Hamiltonian cycle has length equal to the number of
+vertices (`Walk.IsHamiltonianCycle.length_eq`), so every cycle in `C[n + 3]` has
+length exactly `n + 3`.
 -/
 lemma egirth_cycleGraph (n : ℕ) : (cycleGraph (n + 3)).egirth = n + 3 := by
   refine le_antisymm ?_ ?_
   · simpa using cycleGraph.isCycle_cycle.egirth_le_length
   · rw [le_egirth]
     intro a w hw
-    -- each vertex `v` has degree at most `2`, with neighbours `v - 1` and `v + 1`
-    have hdeg : ∀ v, (cycleGraph (n + 3)).degree v ≤ 2 := fun v => by
-      rw [cycleGraph_degree_two_le]
-      exact (Finset.card_insert_le _ _).trans (by simp)
-    -- so, as `C[n + 3]` is connected, the cycle `w` is Hamiltonian
-    have hham :=
-      hw.isHamiltonianCycle_of_degree_le_two connected_cycleGraph_add_one hdeg
+    -- `C[n + 3]` is connected and `2`-regular, so the cycle `w` is Hamiltonian
+    have hham := hw.isHamiltonianCycle_of_degree_le_two connected_cycleGraph_add_one
+      fun _ => cycleGraph_degree_three_le.le
     simp [hham.length_eq, add_assoc]
 
 /-!
@@ -571,32 +664,7 @@ lemma ediam_cycleGraph (n : ℕ) : (cycleGraph (n + 3)).ediam = ((n + 3) / 2 : �
     grind
 
 /-!
-## The Girth of Complete Bipartite Graphs
-
-A bipartite graph is triangle-free, so its girth is at least `4`. When both sides
-have at least two vertices, the complete bipartite graph contains a copy of `C[4]`:
-the vertices `.inl 0` and `.inl 1` have the two common neighbours `.inr 0` and
-`.inr 1`, so `cycleGraph_four_free_iff_common_neighbor_unique` applies. A graph
-containing a copy of `H` has girth at most that of `H` (Mathlib's
-`IsContained.egirth_le`), and `C[4]` has girth `4` (`egirth_cycleGraph`), so the
-girth is exactly `4`.
--/
-lemma egirth_completeBipartiteGraph (s t : ℕ) : K[s + 2, t + 2].egirth = 4 := by
-  -- bipartite, so triangle-free
-  have h2 : K[s + 2, t + 2].Colorable 2 :=
-    (completeBipartiteGraph.bicoloring _ _).colorable
-  have h3 : K[s + 2, t + 2].CliqueFree 3 := h2.cliqueFree (by norm_num)
-  -- `.inl 0` and `.inl 1` have the two common neighbours `.inr 0` and `.inr 1`
-  -- (the four adjacencies and `.inl 0 ≠ .inl 1` are checked by `simp`)
-  have h4 : C[4] ⊑ K[s + 2, t + 2] := not_free.mp fun h => by
-    simpa using cycleGraph_four_free_iff_common_neighbor_unique.mp h
-      (.inl 0) (.inl 1) (.inr 0) (.inr 1) (by simp) (by simp) (by simp) (by simp)
-      (by simp)
-  refine le_antisymm ?_ (four_le_egirth_of_cliqueFree_three h3)
-  exact h4.egirth_le.trans ((egirth_cycleGraph 1).trans_le (by norm_num))
-
-/-!
-## The Girth of the Hypercube
+## Girth of the Hypercube
 
 The hypercube is triangle-free (`cliqueFree_hypercube_three`), so its girth is at
 least `4`, and for `n ≥ 2` it contains a `4`-cycle: in `Q[2]` the Gray-code
@@ -605,26 +673,25 @@ the previous one, via the embedding `hypercube.embedFalse`, so by
 `IsContained.egirth_le` again its girth is at most that of the smaller cube.
 -/
 lemma egirth_hypercube {n : ℕ} : egirth Q[n + 2] = 4 := by
-  refine le_antisymm ?_
-    (four_le_egirth_of_cliqueFree_three (cliqueFree_hypercube_three _))
+  refine
+    (four_le_egirth_of_cliqueFree_three (cliqueFree_hypercube_three _)).antisymm' ?_
   induction n with
   | zero => exact (hypercube.isCycle_grayCycle 0).egirth_le_length
   | succ n ih =>
     exact (IsContained.egirth_le ⟨(hypercube.embedFalse _).toCopy⟩).trans ih
 
 /-!
-## The Girth of the Mycielskian
+## Girth of the Mycielskian
 
 The Mycielskian of a triangle-free graph is triangle-free, so its girth is at least
 `4`. Whether it is exactly `4` depends on whether `G` has two edges sharing an
 endpoint: if it does, the two edges give a `4`-cycle through the apex; if not, the
-edges of `G` form a matching (so `G` is a matching plus isolated vertices), and then
-the girth of `mμ(G)` is `5` provided `G` has an edge. (If `G` has no edges then
-`mμ(G)` is a star centred at the apex plus isolated vertices, so it is acyclic.)
+edges of `G` form a matching, and then the girth of `mμ(G)` is `5` provided `G` has
+an edge. (If `G` has no edges then `mμ(G)` is a star centred at the apex plus
+isolated vertices, so it is acyclic.)
 -/
 /-- The edges of `G` form a matching: no two edges share an endpoint, that is,
-every vertex has at most one neighbour (so `G` is a matching plus isolated
-vertices). -/
+every vertex has at most one neighbour. -/
 abbrev EdgesFormMatching (G : SimpleGraph V) : Prop :=
   ∀ x y z : V, G.Adj x y → G.Adj x z → y = z
 
@@ -640,6 +707,7 @@ lemma isCycle_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w)
     (h : v ≠ w) : (mycielskianFourCycle h1 h2).IsCycle := by
   simp [mycielskianFourCycle, cons_isCycle_iff, h]
 
+@[simp]
 lemma length_mycielskianFourCycle {u v w : V} (h1 : G.Adj u v) (h2 : G.Adj u w) :
     (mycielskianFourCycle h1 h2).length = 4 := rfl
 
@@ -650,23 +718,24 @@ girth `4`.
 lemma egirth_mycielskian_eq_four (h3 : G.CliqueFree 3)
     (hnm : ¬G.EdgesFormMatching) : egirth mμ(G) = 4 := by
   obtain ⟨x, y, z, h1, h2, hvw⟩ : ∃ x y z, G.Adj x y ∧ G.Adj x z ∧ y ≠ z := by grind
-  refine le_antisymm ?_ (four_le_egirth_of_cliqueFree_three h3.mycielskian)
-  simpa [length_mycielskianFourCycle] using
-    (isCycle_mycielskianFourCycle h1 h2 hvw).egirth_le_length
+  refine (four_le_egirth_of_cliqueFree_three h3.mycielskian).antisymm' ?_
+  simpa using (isCycle_mycielskianFourCycle h1 h2 hvw).egirth_le_length
 
 /-!
-If the edges of `G` form a matching then `mμ(G)` contains no copy of `C[4]`.
-We use `cycleGraph_four_free_iff_common_neighbor_unique`: given distinct vertices `x`
-and `y` with common neighbours `u` and `v`, we split into cases according to whether
-each of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy. The adjacency
+If the edges of `G` form a matching then `mμ(G)` is `C[4].Free`. We use
+`cycleGraph_four_free_iff_common_neighbor_unique`: given distinct vertices `x` and
+`y` with common neighbours `u` and `v`, we split into cases according to whether each
+of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy. The adjacency
 rules of the Mycielskian dispose of most of the `81` cases, and `grind` finishes the
 rest.
 -/
 lemma cycleGraph_four_free_mycielskian (hmatch : G.EdgesFormMatching) :
     C[4].Free mμ(G) := by
   apply cycleGraph_four_free_iff_common_neighbor_unique.mpr
-  rintro (_ | (a | a)) (_ | (b | b)) (_ | (u | u)) (_ | (v | v)) h1 h2 h3 h4 hne
-    <;> simp_all only [mycielskian_adj] <;> grind [Adj.symm]
+  -- each of `x`, `y`, `u` and `v` is the apex, a left copy or a right copy: 81 cases
+  rintro (_ | (x | x)) (_ | (y | y)) (_ | (u | u)) (_ | (v | v)) h1 h2 h3 h4 hxy <;>
+    simp_all only [mycielskian_adj] <;> -- 12 goals remain
+    grind [Adj.symm]
 
 /-!
 A graph in which no two edges share a common endpoint is triangle-free.
@@ -692,16 +761,20 @@ The `5`-cycle of `isCycle_mycielskianClosed_of_adj` exists for every edge of `G`
 the Mycielskian of any graph with an edge has girth at most `5`, however large the
 girth of `G`. So Mycielski's construction gives triangle-free graphs of large
 chromatic number, but not graphs of large girth and large chromatic number. That such
-graphs exist is a famous theorem of Erdős (1959), proved by the probabilistic method.
+graphs exist is a famous theorem of Erdős
+[Erdős 1959](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-erdos-1959),
+proved by the probabilistic method.
 
-# Moore and Cage Bounds
+# Moore and Cage Bounds *
 
 Fix a vertex `r` (for *root*). The *distance layers* around `r` are the sets of
 vertices at distance exactly `0, 1, 2, …` from `r`: they are the levels of a
-breadth-first search tree rooted at `r`, as in the figure of the Petersen graph in
-[Moore Graphs](#section-moore-graphs). Comparing the sizes of consecutive layers
-gives two classical bounds relating the number of vertices of a graph to its degrees,
-its diameter and its girth.
+breadth-first search tree rooted at `r`, as in the figure below of the Petersen graph
+(`petersenGraph`). Comparing the sizes of consecutive layers gives two classical
+bounds relating the number of vertices of a graph to its degrees, its diameter and
+its girth.
+
+[Figure: The Petersen graph by distance from the root $r = \{0, 1\}$](https://jt496.github.io/GraphTheoryInLean/figures/petersen_layers.svg)
 
 * The *Moore bound*
   [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960):
@@ -720,12 +793,11 @@ the neighbourhood of `r`.
   neighbours in `Lᵢ₊₁`. Hence `#Lᵢ₊₁ ≤ d * #Lᵢ`, and if the diameter is at most `k`
   then the layers `L₀, …, Lₖ` cover `V`.
 * Cage: if the girth is at least `2 * k + 1` then the graph looks like a tree near
-  `r`. For `1 ≤ i < k`, all the neighbours of `u ∈ Lᵢ` but one lie in `Lᵢ₊₁`, and
+  `r`. For `1 ≤ i < k`, all but one of the neighbours of `u ∈ Lᵢ` lie in `Lᵢ₊₁`, and
   two vertices of `Lᵢ` have no common neighbour there, since otherwise there would
   be a cycle of length at most `2 * i + 2 ≤ 2 * k`. Hence `#Lᵢ₊₁ ≥ d * #Lᵢ`, and the
   disjoint layers `L₀, …, Lₖ` contain the claimed number of vertices.
--/
-/-!
+
 ## Distance Layers
 
 We need two simple facts about distances from a fixed vertex `r`. Adjacent vertices
@@ -753,13 +825,14 @@ lemma exists_adj_edist_eq {r v : V} (i : ℕ) (h : G.edist r v = i + 1) :
       rwa [h, ENat.add_le_add_iff_right ENat.one_ne_top] at this
 
 /-!
-To count vertices in each layer we package them as `Finset`s, so from now on we
-assume that the vertex type is finite; we return to this assumption in [Finite
-Eccentricity](#section-finite-eccentricity). The predicate `G.edist r v = i` is
+To count vertices in each layer we package them as `Finset`s, so we assume that the
+vertex type is finite whenever we use layers. For our purposes this isn't a real
+restriction: the cage bounds hold trivially for infinite graphs, and we show in
+[Finite Eccentricity](#section-finite-eccentricity) that the hypotheses of the Moore
+bound force the vertex type to be finite. The predicate `G.edist r v = i` is
 decidable, since `ℕ∞` has decidable equality, so the set-builder notation produces a
-`Finset`. But `edist` itself is noncomputable (it is an infimum over all walks), so
-the definition must be marked `noncomputable`. For the same reason `decide` cannot
-evaluate distances: even `K[2].edist 0 1 = 1` cannot be proved by `decide`.
+`Finset`. But `edist` is defined as an infimum over all walks, which Lean cannot
+compute, so the definition must be marked `noncomputable`.
 
 Since `layer` is noncomputable anyway, a `Fintype V` argument would be pointless, so
 we assume only `[Finite V]` and pick a `Fintype` instance inside the definition with
@@ -777,6 +850,8 @@ noncomputable def layer [Finite V] (G : SimpleGraph V) (r : V) (i : ℕ) :
 /-!
 We first prove some very basic but useful facts about layers.
 -/
+open Finset
+
 @[simp]
 lemma mem_layer [Finite V] {r v : V} {i : ℕ} :
     v ∈ G.layer r i ↔ G.edist r v = i := by
@@ -795,6 +870,37 @@ lemma layer_one [Finite V] [G.LocallyFinite] (r : V) :
 lemma disjoint_layer [Finite V] {r : V} {i j : ℕ} (h : i ≠ j) :
     Disjoint (G.layer r i) (G.layer r j) :=
   Finset.disjoint_left.2 fun v hi hj => h (by simp_all)
+
+/-!
+## Finite Eccentricity
+
+The degree hypothesis of the Moore bound only makes sense when every vertex has
+finitely many neighbours, that is, when `G` is *locally finite*, and this is the
+only finiteness assumption the Moore bound needs. Every vertex at distance at most
+`i + 1` from `r` is either at distance at most `i` or adjacent to such a vertex, so
+by induction each ball around `r` in a locally finite graph is finite.
+-/
+lemma finite_setOf_edist_le [G.LocallyFinite] (r : V) (i : ℕ) :
+    {v | G.edist r v ≤ i}.Finite := by
+  induction i with
+  | zero => simp
+  | succ i ih =>
+    refine (ih.union (ih.biUnion fun u _ => (G.neighborSet u).toFinite)).subset ?_
+    intro v (hv : G.edist r v ≤ ↑(i + 1))
+    rcases hv.lt_or_eq with hlt | heq
+    · push_cast at hlt
+      exact Or.inl (Order.le_of_lt_add_one hlt)
+    · obtain ⟨u, huv, hu⟩ := exists_adj_edist_eq i (by exact_mod_cast heq)
+      exact Or.inr (Set.mem_biUnion (x := u) (by simp [hu]) huv)
+
+/-!
+If `r` has eccentricity at most `k` then every vertex lies in the ball of radius `k`
+around `r`, so a locally finite graph with a vertex of finite eccentricity is finite.
+-/
+theorem finite_of_eccent_le [G.LocallyFinite] {r : V} {k : ℕ} (h : G.eccent r ≤ k) :
+    Finite V :=
+  Set.finite_univ_iff.mp
+    ((finite_setOf_edist_le r k).subset fun _ _ => edist_le_eccent.trans h)
 
 /-!
 ## Counting Between Layers
@@ -817,7 +923,6 @@ Both are instances of Mathlib's double-counting lemmas
 `B.bipartiteAbove G.Adj u`, whose size is `G.degIn B u` by definition, and the
 neighbours of `v` in `A` form `A.bipartiteBelow G.Adj v`.
 -/
-open Finset
 lemma card_le_mul_card_of_adj [DecidableRel G.Adj] {A B : Finset V} {d : ℕ}
     (hB : ∀ v ∈ B, ∃ u ∈ A, G.Adj u v) (hA : ∀ u ∈ A, G.degIn B u ≤ d) :
     #B ≤ d * #A := by
@@ -840,8 +945,8 @@ lemma mul_card_le_card_of_adj [DecidableRel G.Adj] {A B : Finset V} {d : ℕ}
 To bound `G.degIn B u` in terms of the degree of `u`, we use two lemmas about
 `degIn`. The Moore bound uses `degIn_lt_degree_of_adj_notMem`: if some neighbour of
 `u` lies outside `B` then `G.degIn B u < G.degree u`. The cage bounds need
-`degree_le_degIn_add_one`, a bound in the other direction: if every neighbour of `u`,
-except possibly `w`, lies in `B`, then `G.degree u ≤ G.degIn B u + 1`.
+`degree_le_degIn_add_one`: if every neighbour of `u`, except possibly `w`, lies in
+`B`, then `G.degree u ≤ G.degIn B u + 1`.
 -/
 #check degIn_lt_degree_of_adj_notMem
 #check degree_le_degIn_add_one
@@ -866,7 +971,7 @@ lemma card_layer_add_two_le [Finite V] [G.LocallyFinite] {d : ℕ}
   · -- `u` has a neighbour `w ∈ Lᵢ`, which is not in `Lᵢ₊₂`
     obtain ⟨w, hwu, hw⟩ := exists_adj_edist_eq i (by simpa using hu)
     have := degIn_lt_degree_of_adj_notMem (G.layer r (i + 2)) hwu.symm
-      (by simp [hw]; norm_cast; grind)
+      (by grind [mem_layer, Nat.cast_inj])
     grind
 
 /-!
@@ -884,14 +989,20 @@ lemma card_layer_le [Finite V] [G.LocallyFinite] {d : ℕ}
       _ = (d + 1) * d ^ (i + 1) := by ring
 
 /-!
-If every vertex is within distance `k` of `r`, i.e. `G.eccent r ≤ k`, then the layers
-`L₀, …, Lₖ` cover `V`, and we can sum these bounds.
+If every vertex is within distance `k` of `r`, i.e. `G.eccent r ≤ k`, then `V` is
+finite by `finite_of_eccent_le`, the layers `L₀, …, Lₖ` cover `V`, and we can sum
+these bounds. Since `V` need not be finite in advance, we state the bound with
+`ENat.card V`, not `Nat.card V`. The latter is the junk value `0` for an infinite
+type, so a bound on it would hold trivially for infinite graphs, while a bound on
+`ENat.card V` also says that `V` is finite (`ENat.card_lt_top`).
 -/
-lemma card_le_of_eccent_le [Finite V] [G.LocallyFinite] {d k : ℕ}
+lemma card_le_of_eccent_le [G.LocallyFinite] {d k : ℕ}
     (h_deg : ∀ v, G.degree v ≤ d + 1) {r : V} (h : G.eccent r ≤ k) :
-    Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ range k, d ^ i := by
+    ENat.card V ≤ (1 + (d + 1) * ∑ i ∈ range k, d ^ i : ℕ) := by
   classical
+  have := finite_of_eccent_le h
   have := Fintype.ofFinite V
+  rw [ENat.card_eq_coe_natCard, Nat.cast_le]
   have hcover : (univ : Finset V) ⊆ (range (k + 1)).biUnion (G.layer r) := by
     intro v _
     have hv : G.edist r v ≤ k := edist_le_eccent.trans h
@@ -914,59 +1025,26 @@ a single vertex `r` of eccentricity at most `k`, so a bound on the radius suffic
 radius is at most the diameter this gives the usual form. Note that no connectivity
 hypothesis is needed: a finite radius already forces the graph to be connected.
 -/
-theorem moore_bound_of_radius_le [Finite V] (G : SimpleGraph V) [G.LocallyFinite]
+theorem moore_bound_of_radius_le (G : SimpleGraph V) [G.LocallyFinite]
     (d k : ℕ) (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.radius ≤ k) :
-    Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
+    ENat.card V ≤ (1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i : ℕ) := by
   rcases isEmpty_or_nonempty V with hV | hV
-  · simp
+  · simp [(ENat.card_eq_zero_iff_empty V).mpr hV]
   obtain ⟨r, hr⟩ := exists_eccent_eq_radius (G := G)
   exact card_le_of_eccent_le h_deg (hr ▸ h)
 
 /-!
-This gives the Moore bound in its usual form. Here it matters that the hypothesis is
-stated with `ediam` rather than `diam`. The empty graph `⊥` on `Fin 2` has maximum
-degree `0`, and its `diam` is the junk value `0`, since it is disconnected; but it
-has `2` vertices, while the bound with `d = k = 0` is `1`.
+Finally we give the Moore bound in its usual form. Here it matters that the
+hypothesis is stated with `ediam` rather than `diam`. The empty graph `E[2]` has
+maximum degree `0`, and its `diam` is the junk value `0`, since it is disconnected;
+but it has `2` vertices, while the bound with `d = k = 0` is `1`.
 -/
-theorem moore_bound [Finite V] (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
+theorem moore_bound (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
     (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
-    Nat.card V ≤ 1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i := by
+    ENat.card V ≤ (1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i : ℕ) := by
   rcases isEmpty_or_nonempty V with hV | hV
-  · simp
+  · simp [(ENat.card_eq_zero_iff_empty V).mpr hV]
   exact moore_bound_of_radius_le G d k h_deg (radius_le_ediam.trans h)
-
-/-!
-## Finite Eccentricity
-
-We proved the Moore bound for finite graphs, but what finiteness assumptions are
-really needed? The degree hypothesis only makes sense when every vertex has finitely
-many neighbours, that is, when `G` is *locally finite*, and this is enough: the
-hypotheses of the Moore bound then force `V` to be finite. Indeed, every vertex at
-distance at most `i + 1` from `r` is either at distance at most `i` or adjacent to
-such a vertex, so by induction each ball around `r` in a locally finite graph is
-finite. If `r` has eccentricity at most `k` then `V` is the ball of radius `k` around
-`r`.
--/
-lemma finite_setOf_edist_le [G.LocallyFinite] (r : V) (i : ℕ) :
-    {v | G.edist r v ≤ i}.Finite := by
-  induction i with
-  | zero => simp
-  | succ i ih =>
-    refine (ih.union (ih.biUnion fun u _ => (G.neighborSet u).toFinite)).subset ?_
-    intro v (hv : G.edist r v ≤ ↑(i + 1))
-    rcases hv.lt_or_eq with hlt | heq
-    · push_cast at hlt
-      exact Or.inl (Order.le_of_lt_add_one hlt)
-    · obtain ⟨u, huv, hu⟩ := exists_adj_edist_eq i (by exact_mod_cast heq)
-      exact Or.inr (Set.mem_biUnion (x := u) (by simp [hu]) huv)
-
-/-!
-A locally finite graph with a vertex of finite eccentricity is finite.
--/
-theorem finite_of_eccent_le [G.LocallyFinite] {r : V} {k : ℕ} (h : G.eccent r ≤ k) :
-    Finite V :=
-  Set.finite_univ_iff.mp
-    ((finite_setOf_edist_le r k).subset fun _ _ => edist_le_eccent.trans h)
 
 /-!
 ## Short Cycles Between Layers
@@ -985,7 +1063,7 @@ different, since their second-to-last vertices `a ≠ b` differ; so we can apply
 -/
 #check IsPath.exists_isCycle_length_le_add_of_ne
 
-lemma notMem_support_of_length_eq_edist {r a v : V} {p : G.Walk r a}
+lemma Walk.notMem_support_of_length_eq_edist {r a v : V} {p : G.Walk r a}
     (hp : p.length = G.edist r a) (hav : G.edist r a ≤ G.edist r v) (hva : v ≠ a) :
     v ∉ p.support := by
   classical
@@ -1035,10 +1113,10 @@ lemma edist_eq_add_two_of_adj {r u w x : V} {i : ℕ} (hu : G.edist r u = i + 1)
   -- if `x` were at distance at most `i + 1` from `r`, then shortest paths from `r`
   -- to `x` and to `w`, together with `x — u — w`, would give a cycle of length at
   -- most `2 * i + 3`, which is less than the girth
-  have hcyc (hx' : G.edist r x ≤ i + 1) : G.egirth ≤ G.edist r x + i + 2 := by
+  have hcyc (hx : G.edist r x ≤ i + 1) : G.egirth ≤ G.edist r x + i + 2 := by
     have hw_le : G.edist r w ≤ G.edist r u := by simp [hu, hw]
     rw [← hw]
-    exact egirth_le_edist_add_edist_add_two hxw hux.symm hwu (hu ▸ hx') hw_le
+    exact egirth_le_edist_add_edist_add_two hxw hux.symm hwu (hu ▸ hx) hw_le
   -- the distance from `r` to `x` is finite, so we can work in `ℕ`
   lift G.edist r x to ℕ using ne_top_of_le_ne_top (by simp) hx with m
   norm_cast at hx hcyc ⊢
@@ -1110,8 +1188,9 @@ layers are disjoint, `L₀, …, Lₖ` contain at least `1 + (d + 1) * ∑ i < k
 vertices. The layers around any vertex `r` already contain this many vertices, so `G`
 need not be connected; we only need `V` to be nonempty. We state the girth
 hypothesis with `egirth`, so it also covers acyclic graphs (whose `egirth` is `⊤`).
-Since the bound holds trivially for infinite graphs, we state it with `ENat.card V`,
-which is `⊤` for an infinite type, so no `[Finite V]` hypothesis is needed.
+As for the Moore bound, we state it with `ENat.card V`, so that no `[Finite V]`
+hypothesis is needed, but here for the opposite reason: `ENat.card V` is `⊤` for an
+infinite type, so a lower bound on it holds trivially for infinite graphs.
 -/
 theorem cage_bound_odd (G : SimpleGraph V) [G.LocallyFinite]
     [Nonempty V] (d k : ℕ) (h_deg : ∀ v, d + 1 ≤ G.degree v)
@@ -1155,99 +1234,27 @@ example (k : ℕ) : 1 + (1 + 1) * ∑ i ∈ Finset.range k, 1 ^ i = 2 * k + 1 :=
   simp [add_comm]
 
 /-!
-The most famous Moore graph is the Petersen graph `petersenGraph = Kn[5, 2]`. Recall
-that this is the graph with vertices given by subsets of `Fin 5` of size `2`, with
-two subsets adjacent iff they are disjoint.
+Another Moore graph is the Petersen graph, shown in the figure at the start of this
+section. It has `10 = 1 + 3 * (1 + 2)` vertices, is `3`-regular, and has diameter
+`2` and girth `5`, so it attains both bounds with `d = 2` and `k = 2`. We prove this
+in [Moore Graphs of Diameter Two](#section-moore-graphs-of-diameter-two),
+where the theory of strongly regular graphs allows us to give short proofs.
 
-It has `10` vertices, is `3`-regular, and has diameter `2` and girth `5`, so it
-attains both bounds with `d = 2` and `k = 2`: `10 = 1 + 3 * (1 + 2)`.
-
-[Figure: The Petersen graph by distance from the root $r = \{0, 1\}$](https://jt496.github.io/GraphTheoryInLean/figures/petersen_layers.svg)
--/
-lemma card_petersenGraph : Fintype.card {s : Finset (Fin 5) // s.card = 2} = 10 := by
-  decide
-
-lemma IsRegularOfDegree.petersenGraph : petersenGraph.IsRegularOfDegree 3 := by
-  intro v
-  decide +revert
-
-/-!
-We cannot ask `decide` for the distances directly, since it cannot evaluate `edist`
-([Distance Layers](#section-distance-layers)). Instead we reduce everything to facts
-about adjacency, which `decide` can easily check.
-
-Two distinct non-adjacent vertices are `2`-subsets sharing exactly one element, so
-their union has three elements, and the remaining two elements of `Fin 5` form a
-common neighbour.
--/
-lemma petersenGraph_exists_adj_adj : ∀ u v, u ≠ v → ¬ petersenGraph.Adj u v →
-    ∃ w, petersenGraph.Adj u w ∧ petersenGraph.Adj w v := by decide
-
-/-!
-No three `2`-subsets of `Fin 5` are pairwise disjoint, so there are no triangles.
--/
-lemma cliqueFree_petersenGraph_three : petersenGraph.CliqueFree 3 := fun t ht => by
-  obtain ⟨a, b, c, hab, hac, hbc, rfl⟩ := is3Clique_iff.mp ht
-  revert a b c
-  decide
-
-/-!
-Two distinct vertices have at most one common neighbour, which must be disjoint
-from their union, a set of at least three elements. By
-`cycleGraph_four_free_iff_common_neighbor_unique`, this rules out a copy of `C[4]`.
--/
-lemma cycleGraph_four_free_petersenGraph : C[4].Free petersenGraph :=
-  cycleGraph_four_free_iff_common_neighbor_unique.mpr (by decide)
-
-/-!
-The diameter is at most `2` by `petersenGraph_exists_adj_adj`. It is at least `2`,
-since by the Moore bound a `3`-regular graph of diameter at most `1` has at most
-`1 + 3 = 4` vertices.
--/
-lemma ediam_petersenGraph : petersenGraph.ediam = 2 := by
-  refine le_antisymm (ediam_le_of_edist_le fun u v => ?_) ?_
-  · by_cases huv : u = v
-    · simp [huv]
-    by_cases hadj : petersenGraph.Adj u v
-    · exact (edist_eq_one_iff_adj.mpr hadj).le.trans (by norm_num)
-    obtain ⟨w, huw, hwv⟩ := petersenGraph_exists_adj_adj u v huv hadj
-    exact (edist_le (cons huw (cons hwv nil))).trans (by simp)
-  · by_contra! h
-    have := moore_bound petersenGraph 2 1
-      (fun v => (IsRegularOfDegree.petersenGraph v).le)
-      (Order.le_of_lt_add_one (by simpa [one_add_one_eq_two] using h))
-    rw [Nat.card_eq_fintype_card, card_petersenGraph] at this
-    norm_num at this
-
-/-!
-The girth is at least `5` by `five_le_egirth_of_cliqueFree_three_of_free`. For the
-upper bound, as for the complete bipartite graphs, we exhibit a copy of a cycle
-graph: the pentagon `{0, 1} — {2, 3} — {0, 4} — {1, 2} — {3, 4} — {0, 1}` is a copy
-of `C[5]`, and `decide` checks that the map is an injective homomorphism.
--/
-lemma egirth_petersenGraph : petersenGraph.egirth = 5 := by
-  refine le_antisymm ?_ (five_le_egirth_of_cliqueFree_three_of_free
-    cliqueFree_petersenGraph_three cycleGraph_four_free_petersenGraph)
-  have h5 : C[5] ⊑ petersenGraph :=
-    ⟨⟨⟨![⟨{0, 1}, rfl⟩, ⟨{2, 3}, rfl⟩, ⟨{0, 4}, rfl⟩, ⟨{1, 2}, rfl⟩,
-      ⟨{3, 4}, rfl⟩], by decide⟩, by decide⟩⟩
-  exact h5.egirth_le.trans ((egirth_cycleGraph 2).trans_le (by norm_num))
-
-/-!
 Moore graphs are rare. Besides `C[5]` and the Petersen graph, the only known Moore
 graph of diameter `2` is the Hoffman–Singleton graph, which is `7`-regular with `50`
 vertices. The Hoffman–Singleton theorem
 [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960)
 ([Strongly Regular Graphs](#section-strongly-regular-graphs)) shows that any other
-would be `57`-regular, and whether one exists is a famous open problem. For diameter
-at least `3`, it is known that the only Moore graphs are the odd cycles.
+example would be `57`-regular, and whether one exists is a famous open problem. For
+diameter at least `3`, it is known that the only Moore graphs are the odd cycles.
 
-## The Cage Bound for Even Girth *
+## The Cage Bound for Even Girth
 
-For even girth `2 * k` the same argument works from an edge `r — s` instead of a
-vertex (although the details are more involved). Let `Aᵢ` be the set of vertices at
-distance `i` from `r` and `i + 1` from `s` (so `A₀ = {r}`), and let `Bᵢ` be the same
-with the roles of `r` and `s` swapped.
+The cage bound for even girth `2 * k` follows essentially the same argument as for
+odd girth but working from an edge `r — s` instead of a vertex (and the details are
+more involved). Let `Aᵢ` be the set of vertices at distance `i` from `r` and `i + 1`
+from `s` (so `A₀ = {r}`), and let `Bᵢ` be the same with the roles of `r` and `s`
+swapped.
 
 A vertex `u ∈ Aᵢ` has a neighbour `w` at distance `i` from `s`. If `i + 1 < k` then
 all the other neighbours of `u` are at distance `i + 2` from `s` (by
@@ -1278,7 +1285,7 @@ lemma mul_card_inter_layer_le [Finite V] [G.LocallyFinite] [DecidableEq V]
         rw [edist_comm (u := x) (v := s), edist_comm (u := x) (v := r), h2] at hsx
         exact (ENat.add_le_add_iff_right ENat.one_ne_top).mp
           (by simpa [add_assoc, one_add_one_eq_two] using hsx)
-      simp only [mem_inter, mem_layer]
+      simp_rw [mem_inter, mem_layer]
       exact ⟨by exact_mod_cast h1, by exact_mod_cast h2⟩
     have hdeg :
         G.degree u ≤ G.degIn (G.layer r (i + 1) ∩ G.layer s (i + 2)) u + 1 :=
@@ -1326,7 +1333,7 @@ theorem cage_bound_even (G : SimpleGraph V) [G.LocallyFinite]
       intro i j v hi hj
       simp only [A, B, mem_union, mem_inter, mem_layer] at hi hj
       rcases hi with ⟨h1, h2⟩ | ⟨h1, h2⟩ <;> rcases hj with ⟨h3, h4⟩ | ⟨h3, h4⟩ <;>
-        simp_all <;> norm_cast at * <;> grind
+        simp_all only [Nat.cast_inj] <;> grind
     have hAB : ∀ i, Disjoint (A i) (B i) := fun i =>
       Finset.disjoint_left.mpr fun v hA hB => by
         simp only [A, B, mem_inter, mem_layer] at hA hB
@@ -1351,20 +1358,6 @@ theorem cage_bound_even (G : SimpleGraph V) [G.LocallyFinite]
   · simp
 
 /-!
-The even bound gives a second proof that the Petersen graph has girth at most `5`,
-without exhibiting a cycle: a `3`-regular graph of girth at least `6` would have at
-least `2 * (1 + 2 + 4) = 14` vertices.
--/
-example : petersenGraph.egirth ≤ 5 := by
-  by_contra! h
-  have : Nonempty {s : Finset (Fin 5) // s.card = 2} := ⟨⟨{0, 1}, by decide⟩⟩
-  have := cage_bound_even petersenGraph 2 3
-    (fun v => (IsRegularOfDegree.petersenGraph v).ge)
-    ((by norm_num : (2 * 3 : ℕ∞) ≤ 5 + 1).trans (Order.add_one_le_of_lt h))
-  rw [ENat.card_eq_coe_fintype_card, card_petersenGraph] at this
-  norm_num [Finset.sum_range_succ] at this
-
-/-!
 The complete bipartite graphs attain the even cage bound with `k = 2`. For `d ≥ 1`,
 `K[d + 1, d + 1]` is `(d + 1)`-regular, has girth `4`
 (`egirth_completeBipartiteGraph`), and has `2 * (d + 1)` vertices.
@@ -1372,86 +1365,5 @@ The complete bipartite graphs attain the even cage bound with `k = 2`. For `d �
 example (d : ℕ) :
     ENat.card (Fin (d + 1) ⊕ Fin (d + 1)) = 2 * ∑ i ∈ Finset.range 2, d ^ i := by
   simp [two_mul]
-
-/-!
-# Albertson's Precolouring Extension Theorem *
-
-Albertson's precolouring extension theorem
-[Albertson 1998](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-albertson-1998)
-says that if `G` is `k`-colourable and `s` is a set of vertices that are pairwise at
-distance at least `4`, then any assignment `f : s → Fin (k + 1)` of colours to the
-vertices of `s` extends to a proper `(k + 1)`-colouring of `G`. (In general a
-*precolouring* must be a proper colouring of the subgraph induced by `s`, but here no
-two vertices of `s` are adjacent, so every assignment of colours is allowed.)
-
-The hypothesis is stated with `edist`. Had we written `4 ≤ G.dist u w` instead, the
-junk value `0` for unreachable pairs would forbid precoloured vertices in different
-components, giving a strictly weaker theorem.
-
-Take any `k`-colouring `c` of `G`, so the extra colour `Fin.last k` is unused. Build
-the extension `c'` by recolouring only near `s`: every `w ∈ s` gets its target colour
-`f w`, and whenever `f w` is one of the original `k` colours, each neighbour of `w`
-that already used that colour is swapped to the spare colour `Fin.last k`. The
-distance hypothesis guarantees that the recoloured neighbourhoods of distinct
-vertices of `s` are non-adjacent (any edge between them would give a walk of length
-`≤ 3` between two vertices of `s`), so no new monochromatic edge is created.
--/
-theorem Colorable.extend_precoloring {k : ℕ} (hk : G.Colorable k) {s : Set V}
-    (hs : s.Pairwise fun u w ↦ 4 ≤ G.edist u w) (f : s → Fin (k + 1)) :
-    ∃ C : G.Coloring (Fin (k + 1)), ∀ w : s, C w = f w := by
-  classical
-  obtain ⟨c⟩ := hk
-  -- Two vertices of `s` joined by a walk of length at most `3` are equal.
-  have close {a b : V} (ha : a ∈ s) (hb : b ∈ s) (p : G.Walk a b)
-      (hp : p.length ≤ 3) : a = b := by
-    by_contra hne
-    have := (hs ha hb hne).trans (edist_le p)
-    norm_cast at this
-    grind
-  -- `v` is *pushed* if a neighbour in `s` wants its colour.
-  let P (v : V) : Prop := ∃ w : s, G.Adj w v ∧ f w = (c v).castSucc
-  let c' : V → Fin (k + 1) := fun v ↦
-    if hv : v ∈ s then f ⟨v, hv⟩ else if P v then Fin.last k else (c v).castSucc
-  -- A precoloured vertex never clashes with a neighbour outside `s`.
-  have aux {a b : V} (ha : a ∈ s) (hb : b ∉ s) (hab : G.Adj a b) : c' a ≠ c' b := by
-    simp only [c', ha, hb, ↓reduceDIte]
-    split_ifs with hP
-    · obtain ⟨w, hwb, hw⟩ := hP
-      obtain rfl : w = ⟨a, ha⟩ :=
-        Subtype.ext (close w.2 ha (cons hwb (cons hab.symm nil)) (by simp))
-      rw [hw]
-      exact Fin.castSucc_ne_last _
-    · exact fun h => hP ⟨⟨a, ha⟩, hab, h⟩
-  refine ⟨Coloring.mk c' fun {x y} hxy => ?_, fun w => by
-    change c' w = f w
-    simp [c']⟩
-  by_cases hx : x ∈ s <;> by_cases hy : y ∈ s
-  · exact absurd (close hx hy (cons hxy nil) (by simp)) hxy.ne
-  · exact aux hx hy hxy
-  · exact (aux hy hx hxy.symm).symm
-  · simp only [c', hx, hy, ↓reduceDIte]
-    split_ifs with hPx hPy hPy
-    · -- both pushed by the same vertex of `s`, so `c x = c y`
-      obtain ⟨wx, hwx, hfx⟩ := hPx
-      obtain ⟨wy, hwy, hfy⟩ := hPy
-      obtain rfl : wx = wy := Subtype.ext
-        (close wx.2 wy.2 (cons hwx (cons hxy (cons hwy.symm nil))) (by simp))
-      exact absurd (Fin.castSucc_injective _ (hfx.symm.trans hfy)) (c.valid hxy)
-    · exact (Fin.castSucc_ne_last _).symm
-    · exact Fin.castSucc_ne_last _
-    · exact fun h => c.valid hxy (Fin.castSucc_injective _ h)
-
-/-!
-Distance at least `4` cannot be replaced by `3`. Take `K[3, 3]` and attach a pendant
-vertex to each of its six vertices; the pendants are pairwise at distance at least
-`3`. On each side, colour the three pendants `0`, `1` and `2`, so the vertices on
-that side can only use the colours `{1, 2}`, `{0, 2}` and `{0, 1}` respectively. No
-colour is available to all three, so each side needs to use at least two colours; but
-the two sides of `K[3, 3]` need disjoint sets of colours, which is impossible with
-three colours. The graph is bipartite, so this precolouring of a `2`-colourable graph
-does not extend to a `3`-colouring.
-
-[Figure: $K_{3,3}$ with a precoloured pendant at each vertex, and the colours still available to each vertex of $K_{3,3}$](https://jt496.github.io/GraphTheoryInLean/figures/precolouring_k33.svg)
--/
 
 end SimpleGraph

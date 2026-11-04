@@ -625,6 +625,50 @@ lemma Walk.cons_isCycle_iff_length_ne_one {u v : V} (p : G.Walk v u)
   grind
 
 /-!
+We will also need the `concat` analogue of `cons_isCycle_iff_length_ne_one` which
+follows by reversing the walk.
+-/
+lemma Walk.concat_isCycle_iff_length_ne_one (p : G.Walk u v) (h : G.Adj v u) :
+    (p.concat h).IsCycle ↔ p.IsPath ∧ p.length ≠ 1 := by
+  rw [← isCycle_reverse, reverse_concat, cons_isCycle_iff_length_ne_one,
+    isPath_reverse_iff, length_reverse]
+
+/-!
+To *splice* a closed walk `c` at `w` into a walk `p` from `a` to `b` that visits `w`,
+we can split `p` as `(p.takeUntil w) ++ (p.dropUntil w)` and insert `c` to get
+`(p.takeUntil w) ++ c ++ (p.dropUntil w)`. The result has length
+`p.length + c.length`, and if `p` and `c` are trails with no common edges then it is
+again a trail. We will use this to prove Euler's theorem in
+[Eulerian Circuits and Trails](#section-eulerian-circuits-and-trails).
+
+[Figure: Splicing a closed trail $c$ (red) at $w$ into a trail $p$ (blue) from $a$ to $b$ gives a longer trail from $a$ to $b$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
+-/
+lemma Walk.IsTrail.takeUntil_append_append_dropUntil [DecidableEq V] {a b : V}
+    {p : G.Walk a b} (hp : p.IsTrail) (hw : w ∈ p.support) {c : G.Walk w w}
+    (hc : c.IsTrail) (hdisj : List.Disjoint c.edges p.edges) :
+    ((p.takeUntil w hw).append (c.append (p.dropUntil w hw))).IsTrail := by
+  simp only [isTrail_append, edges_append]
+  refine ⟨hp.takeUntil hw, ⟨hc, hp.dropUntil hw, ?_⟩, ?_⟩
+  · -- the edges of `c` are disjoint from the `w → b` part of `p`
+    exact fun e he hf => hdisj he (edges_dropUntil_subset_edges p hw hf)
+  · -- the `a → w` part of `p` is disjoint from both `c` and the `w → b` part
+    intro e het he'
+    rcases List.mem_append.mp he' with hec | hed
+    · exact hdisj hec (edges_takeUntil_subset_edges p hw het)
+    · exact hp.disjoint_edges_takeUntil_dropUntil hw het hed
+
+lemma Walk.length_takeUntil_append_append_dropUntil [DecidableEq V] {a b : V}
+    (p : G.Walk a b) (hw : w ∈ p.support) (c : G.Walk w w) :
+    ((p.takeUntil w hw).append (c.append (p.dropUntil w hw))).length =
+      p.length + c.length := by
+  have hsp := congrArg Walk.length (p.take_spec hw)
+  grind [length_append]
+
+/-!
+Splicing is the reverse of the step in `Walk.bypass` that cuts a closed walk out of a
+walk. In the next section we will find an odd cycle in a closed walk of odd length by
+looking at the closed walks cut out in this way.
+
 ## Odd Cycles and Bipartite Graphs
 
 Mathlib contains the following result saying that a graph is bipartite iff every
@@ -638,7 +682,8 @@ walks: a graph is bipartite iff it contains no odd cycle. One direction is immed
 since a cycle is a closed walk. For the other we need to show that a closed walk of
 odd length contains a cycle of odd length. This is not currently in Mathlib.
 
-A key step is `Walk.cons_isCycle_iff_length_ne_one`, which we have just proved.
+A key step is `Walk.cons_isCycle_iff_length_ne_one`, which we proved in
+[Circuits and Cycles](#section-circuits-and-cycles).
 
 We show first that any walk can be replaced by a path between the same endpoints
 whose length has the same parity, unless the graph has an odd cycle. The proof is by
@@ -1294,8 +1339,8 @@ def pathGraph.path (n : ℕ) : P[n + 1].Walk 0 (Fin.last n) :=
   match n with
   | 0 => nil
   | n + 1 =>
-      (pathGraph.path n).map (pathGraph.embedding (n + 1) 1).toHom|>.copy
-        (by simp) (by simp)|>.cons
+      (pathGraph.path n).map (pathGraph.embedding (n + 1) 1).toHom |>.copy
+        (by simp) (by simp) |>.cons
           (by simp [pathGraph_adj] : P[n + 2].Adj 0 1)
 
 /-!
@@ -1464,7 +1509,7 @@ lemma HypercubeVert.isPath_hammingPath {n} (u v : HypercubeVert n) :
     rw [hammingPath]
     split_ifs with h <;> apply Walk.IsPath.copy
     · apply IsPath.map (embedBool ..).injective (ih _ _)
-    · apply IsPath.map (embedBool ..).injective (ih _ _)|>.concat
+    · apply IsPath.map (embedBool ..).injective (ih _ _) |>.concat
       -- the mapped path lies in the slice with last coordinate `b`, so it cannot
       -- visit the new end vertex `(v, c)`, as `b ≠ c`
       simp_rw [Walk.support_map, List.mem_map]
@@ -1686,7 +1731,7 @@ two edges `uʳ — none — wʳ` at the end of the zig-zag walk.
 walk. -/
 protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
     mμ(G).Walk uˡ wʳ :=
-  mycielskianZigZag hn|>.concat (by simp) |>.concat (by simp : mμ(G).Adj none _ )
+  mycielskianZigZag hn |>.concat (by simp) |>.concat (by simp : mμ(G).Adj none _)
 
 /-!
 [Figure: Converting a path in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
@@ -1833,7 +1878,7 @@ back, so it is not a cycle. But it is not nil, and the tail `[v, u]` of its supp
 has no repeated vertices, so its image `uʳ — vˡ — uˡ — vʳ — none — uʳ` is a
 `5`-cycle. Hence every edge of `G` gives a `5`-cycle in `mμ(G)`. We will use this to
 find the bridges of `mμ(G)` in [Bridges](#section-bridges) and to compute its girth
-in [The Girth of the Mycielskian](#section-the-girth-of-the-mycielskian).
+in [Girth of the Mycielskian](#section-girth-of-the-mycielskian).
 -/
 lemma isCycle_mycielskianClosed_of_adj {u v : V} (h : G.Adj u v) :
     (mycielskianClosed (cons h (cons h.symm nil))).IsCycle :=
@@ -1981,7 +2026,7 @@ theorem Walk.IsPath.posaRotate (hp : p.IsPath) (h : G.Adj (p.getVert i) v) :
     grind [nil_drop_iff, lt_length_of_adj_getVert_end h]
   rw [← p.append_take_drop_eq i, isPath_def, support_append, List.nodup_append',
        ← (p.drop i).support_tail_of_not_nil hnn] at hp
-  simpa [-Walk.reverse_tail] using hp.2.2
+  simpa [hnn] using hp.2.2
 
 /-!
 The length of a walk is preserved under Pósa rotations.
@@ -2046,14 +2091,6 @@ lemma Walk.length_posaClosed (p : G.Walk u v) (h₁ : G.Adj (p.getVert i) v)
     (p.posaClosed h₁ h₂).length = p.length + 1 := by simp [posaClosed]
 
 /-!
-The `concat` analogue of `cons_isCycle_iff_length_ne_one` follows by reversing.
--/
-lemma Walk.concat_isCycle_iff_length_ne_one (p : G.Walk u v) (h : G.Adj v u) :
-    (p.concat h).IsCycle ↔ p.IsPath ∧ p.length ≠ 1 := by
-  rw [← isCycle_reverse, reverse_concat, cons_isCycle_iff_length_ne_one,
-    isPath_reverse_iff, length_reverse]
-
-/-!
 If `p` is a path of length at least 2 then the `posaClosed` walk is a cycle.
 -/
 lemma Walk.IsPath.isCycle_posaClosed (hp : p.IsPath) (h2 : 2 ≤ p.length)
@@ -2073,20 +2110,21 @@ If `v₀` and `vₖ` are adjacent this is immediate. Otherwise the Ore condition
 `deg v₀ + deg vₖ ≥ |V|`. Every neighbour of `v₀` is `vᵢ₊₁` for some `i < k`, and
 every neighbour of `vₖ` is `vⱼ` for some `j < k`. Since a path has distinct vertices,
 these indices `i` and `j` form two subsets of `{0, ..., k - 1}` of sizes `deg v₀` and
-`deg vₖ`, and `k < |V| ≤ deg v₀ + deg vₖ`. So by pigeonhole the two subsets share an
-index `i`, and both edges `vᵢ₊₁ — v₀` and `vᵢ — vₖ` are present: a *crossing pair*.
-The Pósa rotation `v₀, ..., vᵢ, vₖ, vₖ₋₁, ..., vᵢ₊₁` followed by the edge `vᵢ₊₁ — v₀`
-is then the required cycle (this is the `Walk.posaClosed` we just defined).
+`deg vₖ`, and `k < |V| ≤ deg v₀ + deg vₖ`. So by the pigeonhole principle the two
+subsets share an index `i`, and both edges `vᵢ₊₁ — v₀` and `vᵢ — vₖ` are present: a
+*crossing pair*. The Pósa rotation `v₀, ..., vᵢ, vₖ, vₖ₋₁, ..., vᵢ₊₁` followed by the
+edge `vᵢ₊₁ — v₀` is then the required cycle (this is the `Walk.posaClosed` we just
+defined).
 
 ## Counting Bijections and a Crossing Pair
 
 We now prove a general counting lemma to help with the informal argument we gave
 above. If `p` is a path containing every neighbour of a vertex `x`, and `f : ℕ → ℕ`
 maps `{i | i < p.length}` into `{i | i ≤ p.length}`, is injective on
-`{n | n < p.length}` and is surjective on `{j | j ≤ p.length ∧ p.getVert j ≠ x}`,
-then the indices `i < p.length` with `G.Adj (p.getVert (f i)) x` number exactly
-`G.degree x`. As we can see in its proof, the bijection is `i ↦ p.getVert (f i)` onto
-the neighbours of `x`.
+`{i | i < p.length}` and surjective on `{j | j ≤ p.length ∧ p.getVert j ≠ x}`, then
+the number of `i < p.length` with `G.Adj (p.getVert (f i)) x}` is `G.degree x`. As we
+can see in its proof, the bijection is `i ↦ p.getVert (f i)` onto the neighbours of
+`x`.
 -/
 open Finset
 
@@ -2097,7 +2135,7 @@ lemma Walk.IsPath.card_filter_adj_getVert_eq_degree [DecidableRel G.Adj] {u v x 
     (hf_le : ∀ i ∈ range p.length, f i ≤ p.length)
     (hf_inj : Set.InjOn f (range p.length))
     (hf_surj : ∀ j ≤ p.length, p.getVert j ≠ x → ∃ i ∈ range p.length, f i = j) :
-    {i ∈ range p.length | G.Adj (p.getVert (f i)) x}.card = G.degree x := by
+    #{i ∈ range p.length | G.Adj (p.getVert (f i)) x} = G.degree x := by
   rw [← card_neighborFinset_eq_degree]
   refine card_nbij (fun i => p.getVert (f i)) (fun i hi => ?_)
     (fun i₁ hi₁ i₂ hi₂ heq => ?_) ?_
@@ -2122,7 +2160,7 @@ with `x = u` and `f i = i + 1`.)
 lemma Walk.IsPath.card_succ_adj_start [DecidableRel G.Adj] {u v : V}
     [Fintype (G.neighborSet u)]
     {p : G.Walk u v} (hp : p.IsPath) (hall : ∀ w, G.Adj u w → w ∈ p.support) :
-    {i ∈ range p.length | G.Adj (p.getVert (i + 1)) u}.card = G.degree u := by
+    #{i ∈ range p.length | G.Adj (p.getVert (i + 1)) u} = G.degree u := by
   refine hp.card_filter_adj_getVert_eq_degree hall (· + 1)
     (fun i hi => by grind)
     (fun a _ b _ h => by grind) ?_
@@ -2138,7 +2176,7 @@ of `v`, hence number exactly `G.degree v`. (This is
 lemma Walk.IsPath.card_adj_end [DecidableRel G.Adj] {u v : V}
     [Fintype (G.neighborSet v)]
     {p : G.Walk u v} (hp : p.IsPath) (hall : ∀ w, G.Adj v w → w ∈ p.support) :
-    {i ∈ range p.length | G.Adj (p.getVert i) v}.card = G.degree v := by
+    #{i ∈ range p.length | G.Adj (p.getVert i) v} = G.degree v := by
   refine hp.card_filter_adj_getVert_eq_degree hall id
     (fun i hi => (mem_range.mp hi).le) (fun a _ b _ h => h) ?_
   intro n hn hne
@@ -2165,7 +2203,7 @@ structure Walk.IsMaximalPath {u v : V} (p : G.Walk u v) : Prop extends
 
 /-!
 For a maximal path whose endpoints satisfy Ore's degree sum condition, pigeonhole on
-the two counting lemmas gives the crossing pair: an index `i` with both
+the two counting lemmas gives a crossing pair: an index `i` with both
 `G.Adj (p.getVert i) v` and `G.Adj (p.getVert (i + 1)) u`.
 -/
 lemma Walk.IsMaximalPath.exists_crossing_index [Fintype V] {u v : V}
@@ -2175,14 +2213,14 @@ lemma Walk.IsMaximalPath.exists_crossing_index [Fintype V] {u v : V}
   classical
   let A := {i ∈ range p.length | G.Adj (p.getVert (i + 1)) u}
   let B := {i ∈ range p.length | G.Adj (p.getVert i) v}
-  have hA : A.card = G.degree u := hmax.isPath.card_succ_adj_start hmax.start
-  have hB : B.card = G.degree v := hmax.isPath.card_adj_end hmax.end
+  have hA : #A = G.degree u := hmax.isPath.card_succ_adj_start hmax.start
+  have hB : #B = G.degree v := hmax.isPath.card_adj_end hmax.end
   -- A path has ≤ `card V` distinct vertices, so `p.length < card V`.
   have hlen : p.length + 1 ≤ Fintype.card V := hmax.isPath.length_lt
   -- `A` and `B` both sit inside `range p.length`, but `|A| + |B| ≥ card V > length`.
   have hsub : A ∪ B ⊆ range p.length :=
     union_subset (filter_subset _ _) (filter_subset _ _)
-  have hcardU : (A ∪ B).card ≤ p.length :=
+  have hcardU : #(A ∪ B) ≤ p.length :=
     (card_le_card hsub).trans_eq (card_range _)
   have hunion := card_union_add_card_inter A B
   obtain ⟨i, hi⟩ : (A ∩ B).Nonempty := by rw [← card_pos]; grind
@@ -2191,7 +2229,7 @@ lemma Walk.IsMaximalPath.exists_crossing_index [Fintype V] {u v : V}
 /-!
 ## Ore's Condition and Closing the Path
 
-We can now put things together. Given a maximal path of length ≥ 2, either the
+We can now put everything together. Given a maximal path of length `≥ 2`, either the
 endpoints are adjacent (so it can be closed with `concat`) or the crossing pair gives
 a `Walk.posaClosed`. In both cases we obtain a cycle based at `u` containing exactly
 the vertices of `p`, of length `p.length + 1`.
@@ -2203,7 +2241,7 @@ we make it a definition: `IsOrePair`.
 -/
 /-- *Ore's condition* at a pair of vertices: if `u` and `v` are distinct and
 non-adjacent then their degree sum is at least the number of vertices. (An
-adjacent or equal pair satisfies the condition vacuously.) -/
+equal or adjacent pair satisfies the condition vacuously.) -/
 def IsOrePair (G : SimpleGraph V) [Fintype V] (u v : V)
     [Fintype (G.neighborSet u)] [Fintype (G.neighborSet v)] : Prop :=
   u ≠ v → ¬ G.Adj u v → Fintype.card V ≤ G.degree u + G.degree v
@@ -2237,9 +2275,8 @@ a cycle visiting every vertex: a Hamiltonian cycle.
 -/
 lemma Walk.IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair [Fintype V]
     [DecidableEq V] {u v : V} [Fintype (G.neighborSet u)] [Fintype (G.neighborSet v)]
-    {p : G.Walk u v}
-    (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length) (hcard : G.IsOrePair u v) :
-    ∃ c : G.Walk u u, c.IsHamiltonianCycle := by
+    {p : G.Walk u v} (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length)
+    (hcard : G.IsOrePair u v) : ∃ c : G.Walk u u, c.IsHamiltonianCycle := by
   have hmax : p.IsMaximalPath :=
     ⟨hp.isPath, fun w _ => hp.mem_support w, fun w _ => hp.mem_support w⟩
   obtain ⟨c, hcyc, hclen, -⟩ := hmax.exists_cycle_spanning h2 hcard
@@ -2418,6 +2455,12 @@ private def modAux : ℕ → ℕ → ℕ → ℕ
   | fuel + 1, a, b => if 0 < b ∧ b ≤ a then modAux fuel (a - b) b else a
 
 /-!
+Lean accepts `modAux` with no termination proof because, in the second case, the
+recursive call `modAux fuel (a - b) b` is on `fuel`, which is one less than
+`fuel + 1`. Recursion in which every recursive call is on a smaller part of the
+matched argument, like `fuel` inside `fuel + 1`, is what we called *structural*
+above, and Lean checks this automatically.
+
 If we start with enough fuel, `modAux` computes the remainder of `a` on division by
 `b`.
 -/
@@ -2429,18 +2472,27 @@ giving the wrong answer.
 #eval modAux 2 17 5   -- 7
 /-!
 How much fuel do we need? Since each subtraction reduces `a` by at least one,
-starting with `fuel` equal to `a` is always enough to reach the remainder. (This can
-easily be proved by induction on the fuel, the same pattern we use for the closure
-below.)
+starting with `fuel` equal to `a` is always enough to reach the remainder. This can
+easily be proved by induction on the fuel, and in Lean such a proof can be written
+just like `modAux` itself: by pattern matching on the fuel, with a recursive call on
+`fuel` in the `fuel + 1` case. A lemma calling itself inside its own proof may look
+circular, but Lean accepts the call for the same reason as for `modAux`, and the
+recursive call is exactly the induction hypothesis. We use this pattern for the
+closure below.
 
 Returning to the Bondy–Chvátal closure, the textbook definition adds eligible edges
-one at a time, in any order. In Lean it is more convenient to proceed in rounds: in
+one at a time, in any order. For us it is more convenient to proceed in rounds: in
 each round we join all pairs that are currently eligible. A round adds at least one
 edge unless the graph is already closed, so starting with `fuel` equal to the number
-of missing edges of `G` (the number of edges in its complement `Gᶜ`) is enough to
-reach a closed graph. Adding all eligible pairs at once also means that we never have
-to choose an order in which to add them, so the closure is computable (at least in
-principle; see below).
+of missing edges of `G` (i.e. the number of edges in its complement `Gᶜ`) is enough
+to reach a closed graph. Adding all eligible pairs at once also means that we never
+have to choose which pair to add next. That matters because, given only
+`[Fintype V]`, Lean has no computable way to pick out one eligible pair: as with
+`Equiv.ofBijective` in [Functions, Embeddings and
+Equivalences](#section-functions-embeddings-and-equivalences), it would have to
+*choose* one, making the definition `noncomputable` (unless we also assumed an
+ordering on `V`). Proceeding in rounds avoids this, so the closure is computable (at
+least in principle; see below).
 
 A single round, `closureStep` below, is `G ⊔ fromRel r`, where `r u v` says that `u`
 and `v` have degree sum at least `|V|`. The graph `SimpleGraph.fromRel r` joins
@@ -2477,13 +2529,21 @@ def closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] : SimpleGraph V :=
 
 /-!
 The main result about the closure is the Bondy–Chvátal theorem: taking the closure
-does not change whether the graph is Hamiltonian. Before proving it we record two
+does not change whether a graph is Hamiltonian. Before proving it we record two
 basic facts: the closure contains the original graph, and with enough fuel it really
 is closed. We start with the first of these.
 -/
 lemma le_closureStep [Fintype V] [DecidableRel G.Adj] :
     G ≤ closureStep G := le_sup_left
 
+/-!
+The statement of `le_closureAux` puts the fuel, the graph and its `DecidableRel`
+instance after the colon, as a `∀`, rather than as named arguments before it. This
+lets us prove it by pattern matching, with the same cases as the definition of
+`closureAux`. (The final `_` in each pattern matches the instance, which we never
+need to name.) We follow the same approach when proving other results about
+`closureAux` below.
+-/
 lemma le_closureAux [Fintype V] [DecidableEq V] :
     ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj], G ≤ closureAux fuel G
   | 0, _, _ => le_rfl
@@ -2606,8 +2666,7 @@ one at a time, by induction on a finset of pairs. Each pair was eligible in `G`,
 adding edges only increases degrees, so it is still an `IsOrePair` in each of the
 intermediate graphs. (These intermediate graphs carry no `LocallyFinite` instances
 of their own, so the proof starts with `classical` to supply them.)
--/
-/-!
+
 Adding any finite set of pairs that are eligible in `G` preserves
 Hamiltonicity.
 -/
@@ -2641,8 +2700,7 @@ lemma isHamiltonian_closureStep_iff [Fintype V] [DecidableEq V]
   let s : Finset (V × V) := {p | Fintype.card V ≤ G.degree p.1 + G.degree p.2}
   have hs : closureStep G = G ⊔ s.sup fun p => edge p.1 p.2 := by
     ext x y
-    simp only [s, Finset.sup_eq_iSup, sup_adj, iSup_adj, edge_adj, mem_filter,
-      mem_univ, true_and]
+    simp_rw [s, Finset.sup_eq_iSup, sup_adj, iSup_adj, edge_adj]
     aesop
   rw [hs, isHamiltonian_sup_sup_edge_iff _ fun p hp => by simpa [s] using hp]
 
@@ -2666,7 +2724,7 @@ Combining the Bondy–Chvátal theorem `isHamiltonian_closure_iff` with
 Hamiltonian, gives the form we need: if `G` has at least 3 vertices and its closure
 is complete then `G` is Hamiltonian.
 -/
-#check isHamiltonian_top -- (h : 3 ≤ card α) : (completeGraph α).IsHamiltonian
+#check isHamiltonian_top
 
 theorem isHamiltonian_of_closure_eq_top [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj] (hn : 3 ≤ Fintype.card V) (h : G.closure = ⊤) :
@@ -2756,11 +2814,11 @@ For our rounds the absorption argument is again an induction on fuel.
 lemma closureStep_le [Fintype V] [DecidableRel G.Adj]
     {K : SimpleGraph V} [K.LocallyFinite] (hGK : G ≤ K) (hK : K.IsClosed) :
     closureStep G ≤ K := by
-    intro v w h
-    apply (closureStep_adj.1 h).elim (fun h1 => hGK h1)
-    rintro ⟨hne, hd⟩
-    exact hK hne <| hd.trans
-      <| Nat.add_le_add (degree_le_of_le hGK) (degree_le_of_le hGK)
+  intro v w h
+  apply (closureStep_adj.1 h).elim (fun h1 => hGK h1)
+  rintro ⟨hne, hd⟩
+  exact hK hne <| hd.trans
+    <| Nat.add_le_add (degree_le_of_le hGK) (degree_le_of_le hGK)
 
 lemma closureAux_le [Fintype V] [DecidableEq V] :
     ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj] (K : SimpleGraph V)
@@ -2792,6 +2850,7 @@ theorem closure_closure [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
   le_antisymm (closure_min le_rfl isClosed_closure) le_closure
 
 end bondy_chvatal
+
 /-!
 A monotone map on a partial order that is *inflationary* (`G ≤ G.closure`) and
 *idempotent* (`G.closure.closure = G.closure`) is what Mathlib calls a

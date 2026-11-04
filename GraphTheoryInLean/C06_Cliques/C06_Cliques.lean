@@ -927,10 +927,8 @@ lemma mycielskian_none_notMem_clique {k : ℕ} (h3 : 3 ≤ k)
   have h_na := ht.isClique hmem (Finset.mem_of_mem_erase ha) (by grind)
   have h_nb := ht.isClique hmem (Finset.mem_of_mem_erase hb) (by grind)
   -- so they must be "right" vertices
-  -- below `try tac` runs `tac`, but if `tac` fails it
-  -- does nothing instead of raising an error
   rcases a with _ | ⟨va | va⟩ <;> rcases b with _ | ⟨vb | vb⟩
-    <;> try simp only [mycielskian_adj] at h_na h_nb
+    <;> simp only [mycielskian_adj] at h_na h_nb
   -- but no two "right" vertices are adjacent, so we have a contradiction.
   exact ht.isClique (Finset.mem_of_mem_erase ha) (Finset.mem_of_mem_erase hb) hab
 

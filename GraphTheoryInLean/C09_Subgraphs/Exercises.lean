@@ -9,10 +9,10 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
 
-1. Show that any edge of an induced subgraph is an edge of `G`.
+1. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
 -/
-example (s : Set V) (v w : V) (h : ((⊤ : G.Subgraph).induce s).Adj v w) :
-    G.Adj v w := by
+example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
+    G.Adj v w :=
   sorry
 
 /-!
@@ -58,7 +58,7 @@ theorem Walk.exists_odd_isCycle_toSubgraph_le' {u : V} (w : G.Walk u u)
 6. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
 every edge of the trail is an edge of the walk (`Walk.mem_edges_toSubgraph` and
 `Subgraph.edgeSet_mono`), and the edges of a trail are distinct
-(`Walk.IsTrail.edges_nodup`), so `List.Nodup.subperm` applies.
+(`Walk.IsTrail.edges_nodup`), so `List.Subperm.length_le` applies.
 -/
 theorem Walk.IsTrail.length_le_of_toSubgraph_le' {a b c d : V} {p : G.Walk a b}
     {w : G.Walk c d} (hp : p.IsTrail) (hle : p.toSubgraph ≤ w.toSubgraph) :
@@ -75,7 +75,7 @@ theorem Walk.exists_odd_isCycle_length_le' {u : V} (w : G.Walk u u)
   sorry
 
 /-!
-8. Show that an induced subgraph `(⊤ : G.Subgraph).induce s` is induced (in the sense
+8. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
 of `Subgraph.IsInduced`).
 -/
 example (s : Set V) : ((⊤ : G.Subgraph).induce s).IsInduced := by
@@ -121,7 +121,7 @@ lemma colorable_of_forall_finite_induce_colorable' {n : ℕ}
 dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
-`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first, number the
+`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first part, number the
 vertices of `H` using `Finite.equivFin` and send them into `K[m]`, where `m` is the
 number of vertices. For the second, show that adjacent vertices of
 `sigmaCompleteNat` lie in the same `K[i]` and have distinct labels, as in the
@@ -281,9 +281,9 @@ lemma colorableOn_iff_colorable_induce' {n : ℕ} (hn : 0 < n) (s : Set V) :
 /-! SOLUTIONS -/
 
 /-!
-1. Show that any edge of an induced subgraph is an edge of `G`.
+1. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
 -/
-example (s : Set V) (v w : V) (h : ((⊤ : G.Subgraph).induce s).Adj v w) :
+example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
     G.Adj v w :=
   h.2.2.adj_sub
 
@@ -362,7 +362,7 @@ theorem Walk.exists_odd_isCycle_toSubgraph_le {u : V} (w : G.Walk u u)
 6. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
 every edge of the trail is an edge of the walk (`Walk.mem_edges_toSubgraph` and
 `Subgraph.edgeSet_mono`), and the edges of a trail are distinct
-(`Walk.IsTrail.edges_nodup`), so `List.Nodup.subperm` applies.
+(`Walk.IsTrail.edges_nodup`), so `List.Subperm.length_le` applies.
 -/
 theorem Walk.IsTrail.length_le_of_toSubgraph_le {a b c d : V} {p : G.Walk a b}
     {w : G.Walk c d} (hp : p.IsTrail) (hle : p.toSubgraph ≤ w.toSubgraph) :
@@ -382,7 +382,7 @@ theorem Walk.exists_odd_isCycle_length_le {u : V} (w : G.Walk u u)
   exact ⟨v, c, hc, hodd, hc.isTrail.length_le_of_toSubgraph_le hle⟩
 
 /-!
-8. Show that an induced subgraph `(⊤ : G.Subgraph).induce s` is induced (in the sense
+8. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
 of `Subgraph.IsInduced`).
 -/
 example (s : Set V) : ((⊤ : G.Subgraph).induce s).IsInduced :=
@@ -463,7 +463,7 @@ lemma colorable_of_forall_finite_induce_colorable {n : ℕ}
 dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
-`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first, number the
+`sigmaCompleteNat`, but `⊤` itself does not. Hint: for the first part, number the
 vertices of `H` using `Finite.equivFin` and send them into `K[m]`, where `m` is the
 number of vertices. For the second, show that adjacent vertices of
 `sigmaCompleteNat` lie in the same `K[i]` and have distinct labels, as in the
@@ -563,10 +563,8 @@ lemma matchingNum_pathNat : ν pathNat = ⊤ := by
   have hinf : M.edgeSet.Infinite := by
     refine Set.infinite_of_injective_forall_mem
       (f := fun k : ℕ => s(2 * k, 2 * k + 1)) (fun a b h => ?_) (fun k => ?_)
-    · simp only [Sym2.eq_iff] at h
-      grind
-    · simp only [M, Subgraph.mem_edgeSet]
-      grind
+    · grind [Sym2.eq_iff]
+    · grind [Subgraph.mem_edgeSet]
   exact top_le_iff.mp (hinf.encard_eq ▸ hM.le_matchingNum)
 
 /-!
