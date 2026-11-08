@@ -17,7 +17,8 @@ are defined in Mathlib. We consider operations on walks such as concatenation
 of edges) and `Walk.support` (list of vertices visited) of walks. We then meet the
 kinds of walks that arise most frequently in graph theory: trails, paths, circuits
 and cycles, together with Eulerian trails and Hamiltonian paths and cycles. Along the
-way we show that a graph is bipartite iff it has no odd cycle.
+way we show that a graph is bipartite iff it has no odd cycle
+(`isBipartite_iff_forall_isCycle_even`).
 
 The type of a walk records its endpoints, which in many situations is very useful,
 but it is also where dependent types show their less appealing side. In order to deal
@@ -27,7 +28,9 @@ analogue (`Walk.Nil`, `Walk.copy` and `Walk.transfer`).
 We then look at maps of walks along graph homomorphisms, and return to our running
 examples: Hamming paths and the Gray code in the hypercube, and walks in the
 Mycielskian. Finally we look at Hamiltonian graphs: we define Pósa rotations and
-prove the Bondy–Chvátal theorem, with Ore's and Dirac's theorems as corollaries.
+prove the Bondy–Chvátal theorem (`isHamiltonian_closure_iff`), with Ore's theorem
+(`IsOreGraph.isHamiltonian`) and Dirac's theorem
+(`isHamiltonian_of_card_le_two_mul_minDegree`) as corollaries.
 
 # Constructing Walks
 
@@ -674,8 +677,8 @@ looking at the closed walks cut out in this way.
 Mathlib contains the following result saying that a graph is bipartite iff every
 closed walk has even length.
 -/
-#check two_colorable_iff_forall_loop_even
-  -- G.Colorable 2 ↔ ∀ u (w : G.Walk u u), Even w.length
+#check isBipartite_iff_forall_walk_even_length
+  -- G.IsBipartite ↔ ∀ v (p : G.Walk v v), Even p.length
 /-!
 However we would really like the stronger result about cycles rather than closed
 walks: a graph is bipartite iff it contains no odd cycle. One direction is immediate,
@@ -727,7 +730,7 @@ theorem Walk.exists_odd_isCycle {u : V} (w : G.Walk u u) (hw : Odd w.length) :
   cases w with
   | nil => simp at hw
   | cons h p =>
-    apply p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
+    refine p.exists_isPath_or_odd_isCycle.elim (fun ⟨q, hq, hpar⟩ => ?_) id
     exact ⟨_, _, (cons_isCycle_iff_length_ne_one _ h).mpr
       ⟨hq, by grind [length_cons]⟩, by grind [length_cons]⟩
 
@@ -736,8 +739,8 @@ Hence a graph is bipartite iff it has no odd cycle.
 -/
 theorem isBipartite_iff_forall_isCycle_even :
     G.IsBipartite ↔ ∀ u (c : G.Walk u u), c.IsCycle → Even c.length := by
-  refine ⟨fun h u c _ => two_colorable_iff_forall_loop_even.mp h u c, fun h => ?_⟩
-  apply two_colorable_iff_forall_loop_even.mpr fun u w => ?_
+  rw [isBipartite_iff_forall_walk_even_length]
+  refine ⟨fun h u c _ => h u c, fun h u w => ?_⟩
   by_contra hw
   obtain ⟨v, c, hc, hodd⟩ := w.exists_odd_isCycle (Nat.not_even_iff_odd.mp hw)
   grind
@@ -1154,8 +1157,10 @@ the same as taking a copy of the equivalent `cons` walk.
 #check Walk.cons_copy --  cons h (p.copy hv hw) = (cons ⋯ p).copy ⋯ hw
 
 /-!
-Some, but certainly not all, such results are `simp` lemmas. To understand why, we
-need to read the doc-string for `Walk.copy`, in particular the following comment:
+Some, but certainly not all, such results are `simp` lemmas. To understand why,
+recall that the left-hand side of a `simp` lemma should be in simp normal form ([The
+Simplifier](#section-the-simplifier)), and the doc-string for `Walk.copy` tells us
+what the normal form is in this case:
 
 > The simp-normal form is for the `copy` to be pushed outward. That way calculations
 can occur within the "copy context".
@@ -1891,7 +1896,7 @@ If the original walk `p : G.Walk u w` is a Hamiltonian path, then the
 protected lemma Walk.IsHamiltonian.mycielskian [DecidableEq V] {u w} {p : G.Walk u w}
     (hp : p.IsHamiltonian) (hn : ¬ p.Nil) : (p.mycielskian hn).IsHamiltonian := by
   have : Fintype V := hp.fintype
-  apply isHamiltonian_iff_isPath_and_length_eq.2 ⟨hp.isPath.mycielskian hn, ?_⟩
+  refine isHamiltonian_iff_isPath_and_length_eq.2 ⟨hp.isPath.mycielskian hn, ?_⟩
   grind [length_mycielskian, Fintype.card_option, Fintype.card_sum, hp.length_eq,
     not_nil_iff_lt_length]
 
@@ -1902,7 +1907,7 @@ If the original walk `p : G.Walk u u` is a Hamiltonian cycle, then the
 lemma Walk.IsHamiltonianCycle.mycielskianClosed [DecidableEq V] {u} {p : G.Walk u u}
     (hp : p.IsHamiltonianCycle) : p.mycielskianClosed.IsHamiltonianCycle := by
   have : Fintype V := hp.isHamiltonian_tail.fintype
-  apply isHamiltonianCycle_iff_isCycle_and_length_eq.2
+  refine isHamiltonianCycle_iff_isCycle_and_length_eq.2
     ⟨isCycle_mycielskianClosed hp.isCycle.not_nil hp.isCycle.support_nodup, ?_⟩
   grind [length_mycielskianClosed hp.isCycle.not_nil, hp.length_eq,
         Fintype.card_option, Fintype.card_sum]
@@ -2712,7 +2717,7 @@ lemma isHamiltonian_closureAux_iff [Fintype V] [DecidableEq V] :
     (isHamiltonian_closureAux_iff fuel G.closureStep).trans
       isHamiltonian_closureStep_iff
 
-/-- *Bondy–Chvátal theorem*: a graph is Hamiltonian iff its closure is. -/
+/-- **Bondy–Chvátal theorem**: a graph is Hamiltonian iff its closure is. -/
 theorem isHamiltonian_closure_iff [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     G.closure.IsHamiltonian ↔ G.IsHamiltonian := isHamiltonian_closureAux_iff ..
 
@@ -2767,7 +2772,7 @@ theorem IsOreGraph.closure_eq_top [Fintype V] [DecidableEq V] [DecidableRel G.Ad
     [G.LocallyFinite] (h : G.IsOreGraph) : G.closure = ⊤ :=
   (h.mono le_closure).eq_top_of_isClosed isClosed_closure
 
-/-- *Ore's theorem*: a finite graph on at least three vertices in which every pair
+/-- **Ore's theorem**: a finite graph on at least three vertices in which every pair
 of non-adjacent vertices has degree sum at least `|V|` is Hamiltonian. -/
 theorem IsOreGraph.isHamiltonian [Fintype V] [DecidableEq V] [G.LocallyFinite]
     (h : G.IsOreGraph) (hn : 3 ≤ Fintype.card V) : G.IsHamiltonian := by
@@ -2781,13 +2786,13 @@ is a strictly weaker assumption and the statement would then be false. (Two tria
 sharing a vertex have `|V| = 5` and `δ(G) = 2 = 5 / 2`, but the shared vertex is a
 cut vertex, so the graph has no Hamiltonian cycle.)
 -/
-/-- *Dirac's theorem*: a finite graph on at least three vertices satisfying
+/-- **Dirac's theorem**: a finite graph on at least three vertices satisfying
 `|V| ≤ 2 * δ(G)` is Hamiltonian. -/
 theorem isHamiltonian_of_card_le_two_mul_minDegree [Fintype V] [DecidableEq V]
     [DecidableRel G.Adj]
     (hn : 3 ≤ Fintype.card V) (hdeg : Fintype.card V ≤ 2 * δ(G)) :
     G.IsHamiltonian := by
-  apply IsOreGraph.isHamiltonian (fun x y _ _ => ?_) hn
+  refine IsOreGraph.isHamiltonian (fun x y _ _ => ?_) hn
   grind [G.minDegree_le_degree x, G.minDegree_le_degree y]
 
 /-!
@@ -2815,10 +2820,10 @@ lemma closureStep_le [Fintype V] [DecidableRel G.Adj]
     {K : SimpleGraph V} [K.LocallyFinite] (hGK : G ≤ K) (hK : K.IsClosed) :
     closureStep G ≤ K := by
   intro v w h
-  apply (closureStep_adj.1 h).elim (fun h1 => hGK h1)
-  rintro ⟨hne, hd⟩
-  exact hK hne <| hd.trans
-    <| Nat.add_le_add (degree_le_of_le hGK) (degree_le_of_le hGK)
+  rcases closureStep_adj.1 h with h1 | ⟨hne, hd⟩
+  · exact hGK h1
+  · exact hK hne <| hd.trans
+      <| Nat.add_le_add (degree_le_of_le hGK) (degree_le_of_le hGK)
 
 lemma closureAux_le [Fintype V] [DecidableEq V] :
     ∀ (fuel : ℕ) (G : SimpleGraph V) [DecidableRel G.Adj] (K : SimpleGraph V)

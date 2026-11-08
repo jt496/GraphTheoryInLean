@@ -34,6 +34,13 @@ declaration has been elaborated, the hover shows its header and docstring as the
 has them. (The guide's `{smart}` role resolves such names at the end of the file
 instead.)
 
+An identifier that starts with a section variable, such as `G` or `G.edgeSet` after
+`variable (G : SimpleGraph V)`, is elaborated as a term with the variables of the
+scope in the local context (see `Command.runTermElabM`), so that `G` shows its type
+and `edgeSet` shows `SimpleGraph.edgeSet`, as they would in code. Variables bound
+only by a nearby declaration are not looked for, although the guide's `{smart}` role
+also tries the binders of the neighbouring declaration.
+
 A span that is a single keyword, such as `#eval`, `simp` or `def`, shows the
 docstring of its syntax instead, and Ctrl-click goes to the declaration of the
 syntax: the span is treated as the guide's `{smart}` role renders it, using the same
@@ -512,7 +519,15 @@ def syntaxDocStrings : List (SyntaxNodeKind × String) := [
     argument of the expected type, which must therefore be known. Like `nomatch`, \
     it elaborates only if Lean can show that no pattern matches the arguments: \
     here, the only constructor of `Eq`, `Eq.refl`, would need `0` and `1` to be \
-    the same.\n\nThe tactic `nofun` is short for `exact nofun`.")]
+    the same.\n\nThe tactic `nofun` is short for `exact nofun`."),
+  (``Parser.Command.«noncomputable», "`noncomputable` is a declaration modifier \
+    that tells Lean not to compile a definition to executable code, usually \
+    because it makes a choice (through `Classical.choice`, `Classical.choose`, or \
+    the `classical` tactic) or uses another noncomputable definition. Such a \
+    definition can still be used in statements and proofs, but not evaluated with \
+    `#eval`. If a definition needs the modifier and lacks it, Lean reports an error \
+    suggesting it; `noncomputable section` adds it to every definition in the \
+    section that needs it.")]
 
 initialize
   for (kind, doc) in syntaxDocStrings do
@@ -1017,6 +1032,13 @@ def pushDocInfo (ref : Syntax) (doc : String) (decl? : Option Name) :
     expectedType? := none, expr := mkStrLit ref.getAtomVal, location?
     mkDocString? := some fun _ => pure doc }
 
+/-- The identifier `name` at bytes `b` to `e` of the file. Its source info is
+original, so that elaborating `G.edgeSet` gives `G` and `edgeSet` info nodes over
+their own ranges (see `Syntax.identComponents?`). -/
+def identAt (b e : String.Pos.Raw) (name : String) : Syntax :=
+  .ident (.original "".toRawSubstring b "".toRawSubstring e) name.toRawSubstring
+    name.toName []
+
 /-- Records an info node over the keyword or notation token `ref`, whose syntax node
 kind is `kind?`, that shows its hover text (see `keywordDoc?`) and goes to the
 declaration of `kind?` on Ctrl-click. -/
@@ -1042,10 +1064,12 @@ def docHoverLinter : Linter where
       then currentHeadingIndex? else pure none
     let fileMap ← getFileMap
     -- `liftTermElabM` records the info nodes with the context the server needs.
-    liftTermElabM do
+    let vars ← liftTermElabM do
       -- The lines of the file and the declarations they make, read only for a name
       -- that is not a constant.
       let mut source? : Option (Array String × Array SourceDecl) := none
+      -- The identifiers that start with a section variable, with their positions.
+      let mut vars : Array (String.Pos.Raw × String.Pos.Raw × String) := #[]
       for doc in docs do
         -- The line of the end of the comment, counting from 1.
         let endLine := (fileMap.toPosition (doc.getTailPos?.getD 0)).line
@@ -1112,6 +1136,10 @@ def docHoverLinter : Linter where
               catch _ => pure false
             if isConst then
               continue
+            -- A section variable, alone or with fields, as in `G.edgeSet`.
+            if (← read).sectionVars.contains name.toName.getRoot then
+              vars := vars.push (b, e, name)
+              continue
             -- A name declared further down the file is not a constant yet.
             if source?.isNone then
               source? := some (← currentSourceDecls fileMap.source)
@@ -1146,6 +1174,19 @@ def docHoverLinter : Linter where
             expectedType? := none, expr := mkStrLit tag
             location? := some ⟨target.module, target.range⟩
             mkDocString? := some fun _ => pure target.hover }
+      return vars
+    -- Elaborated with the section variables in the local context, an identifier
+    -- such as `G.edgeSet` gets the info nodes it has in code. Errors are dropped.
+    unless vars.isEmpty do
+      try
+        runTermElabM fun _ => do
+          for (b, e, name) in vars do
+            let msgs ← Core.getMessageLog
+            try
+              discard <| Term.elabTerm (identAt b e name) none
+            catch _ => pure ()
+            Core.setMessageLog msgs
+      catch _ => pure ()
 
 initialize addLinter docHoverLinter
 

@@ -9,28 +9,23 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
 
-1. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
+1. If `H` and `K` are complementary subgraphs of `G` (i.e. `IsCompl H K`, which
+means `H ⊓ K = ⊥` and `H ⊔ K = ⊤`) then no edge of `G` can have only one
+endpoint in `H`.
 -/
-example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
-    G.Adj v w :=
+lemma Subgraph.mem_verts_iff_of_isCompl' {H K : G.Subgraph} (h : IsCompl H K)
+    {v w : V} (hadj : G.Adj v w) : v ∈ H.verts ↔ w ∈ H.verts := by
   sorry
 
 /-!
-2. Show that the induced subgraph on `Set.univ` is the `top` subgraph.
+2. Prove that the *Heyting complement* of a subgraph `H` (which is how `Hᶜ` is
+defined) is `(⊤ : G.Subgraph).induce H.vertsᶜ`. Hint: `le_compl_iff_disjoint_right`.
 -/
-example : (⊤ : G.Subgraph).induce Set.univ = ⊤ := by
+example (H : G.Subgraph) : Hᶜ = (⊤ : G.Subgraph).induce H.vertsᶜ := by
   sorry
 
 /-!
-3. Show that the single-edge subgraph `G.subgraphOfAdj hadj` is a subgraph of a
-subgraph `H` if and only if `H` contains the edge.
--/
-example {v w : V} (hadj : G.Adj v w) (H : G.Subgraph) :
-    G.subgraphOfAdj hadj ≤ H ↔ H.Adj v w := by
-  sorry
-
-/-!
-4. Strengthen `Walk.exists_isPath_or_odd_isCycle` so that the path or odd cycle it
+3. Strengthen `Walk.exists_isPath_or_odd_isCycle` so that the path or odd cycle it
 produces is a subgraph of the original walk. Hint: follow the proof of
 `Walk.exists_isPath_or_odd_isCycle`. Applying `Walk.toSubgraph` to `Walk.take_spec`
 and rewriting with `Walk.toSubgraph_append` shows that `takeUntil` and `dropUntil`
@@ -44,7 +39,7 @@ lemma Walk.exists_isPath_or_odd_isCycle_toSubgraph_le' {a b : V} (p : G.Walk a b
   sorry
 
 /-!
-5. Deduce the corresponding strengthening of `Walk.exists_odd_isCycle`: a closed walk
+4. Deduce the corresponding strengthening of `Walk.exists_odd_isCycle`: a closed walk
 of odd length contains an odd cycle that is a subgraph of the walk. Hint: follow the
 proof of `Walk.exists_odd_isCycle`.
 -/
@@ -55,10 +50,11 @@ theorem Walk.exists_odd_isCycle_toSubgraph_le' {u : V} (w : G.Walk u u)
   sorry
 
 /-!
-6. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
+5. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
 every edge of the trail is an edge of the walk (`Walk.mem_edges_toSubgraph` and
 `Subgraph.edgeSet_mono`), and the edges of a trail are distinct
-(`Walk.IsTrail.edges_nodup`), so `List.Subperm.length_le` applies.
+(`Walk.IsTrail.edges_nodup`), so `List.Nodup.subperm` and `List.Subperm.length_le`
+apply.
 -/
 theorem Walk.IsTrail.length_le_of_toSubgraph_le' {a b c d : V} {p : G.Walk a b}
     {w : G.Walk c d} (hp : p.IsTrail) (hle : p.toSubgraph ≤ w.toSubgraph) :
@@ -66,7 +62,7 @@ theorem Walk.IsTrail.length_le_of_toSubgraph_le' {a b c d : V} {p : G.Walk a b}
   sorry
 
 /-!
-7. Deduce that a closed walk of odd length `k` contains an odd cycle of length at
+6. Deduce that a closed walk of odd length `k` contains an odd cycle of length at
 most `k`.
 -/
 theorem Walk.exists_odd_isCycle_length_le' {u : V} (w : G.Walk u u)
@@ -75,14 +71,27 @@ theorem Walk.exists_odd_isCycle_length_le' {u : V} (w : G.Walk u u)
   sorry
 
 /-!
-8. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
+7. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
+-/
+example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
+    G.Adj v w :=
+  sorry
+
+/-!
+8. Show that the induced subgraph on `Set.univ` is the top subgraph `⊤`.
+-/
+example : (⊤ : G.Subgraph).induce Set.univ = ⊤ := by
+  sorry
+
+/-!
+9. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
 of `Subgraph.IsInduced`).
 -/
 example (s : Set V) : ((⊤ : G.Subgraph).induce s).IsInduced := by
   sorry
 
 /-!
-9. Show that the spanning coercion of a single-vertex subgraph is the empty graph
+10. Show that the spanning coercion of a single-vertex subgraph is the empty graph
 `⊥ : SimpleGraph V`, which has *every* vertex of `V`. So `spanningCoe` forgets the
 vertex set of a subgraph.
 -/
@@ -90,34 +99,18 @@ example (v : V) : (G.singletonSubgraph v).spanningCoe = ⊥ := by
   sorry
 
 /-!
-10. If `H` and `K` are complementary subgraphs of `G` (i.e. `IsCompl H K`, which
-means `H ⊓ K = ⊥` and `H ⊔ K = ⊤`) then no edge of `G` can have only one
-endpoint in `H`.
--/
-lemma Subgraph.mem_verts_iff_of_isCompl' {H K : G.Subgraph} (h : IsCompl H K)
-    {v w : V} (hadj : G.Adj v w) : v ∈ H.verts ↔ w ∈ H.verts := by
-  sorry
-
-/-!
-11. Prove that the *Heyting complement* of a subgraph `H` (which is how `Hᶜ` is
-defined) is `(⊤ : G.Subgraph).induce H.vertsᶜ`.
--/
-example (H : G.Subgraph) : Hᶜ = (⊤ : G.Subgraph).induce H.vertsᶜ := by
-  sorry
-
-/-!
-12. Show that if every induced subgraph of `G` on a finite set of vertices is
+11. Show that if every induced subgraph of `G` on a finite set of vertices is
 `n`-colourable then `G` is `n`-colourable. Hint: use the De Bruijn–Erdős theorem
-`colorable_of_forall_finite_subgraph_colorable`. For a finite subgraph `H`, the graph
-`H.coe` is a subgraph of `G.induce H.verts` on the same vertex type `↑H.verts`, so
-`Colorable.mono_left` applies.
+`colorable_of_forall_finite_subgraph_colorable`. For a finite subgraph `H`,
+`H.coe ≤ G.induce H.verts` (both graphs on `↑H.verts`), so `Colorable.mono_left`
+applies.
 -/
 lemma colorable_of_forall_finite_induce_colorable' {n : ℕ}
     (h : ∀ s : Set V, s.Finite → (G.induce s).Colorable n) : G.Colorable n := by
   sorry
 
 /-!
-13. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
+12. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
 dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
@@ -137,7 +130,7 @@ example : IsEmpty ((⊤ : SimpleGraph ℕ) →g sigmaCompleteNat) := by
   sorry
 
 /-!
-14. Show that the matching number is monotone: if `G ≤ H` then `ν G ≤ ν H`. Hint:
+13. Show that the matching number is monotone: if `G ≤ H` then `ν G ≤ ν H`. Hint:
 turn a matching of `G` into a matching of `H` with the same edges by building the
 `H.Subgraph` directly, then use the `matchingNum` API (`matchingNum_le` and
 `Subgraph.IsMatching.le_matchingNum`). (Mathlib's `Subgraph.IsMatching.map_ofLE`
@@ -149,7 +142,7 @@ lemma matchingNum_mono' {G H : SimpleGraph V} (h : G ≤ H) :
   sorry
 
 /-!
-15. Show that `ν K[3] = 1` but `τ K[3] = 2`, so weak duality `ν G ≤ τ G` can be
+14. Show that `ν K[3] = 1` but `τ K[3] = 2`, so weak duality `ν G ≤ τ G` can be
 strict. Hint: for the first, `matchingNum_le_card_div_two` gives the upper bound and
 a single edge is a matching (`Subgraph.IsMatching.subgraphOfAdj`). For the second,
 use Mathlib's `vertexCoverNum_top`.
@@ -161,7 +154,7 @@ example : τ K[3] = 2 := by
   sorry
 
 /-!
-16. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
+15. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
 `pathNat` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
 relation is as `pathNat.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
 show that its edge set is infinite (`Set.infinite_of_injective_forall_mem`).
@@ -170,7 +163,7 @@ lemma matchingNum_pathNat' : ν pathNat = ⊤ := by
   sorry
 
 /-!
-17. Show that in a finite graph `⍺ G + ν G ≤ |V|`. Hint: let `I` be a maximum
+16. Show that in a finite graph `⍺ G + ν G ≤ |V|`. Hint: let `I` be a maximum
 independent set (`exists_isNIndepSet_indepNum`) and `M` a maximum matching
 (`exists_isMatching_matchingNum`), so `#I = ⍺ G` and `|E(M)| = ν G`. Count the
 vertices of `I` inside and outside `M.verts` separately:
@@ -189,25 +182,17 @@ lemma indepNum_add_matchingNum_le' [Finite V] :
   sorry
 
 /-!
-18. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from the previous
-exercise and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is
-bipartite (`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
--/
-example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
-  sorry
-
-/-!
-19. The supremum of an increasing sequence of matchings is a matching. Hint: a
+17. The supremum of an increasing sequence of matchings is a matching. Hint: a
 vertex of `⨆ n, M n` lies in some `M n` (`Subgraph.verts_iSup`) and an edge of
 `⨆ n, M n` lies in some `M m` (`Subgraph.iSup_adj`); compare the two at the later
 stage `max n m`.
 -/
-lemma Subgraph.IsMatching.iSup_of_monotone' {M : ℕ → G.Subgraph}
+lemma Subgraph.isMatching_iSup_of_monotone' {M : ℕ → G.Subgraph}
     (hmono : Monotone M) (hM : ∀ n, (M n).IsMatching) : (⨆ n, M n).IsMatching := by
   sorry
 
 /-!
-20. If `ν G = ⊤` then every finite set of vertices `S` misses some edge of `G`.
+18. If `ν G = ⊤` then every finite set of vertices `S` misses some edge of `G`.
 Hint: otherwise `S` is a vertex cover, so weak duality
 (`matchingNum_le_vertexCoverNum`) and `IsVertexCover.vertexCoverNum_le` force
 `S.encard = ⊤`.
@@ -217,7 +202,7 @@ lemma exists_adj_notMem_of_matchingNum_eq_top' (h : ν G = ⊤) {S : Set V}
   sorry
 
 /-!
-21. A matching `M` with finitely many vertices in a graph with `ν G = ⊤` can be
+19. A matching `M` with finitely many vertices in a graph with `ν G = ⊤` can be
 extended by one edge. Hint: take an edge avoiding `M.verts` from the previous
 exercise and add it with `Subgraph.IsMatching.sup`, whose disjointness hypothesis
 is about supports (`Subgraph.IsMatching.support_eq_verts`), then count edges with
@@ -230,14 +215,12 @@ lemma Subgraph.IsMatching.exists_le_encard_eq_add_one' (h : ν G = ⊤)
   sorry
 
 /-!
-22. If `ν G = ⊤` then `G` has an infinite matching. Hint: restate the previous
-exercise on the subtype `FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}`
-of finite matchings, so that `choose` produces a step function `next : FM → FM`,
-and iterate it from `⊥`: `M n := next^[n] ⊥`, with `Function.iterate_succ_apply'`
-unfolding one step. Each `M n` is then a finite matching by construction; show by
-induction that it has exactly `n` edges. Each step extends the previous matching, so
-`M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by
-Exercise 19, with at least `n` edges for every `n`.
+20. If `ν G = ⊤` then `G` has an infinite matching. Hint: the stub chooses a step
+function `next`, which extends each finite matching by one edge (the previous
+exercise), and iterates it from `⊥`; each `M n` is then a finite matching by
+construction. Show by induction that it has exactly `n` edges. Each step extends the
+previous matching, so `M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a
+matching by Exercise 17, with at least `n` edges for every `n`.
 -/
 lemma exists_isMatching_encard_eq_top' (h : ν G = ⊤) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ⊤ := by
@@ -258,18 +241,26 @@ lemma exists_isMatching_encard_eq_top' (h : ν G = ⊤) :
   sorry
 
 /-!
-23. Conclude that the matching number is attained in every graph, finite or not:
+21. Conclude that the matching number is attained in every graph, finite or not:
 this is the analogue of Mathlib's `vertexCoverNum_exists`. Hint: if `ν G = ⊤` use
-the previous exercise; otherwise a finite supremum in `ℕ∞` is attained
-(`ENat.exists_eq_iSup_of_lt_top`), exactly as in the proof of
-`exists_isMatching_matchingNum`.
+the previous exercise; otherwise a finite supremum in `ℕ∞` is attained, so conclude
+as in the proof of `exists_isMatching_matchingNum`, with
+`ENat.exists_eq_iSup_of_lt_top` in place of `exists_eq_ciSup_of_finite`.
 -/
 lemma matchingNum_exists' (G : SimpleGraph V) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ν G := by
   sorry
 
 /-!
-24. Show that, provided there is at least one colour, `s` is `n`-colourable in the
+22. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from Exercise 16
+and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is bipartite
+(`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
+-/
+example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
+  sorry
+
+/-!
+23. Show that, provided there is at least one colour, `s` is `n`-colourable in the
 sense of `ColorableOn` iff the induced subgraph `G.induce s` is `n`-colourable. (So
 partial colourings really do capture colourings of induced subgraphs.) Why is the
 hypothesis `0 < n` needed?
@@ -281,27 +272,54 @@ lemma colorableOn_iff_colorable_induce' {n : ℕ} (hn : 0 < n) (s : Set V) :
 /-! SOLUTIONS -/
 
 /-!
-1. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
+1. If `H` and `K` are complementary subgraphs of `G` (i.e. `IsCompl H K`, which
+means `H ⊓ K = ⊥` and `H ⊔ K = ⊤`) then no edge of `G` can have only one
+endpoint in `H`.
 -/
-example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
-    G.Adj v w :=
-  h.2.2.adj_sub
+lemma Subgraph.mem_verts_iff_of_isCompl {H K : G.Subgraph} (h : IsCompl H K)
+    {v w : V} (hadj : G.Adj v w) : v ∈ H.verts ↔ w ∈ H.verts := by
+  -- The vertex sets of `H` and `K` are disjoint.
+  have hdisj : Disjoint H.verts K.verts := by
+    simpa [Set.disjoint_iff_inter_eq_empty] using
+      congrArg Subgraph.verts h.inf_eq_bot
+  -- The `G`-edge `v — w` lies in the sup, hence in `H` or `K`.
+  have hsup : H.Adj v w ∨ K.Adj v w := Subgraph.sup_adj.1 (h.sup_eq_top ▸ hadj)
+  -- In either case both endpoints lie on the same side of the partition.
+  rcases hsup with hH | hK
+  · exact ⟨fun _ => hH.snd_mem, fun _ => hH.fst_mem⟩
+  · exact iff_of_false (hdisj.notMem_of_mem_right hK.fst_mem)
+      (hdisj.notMem_of_mem_right hK.snd_mem)
 
 /-!
-2. Show that the induced subgraph on `Set.univ` is the `top` subgraph.
+2. Prove that the *Heyting complement* of a subgraph `H` (which is how `Hᶜ` is
+defined) is `(⊤ : G.Subgraph).induce H.vertsᶜ`. Hint: `le_compl_iff_disjoint_right`.
 -/
-example : (⊤ : G.Subgraph).induce Set.univ = ⊤ := by
-  ext <;> simp
+example (H : G.Subgraph) : Hᶜ = (⊤ : G.Subgraph).induce H.vertsᶜ := by
+  -- We show `Hᶜ ≤ ⊤.induce H.vertsᶜ` and `⊤.induce H.vertsᶜ ≤ Hᶜ`.
+  -- We use `disjoint_compl_left : Disjoint Hᶜ H`, which forces every vertex and edge
+  -- of `Hᶜ` to avoid `H`.
+  have hdisj : Disjoint Hᶜ H := disjoint_compl_left
+  have hverts : ∀ {v}, v ∈ Hᶜ.verts → v ∉ H.verts := fun {v} hvc hvH => by
+    have : v ∈ (Hᶜ ⊓ H).verts := ⟨hvc, hvH⟩
+    rw [disjoint_iff.mp hdisj] at this
+    exact this
+  apply le_antisymm
+  · -- `Hᶜ ≤ ⊤.induce H.vertsᶜ`
+    exact ⟨fun v hv => hverts hv, fun u v huv =>
+      ⟨hverts huv.fst_mem, hverts huv.snd_mem, huv.adj_sub⟩⟩
+  · -- `⊤.induce H.vertsᶜ ≤ Hᶜ`: it is disjoint from `H`,
+    -- so lies below the Heyting complement.
+    rw [le_compl_iff_disjoint_right]
+    refine disjoint_iff_inf_le.mpr ⟨?_, ?_⟩
+    · -- verts of the inf are ⊆ ⊥.verts = ∅
+      rintro v ⟨hv, hvH⟩
+      exact (hv hvH).elim
+    · -- adjacencies of the inf imply ⊥.Adj
+      rintro u v ⟨⟨hu, _, _⟩, hH⟩
+      exact hu hH.fst_mem
 
 /-!
-3. Show that the single-edge subgraph `G.subgraphOfAdj hadj` is a subgraph of a
-subgraph `H` if and only if `H` contains the edge.
--/
-example {v w : V} (hadj : G.Adj v w) (H : G.Subgraph) :
-    G.subgraphOfAdj hadj ≤ H ↔ H.Adj v w := subgraphOfAdj_le_iff _ _
-
-/-!
-4. Strengthen `Walk.exists_isPath_or_odd_isCycle` so that the path or odd cycle it
+3. Strengthen `Walk.exists_isPath_or_odd_isCycle` so that the path or odd cycle it
 produces is a subgraph of the original walk. Hint: follow the proof of
 `Walk.exists_isPath_or_odd_isCycle`. Applying `Walk.toSubgraph` to `Walk.take_spec`
 and rewriting with `Walk.toSubgraph_append` shows that `takeUntil` and `dropUntil`
@@ -340,7 +358,7 @@ lemma Walk.exists_isPath_or_odd_isCycle_toSubgraph_le {a b : V} (p : G.Walk a b)
     · exact .inr ⟨v, c, hc, hodd, le_sup_of_le_right hle⟩
 
 /-!
-5. Deduce the corresponding strengthening of `Walk.exists_odd_isCycle`: a closed walk
+4. Deduce the corresponding strengthening of `Walk.exists_odd_isCycle`: a closed walk
 of odd length contains an odd cycle that is a subgraph of the walk. Hint: follow the
 proof of `Walk.exists_odd_isCycle`.
 -/
@@ -359,10 +377,11 @@ theorem Walk.exists_odd_isCycle_toSubgraph_le {u : V} (w : G.Walk u u)
     · exact ⟨v, c, hc, hodd, le_sup_of_le_right hle⟩
 
 /-!
-6. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
+5. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:
 every edge of the trail is an edge of the walk (`Walk.mem_edges_toSubgraph` and
 `Subgraph.edgeSet_mono`), and the edges of a trail are distinct
-(`Walk.IsTrail.edges_nodup`), so `List.Subperm.length_le` applies.
+(`Walk.IsTrail.edges_nodup`), so `List.Nodup.subperm` and `List.Subperm.length_le`
+apply.
 -/
 theorem Walk.IsTrail.length_le_of_toSubgraph_le {a b c d : V} {p : G.Walk a b}
     {w : G.Walk c d} (hp : p.IsTrail) (hle : p.toSubgraph ≤ w.toSubgraph) :
@@ -372,7 +391,7 @@ theorem Walk.IsTrail.length_le_of_toSubgraph_le {a b c d : V} {p : G.Walk a b}
   simpa using (hp.edges_nodup.subperm hsub).length_le
 
 /-!
-7. Deduce that a closed walk of odd length `k` contains an odd cycle of length at
+6. Deduce that a closed walk of odd length `k` contains an odd cycle of length at
 most `k`.
 -/
 theorem Walk.exists_odd_isCycle_length_le {u : V} (w : G.Walk u u)
@@ -382,7 +401,20 @@ theorem Walk.exists_odd_isCycle_length_le {u : V} (w : G.Walk u u)
   exact ⟨v, c, hc, hodd, hc.isTrail.length_le_of_toSubgraph_le hle⟩
 
 /-!
-8. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
+7. Show that any edge of an induced subgraph of a subgraph is an edge of `G`.
+-/
+example (s : Set V) (v w : V) (H : G.Subgraph) (h : (H.induce s).Adj v w) :
+    G.Adj v w :=
+  h.2.2.adj_sub
+
+/-!
+8. Show that the induced subgraph on `Set.univ` is the top subgraph `⊤`.
+-/
+example : (⊤ : G.Subgraph).induce Set.univ = ⊤ := by
+  ext <;> simp
+
+/-!
+9. Show that an induced subgraph of `(⊤ : G.Subgraph)` is induced (in the sense
 of `Subgraph.IsInduced`).
 -/
 example (s : Set V) : ((⊤ : G.Subgraph).induce s).IsInduced :=
@@ -390,7 +422,7 @@ example (s : Set V) : ((⊤ : G.Subgraph).induce s).IsInduced :=
   fun _ hu _ hv hadj => ⟨hu, hv, hadj⟩
 
 /-!
-9. Show that the spanning coercion of a single-vertex subgraph is the empty graph
+10. Show that the spanning coercion of a single-vertex subgraph is the empty graph
 `⊥ : SimpleGraph V`, which has *every* vertex of `V`. So `spanningCoe` forgets the
 vertex set of a subgraph.
 -/
@@ -399,58 +431,11 @@ example (v : V) : (G.singletonSubgraph v).spanningCoe = ⊥ := by
   simp
 
 /-!
-10. If `H` and `K` are complementary subgraphs of `G` (i.e. `IsCompl H K`, which
-means `H ⊓ K = ⊥` and `H ⊔ K = ⊤`) then no edge of `G` can have only one
-endpoint in `H`.
--/
-lemma Subgraph.mem_verts_iff_of_isCompl {H K : G.Subgraph} (h : IsCompl H K)
-    {v w : V} (hadj : G.Adj v w) : v ∈ H.verts ↔ w ∈ H.verts := by
-  -- The vertex sets of `H` and `K` are disjoint.
-  have hdisj : Disjoint H.verts K.verts := by
-    simpa [Set.disjoint_iff_inter_eq_empty] using
-      congrArg Subgraph.verts h.inf_eq_bot
-  -- The `G`-edge `v — w` lies in the sup, hence in `H` or `K`.
-  have hsup : H.Adj v w ∨ K.Adj v w := Subgraph.sup_adj.1 (h.sup_eq_top ▸ hadj)
-  -- In either case both endpoints lie on the same side of the partition.
-  rcases hsup with hH | hK
-  · exact ⟨fun _ => hH.snd_mem, fun _ => hH.fst_mem⟩
-  · exact iff_of_false (hdisj.notMem_of_mem_right hK.fst_mem)
-      (hdisj.notMem_of_mem_right hK.snd_mem)
-
-/-!
-11. Prove that the *Heyting complement* of a subgraph `H` (which is how `Hᶜ` is
-defined) is `(⊤ : G.Subgraph).induce H.vertsᶜ`.
--/
-example (H : G.Subgraph) : Hᶜ = (⊤ : G.Subgraph).induce H.vertsᶜ := by
-  -- We show `Hᶜ ≤ ⊤.induce H.vertsᶜ` and `⊤.induce H.vertsᶜ ≤ Hᶜ`.
-  -- The key fact is `disjoint_compl_left : Disjoint Hᶜ H`, which forces every vertex
-  -- and edge of `Hᶜ` to avoid `H`.
-  have hdisj : Disjoint Hᶜ H := disjoint_compl_left
-  have hverts : ∀ {v}, v ∈ Hᶜ.verts → v ∉ H.verts := fun {v} hvc hvH => by
-    have : v ∈ (Hᶜ ⊓ H).verts := ⟨hvc, hvH⟩
-    rw [disjoint_iff.mp hdisj] at this
-    exact this
-  apply le_antisymm
-  · -- `Hᶜ ≤ ⊤.induce H.vertsᶜ`
-    refine ⟨fun v hv => hverts hv, fun u v huv =>
-      ⟨hverts huv.fst_mem, hverts huv.snd_mem, huv.adj_sub⟩⟩
-  · -- `⊤.induce H.vertsᶜ ≤ Hᶜ`: it is disjoint from `H`,
-    -- so lies below the Heyting complement.
-    rw [le_compl_iff_disjoint_right]
-    refine disjoint_iff_inf_le.mpr ⟨?_, ?_⟩
-    · -- verts of the inf are ⊆ ⊥.verts = ∅
-      rintro v ⟨hv, hvH⟩
-      exact (hv hvH).elim
-    · -- adjacencies of the inf imply ⊥.Adj
-      rintro u v ⟨⟨hu, _, _⟩, hH⟩
-      exact hu hH.fst_mem
-
-/-!
-12. Show that if every induced subgraph of `G` on a finite set of vertices is
+11. Show that if every induced subgraph of `G` on a finite set of vertices is
 `n`-colourable then `G` is `n`-colourable. Hint: use the De Bruijn–Erdős theorem
-`colorable_of_forall_finite_subgraph_colorable`. For a finite subgraph `H`, the graph
-`H.coe` is a subgraph of `G.induce H.verts` on the same vertex type `↑H.verts`, so
-`Colorable.mono_left` applies.
+`colorable_of_forall_finite_subgraph_colorable`. For a finite subgraph `H`,
+`H.coe ≤ G.induce H.verts` (both graphs on `↑H.verts`), so `Colorable.mono_left`
+applies.
 -/
 lemma colorable_of_forall_finite_induce_colorable {n : ℕ}
     (h : ∀ s : Set V, s.Finite → (G.induce s).Colorable n) : G.Colorable n :=
@@ -459,7 +444,7 @@ lemma colorable_of_forall_finite_induce_colorable {n : ℕ}
     (h H.verts hH).mono_left (G := H.coe) fun _ _ hab => H.adj_sub hab
 
 /-!
-13. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
+12. The finiteness of `F` in `nonempty_hom_of_forall_finite_subgraph_hom` cannot be
 dropped. Recall the sigma graph `sigmaCompleteNat`, the disjoint union
 `Σg (fun i => K[i])` of all the complete graphs `K[i]` (see `SimpleGraph.sigma`).
 Show that every finite subgraph of `⊤ : SimpleGraph ℕ` has a homomorphism to
@@ -505,7 +490,7 @@ example : IsEmpty ((⊤ : SimpleGraph ℕ) →g sigmaCompleteNat) := by
   exact not_finite ℕ
 
 /-!
-14. Show that the matching number is monotone: if `G ≤ H` then `ν G ≤ ν H`. Hint:
+13. Show that the matching number is monotone: if `G ≤ H` then `ν G ≤ ν H`. Hint:
 turn a matching of `G` into a matching of `H` with the same edges by building the
 `H.Subgraph` directly, then use the `matchingNum` API (`matchingNum_le` and
 `Subgraph.IsMatching.le_matchingNum`). (Mathlib's `Subgraph.IsMatching.map_ofLE`
@@ -520,7 +505,7 @@ lemma matchingNum_mono {G H : SimpleGraph V} (h : G ≤ H) :
     (M := ⟨M.verts, M.Adj, fun hadj => h (M.adj_sub hadj), M.edge_vert, M.symm⟩) hM
 
 /-!
-15. Show that `ν K[3] = 1` but `τ K[3] = 2`, so weak duality `ν G ≤ τ G` can be
+14. Show that `ν K[3] = 1` but `τ K[3] = 2`, so weak duality `ν G ≤ τ G` can be
 strict. Hint: for the first, `matchingNum_le_card_div_two` gives the upper bound and
 a single edge is a matching (`Subgraph.IsMatching.subgraphOfAdj`). For the second,
 use Mathlib's `vertexCoverNum_top`.
@@ -538,7 +523,7 @@ example : τ K[3] = 2 := by
   rfl
 
 /-!
-16. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
+15. Show that the infinite path has matching number `⊤`. Hint: build the subgraph of
 `pathNat` that pairs `2 * k` with `2 * k + 1`. (An easy way to define this adjacency
 relation is as `pathNat.Adj m n ∧ m / 2 = n / 2`.) Show that it is a matching, and
 show that its edge set is infinite (`Set.infinite_of_injective_forall_mem`).
@@ -568,7 +553,7 @@ lemma matchingNum_pathNat : ν pathNat = ⊤ := by
   exact top_le_iff.mp (hinf.encard_eq ▸ hM.le_matchingNum)
 
 /-!
-17. Show that in a finite graph `⍺ G + ν G ≤ |V|`. Hint: let `I` be a maximum
+16. Show that in a finite graph `⍺ G + ν G ≤ |V|`. Hint: let `I` be a maximum
 independent set (`exists_isNIndepSet_indepNum`) and `M` a maximum matching
 (`exists_isMatching_matchingNum`), so `#I = ⍺ G` and `|E(M)| = ν G`. Count the
 vertices of `I` inside and outside `M.verts` separately:
@@ -606,30 +591,12 @@ lemma indepNum_add_matchingNum_le [Finite V] :
   grind
 
 /-!
-18. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from the previous
-exercise and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is
-bipartite (`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
--/
-example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
-  refine le_antisymm ?_ ?_
-  · -- The upper bound `⍺ G + ν G ≤ |V|`, with `ν Q[n + 1] = 2 ^ n`.
-    have h := indepNum_add_matchingNum_le (G := Q[n + 1])
-    rw [matchingNum_hypercube_succ, Nat.card_eq_fintype_card, card_hypercubeVert,
-      pow_succ, mul_two] at h
-    have h' : ⍺ Q[n + 1] + 2 ^ n ≤ 2 ^ n + 2 ^ n := by exact_mod_cast h
-    grind
-  · -- `Q[n + 1]` is `2`-colourable, so it has at most `2 * ⍺ Q[n + 1]` vertices.
-    have h := (IsBipartite.hypercube (n + 1)).natCard_le_mul_indepNum
-    rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ] at h
-    grind
-
-/-!
-19. The supremum of an increasing sequence of matchings is a matching. Hint: a
+17. The supremum of an increasing sequence of matchings is a matching. Hint: a
 vertex of `⨆ n, M n` lies in some `M n` (`Subgraph.verts_iSup`) and an edge of
 `⨆ n, M n` lies in some `M m` (`Subgraph.iSup_adj`); compare the two at the later
 stage `max n m`.
 -/
-lemma Subgraph.IsMatching.iSup_of_monotone {M : ℕ → G.Subgraph}
+lemma Subgraph.isMatching_iSup_of_monotone {M : ℕ → G.Subgraph}
     (hmono : Monotone M) (hM : ∀ n, (M n).IsMatching) : (⨆ n, M n).IsMatching := by
   intro v hv
   rw [Subgraph.verts_iSup, Set.mem_iUnion] at hv
@@ -643,7 +610,7 @@ lemma Subgraph.IsMatching.iSup_of_monotone {M : ℕ → G.Subgraph}
     hu w ((hmono (le_max_left n m)).2 hw)]
 
 /-!
-20. If `ν G = ⊤` then every finite set of vertices `S` misses some edge of `G`.
+18. If `ν G = ⊤` then every finite set of vertices `S` misses some edge of `G`.
 Hint: otherwise `S` is a vertex cover, so weak duality
 (`matchingNum_le_vertexCoverNum`) and `IsVertexCover.vertexCoverNum_le` force
 `S.encard = ⊤`.
@@ -662,7 +629,7 @@ lemma exists_adj_notMem_of_matchingNum_eq_top (h : ν G = ⊤) {S : Set V}
   exact this hS
 
 /-!
-21. A matching `M` with finitely many vertices in a graph with `ν G = ⊤` can be
+19. A matching `M` with finitely many vertices in a graph with `ν G = ⊤` can be
 extended by one edge. Hint: take an edge avoiding `M.verts` from the previous
 exercise and add it with `Subgraph.IsMatching.sup`, whose disjointness hypothesis
 is about supports (`Subgraph.IsMatching.support_eq_verts`), then count edges with
@@ -690,14 +657,12 @@ lemma Subgraph.IsMatching.exists_le_encard_eq_add_one (h : ν G = ⊤)
     exact fun hadj => ha (M.edge_vert hadj)
 
 /-!
-22. If `ν G = ⊤` then `G` has an infinite matching. Hint: restate the previous
-exercise on the subtype `FM := {M : G.Subgraph // M.IsMatching ∧ M.verts.Finite}`
-of finite matchings, so that `choose` produces a step function `next : FM → FM`,
-and iterate it from `⊥`: `M n := next^[n] ⊥`, with `Function.iterate_succ_apply'`
-unfolding one step. Each `M n` is then a finite matching by construction; show by
-induction that it has exactly `n` edges. Each step extends the previous matching, so
-`M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a matching by
-Exercise 19, with at least `n` edges for every `n`.
+20. If `ν G = ⊤` then `G` has an infinite matching. Hint: the stub chooses a step
+function `next`, which extends each finite matching by one edge (the previous
+exercise), and iterates it from `⊥`; each `M n` is then a finite matching by
+construction. Show by induction that it has exactly `n` edges. Each step extends the
+previous matching, so `M` is monotone (`monotone_nat_of_le_succ`) and `⨆ n, M n` is a
+matching by Exercise 17, with at least `n` edges for every `n`.
 -/
 lemma exists_isMatching_encard_eq_top (h : ν G = ⊤) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ⊤ := by
@@ -724,7 +689,7 @@ lemma exists_isMatching_encard_eq_top (h : ν G = ⊤) :
     rw [hstep]
     exact hnext (M n)
   refine ⟨⨆ n, (M n).1,
-    Subgraph.IsMatching.iSup_of_monotone hmono fun n => (M n).2.1, ?_⟩
+    Subgraph.isMatching_iSup_of_monotone hmono fun n => (M n).2.1, ?_⟩
   -- The union contains a matching with `n` edges for every `n`, so it is infinite.
   have hle : ∀ n : ℕ, (n : ℕ∞) ≤ (⨆ n, (M n).1).edgeSet.encard := fun n => by
     rw [← hcount n]
@@ -732,11 +697,11 @@ lemma exists_isMatching_encard_eq_top (h : ν G = ⊤) :
   exact ENat.eq_top_iff_forall_ge.2 hle
 
 /-!
-23. Conclude that the matching number is attained in every graph, finite or not:
+21. Conclude that the matching number is attained in every graph, finite or not:
 this is the analogue of Mathlib's `vertexCoverNum_exists`. Hint: if `ν G = ⊤` use
-the previous exercise; otherwise a finite supremum in `ℕ∞` is attained
-(`ENat.exists_eq_iSup_of_lt_top`), exactly as in the proof of
-`exists_isMatching_matchingNum`.
+the previous exercise; otherwise a finite supremum in `ℕ∞` is attained, so conclude
+as in the proof of `exists_isMatching_matchingNum`, with
+`ENat.exists_eq_iSup_of_lt_top` in place of `exists_eq_ciSup_of_finite`.
 -/
 lemma matchingNum_exists (G : SimpleGraph V) :
     ∃ M : G.Subgraph, M.IsMatching ∧ M.edgeSet.encard = ν G := by
@@ -753,10 +718,32 @@ lemma matchingNum_exists (G : SimpleGraph V) :
     exact ⟨M, M.2, by rw [matchingNum_eq_iSup_subtype]; exact hM⟩
 
 /-!
-24. Show that, provided there is at least one colour, `s` is `n`-colourable in the
+22. Show that `⍺ Q[n + 1] = 2 ^ n`. Hint: the upper bound follows from Exercise 16
+and `matchingNum_hypercube_succ`. For the lower bound, `Q[n + 1]` is bipartite
+(`IsBipartite.hypercube`), so `Colorable.natCard_le_mul_indepNum` applies.
+-/
+example (n : ℕ) : ⍺ Q[n + 1] = 2 ^ n := by
+  refine le_antisymm ?_ ?_
+  · -- The upper bound `⍺ G + ν G ≤ |V|`, with `ν Q[n + 1] = 2 ^ n`.
+    have h := indepNum_add_matchingNum_le (G := Q[n + 1])
+    rw [matchingNum_hypercube_succ, Nat.card_eq_fintype_card, card_hypercubeVert,
+      pow_succ, mul_two] at h
+    have h' : ⍺ Q[n + 1] + 2 ^ n ≤ 2 ^ n + 2 ^ n := by exact_mod_cast h
+    grind
+  · -- `Q[n + 1]` is `2`-colourable, so it has at most `2 * ⍺ Q[n + 1]` vertices.
+    have h := (IsBipartite.hypercube (n + 1)).natCard_le_mul_indepNum
+    rw [Nat.card_eq_fintype_card, card_hypercubeVert, pow_succ] at h
+    grind
+
+/-!
+23. Show that, provided there is at least one colour, `s` is `n`-colourable in the
 sense of `ColorableOn` iff the induced subgraph `G.induce s` is `n`-colourable. (So
 partial colourings really do capture colourings of induced subgraphs.) Why is the
 hypothesis `0 < n` needed?
+
+A `G.ColoringOn (Fin n) s` colours every vertex of `G`, including those outside `s`.
+If `n = 0` and `V` is nonempty there is no colour for them, so `G.ColorableOn 0 ∅`
+fails, although `G.induce ∅` has no vertices and so is `0`-colourable.
 -/
 lemma colorableOn_iff_colorable_induce {n : ℕ} (hn : 0 < n) (s : Set V) :
     G.ColorableOn n s ↔ (G.induce s).Colorable n := by
@@ -765,8 +752,7 @@ lemma colorableOn_iff_colorable_induce {n : ℕ} (hn : 0 < n) (s : Set V) :
   · -- Restrict the colouring to `s`.
     rintro ⟨C⟩
     exact ⟨Coloring.mk (fun v => C v) fun {v w} h => C.valid ⟨v.2, w.2, h⟩⟩
-  · -- Colour the vertices outside `s` with colour `0`. (If `n = 0` and `V` is
-    -- nonempty there is no such colour, although `G.induce ∅` is `0`-colourable.)
+  · -- Colour the vertices outside `s` with colour `0`.
     rintro ⟨c⟩
     refine ⟨Coloring.mk (fun v => if hv : v ∈ s then c ⟨v, hv⟩ else ⟨0, hn⟩) ?_⟩
     rintro v w ⟨hv, hw, hadj⟩
@@ -774,6 +760,5 @@ lemma colorableOn_iff_colorable_induce {n : ℕ} (hn : 0 < n) (s : Set V) :
     exact c.valid (by simpa using hadj)
 
 /-! END SOLUTIONS -/
-
 
 end SimpleGraph

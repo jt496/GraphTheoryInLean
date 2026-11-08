@@ -50,24 +50,28 @@ and clone a copy of the repository <https://github.com/jt496/GraphTheoryInLean>.
 If you are reading the `.lean` files directly in VS Code or similar then see the
 `README.md` file for build instructions (`lake exe cache get` followed by
 `lake build`). Each chapter is in a separate folder that also contains any associated
-exercises.
+exercises. In VS Code the InfoView panel shows the output of each `#command` and the
+proof state at the cursor. Hovering over a name shows its type and any doc-string,
+and Ctrl+click (Cmd+click on a Mac) or F12 takes you to its definition, in Mathlib's
+source or in the guide.
 
 If you are reading the web version then please note that this is published using
 [Verso](https://verso.lean-lang.org/). You should be able to see most of the
 interactive features of Lean such as InfoView messages and `#command` outputs.
 
 To see the actual output of a `#command` you need to hover over the `#command` itself
-with your cursor (the `#command` will have wavy underlining). Many terms also have
-associated doc-strings which you can see by hovering over them; click on them to view
-their full documentation. Types of terms are also shown. In tactic proofs (i.e.
-proofs that start with `:= by`) hover over the small lozenge after a tactic to see
-the proof state at that point, and click it to keep the proof state open (click again
-to close it).
+with your cursor (the `#command` will have wavy underlining). Hovering over a name or
+term shows its type, and also its doc-string if it has one. Clicking a name takes you
+to its definition: a name from Mathlib opens its page in the Mathlib documentation,
+while a name defined in this guide takes you to where we define it. In tactic proofs
+(i.e. proofs that start with `:= by`) hover over the small lozenge after a tactic to
+see the proof state at that point, and click it to keep the proof state open (click
+again to close it).
 
 For example, below you should be able to hover over the `#source` command to see the
-verbatim source code of the definition of `SimpleGraph` in Mathlib. While if you
-hover over `SimpleGraph` itself you will see its doc-string; clicking on it will take
-you to its documentation page. Hovering over the `#check` will tell you the type of
+verbatim source code of the definition of `SimpleGraph` in Mathlib. Hovering over
+`SimpleGraph` itself shows its type and doc-string; clicking on it takes you to its
+page in the Mathlib documentation. Hovering over the `#check` tells you the type of
 `G.Adj u v` (it is a `Prop`), while hovering over `u` will confirm that it has type
 `V`, which in turn you can hover over to see its type `Type u_1`.
 -/
@@ -104,8 +108,9 @@ worth knowing how to search.
   example `SimpleGraph.degree` and `SimpleGraph.completeGraph`.
 * [LeanSearch](https://leansearch.net/) searches using natural language, for example
   "degree of a vertex in the complete graph".
-* Mathlib's documentation pages list the declarations of each file in order, so the
-  lemmas about a definition can usually be found near it.
+* Mathlib's documentation pages, and its source files (reached in VS Code with
+  Ctrl+click or F12), list the declarations of each file in order, so the lemmas
+  about a definition can usually be found near it.
 
 # How This Guide is Structured
 
@@ -135,6 +140,11 @@ advanced. Later sections sometimes use their results, and recall what they need 
 they do.
 
 [Figure: A route through the guide](https://jt496.github.io/GraphTheoryInLean/figures/reading_routes.svg)
+
+You certainly don't have to read the guide in order. If you prefer to start from
+something familiar, pick a theorem you already know in
+[Theorems](#chapter-theorems), see how it is stated in Lean, and work
+backwards to the definitions it uses.
 
 We use three running examples throughout: the `n`-dimensional hypercube `Q[n]`
 ([Hypercube](#section-hypercube)), the Mycielskian `mμ(G)` of a graph `G`
@@ -172,7 +182,7 @@ Theorems from Mathlib that we survey, mostly in the final chapter
 * [Tutte's Theorem](#section-tutte-s-theorem)
 * [Turán's Theorem](#section-tur-n-s-theorem) and
   [Mantel's Theorem](#section-mantel-s-theorem)
-* [Andrásfai–Erdős–Sós Theorem](#section-andr-sfai-erd-s-s-s-theorem)
+* [Andrásfai–Erdős–Sós Theorem](#section-the-andr-sfai-erd-s-s-s-theorem)
 * [Erdős–Stone Theorem](#section-tur-n-density-and-the-erd-s-stone-theorem)
 * [The Laplacian](#section-the-laplacian)
 * [Strongly Regular Graphs](#section-strongly-regular-graphs)

@@ -36,19 +36,36 @@
     margin-bottom: 0.85rem;
 }
 
-/* Toolchain versions on the title page (the root `authorshipNote`, written by
-   convert_lean_to_verso.py): a small faded line of its own below the authors,
-   rather than Verso's italic note inline after ", ". Opacity keeps it muted in
-   both themes. */
-main .authors .note {
-    display: block;
+/* The `:::release_line` block on the title page (STIL/Tactic/TitlePage.lean),
+   centred under the authors like them: the edition line (guide.json "edition"),
+   in italics as in Mathematics in Lean, then the toolchain versions as a small
+   faded line (opacity keeps it muted in both themes). The version names link to
+   their releases and commits: underlined, in the line's own colour and size. */
+main .titlepage .stil-release {
     margin-top: 0.5em;
-    font-size: 0.75rem;
-    font-style: normal;
+    text-align: center;
+    font-family: var(--verso-structure-font-family);
+}
+main .titlepage .stil-release p {
+    margin: 0;
+}
+main .titlepage .stil-release-edition {
+    font-style: italic;
+}
+main .titlepage .stil-release-versions {
     opacity: 0.6;
 }
-main .authors:has(.author) .note::before {
-    content: none;
+/* The versions are a Verso paragraph, so the size goes on the `p` itself: set on
+   the div it would lose to the body-text `.content-wrapper :is(p, li, dd)`. */
+main .titlepage .stil-release-versions p {
+    font-size: 0.75rem;
+}
+main .titlepage .stil-release-edition + .stil-release-versions {
+    margin-top: 0.5em;
+}
+main .titlepage .stil-release-versions a {
+    color: inherit;
+    text-decoration: underline;
 }
 
 /* Work-in-progress notice (guide.json "draft_notice"): the `:::draft_notice`
@@ -298,6 +315,23 @@ figure.stil-figure img {
     display: inline-block;
     padding: 0.2em 0;
     color: #0645ad;
+}
+
+/* The `*import …*` line that ends a constant's hover (the SubVerso patch's
+   `constDocs`) follows the docstring after a Markdown rule. Draw that rule like
+   Verso's own `.sep` between signature and docstring, and drop the paragraph
+   margins on either side of it, which otherwise leave a wide gap. */
+.hl.lean div.docstring > hr {
+    height: 0;
+    margin: 0.5rem 1rem;
+    border: none;
+    border-top: 1px solid var(--verso-tooltip-separator-color, #ccc);
+}
+.hl.lean div.docstring > :has(+ hr) {
+    margin-bottom: 0;
+}
+.hl.lean div.docstring > hr + * {
+    margin-top: 0;
 }
 
 /* A pinned proof state goes under the tactic text, not under the lozenge: the
@@ -834,6 +868,10 @@ ol.section-toc > li.part-sep {
         word-break: break-all;
     }
     a[href*="mathlib4_docs"]::after { content: none; }
+    /* Nor the title page's version links: three long release/commit URLs.
+       `!important` because the rule above, with its `:not(…)`s, has the higher
+       specificity (0,3,7). */
+    main .titlepage .stil-release-versions a::after { content: none !important; }
 }
 
 /* ============================================================

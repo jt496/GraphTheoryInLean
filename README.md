@@ -1,13 +1,13 @@
 # Graph Theory in Lean
 
+*First edition · Release v4.36.0-rc2 · November 2026*
+
 The Lean sources of *Graph Theory in Lean*: one directory per chapter under
 `GraphTheoryInLean/`, each holding the chapter (`CNN_Name.lean`) and, for most chapters, its
 exercises with solutions (`Exercises.lean`).
 
 Read the guide online at <https://jt496.github.io/GraphTheoryInLean/>.
 The HTML is in `docs/`, served by GitHub Pages.
-
-> **Preliminary draft.** Chapters may be incomplete, and the text and code may change.
 
 ## Building
 
@@ -31,8 +31,9 @@ The HTML is in `docs/`, served by GitHub Pages.
 11. [Distance](https://jt496.github.io/GraphTheoryInLean/Distance/)
 12. [Algebraic Graph Theory](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/)
 13. [Theorems](https://jt496.github.io/GraphTheoryInLean/Theorems/)
-14. [Bibliography](https://jt496.github.io/GraphTheoryInLean/Bibliography/)
-15. [Appendix](https://jt496.github.io/GraphTheoryInLean/Appendix/)
+
+- [Appendix](https://jt496.github.io/GraphTheoryInLean/Appendix/)
+- [Bibliography](https://jt496.github.io/GraphTheoryInLean/Bibliography/)
 
 This repository is generated from the guide's sources; edit those rather than
 these files.

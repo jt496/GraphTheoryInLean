@@ -40,7 +40,7 @@ vertices of the disjoint union have the same index.
 -/
 def Hom.sigmaElim' {ι : Type*} {V : ι → Type*} {W : Type*}
     (G : (i : ι) → SimpleGraph (V i))
-    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : SimpleGraph.sigma G →g H :=
+    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : Σg G →g H :=
   sorry
 
 /-!
@@ -61,17 +61,17 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
   sorry
 
 /-!
-7. Show that the path graph `pathGraph (n + 1)` is a tree. (Mathlib has this, but
-prove it directly.) Hint: deduce acyclicity from `isAcyclic_pathNat` using
-`IsAcyclic.comap`.
+7. Show that a tree has at most one connected component.
 -/
-example (n : ℕ) : P[n + 1].IsTree := by
+example (h : G.IsTree) : Subsingleton G.ConnectedComponent := by
   sorry
 
 /-!
-8. Show that a tree has at most one connected component.
+8. Show that the path graph `P[n + 1]` is a tree. (Mathlib has this as
+`isTree_pathGraph_add_one`, but prove it directly.) Hint: deduce acyclicity from
+`isAcyclic_pathNat` using `IsAcyclic.comap`.
 -/
-example (h : G.IsTree) : Subsingleton G.ConnectedComponent := by
+example (n : ℕ) : P[n + 1].IsTree := by
   sorry
 
 /-!
@@ -80,7 +80,7 @@ the degree of any of its vertices.
 
 Hint: every vertex `u ≠ v` has degree at least one
 (`Preconnected.degree_pos_of_nontrivial`), so
-`degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
+`G.degree u + (if G.degree u = 1 then 1 else 0)` is at least `2`. Sum this over all
 vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
 form `sum_degrees_eq_twice_card_edges'` from [The Handshake
 Lemma](#section-the-handshake-lemma).
@@ -91,7 +91,15 @@ lemma IsTree.degree_le_card_leaves' [Fintype V] [G.LocallyFinite] (h : G.IsTree)
   sorry
 
 /-!
-10. Show that every finite connected graph with at least two vertices has a vertex
+10. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
+Hint: `Connected.induce_compl_singleton_of_degree_eq_one` and `IsAcyclic.induce`.
+-/
+example [G.LocallyFinite] (hT : G.IsTree) {v : V}
+    (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree := by
+  sorry
+
+/-!
+11. Show that every finite connected graph with at least two vertices has a vertex
 whose deletion leaves it connected (so not every vertex is a cut vertex). Hint: take
 a leaf `v` of a spanning tree `T` (`IsTree.exists_vert_degree_one_of_nontrivial`).
 Deleting it leaves `T` connected
@@ -100,15 +108,6 @@ this to `G`.
 -/
 example [Finite V] [Nontrivial V] (h : G.Connected) :
     ∃ v, (G.induce {v}ᶜ).Connected := by
-  sorry
-
-/-!
-11. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
-Hint: search Mathlib (see [Finding Lemmas](#section-finding-lemmas)) for a lemma
-about `induce` and a vertex of degree one.
--/
-example [G.LocallyFinite] (hT : G.IsTree) {v : V}
-    (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree := by
   sorry
 
 /-!
@@ -127,7 +126,7 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian := by
 `exists_minimal_degree_vertex` and `IsVertexConnected.le_degree`.
 -/
 lemma IsVertexConnected.le_minDegree' {k : ℕ∞} [Fintype V] [Nonempty V]
-    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ G.minDegree := by
+    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ δ(G) := by
   sorry
 
 /-!
@@ -170,6 +169,11 @@ Hint: if `c ≠ b` and `(z, b) ∈ S`, find a neighbour `w` of `z` such that nei
 `IsVertexConnected.le_encard_neighborSet`, but less than `k` elements of `S` have a
 first coordinate other than `z`. Then step to `(w, c)` and cross to `(w, b)`.
 -/
+private lemma exists_good_neighbor' {k : ℕ} (hG : G.IsVertexConnected k)
+    {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {b : Bool} (hzb : (z, b) ∈ S) :
+    ∃ w, G.Adj z w ∧ ∀ c, (w, c) ∉ S := by
+  sorry
+
 lemma IsVertexConnected.exists_walk_to_fiber' {k : ℕ} (hG : G.IsVertexConnected k)
     {S : Finset (V × Bool)} (hS : S.card ≤ k) {z : V} {c : Bool} (hzc : (z, c) ∉ S)
     (b : Bool) :
@@ -210,7 +214,7 @@ lemma IsVertexConnected.boxProd_top_bool' {k : ℕ} (hG : G.IsVertexConnected k)
     (G □ (⊤ : SimpleGraph Bool)).IsVertexConnected (k + 1) := by
   sorry
 
-lemma isVertexConnected_hypercube' {n : ℕ} : Q[n].IsVertexConnected n := by
+lemma isVertexConnected_hypercube' (n : ℕ) : Q[n].IsVertexConnected n := by
   sorry
 
 /-!
@@ -219,7 +223,7 @@ no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
 `Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
 `isBridge_iff_not_isEdgeReachable_two`.
 -/
-lemma isEdgeConnected_hypercube' {n : ℕ} : Q[n].IsEdgeConnected n := by
+lemma isEdgeConnected_hypercube' (n : ℕ) : Q[n].IsEdgeConnected n := by
   sorry
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
@@ -235,7 +239,7 @@ this gives Whitney's inequalities
 `edgeConnectivity_le_degree`.
 -/
 lemma edgeConnectivity_le_minDegree' [Fintype V] [Nontrivial V]
-    [DecidableRel G.Adj] : λ(G) ≤ G.minDegree := by
+    [DecidableRel G.Adj] : λ(G) ≤ δ(G) := by
   sorry
 
 /-!
@@ -246,8 +250,7 @@ lemma edgeConnectivity_le_minDegree' [Fintype V] [Nontrivial V]
 /-- The *bowtie*: two triangles `0, 1, 2` and `0, 3, 4` sharing the vertex `0`. -/
 def bowtie : SimpleGraph (Fin 5) :=
   fromRel fun i j => (i, j) ∈ [(0, 1), (1, 2), (2, 0), (0, 3), (3, 4), (4, 0)]
-
-instance : DecidableRel bowtie.Adj := inferInstanceAs (DecidableRel (fromRel _).Adj)
+deriving instance DecidableRel for (bowtie.Adj)
 
 /-!
 Show that `κ(bowtie) < λ(bowtie)`, so the first of Whitney's inequalities can be
@@ -268,8 +271,7 @@ example : κ(bowtie) < λ(bowtie) := by
 the edge `3 — 4`. -/
 def barbell : SimpleGraph (Fin 8) :=
   fromRel fun i j => (i < 4 ∧ j < 4) ∨ (4 ≤ i ∧ 4 ≤ j) ∨ (i = 3 ∧ j = 4)
-
-instance : DecidableRel barbell.Adj := inferInstanceAs (DecidableRel (fromRel _).Adj)
+deriving instance DecidableRel for (barbell.Adj)
 
 /-!
 Show that `λ(barbell) < δ(barbell)`, so the second of Whitney's inequalities can also
@@ -291,11 +293,12 @@ lemma vertexConnectivity_hypercube' (n : ℕ) : κ(Q[n]) = n := by
 
 /-!
 22. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
-connectivity of `Q[0]` is `⊤`. Hint: use `vertexConnectivity_le_edgeConnectivity` and
-`edgeConnectivity_le_degree`, which needs a `Nontrivial (HypercubeVert (n + 1))`
-instance, and `edgeConnectivity_of_subsingleton`. Instance search deliberately does
-not see through `HypercubeVert`, so you will have to supply these instances yourself,
-for example with `inferInstanceAs (Nontrivial (HypercubeVert n × Bool))`.
+connectivity of `Q[0]` is `⊤`. Hint: use Exercise 21 and
+`vertexConnectivity_le_edgeConnectivity`, then `edgeConnectivity_le_degree`, which
+needs a `Nontrivial (HypercubeVert (n + 1))` instance, and
+`edgeConnectivity_of_subsingleton`. Instance search deliberately does not see through
+`HypercubeVert`, so you will have to supply these instances yourself, for example
+with `inferInstanceAs (Nontrivial (HypercubeVert n × Bool))`.
 -/
 lemma edgeConnectivity_hypercube_succ' (n : ℕ) : λ(Q[n + 1]) = n + 1 := by
   sorry
@@ -366,7 +369,7 @@ example [Nonempty V] : G.Connected ∨ Gᶜ.Connected := by
 2. Show that the complete bipartite graph `K[s + 1, t + 1]` is connected.
 -/
 example (s t : ℕ) : K[s + 1, t + 1].Connected := by
-  apply (connected_iff_exists_forall_reachable _).2 ⟨.inl 0, fun v => ?_⟩
+  refine (connected_iff_exists_forall_reachable _).2 ⟨.inl 0, fun v => ?_⟩
   match v with
   | .inl b =>
     have h : K[s + 1, t + 1].Adj (.inl 0) (.inr 0) := by simp
@@ -382,6 +385,7 @@ does a walk in `⊥` look like?
 Any walk in `⊥` is `nil`, so reachability in `⊥` is equality and
 `connectedComponentMk` is a bijection.
 -/
+/-- The connected components of `⊥` correspond to its vertices. -/
 def botComponentEquiv : (⊥ : SimpleGraph V).ConnectedComponent ≃ V where
   toFun := ConnectedComponent.lift id fun v w p _ => by
     cases p with
@@ -403,7 +407,7 @@ preserves.
 the disjoint union. -/
 def Hom.sigmaElim {ι : Type*} {V : ι → Type*} {W : Type*}
     (G : (i : ι) → SimpleGraph (V i))
-    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : SimpleGraph.sigma G →g H where
+    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : Σg G →g H where
   toFun p := f p.1 p.2
   map_rel' := by
     rintro ⟨i, u⟩ ⟨j, v⟩ ⟨rfl, hadj⟩
@@ -432,9 +436,15 @@ example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
   exact hG u hu
 
 /-!
-7. Show that the path graph `pathGraph (n + 1)` is a tree. (Mathlib has this, but
-prove it directly.) Hint: deduce acyclicity from `isAcyclic_pathNat` using
-`IsAcyclic.comap`.
+7. Show that a tree has at most one connected component.
+-/
+example (h : G.IsTree) : Subsingleton G.ConnectedComponent :=
+  h.connected.preconnected.subsingleton_connectedComponent
+
+/-!
+8. Show that the path graph `P[n + 1]` is a tree. (Mathlib has this as
+`isTree_pathGraph_add_one`, but prove it directly.) Hint: deduce acyclicity from
+`isAcyclic_pathNat` using `IsAcyclic.comap`.
 
 The path graph is connected, and `Fin.val` is an injective homomorphism from
 `P[n + 1]` into the infinite path `pathNat`, which is acyclic. So any cycle in
@@ -454,7 +464,7 @@ example (n : ℕ) : P[n + 1].IsTree := by
     Nat.add_right_cancel_iff]
   -- show `P[n + 1].edgeFinset.card = n` by exhibiting a bijection from `Fin n`
   have he : P[n + 1].edgeFinset =
-      Finset.univ.image fun i : Fin n ↦ s(i.castSucc, i.succ) := by
+      Finset.univ.image fun i : Fin n => s(i.castSucc, i.succ) := by
     ext e
     induction e using Sym2.ind with | _ a b => ?_
     simp only [mem_edgeFinset, mem_edgeSet, pathGraph_adj, Finset.mem_image,
@@ -464,14 +474,8 @@ example (n : ℕ) : P[n + 1].IsTree := by
       · exact ⟨⟨a, by grind⟩, by grind⟩
       · exact ⟨⟨b, by grind⟩, by grind⟩
     · grind
-  rw [he, Finset.card_image_of_injective _ fun a b h ↦ by grind, Finset.card_univ,
+  rw [he, Finset.card_image_of_injective _ fun a b h => by grind, Finset.card_univ,
     Fintype.card_fin]
-
-/-!
-8. Show that a tree has at most one connected component.
--/
-example (h : G.IsTree) : Subsingleton G.ConnectedComponent :=
-  h.connected.preconnected.subsingleton_connectedComponent
 
 /-!
 9. Show that a finite tree has at least as many leaves (vertices of degree one) as
@@ -479,7 +483,7 @@ the degree of any of its vertices.
 
 Hint: every vertex `u ≠ v` has degree at least one
 (`Preconnected.degree_pos_of_nontrivial`), so
-`degree u + (if G.degree u = 1 then 1 else 0)` is at least 2. Sum this over all
+`G.degree u + (if G.degree u = 1 then 1 else 0)` is at least `2`. Sum this over all
 vertices and compare with `IsTree.card_edgeFinset` and the handshake lemma in the
 form `sum_degrees_eq_twice_card_edges'` from [The Handshake
 Lemma](#section-the-handshake-lemma).
@@ -506,7 +510,15 @@ lemma IsTree.degree_le_card_leaves [Fintype V] [G.LocallyFinite] (h : G.IsTree)
   grind [h.card_edgeFinset]
 
 /-!
-10. Show that every finite connected graph with at least two vertices has a vertex
+10. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
+Hint: `Connected.induce_compl_singleton_of_degree_eq_one` and `IsAcyclic.induce`.
+-/
+example [G.LocallyFinite] (hT : G.IsTree) {v : V}
+    (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree :=
+  ⟨hT.connected.induce_compl_singleton_of_degree_eq_one hv, hT.isAcyclic.induce _⟩
+
+/-!
+11. Show that every finite connected graph with at least two vertices has a vertex
 whose deletion leaves it connected (so not every vertex is a cut vertex). Hint: take
 a leaf `v` of a spanning tree `T` (`IsTree.exists_vert_degree_one_of_nontrivial`).
 Deleting it leaves `T` connected
@@ -526,15 +538,6 @@ example [Finite V] [Nontrivial V] (h : G.Connected) :
   -- deleting a leaf keeps `T` connected, and `T.induce {v}ᶜ ≤ G.induce {v}ᶜ`
   exact ⟨v, (hT.connected.induce_compl_singleton_of_degree_eq_one hv).mono
     fun _ _ h => hTG h⟩
-
-/-!
-11. Show that deleting a leaf (a vertex of degree one) from a tree leaves a tree.
-Hint: search Mathlib (see [Finding Lemmas](#section-finding-lemmas)) for a lemma
-about `induce` and a vertex of degree one.
--/
-example [G.LocallyFinite] (hT : G.IsTree) {v : V}
-    (hv : G.degree v = 1) : (G.induce {v}ᶜ).IsTree :=
-  ⟨hT.connected.induce_compl_singleton_of_degree_eq_one hv, hT.isAcyclic.induce _⟩
 
 /-!
 12. Use Euler's theorem (`Connected.exists_closed_isEulerian`) to show that the
@@ -562,14 +565,18 @@ example (n : ℕ) : ∃ u, ∃ p : Q[2 * n + 2].Walk u u, p.IsEulerian :=
 `exists_minimal_degree_vertex` and `IsVertexConnected.le_degree`.
 -/
 lemma IsVertexConnected.le_minDegree {k : ℕ∞} [Fintype V] [Nonempty V]
-    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ G.minDegree := by
+    [DecidableRel G.Adj] (hG : G.IsVertexConnected k) : k ≤ δ(G) := by
   obtain ⟨v, hv⟩ := G.exists_minimal_degree_vertex
   rw [hv]
   exact hG.le_degree v
 
 /-!
-14. For a finset `S` of vertices of `G □ K₂` and `b : Bool`, let `S.fiberProj b` be
-the finset of vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at `b` lies in
+14. Exercises 14–16 show that if `G` is connected and `k`-vertex-connected then
+`G □ K₂` is `(k + 1)`-vertex-connected, and deduce that the hypercube `Q[n]` is
+`n`-vertex-connected.
+
+For a finset `S` of vertices of `G □ K₂` and `b : Bool`, let `S.fiberProj b` be the
+finset of vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at `b` lies in
 `S`. Show that if `0 < k` and `S` has at most `k` elements then some `G`-fibre
 contains less than `k` vertices of `S`.
 
@@ -678,7 +685,7 @@ lemma IsVertexConnected.boxProd_top_bool {k : ℕ} (hG : G.IsVertexConnected k)
     Walk.support_boxProdLeft, List.mem_map] at hx
   grind [Finset.mem_fiberProj]
 
-lemma isVertexConnected_hypercube {n : ℕ} : Q[n].IsVertexConnected n := by
+lemma isVertexConnected_hypercube (n : ℕ) : Q[n].IsVertexConnected n := by
   induction n with
   | zero =>
     refine ⟨?_, fun S hS => absurd hS (by simp)⟩
@@ -692,13 +699,13 @@ no bridges. Hint: Exercise 16 and `IsVertexConnected.isEdgeConnected`. Then
 `Q[n + 2]` is `2`-edge-connected by `IsEdgeConnected.anti`; now use
 `isBridge_iff_not_isEdgeReachable_two`.
 -/
-lemma isEdgeConnected_hypercube {n : ℕ} : Q[n].IsEdgeConnected n :=
-  isVertexConnected_hypercube.isEdgeConnected
+lemma isEdgeConnected_hypercube (n : ℕ) : Q[n].IsEdgeConnected n :=
+  (isVertexConnected_hypercube n).isEdgeConnected
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
     ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
   (isBridge_iff_not_isEdgeReachable_two h).mp hb
-    ((isEdgeConnected_hypercube (n := n + 2)).anti (by simp) u v)
+    ((isEdgeConnected_hypercube (n + 2)).anti (by simp) u v)
 
 /-!
 18. Show that the edge connectivity of a finite graph with at least two vertices is
@@ -709,7 +716,7 @@ this gives Whitney's inequalities
 `edgeConnectivity_le_degree`.
 -/
 lemma edgeConnectivity_le_minDegree [Fintype V] [Nontrivial V]
-    [DecidableRel G.Adj] : λ(G) ≤ G.minDegree := by
+    [DecidableRel G.Adj] : λ(G) ≤ δ(G) := by
   obtain ⟨v, hv⟩ := G.exists_minimal_degree_vertex
   rw [hv]
   exact edgeConnectivity_le_degree v
@@ -762,17 +769,18 @@ degree `n` of any vertex.
 lemma vertexConnectivity_hypercube (n : ℕ) : κ(Q[n]) = n := by
   obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
   refine le_antisymm ((vertexConnectivity_le_encard_neighborSet v).trans_eq ?_)
-    (le_vertexConnectivity_iff.mpr isVertexConnected_hypercube)
+    (le_vertexConnectivity_iff.mpr (isVertexConnected_hypercube n))
   rw [← coe_neighborFinset, Set.encard_coe_eq_coe_finsetCard,
     card_neighborFinset_eq_degree, IsRegularOfDegree.hypercube n v]
 
 /-!
 22. Show that the edge connectivity of `Q[n + 1]` is `n + 1`, but that the edge
-connectivity of `Q[0]` is `⊤`. Hint: use `vertexConnectivity_le_edgeConnectivity` and
-`edgeConnectivity_le_degree`, which needs a `Nontrivial (HypercubeVert (n + 1))`
-instance, and `edgeConnectivity_of_subsingleton`. Instance search deliberately does
-not see through `HypercubeVert`, so you will have to supply these instances yourself,
-for example with `inferInstanceAs (Nontrivial (HypercubeVert n × Bool))`.
+connectivity of `Q[0]` is `⊤`. Hint: use Exercise 21 and
+`vertexConnectivity_le_edgeConnectivity`, then `edgeConnectivity_le_degree`, which
+needs a `Nontrivial (HypercubeVert (n + 1))` instance, and
+`edgeConnectivity_of_subsingleton`. Instance search deliberately does not see through
+`HypercubeVert`, so you will have to supply these instances yourself, for example
+with `inferInstanceAs (Nontrivial (HypercubeVert n × Bool))`.
 
 For `Q[n + 1]` we have `n + 1 = κ(Q[n + 1]) ≤ λ(Q[n + 1])`, and `λ(Q[n + 1])` is at
 most the degree `n + 1` of any vertex, since `Q[n + 1]` has at least two vertices.
@@ -858,7 +866,5 @@ theorem colorable_iff_forall_block {n : ℕ} (hn : 1 ≤ n) :
         (B.map_toSubgraph_le H.coeCopy))
 
 /-! END SOLUTIONS -/
-
-
 
 end SimpleGraph

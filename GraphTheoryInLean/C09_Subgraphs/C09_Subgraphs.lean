@@ -24,18 +24,21 @@ and walks, by taking induced subgraphs, and by deleting vertices and edges. Sinc
 two (`Subgraph.coe`, `Subgraph.spanningCoe` and `toSubgraph`), spanning subgraphs,
 and the parts of the `SimpleGraph` API that have to be duplicated for `Subgraph`.
 Since we now have four different ways of talking about subgraphs, we compare them and
-discuss when to use each. As an application we use the *De Bruijn–Erdős theorem* to
-extend our greedy colouring bound to infinite graphs. We then introduce maps and
+discuss when to use each. As an application we use the *De Bruijn–Erdős theorem*
+(`colorable_of_forall_finite_subgraph_colorable`) to extend our greedy colouring
+bound to infinite graphs (`colorable_of_degree_le`). We then introduce maps and
 comaps of subgraphs, with subgraphs of the Mycielskian as a worked example.
 
 Matchings are subgraphs, so we next define the *matching number* `ν G` of a graph and
-prove weak duality `ν G ≤ τ G`, where `τ G` is the *vertex cover number*. We then
-compute the matching number of the hypercube and bound that of the Mycielskian.
+prove weak duality `ν G ≤ τ G` (`matchingNum_le_vertexCoverNum`), where `τ G` is the
+*vertex cover number*. We then compute the matching number of the hypercube
+(`matchingNum_hypercube_succ`) and bound that of the Mycielskian
+(`two_mul_matchingNum_le_matchingNum_mycielskian`).
 
-The final section is more advanced: we introduce *partial colourings*, colourings
-that need only be valid on a given set of vertices. These are the main tool in our
-proof of *Brooks' theorem* in the next chapter [Brooks'
-Theorem*](#section-brooks-theorem).
+The final section is more advanced: we introduce *partial colourings* (`ColoringOn`),
+colourings that need only be valid on a given set of vertices. These are the main
+tool in our proof of *Brooks' theorem* in the next chapter
+[Brooks' Theorem*](#section-brooks-theorem).
 
 # Subgraphs
 
@@ -69,7 +72,7 @@ example (H₁ H₂ : G.Subgraph) (h₁ : H₁.verts = H₂.verts)
     (h₂ : ∀ v w, H₁.Adj v w ↔ H₂.Adj v w) : H₁ = H₂ := by
   ext v w
   · rw [h₁]
-  · apply h₂
+  · exact h₂ v w
 
 /-!
 ## The Subgraph Lattice
@@ -548,8 +551,8 @@ exercises for details.)
 Since an `n`-colouring is a homomorphism to `K[n]`, the De Bruijn–Erdős theorem is
 the special case in which `F` is `K[n]`.
 -/
-/-- *De Bruijn–Erdős*: if every finite subgraph of `G` is `n`-colourable then `G` is
-`n`-colourable. -/
+/-- **De Bruijn–Erdős theorem**: if every finite subgraph of `G` is `n`-colourable
+then `G` is `n`-colourable. -/
 theorem colorable_of_forall_finite_subgraph_colorable {n : ℕ}
     (h : ∀ H : G.Subgraph, H.verts.Finite → H.coe.Colorable n) : G.Colorable n :=
   nonempty_hom_of_forall_finite_subgraph_hom fun H hH => (h H hH).some
@@ -561,7 +564,7 @@ is countable.
 -/
 theorem colorable_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     (hdeg : ∀ v, G.degree v ≤ Δ) : G.Colorable (Δ + 1) := by
-  apply colorable_of_forall_finite_subgraph_colorable fun H hH => ?_
+  refine colorable_of_forall_finite_subgraph_colorable fun H hH => ?_
   classical
   have : Finite H.verts := hH.to_subtype
   exact colorable_of_degree_le_of_countable fun _ =>
@@ -903,7 +906,7 @@ particular `matchingNum_le`, ensures our proof does not need to mention indexed
 suprema.)
 -/
 lemma matchingNum_bot : ν (⊥ : SimpleGraph V) = 0 := by
-  apply nonpos_iff_eq_zero.mp <| matchingNum_le fun M _ => ?_
+  refine nonpos_iff_eq_zero.mp <| matchingNum_le fun M _ => ?_
   simp [Set.subset_empty_iff.mp (edgeSet_bot ▸ M.edgeSet_subset)]
 
 /-!
@@ -1294,7 +1297,6 @@ example {a b : V} {s : Set V} :
     (G.induce s).spanningCoe.Adj a b ↔
       a ≠ b ∧ ∃ u v : ↑s, (G.induce s).Adj u v ∧ ↑u = a ∧ ↑v = b := Iff.rfl
 
-
 /-- `G.ColoringOn γ s` assigns a colour in `γ` to every vertex of `G`, but only
 requires adjacent vertices that both lie in `s` to get different colours: vertices
 outside `s` are coloured arbitrarily. -/
@@ -1431,7 +1433,6 @@ colouring of a pair of non-adjacent vertices.
 @[simps!]
 protected def ColoringOn.empty (c : γ) : G.ColoringOn γ ∅ :=
   Coloring.mk (fun _ => c) fun h => h.1.elim
-
 
 /-- The partial colouring of the singleton set `{a}` by a colour `c`. -/
 @[simps]

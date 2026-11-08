@@ -30,15 +30,17 @@ a goal that uses the other. We will see how to deal with such a mismatch when it
 arises, and how to state theorems so that it does not arise in the first place.
 
 The second half applies all this to graphs. We study finite neighbourhoods and vertex
-degrees (including minimum and maximum degree, the handshake lemma and regular
-graphs). We then do computations with two families of graphs, hypercubes and
-Mycielskians, building the `DecidableRel` and `Fintype` instances needed both to
-evaluate and to prove facts about their degrees and edge counts.
+degrees, including minimum degree (`δ(G)`) and maximum degree (`Δ(G)`), the handshake
+lemma (`sum_degrees_eq_twice_card_edges`) and regular graphs. We then do computations
+with two families of graphs, hypercubes and Mycielskians, building the `DecidableRel`
+and `Fintype` instances needed both to evaluate and to prove facts about their
+degrees and edge counts.
 
 Finally, an advanced section on degree sequences defines the degree multiset of a
-graph and asks which multisets are *graphic*. It states the Erdős–Gallai and
-Havel–Hakimi characterizations without proof, and uses Havel–Hakimi to give a
-function that computes the edges of a graph with a given graphic degree sequence.
+graph and asks which multisets are *graphic* (`Graphic`). It states the Erdős–Gallai
+(`erdos_gallai`) and Havel–Hakimi (`havel_hakimi`) characterizations without proof,
+and uses Havel–Hakimi to give a function (`havelHakimiEdges`) that computes the edges
+of a graph with a given graphic degree sequence.
 
 # Decidability
 
@@ -459,14 +461,15 @@ adjacency for a graph defined from a decidable relation using the
 of `ℕ`.
 
 Rather than changing the definition of `pathNatFromRel` to an `abbrev` we can also
-provide a decidability instance for `pathNatFromRel.Adj` directly in two different
+provide a decidability instance for `pathNatFromRel.Adj` directly, in three different
 ways. One way is by `unfold`ing its definition and then calling `infer_instance`. The
 second way is to use `inferInstanceAs` to specify the type of the instance we want to
 find. In the latter case we know that Mathlib contains an instance of `DecidableRel`
 for the adjacency relation of a graph defined using `SimpleGraph.fromRel` so we tell
-it to use this.
+it to use this. We write both of these as `example`s, since we only want one instance
+for `pathNatFromRel.Adj`.
 -/
-instance myDecidableRelPathNatFromRel : DecidableRel pathNatFromRel.Adj := by
+example : DecidableRel pathNatFromRel.Adj := by
   unfold pathNatFromRel
   -- goal is now ⊢ DecidableRel (fromRel fun x1 x2 ↦ x1 + 1 = x2).Adj
   -- so Lean can use the instance `instDecidableRelAdjFromRelOfDecidableEq`
@@ -474,6 +477,27 @@ instance myDecidableRelPathNatFromRel : DecidableRel pathNatFromRel.Adj := by
 
 example : DecidableRel pathNatFromRel.Adj :=
   inferInstanceAs (DecidableRel (SimpleGraph.fromRel _).Adj)
+
+/-!
+The third way, and the one we use, is to let Lean write the instance for us with the
+`deriving instance` command. This unfolds `pathNatFromRel.Adj` until type class
+inference finds an instance, much as we did by hand above. The parentheses are
+needed because Lean reads `pathNatFromRel.Adj` as a single name, and when the target
+of `deriving instance` is just a name it looks for a declaration with that name;
+there is no declaration called `pathNatFromRel.Adj`. In parentheses it is read as an
+ordinary expression, meaning `SimpleGraph.Adj pathNatFromRel`.
+-/
+deriving instance DecidableRel for (pathNatFromRel.Adj)
+
+example : pathNatFromRel.Adj 3 4 := by decide
+
+/-!
+When the value of a `def` is a `Prop`, we can instead write `deriving Decidable` at
+the end of the definition itself, and Lean builds the instance in the same way. This
+only works if the definition already takes every instance needed to decide its value;
+otherwise we can use `deriving instance` as above, supplying the missing instances as
+section variables.
+-/
 
 /-!
 Finally we have `pathNatFromEdgeSet` which was defined using
@@ -1523,6 +1547,8 @@ produce a proof of `inst₁ = inst₂` for us whenever we need one. This is exac
 #synth (α : Type*) → Subsingleton (Fintype α) -- Fintype.subsingleton
 #check Subsingleton.elim -- {α : Sort u} [h : Subsingleton α] (a b : α) : a = b
 
+/-- The **handshake lemma** the degrees of a finite graph sum to twice its number of
+edges (assuming only the instances its statement needs) -/
 lemma sum_degrees_eq_twice_card_edges' {V : Type*} (G : SimpleGraph V)
     [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] :
     ∑ v, G.degree v = 2 * G.edgeFinset.card := by
@@ -2158,8 +2184,14 @@ lemma degree_mycielskian_left (v : V) [Fintype (G.neighborSet v)]
 If `V` is finite then the vertex type `Option (V ⊕ V)` of the Mycielskian has
 `2 * |V| + 1` elements. (Counting the vertices of the `n`-th iterated Mycielskian is
 left as an exercise.)
+
+This is not a `simp` lemma, since its left-hand side is not in simp normal form ([The
+Simplifier](#section-the-simplifier)): `simp` rewrites
+`Fintype.card (Option (V ⊕ V))` to `Fintype.card V + Fintype.card V + 1` using
+Mathlib's `simp` lemmas `Fintype.card_option` and `Fintype.card_sum`, so it would
+never use our lemma. That is also how the proof works, with `two_mul` rewriting the
+right-hand side to match.
 -/
-@[simp]
 lemma card_mycielskianVert_one [Fintype V] :
     Fintype.card (Option (V ⊕ V)) = 2 * Fintype.card V + 1 := by
   simp [two_mul]
@@ -2348,6 +2380,8 @@ abbrev ErdosGallaiLE (m : Multiset ℕ) (k : ℕ) : Prop :=
 /-!
 Now the Erdős–Gallai theorem can be stated as follows.
 -/
+/-- The **Erdős–Gallai theorem**: a multiset `m` of natural numbers is graphic iff
+its sum is even and `ErdosGallaiLE m k` holds for every `k ≤ m.card`. -/
 theorem erdos_gallai (m : Multiset ℕ) :
     (Even m.sum ∧ ∀ (k : ℕ), k ≤ m.card → ErdosGallaiLE m k) ↔ Graphic m := by
   sorry
@@ -2420,6 +2454,8 @@ def havelHakimi (m : Multiset ℕ) : Bool := havelHakimiAux (m.sort (· ≥ ·))
 #eval havelHakimi [6, 5, 4, 3, 2, 1, 1] -- false: it reduces to [4, 3, 2, 1, 0, 0]
                                         -- which has too many zeros so is rejected.
 
+/-- The **Havel–Hakimi theorem**: the procedure `havelHakimi` accepts `m` iff `m` is
+graphic. -/
 theorem havel_hakimi (m : Multiset ℕ) : havelHakimi m ↔ Graphic m := by
   sorry
 

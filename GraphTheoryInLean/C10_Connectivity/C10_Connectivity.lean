@@ -14,22 +14,28 @@ namespace SimpleGraph
 In this chapter we study graph connectivity. Building on the reachability relation
 `Reachable`, we start with Mathlib's notions `Preconnected` and `Connected`,
 connected components (`ConnectedComponent`) and bridges (`IsBridge`). We show that
-the Mycielskian `mμ(G)` is connected iff `G` has no isolated vertices, and that in a
-graph of maximum degree at most `2` every cycle is its own connected component. We
-then look at trees, and show that the infinite path `pathNat` is one. We prove
-*Euler's theorem*: a finite graph has an Eulerian trail iff all its edges lie in one
-component and it has either no vertex of odd degree or exactly two. Next we introduce
-Mathlib's edge connectivity (`IsEdgeConnected`), and give our own definition of
-vertex connectivity (`IsVertexConnected`). We show that `k`-vertex-connectivity
-implies `k`-edge-connectivity. We also define the edge and vertex connectivity of a
-graph as numbers in `ℕ∞` and prove Whitney's inequalities.
+the Mycielskian `mμ(G)` is connected iff `G` has no isolated vertices
+(`connected_mycielskian_iff`), and that in a graph of maximum degree at most `2`
+every cycle is its own connected component
+(`Walk.IsCycle.toSubgraph_eq_of_degree_le_two`). We then look at trees, and show that
+the infinite path `pathNat` is one (`isTree_pathNat`). We prove *Euler's theorem*: a
+finite graph has an Eulerian trail iff all its edges lie in one component and it has
+either no vertex of odd degree or exactly two (`exists_isEulerian_iff`). Next we
+introduce Mathlib's edge connectivity (`IsEdgeConnected`), and give our own
+definition of vertex connectivity (`IsVertexConnected`). We show that
+`k`-vertex-connectivity implies `k`-edge-connectivity
+(`IsVertexConnected.isEdgeConnected`). We also define the edge and vertex
+connectivity of a graph as numbers in `ℕ∞` and prove Whitney's inequalities
+`κ(G) ≤ λ(G)` (`vertexConnectivity_le_edgeConnectivity`) and `λ(G) ≤ δ(G)`
+(`edgeConnectivity_le_degree`).
 
-The final two sections are more advanced. We prove *Brooks' theorem*: a locally
-finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it contains a
-`(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle. Then we
-define the *blocks* of a graph as the classes of an equivalence relation on edges,
-building our own quotient type just as Mathlib builds `ConnectedComponent`, and prove
-that, for `n ≥ 1`, a finite graph is `n`-colourable if each of its blocks is.
+The final two sections are more advanced. We prove *Brooks' theorem* (`brooks`): a
+locally finite graph of maximum degree at most `Δ` is `Δ`-colourable unless it
+contains a `(Δ + 1)`-clique or (when `Δ = 2`) one of its components is an odd cycle.
+Then we define the *blocks* of a graph as the classes of an equivalence relation on
+edges, building our own quotient type just as Mathlib builds `ConnectedComponent`,
+and prove that, for `n ≥ 1`, a finite graph is `n`-colourable if each of its blocks
+is (`colorable_of_forall_block`).
 
 # Connectivity
 
@@ -118,7 +124,7 @@ theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬ G.IsIsolated 
   · intro v
     obtain ⟨p⟩ := h.preconnected vˡ none
     cases p; grind [mycielskian_adj]
-  · apply (connected_iff_exists_forall_reachable _).2 ⟨none, fun z => ?_⟩
+  · refine (connected_iff_exists_forall_reachable _).2 ⟨none, fun z => ?_⟩
     rcases z with (_ | ⟨v | v⟩)
     · rfl
     · obtain ⟨u, h⟩ := h v
@@ -912,6 +918,8 @@ a start vertex in the case that the graph has no edges. In that case the walk is
 `nil`, which is not a circuit (`IsCircuit` requires `p ≠ nil`), so we don't call it
 an Eulerian circuit.
 -/
+/-- **Euler's theorem**, closed case: a graph with finitely many edges, all in one
+component, in which every vertex has even degree has a closed Eulerian walk. -/
 theorem exists_closed_isEulerian [Nonempty V]
     (h : G.EdgesInOneComponent) (h2 : ∀ v, Even (G.degree v)) :
     ∃ u : V, ∃ (p : G.Walk u u), p.IsEulerian := by
@@ -930,6 +938,8 @@ If `G` has at least one edge then the closed Eulerian walk uses it, so it is not
 `nil` and is an Eulerian *circuit*: in Mathlib this is `IsEulerian` together with
 `IsCircuit`.
 -/
+/-- **Euler's theorem**, circuit form: a graph with at least one edge, finitely many
+edges, all in one component, and every degree even has an Eulerian circuit. -/
 theorem exists_isEulerian_isCircuit (h : G.EdgesInOneComponent)
     (h2 : ∀ v, Even (G.degree v)) (hE : G.edgeSet.Nonempty) :
     ∃ u : V, ∃ p : G.Walk u u, p.IsEulerian ∧ p.IsCircuit := by
@@ -945,6 +955,8 @@ theorem exists_isEulerian_isCircuit (h : G.EdgesInOneComponent)
 *Euler's theorem* (existence direction, closed case) for a *connected* graph:
 follows from `exists_closed_isEulerian` via `Connected.edgesInOneComponent`.
 -/
+/-- **Euler's theorem**, closed case, for a connected graph: if every vertex has even
+degree then there is a closed Eulerian walk. -/
 theorem Connected.exists_closed_isEulerian (h : G.Connected)
     (h2 : ∀ v, Even (G.degree v)) :
     ∃ u : V, ∃ (p : G.Walk u u), p.IsEulerian :=
@@ -956,6 +968,9 @@ theorem Connected.exists_closed_isEulerian (h : G.Connected)
 component (`EdgesInOneComponent`) and `a ≠ b` are the only two odd-degree vertices,
 then `G` has an Eulerian trail from `a` to `b`.
 -/
+/-- **Euler's theorem**, open case: if the edges of `G` all lie in one component and
+`a ≠ b` are its only vertices of odd degree, then `G` has an Eulerian trail from `a`
+to `b`. -/
 theorem exists_isEulerian_trail_of_two_odd {a b}
     (hG : G.EdgesInOneComponent) (hab : a ≠ b)
     (hpar : ∀ x, Even (G.degree x) ↔ x ≠ a ∧ x ≠ b) :
@@ -973,6 +988,8 @@ theorem exists_isEulerian_trail_of_two_odd {a b}
 follows from `exists_isEulerian_trail_of_two_odd` via
 `Connected.edgesInOneComponent`.
 -/
+/-- **Euler's theorem**, open case, for a connected graph: if `a ≠ b` are its only
+vertices of odd degree, then there is an Eulerian trail from `a` to `b`. -/
 theorem Connected.exists_isEulerian_trail {a b} (h : G.Connected)
     (hab : a ≠ b) (hpar : ∀ x, Even (G.degree x) ↔ x ≠ a ∧ x ≠ b) :
     ∃ p : G.Walk a b, p.IsEulerian :=
@@ -990,7 +1007,11 @@ it implies the section's `[Finite G.edgeSet]` assumption, which we `omit`. Mathl
 `IsEulerian.card_odd_degree` counts using `Fintype.card` instead, so the forward
 direction converts between the two.
 -/
-omit [Finite G.edgeSet] in
+omit [Finite G.edgeSet]
+
+/-- **Euler's theorem**: a finite graph with at least one vertex has an Eulerian
+trail iff its edges all lie in one component and it has `0` or `2` vertices of odd
+degree. -/
 theorem exists_isEulerian_iff [Finite V] [Nonempty V] :
     (∃ u v, ∃ p : G.Walk u v, p.IsEulerian) ↔
       G.EdgesInOneComponent ∧ ({v | Odd (G.degree v)}.ncard = 0
@@ -1504,8 +1525,8 @@ say, and by
 `Walk.IsCycle.toSubgraph_eq_of_degree_le_two` that cycle *is* its component:
 `c.toSubgraph = G⟦u⟧.toSubgraph`.
 -/
-/-- *Brooks' theorem (Δ = 2)*: a graph with all degrees at most `2` is `2`-colourable
-unless it has a component that is an odd cycle. -/
+/-- **Brooks' theorem (Δ = 2)**: a graph with all degrees at most `2` is
+`2`-colourable unless it has a component that is an odd cycle. -/
 theorem brooks_two [G.LocallyFinite] (hdeg : ∀ v, G.degree v ≤ 2)
     (hcyc : ¬ ∃ (u : V) (c : G.Walk u u),
       c.IsCycle ∧ Odd c.length ∧ c.toSubgraph = G⟦u⟧.toSubgraph) :
@@ -2163,7 +2184,7 @@ end brooks
 /-!
 By De Bruijn–Erdős, Brooks' theorem extends to infinite graphs.
 -/
-/-- *Brooks' theorem (Δ ≥ 3)*: a locally finite graph that is `(Δ + 1)`-clique-free
+/-- **Brooks' theorem (Δ ≥ 3)**: a locally finite graph that is `(Δ + 1)`-clique-free
 with maximum degree at most `Δ ≥ 3` is `Δ`-colourable. -/
 theorem colorable_of_cliqueFree_of_degree_le {Δ : ℕ} [G.LocallyFinite]
     (hΔ : 3 ≤ Δ) (hcf : G.CliqueFree (Δ + 1)) (hdeg : ∀ v, G.degree v ≤ Δ) :
@@ -2182,7 +2203,7 @@ We can now put the cases together. When `Δ ≤ 1` there is nothing to prove: a 
 with no `1`-clique has no vertices, and a graph with no `2`-clique has no edges
 (`cliqueFree_one` and `cliqueFree_two`).
 -/
-/-- *Brooks' theorem*: a graph with all degrees at most `Δ` and no `(Δ + 1)`-clique
+/-- **Brooks' theorem**: a graph with all degrees at most `Δ` and no `(Δ + 1)`-clique
 is `Δ`-colourable, unless `Δ = 2` and one of its components is an odd cycle. -/
 theorem brooks [G.LocallyFinite] {Δ : ℕ}
     (hdeg : ∀ v, G.degree v ≤ Δ) (hcf : G.CliqueFree (Δ + 1))

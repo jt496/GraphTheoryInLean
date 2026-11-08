@@ -10,35 +10,32 @@ open HypercubeVert Walk
 /-!
 # Exercises
 
-1. Prove by induction on `p` that reversing a walk does not change its length.
-Hint: `reverse_cons` and `length_append`.
--/
-example {u v : V} (p : G.Walk u v) : p.reverse.length = p.length := by
-  sorry
-
-/-!
-2. Prove by induction on `p` that the support of `p.append q` is the support of `p`
-followed by the tail of the support of `q` (the tail drops the shared vertex `v`).
-Hint: in the `nil` case, `cons_tail_support`.
--/
-example {u v w : V} (p : G.Walk u v) (q : G.Walk v w) :
-    (p.append q).support = p.support ++ q.support.tail := by
-  sorry
-
-/-!
-3. Show that the `nil` walk is a trail.
--/
-example (u : V) : (nil : G.Walk u u).IsTrail := by
-  sorry
-
-/-!
-4. Show that if `p : G.Walk u v` has length `0` then `u = v`. Hint: use `cases p`.
+1. Show that if `p : G.Walk u v` has length `0` then `u = v`. Hint: use `cases p`.
 -/
 example {u v : V} (p : G.Walk u v) (hl : p.length = 0) : u = v := by
   sorry
 
 /-!
-5. Show that splitting a walk at a vertex on its support preserves the total length.
+2. Prove by induction on `p` that a walk in `pathNat` from `i` to `j` has length at
+least `j - i`, so that `pathNat.path i j` is a shortest walk from `i` to `i + j`.
+Hint: in the `cons` case the first edge changes the vertex by one; `length_cons`.
+-/
+example {i j : ℕ} (p : pathNat.Walk i j) : j ≤ i + p.length := by
+  sorry
+
+/-!
+3. Let `c` be a `Bool`-colouring of `G`. Prove by induction on `p` that a walk has
+even length iff its endpoints have the same colour. Hint: in the `cons` case,
+`Bool.eq_not_of_ne` rewrites the colour of the first vertex as the negation of the
+colour of the second, and `Nat.even_add_one` handles the length. Finally, `cases` on
+a colour such as `c v` splits into the two cases `true` and `false`.
+-/
+lemma Coloring.even_length_iff' (c : G.Coloring Bool) {u v : V} (p : G.Walk u v) :
+    Even p.length ↔ c u = c v := by
+  sorry
+
+/-!
+4. Show that splitting a walk at a vertex on its support preserves the total length.
 Hint: `Walk.take_spec`.
 -/
 example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
@@ -46,7 +43,7 @@ example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
   sorry
 
 /-!
-6. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
+5. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
 Eulerian circuit. Hint: `decide` proves that it is Eulerian, using the `Decidable`
 instance from the chapter. For `IsCircuit`, rewrite with `isCircuit_def` and
 `isTrail_def` first.
@@ -61,20 +58,29 @@ example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
   sorry
 
 /-!
-7. Show that the tail of a cycle is never nil. Hint: a cycle has length at least
-three.
+6. Use Exercise 3 and the closed walk `eulerC5` of length `5` to show that `C[5]` is
+not `2`-colourable. Hint: `recolorOfEquiv` and `finTwoEquiv` turn a colouring by
+`Fin 2` into a `Bool`-colouring.
 -/
-lemma Walk.IsCycle.tail_not_nil' {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
-    ¬ c.tail.Nil := by
+example : ¬ C[5].Colorable 2 := by
   sorry
 
 /-!
-8. A `cons` walk is a Hamiltonian cycle iff its tail is Hamiltonian and has length at
-least two.
+7. A `cons` walk is a Hamiltonian cycle iff its tail is Hamiltonian and has length at
+least two. Hint: `isHamiltonianCycle_isCycle_and_isHamiltonian_tail` and
+`cons_isCycle_iff_length_ne_one`.
 -/
 lemma Walk.cons_isHamiltonianCycle_iff' [DecidableEq V] {u v : V} (p : G.Walk v u)
     (h : G.Adj u v) :
     (cons h p).IsHamiltonianCycle ↔ p.IsHamiltonian ∧ 2 ≤ p.length := by
+  sorry
+
+/-!
+8. Show that the tail of a cycle is never nil. Hint: a cycle has length at least
+three.
+-/
+lemma Walk.IsCycle.not_nil_tail' {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
+    ¬ c.tail.Nil := by
   sorry
 
 /-!
@@ -86,27 +92,11 @@ example {u v u' v' : V} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
   sorry
 
 /-!
-10. Show that a walk is not nil iff it has positive length. Hint: use `cases p`;
-then `Nil.nil` and `nofun` are useful.
--/
-example {u v : V} (p : G.Walk u v) : ¬ p.Nil ↔ 0 < p.length := by
-  sorry
-
-/-!
-11. Show that an injective homomorphism maps trails to trails. Mathlib has this as
-`IsTrail.map`, but prove it directly. Hint: `isTrail_def`, `edges_map` and
-`List.Nodup.map`.
--/
-example {W : Type*} {H : SimpleGraph W} {f : G →g H} (hf : Function.Injective f)
-    {u v : V} {p : G.Walk u v} (hp : p.IsTrail) : (p.map f).IsTrail := by
-  sorry
-
-/-!
-12. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
+10. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
 `pathNat.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
 compare it with `pathNat.path i j` we must `copy` it. Show that the two walks are
 then equal. Hint: compare supports with `Walk.ext_support`, then use `support_copy`,
-`Walk.support_map` and `pathNat.support_path`.
+`Walk.support_map`, `pathNat.support_path` and `List.map_add_range'`.
 -/
 example (i j : ℕ) :
     ((pathNat.path 0 j).map (pathNat.translate i).toHom).copy
@@ -115,18 +105,7 @@ example (i j : ℕ) :
   sorry
 
 /-!
-13. If `p` is a Hamiltonian walk of length at least two and there is an edge `h₁`
-from its `i`-th vertex to its end and an edge `h₂` from its `(i + 1)`-th vertex to
-its start, then `p.posaClosed h₁ h₂` is a Hamiltonian cycle.
--/
-lemma Walk.IsHamiltonian.isHamiltonianCycle_posaClosed' {u v} {i} [DecidableEq V]
-    {p : G.Walk u v} (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length)
-    (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
-    (p.posaClosed h₁ h₂).IsHamiltonianCycle := by
-  sorry
-
-/-!
-14. Show that the Hamming distance on the hypercube is symmetric.
+11. Show that the Hamming distance on the hypercube is symmetric.
 -/
 lemma HypercubeVert.hammingDist_comm' {n : ℕ} (u v : HypercubeVert n) :
     u.hammingDist v = v.hammingDist u := by
@@ -139,41 +118,53 @@ how to build a Hamiltonian cycle in `Q[n + 2]` from it.
 /-- The Gray code Hamiltonian cycle in `Q[n + 2]`. -/
 def hypercube.grayCycle (n : ℕ) :
     Q[n + 2].Walk (grayStart (n + 2)) (grayStart (n + 2)) :=
-  have adj : Q[n + 2].Adj (grayStart (n + 2)) (grayEnd (n + 2)):= by simp
+  have adj : Q[n + 2].Adj (grayStart (n + 2)) (grayEnd (n + 2)) := by simp
   Walk.cons adj (grayPath (n + 2)).reverse
 
 /-!
-15. Show that in the Gray code walk `hypercube.grayPath (n + 2)`, the second vertex
+12. Show that in the Gray code walk `hypercube.grayPath (n + 2)`, the second vertex
 is always in the `false` slice of `Q[n + 2]`.
 -/
 lemma hypercube.grayPath_snd_false' (n : ℕ) : (grayPath (n + 2)).snd.2 = false := by
   sorry
 
 /-!
-16. Show that `hypercube.grayCycle n` is indeed a cycle.
+13. Show that `hypercube.grayCycle n` is indeed a cycle. Hint: Exercise 12.
 -/
 lemma hypercube.isCycle_grayCycle' (n : ℕ) : (grayCycle n).IsCycle := by
   sorry
 
 /-!
-17. Show that `hypercube.grayCycle n` is a Hamiltonian cycle.
+14. Show that `hypercube.grayCycle n` is a Hamiltonian cycle. Hint: Exercise 7.
 -/
 lemma hypercube.isHamiltonianCycle_grayCycle' (n : ℕ) :
     (grayCycle n).IsHamiltonianCycle := by
   sorry
 
 /-!
-18. Prove that `Q[n]` is Hamiltonian unless `n = 1`. (Recall that `Q[0]` is a single
+15. Prove that `Q[n]` is Hamiltonian unless `n = 1`. (Recall that `Q[0]` is a single
 vertex which is considered Hamiltonian.)
 -/
 lemma isHamiltonian_hypercube' {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
   sorry
 
 /-!
-19. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
-`IsHamiltonian.mycielskian`.
+16. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
+`IsHamiltonian.mycielskian` and `isHamiltonian_cycleGraph`.
 -/
 example : grotzschGraph.IsHamiltonian := by
+  sorry
+
+/-!
+17. If `p` is a Hamiltonian walk of length at least two and there is an edge `h₁`
+from its `i`-th vertex to its end and an edge `h₂` from its `(i + 1)`-th vertex to
+its start, then `p.posaClosed h₁ h₂` is a Hamiltonian cycle. Hint:
+`IsPath.isCycle_posaClosed` and `isHamiltonianCycle_iff_isCycle_and_length_eq`.
+-/
+lemma Walk.IsHamiltonian.isHamiltonianCycle_posaClosed' {u v} {i} [DecidableEq V]
+    {p : G.Walk u v} (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length)
+    (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
+    (p.posaClosed h₁ h₂).IsHamiltonianCycle := by
   sorry
 
 /-!
@@ -187,21 +178,21 @@ Mathlib's, so `decide` can check facts about this graph directly.
 abbrev chordedC5 : SimpleGraph (Fin 5) := C[5] ⊔ edge 0 2 ⊔ edge 0 3
 
 /-!
-20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
+18. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
 have degree `2`.
 -/
 example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   sorry
 
 /-!
-21. Show that `chordedC5` is not an Ore graph.
+19. Show that `chordedC5` is not an Ore graph.
 -/
 example : ¬ chordedC5.IsOreGraph := by
   sorry
 
 /-!
-22. Show that the closure of `chordedC5` is complete, even though `chordedC5` is not
-an Ore graph. Hint: `ext` and `decide +revert`.
+20. Show that the closure of `chordedC5` is complete, even though `chordedC5` is not
+an Ore graph. Hint: `ext`, `top_adj` and `decide +revert`.
 -/
 example : chordedC5.closure = ⊤ := by
   sorry
@@ -214,7 +205,7 @@ supply the extremal argument that replaces the closure. We begin with some
 warm-up properties of Ore graphs.
 -/
 /-!
-23. In an Ore graph any two distinct vertices are either adjacent or have a common
+21. In an Ore graph any two distinct vertices are either adjacent or have a common
 neighbour. Hint: if distinct vertices `u` and `v` are non-adjacent and have no
 common neighbour, then their neighbourhoods are disjoint subsets of `V \ {u, v}`,
 so their degree sum is at most `|V| - 2`, contradicting the Ore condition.
@@ -226,7 +217,7 @@ lemma IsOreGraph.adj_or_exists_adj_adj' [Fintype V] [G.LocallyFinite]
   sorry
 
 /-!
-24. Consequently any two vertices of an Ore graph are joined by a walk of length
+22. Consequently any two vertices of an Ore graph are joined by a walk of length
 at most two (in the language of later chapters: an Ore graph is connected, with
 diameter at most two).
 -/
@@ -235,20 +226,21 @@ lemma IsOreGraph.exists_walk_length_le_two' [Fintype V] [G.LocallyFinite]
   sorry
 
 /-!
-25. An Ore graph on at least three vertices contains a vertex of degree at least
+23. An Ore graph on at least three vertices contains a vertex of degree at least
 two. Hint: among any three distinct vertices either some pair is non-adjacent, and
 so the Ore condition forces its degree sum to be at least three, or all three are
 pairwise adjacent.
 -/
+open Finset in
 lemma IsOreGraph.exists_two_le_degree' [Fintype V] [G.LocallyFinite]
     (h : G.IsOreGraph) (hn : 3 ≤ Fintype.card V) : ∃ w, 2 ≤ G.degree w := by
   sorry
 
 /-!
-26. Existence of a vertex of degree at least two implies existence of a path of
+24. Existence of a vertex of degree at least two implies existence of a path of
 length at least two.
 -/
-lemma Walk.exists_isPath_of_two_le_degree' [G.LocallyFinite] {v : V}
+lemma exists_isPath_of_two_le_degree' [G.LocallyFinite] {v : V}
     (hv : 2 ≤ G.degree v) :
     ∃ (x y : V) (q : G.Walk x y), q.IsPath ∧ 2 ≤ q.length := by
   sorry
@@ -267,10 +259,11 @@ itself cannot be extended to a longer path.)
 /-- A *maximum-length path*: a path such that no path in `G` is longer. -/
 structure Walk.IsMaximumPath {u v : V} (p : G.Walk u v) : Prop extends
   isPath : p.IsPath where
+  /-- No path in `G` is longer than `p`. -/
   length_le : ∀ ⦃x y : V⦄ ⦃q : G.Walk x y⦄, q.IsPath → q.length ≤ p.length
 
 /-!
-27. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
+25. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
 compactly.
 -/
 variable (G) in
@@ -279,14 +272,14 @@ lemma Walk.exists_isMaximumPath' [Nonempty V] [Finite G.edgeSet] :
   sorry
 
 /-!
-28. The reverse of a maximum-length path is again a maximum-length path.
+26. The reverse of a maximum-length path is again a maximum-length path.
 -/
 lemma Walk.IsMaximumPath.reverse' {u v : V} {p : G.Walk u v} (h : p.IsMaximumPath) :
     p.reverse.IsMaximumPath := by
   sorry
 
 /-!
-29. A maximum-length path in an Ore graph on at least three vertices has length
+27. A maximum-length path in an Ore graph on at least three vertices has length
 at least two.
 -/
 lemma IsOreGraph.two_le_length_of_isMaximumPath' [Fintype V] [G.LocallyFinite]
@@ -296,26 +289,26 @@ lemma IsOreGraph.two_le_length_of_isMaximumPath' [Fintype V] [G.LocallyFinite]
   sorry
 
 /-!
-30. A maximum-length path is in particular a *maximal* path, in the sense of the
+28. A maximum-length path is in particular a *maximal* path, in the sense of the
 chapter's `Walk.IsMaximalPath`: neither endpoint has a neighbour missing from it.
 Hint: if a neighbour of the start were missing then `cons` would give a strictly
 longer path; for the end vertex apply the same argument to `p.reverse`, using
-`IsMaximumPath.reverse`.
+`IsMaximumPath.reverse'`.
 -/
 lemma Walk.IsMaximumPath.isMaximalPath' {u v : V} {p : G.Walk u v}
     (hmax : p.IsMaximumPath) : p.IsMaximalPath := by
   sorry
 
 /-!
-31. If `p` is a walk from a vertex in a set `S` to a vertex outside of `S`, there
+29. If `p` is a walk from a vertex in a set `S` to a vertex outside of `S`, there
 are adjacent vertices `c ∈ S` and `d ∉ S`. Hint: `Walk.exists_boundary_dart`.
 -/
 lemma Walk.exists_cross_adj' {a b} {S : Set V} (p : G.Walk a b) (ha : a ∈ S)
-    (hb : b ∉ S) : ∃ c ∈ S, ∃ d ∉ S, G.Adj c d  := by
+    (hb : b ∉ S) : ∃ c ∈ S, ∃ d ∉ S, G.Adj c d := by
   sorry
 
 /-!
-32. In a non-nil closed walk the first vertex also occurs as the last, so a vertex
+30. In a non-nil closed walk the first vertex also occurs as the last, so a vertex
 lies in the tail of the support iff it lies in the support.
 -/
 lemma Walk.mem_support_tail_iff' {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V} :
@@ -323,7 +316,7 @@ lemma Walk.mem_support_tail_iff' {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V}
   sorry
 
 /-!
-33. A cycle can be cut at any of its vertices to give a path from that vertex
+31. A cycle can be cut at any of its vertices to give a path from that vertex
 visiting exactly the cycle's vertices, of length one less than the cycle. Hint:
 deduce it from the chapter's `IsCycle.exists_isPath_of_mem_edges`, cutting the cycle
 at the first edge of `c.rotate y hy` (`Walk.mk_start_snd_mem_edges`,
@@ -336,10 +329,10 @@ lemma Walk.IsCycle.exists_isPath_spanning' {a : V} {c : G.Walk a a}
   sorry
 
 /-!
-34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
+32. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
 some cycle through `u` of length one more than `p` visits exactly the vertices of
 `p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
-Hint: if `p` missed a vertex, a walk from `u` to it and `exists_cross_adj` would
+Hint: if `p` missed a vertex, a walk from `u` to it and `exists_cross_adj'` would
 yield an edge leaving the cycle. Break the cycle with
 `IsCycle.exists_isPath_spanning'` and extend the resulting path with this edge to
 give a strictly longer path, contradicting maximality.
@@ -351,11 +344,11 @@ lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle' [DecidableEq V] {u v : V}
   sorry
 
 /-!
-35. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
+33. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
 `IsMaximumPath.isHamiltonian_of_isCycle'`. Ore's condition supplies the cycle, via
 `IsOreGraph.two_le_length_of_isMaximumPath'` and
-`IsMaximalPath.exists_cycle_spanning` (from the chapter), and the reachability, via
-`IsOreGraph.exists_walk_length_le_two'`.
+`IsMaximalPath.exists_cycle_spanning` (from the chapter; `p` is a maximal path by
+Exercise 28), and the reachability, via `IsOreGraph.exists_walk_length_le_two'`.
 -/
 lemma Walk.isHamiltonian_of_isMaximumPath' [Fintype V] [DecidableEq V]
     [G.LocallyFinite] (h : G.IsOreGraph)
@@ -364,8 +357,8 @@ lemma Walk.isHamiltonian_of_isMaximumPath' [Fintype V] [DecidableEq V]
   sorry
 
 /-!
-36. Give a direct proof of Ore's theorem, not using the closure: take a
-maximum-length path; it is Hamiltonian of length ≥ 2, so
+34. Give a direct proof of Ore's theorem, not using the closure: take a
+maximum-length path; it is Hamiltonian of length at least two, so
 `IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair` closes it into a Hamiltonian
 cycle.
 -/
@@ -375,33 +368,7 @@ example [Fintype V] [DecidableEq V] [G.LocallyFinite] (h : G.IsOreGraph)
 
 /-! SOLUTIONS -/
 /-!
-1. Prove by induction on `p` that reversing a walk does not change its length.
-Hint: `reverse_cons` and `length_append`.
--/
-example {u v : V} (p : G.Walk u v) : p.reverse.length = p.length := by
-  induction p with
-  | nil => rfl
-  | cons h p ih =>
-    rw [reverse_cons, length_append, ih, length_cons, length_cons, length_nil]
-
-/-!
-2. Prove by induction on `p` that the support of `p.append q` is the support of `p`
-followed by the tail of the support of `q` (the tail drops the shared vertex `v`).
-Hint: in the `nil` case, `cons_tail_support`.
--/
-example {u v w : V} (p : G.Walk u v) (q : G.Walk v w) :
-    (p.append q).support = p.support ++ q.support.tail := by
-  induction p with
-  | nil => rw [nil_append, support_nil, List.singleton_append, cons_tail_support]
-  | cons h p ih => rw [cons_append, support_cons, support_cons, ih, List.cons_append]
-
-/-!
-3. Show that the `nil` walk is a trail.
--/
-example (u : V) : (nil : G.Walk u u).IsTrail := .nil
-
-/-!
-4. Show that if `p : G.Walk u v` has length `0` then `u = v`. Hint: use `cases p`.
+1. Show that if `p : G.Walk u v` has length `0` then `u = v`. Hint: use `cases p`.
 -/
 example {u v : V} (p : G.Walk u v) (hl : p.length = 0) : u = v := by
   cases p with
@@ -409,7 +376,34 @@ example {u v : V} (p : G.Walk u v) (hl : p.length = 0) : u = v := by
   | cons h p => simp at hl
 
 /-!
-5. Show that splitting a walk at a vertex on its support preserves the total length.
+2. Prove by induction on `p` that a walk in `pathNat` from `i` to `j` has length at
+least `j - i`, so that `pathNat.path i j` is a shortest walk from `i` to `i + j`.
+Hint: in the `cons` case the first edge changes the vertex by one; `length_cons`.
+-/
+example {i j : ℕ} (p : pathNat.Walk i j) : j ≤ i + p.length := by
+  induction p with
+  | nil => simp
+  -- the first edge changes the vertex by one, and `ih` bounds the rest of the walk
+  | cons h p ih => grind [length_cons]
+
+/-!
+3. Let `c` be a `Bool`-colouring of `G`. Prove by induction on `p` that a walk has
+even length iff its endpoints have the same colour. Hint: in the `cons` case,
+`Bool.eq_not_of_ne` rewrites the colour of the first vertex as the negation of the
+colour of the second, and `Nat.even_add_one` handles the length. Finally, `cases` on
+a colour such as `c v` splits into the two cases `true` and `false`.
+-/
+lemma Coloring.even_length_iff (c : G.Coloring Bool) {u v : V} (p : G.Walk u v) :
+    Even p.length ↔ c u = c v := by
+  induction p with
+  | nil => simp
+  | @cons a b w h p ih =>
+    -- one more edge flips the parity of the length and the colour of the start
+    rw [length_cons, Nat.even_add_one, ih, Bool.eq_not_of_ne (c.valid h)]
+    cases c b <;> cases c w <;> simp
+
+/-!
+4. Show that splitting a walk at a vertex on its support preserves the total length.
 Hint: `Walk.take_spec`.
 -/
 example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
@@ -417,7 +411,7 @@ example [DecidableEq V] {u v w : V} (p : G.Walk u v) (h : w ∈ p.support) :
   rw [← length_append, take_spec]
 
 /-!
-6. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
+5. The walk `eulerC5` travels once around the cycle `C[5]`. Show that it is an
 Eulerian circuit. Hint: `decide` proves that it is Eulerian, using the `Decidable`
 instance from the chapter. For `IsCircuit`, rewrite with `isCircuit_def` and
 `isTrail_def` first.
@@ -427,16 +421,20 @@ example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
   decide
 
 /-!
-7. Show that the tail of a cycle is never nil. Hint: a cycle has length at least
-three.
+6. Use Exercise 3 and the closed walk `eulerC5` of length `5` to show that `C[5]` is
+not `2`-colourable. Hint: `recolorOfEquiv` and `finTwoEquiv` turn a colouring by
+`Fin 2` into a `Bool`-colouring.
 -/
-lemma Walk.IsCycle.tail_not_nil {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
-    ¬ c.tail.Nil := by
-  grind [length_tail_add_one, hc.three_le_length]
+example : ¬ C[5].Colorable 2 := by
+  rintro ⟨c⟩
+  -- as a `Bool`-colouring, `c` would give the closed walk `eulerC5` even length
+  have := ((C[5]).recolorOfEquiv finTwoEquiv c).even_length_iff eulerC5
+  exact absurd (this.2 rfl) (by decide)
 
 /-!
-8. A `cons` walk is a Hamiltonian cycle iff its tail is Hamiltonian and has length at
-least two.
+7. A `cons` walk is a Hamiltonian cycle iff its tail is Hamiltonian and has length at
+least two. Hint: `isHamiltonianCycle_isCycle_and_isHamiltonian_tail` and
+`cons_isCycle_iff_length_ne_one`.
 -/
 lemma Walk.cons_isHamiltonianCycle_iff [DecidableEq V] {u v : V} (p : G.Walk v u)
     (h : G.Adj u v) :
@@ -448,6 +446,14 @@ lemma Walk.cons_isHamiltonianCycle_iff [DecidableEq V] {u v : V} (p : G.Walk v u
   · exact ⟨h1.isPath, by grind, by simpa using h1⟩
 
 /-!
+8. Show that the tail of a cycle is never nil. Hint: a cycle has length at least
+three.
+-/
+lemma Walk.IsCycle.not_nil_tail {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
+    ¬ c.tail.Nil := by
+  grind [length_tail_add_one, hc.three_le_length]
+
+/-!
 9. Show that reversing a copy of a walk is the same as copying its reverse. Hint:
 `subst_vars`.
 -/
@@ -457,30 +463,11 @@ example {u v u' v' : V} (p : G.Walk u v) (hu : u = u') (hv : v = v') :
   rfl
 
 /-!
-10. Show that a walk is not nil iff it has positive length. Hint: use `cases p`;
-then `Nil.nil` and `nofun` are useful.
--/
-example {u v : V} (p : G.Walk u v) : ¬ p.Nil ↔ 0 < p.length := by
-  cases p with
-  | nil => exact ⟨fun h => (h Nil.nil).elim, fun h => (Nat.lt_irrefl 0 h).elim⟩
-  | cons h p => exact ⟨fun _ => by simp, fun _ => nofun⟩
-
-/-!
-11. Show that an injective homomorphism maps trails to trails. Mathlib has this as
-`IsTrail.map`, but prove it directly. Hint: `isTrail_def`, `edges_map` and
-`List.Nodup.map`.
--/
-example {W : Type*} {H : SimpleGraph W} {f : G →g H} (hf : Function.Injective f)
-    {u v : V} {p : G.Walk u v} (hp : p.IsTrail) : (p.map f).IsTrail := by
-  rw [isTrail_def, edges_map]
-  exact hp.edges_nodup.map (Sym2.map.injective hf)
-
-/-!
-12. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
+10. Translating the walk `pathNat.path 0 j` by `i`, with `Walk.map` along
 `pathNat.translate i`, gives a walk from `0 + i` to `(0 + j) + i`, so before we can
 compare it with `pathNat.path i j` we must `copy` it. Show that the two walks are
 then equal. Hint: compare supports with `Walk.ext_support`, then use `support_copy`,
-`Walk.support_map` and `pathNat.support_path`.
+`Walk.support_map`, `pathNat.support_path` and `List.map_add_range'`.
 -/
 example (i j : ℕ) :
     ((pathNat.path 0 j).map (pathNat.translate i).toHom).copy
@@ -492,21 +479,7 @@ example (i j : ℕ) :
   rw [h, List.map_add_range', add_zero]
 
 /-!
-13. If `p` is a Hamiltonian walk of length at least two and there is an edge `h₁`
-from its `i`-th vertex to its end and an edge `h₂` from its `(i + 1)`-th vertex to
-its start, then `p.posaClosed h₁ h₂` is a Hamiltonian cycle.
--/
-lemma Walk.IsHamiltonian.isHamiltonianCycle_posaClosed {u v} {i} [DecidableEq V]
-    {p : G.Walk u v} (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length)
-    (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
-    (p.posaClosed h₁ h₂).IsHamiltonianCycle := by
-  have : Fintype V := hp.fintype
-  apply isHamiltonianCycle_iff_isCycle_and_length_eq.2
-          ⟨hp.isPath.isCycle_posaClosed h2 h₁ h₂, ?_⟩
-  simpa using hp.length_support
-
-/-!
-14. Show that the Hamming distance on the hypercube is symmetric.
+11. Show that the Hamming distance on the hypercube is symmetric.
 -/
 lemma HypercubeVert.hammingDist_comm {n : ℕ} (u v : HypercubeVert n) :
     u.hammingDist v = v.hammingDist u := by
@@ -518,22 +491,22 @@ lemma HypercubeVert.hammingDist_comm {n : ℕ} (u v : HypercubeVert n) :
     grind [HypercubeVert.hammingDist]
 
 /-!
-15. Show that in the Gray code walk `hypercube.grayPath (n + 2)`, the second vertex
+12. Show that in the Gray code walk `hypercube.grayPath (n + 2)`, the second vertex
 is always in the `false` slice of `Q[n + 2]`.
 -/
 lemma hypercube.grayPath_snd_false (n : ℕ) : (grayPath (n + 2)).snd.2 = false := by
   -- the first half of the walk has length `1 ≤ 2 ^ (n + 1) - 1` and lies in the
-  -- `false` slice; `getVert_append'`, says that `snd` takes vertex `1` from it
+  -- `false` slice; `getVert_append'` says that `snd` takes vertex `1` from it
   have h : 1 ≤ (grayPath (n + 1)).length := by grind [length_grayPath]
   rw [grayPath, snd, getVert_append']
   simp_all
 
 /-!
-16. Show that `hypercube.grayCycle n` is indeed a cycle.
+13. Show that `hypercube.grayCycle n` is indeed a cycle. Hint: Exercise 12.
 -/
 @[simp]
 lemma hypercube.isCycle_grayCycle (n : ℕ) : (grayCycle n).IsCycle := by
-  apply (cons_isCycle_iff _ _).2 ⟨(isPath_grayPath (n + 2)).reverse, ?_⟩
+  refine (cons_isCycle_iff _ _).2 ⟨(isPath_grayPath (n + 2)).reverse, ?_⟩
   rw [edges_reverse, List.mem_reverse]
   intro hmem
   have hf := grayPath_snd_false n
@@ -541,16 +514,16 @@ lemma hypercube.isCycle_grayCycle (n : ℕ) : (grayCycle n).IsCycle := by
   contradiction
 
 /-!
-17. Show that `hypercube.grayCycle n` is a Hamiltonian cycle.
+14. Show that `hypercube.grayCycle n` is a Hamiltonian cycle. Hint: Exercise 7.
 -/
 lemma hypercube.isHamiltonianCycle_grayCycle (n : ℕ) :
     (grayCycle n).IsHamiltonianCycle := by
-  apply (cons_isHamiltonianCycle_iff _ _).2 ⟨?_, ?_⟩
+  refine (cons_isHamiltonianCycle_iff _ _).2 ⟨?_, ?_⟩
   · exact isHamiltonian_reverse.2 <| isHamiltonian_grayPath (n + 2)
   · grind [length_grayPath, length_reverse]
 
 /-!
-18. Prove that `Q[n]` is Hamiltonian unless `n = 1`. (Recall that `Q[0]` is a single
+15. Prove that `Q[n]` is Hamiltonian unless `n = 1`. (Recall that `Q[0]` is a single
 vertex which is considered Hamiltonian.)
 -/
 lemma isHamiltonian_hypercube {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
@@ -560,21 +533,36 @@ lemma isHamiltonian_hypercube {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
   | n + 2 => fun _ => ⟨_, _, hypercube.isHamiltonianCycle_grayCycle n⟩
 
 /-!
-19. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
-`IsHamiltonian.mycielskian`.
+16. Show that the Grötzsch graph `mμ(C[5])` is Hamiltonian. Hint:
+`IsHamiltonian.mycielskian` and `isHamiltonian_cycleGraph`.
 -/
 example : grotzschGraph.IsHamiltonian :=
   IsHamiltonian.mycielskian (isHamiltonian_cycleGraph (by grind)) (by simp)
 
 /-!
-20. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
+17. If `p` is a Hamiltonian walk of length at least two and there is an edge `h₁`
+from its `i`-th vertex to its end and an edge `h₂` from its `(i + 1)`-th vertex to
+its start, then `p.posaClosed h₁ h₂` is a Hamiltonian cycle. Hint:
+`IsPath.isCycle_posaClosed` and `isHamiltonianCycle_iff_isCycle_and_length_eq`.
+-/
+lemma Walk.IsHamiltonian.isHamiltonianCycle_posaClosed {u v} {i} [DecidableEq V]
+    {p : G.Walk u v} (hp : p.IsHamiltonian) (h2 : 2 ≤ p.length)
+    (h₁ : G.Adj (p.getVert i) v) (h₂ : G.Adj (p.getVert (i + 1)) u) :
+    (p.posaClosed h₁ h₂).IsHamiltonianCycle := by
+  have : Fintype V := hp.fintype
+  refine isHamiltonianCycle_iff_isCycle_and_length_eq.2
+    ⟨hp.isPath.isCycle_posaClosed h2 h₁ h₂, ?_⟩
+  simpa using hp.length_support
+
+/-!
+18. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
 have degree `2`.
 -/
 example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   decide
 
 /-!
-21. Show that `chordedC5` is not an Ore graph.
+19. Show that `chordedC5` is not an Ore graph.
 -/
 example : ¬ chordedC5.IsOreGraph := by
   -- the non-adjacent vertices `1` and `4` have degree sum `4 < 5`
@@ -587,8 +575,8 @@ example : ¬ chordedC5.IsOreGraph := by
   decide
 
 /-!
-22. Show that the closure of `chordedC5` is complete, even though `chordedC5` is not
-an Ore graph. Hint: `ext` and `decide +revert`.
+20. Show that the closure of `chordedC5` is complete, even though `chordedC5` is not
+an Ore graph. Hint: `ext`, `top_adj` and `decide +revert`.
 -/
 example : chordedC5.closure = ⊤ := by
   ext x y
@@ -596,7 +584,7 @@ example : chordedC5.closure = ⊤ := by
   decide +revert
 
 /-!
-23. In an Ore graph any two distinct vertices are either adjacent or have a common
+21. In an Ore graph any two distinct vertices are either adjacent or have a common
 neighbour. Hint: if distinct vertices `u` and `v` are non-adjacent and have no
 common neighbour, then their neighbourhoods are disjoint subsets of `V \ {u, v}`,
 so their degree sum is at most `|V| - 2`, contradicting the Ore condition.
@@ -610,22 +598,22 @@ lemma IsOreGraph.adj_or_exists_adj_adj [Fintype V] [G.LocallyFinite]
   · exact Or.inl huv
   refine Or.inr ?_
   -- The union of the neighbourhoods of `u` and `v` lives in `V \ {u, v}`
-  have h_sub : G.neighborFinset u ∪ G.neighborFinset v ⊆ univ \ {u, v} := by
+  have hsub : G.neighborFinset u ∪ G.neighborFinset v ⊆ univ \ {u, v} := by
     intro x hx
     simp_rw [mem_union, mem_neighborFinset, mem_sdiff, mem_univ, true_and,
       mem_insert, mem_singleton] at hx ⊢
     grind [adj_symm]
   -- So the cardinality of the union of the neighbourhoods is at most `|V| - 2`
-  have h_card := card_le_card h_sub
+  have hcard := card_le_card hsub
   -- The cardinality of `V \ {u, v}` is exactly `|V| - 2`
-  have h_univ_card : (univ \ {u, v} : Finset V).card = Fintype.card V - 2 := by
+  have huniv : (univ \ {u, v} : Finset V).card = Fintype.card V - 2 := by
     grind
   -- there is `w` in the intersection of the neighbourhoods of `u` and `v`
   obtain ⟨w, hw⟩ : (G.neighborFinset u ∩ G.neighborFinset v).Nonempty := by
-    by_contra! h_empty
-    rw [← disjoint_iff_inter_eq_empty] at h_empty
-    -- Evaluate the cardinality of the subset relation
-    rw [card_union_of_disjoint h_empty] at h_card
+    by_contra! hempty
+    rw [← disjoint_iff_inter_eq_empty] at hempty
+    -- the neighbourhoods are disjoint, so `hcard` gives `deg u + deg v ≤ |V| - 2`
+    rw [card_union_of_disjoint hempty] at hcard
     -- Since `G.degree x` is the cardinality of `G.neighborFinset x`,
     -- grind can close the arithmetic contradiction directly using Ore's
     -- condition at the pair `u`, `v`
@@ -633,7 +621,7 @@ lemma IsOreGraph.adj_or_exists_adj_adj [Fintype V] [G.LocallyFinite]
   exact ⟨w, by simpa using hw⟩
 
 /-!
-24. Consequently any two vertices of an Ore graph are joined by a walk of length
+22. Consequently any two vertices of an Ore graph are joined by a walk of length
 at most two (in the language of later chapters: an Ore graph is connected, with
 diameter at most two).
 -/
@@ -641,12 +629,12 @@ lemma IsOreGraph.exists_walk_length_le_two [Fintype V] [G.LocallyFinite]
     (h : G.IsOreGraph) (u v : V) : ∃ p : G.Walk u v, p.length ≤ 2 := by
   by_cases heq : u = v
   · exact heq ▸ ⟨nil, by simp⟩
-  · rcases h.adj_or_exists_adj_adj heq with  huv | ⟨w, h1, h2⟩
+  · rcases h.adj_or_exists_adj_adj heq with huv | ⟨w, h1, h2⟩
     · exact ⟨cons huv nil, by simp⟩
     · exact ⟨cons h1 (cons h2.symm nil), by simp⟩
 
 /-!
-25. An Ore graph on at least three vertices contains a vertex of degree at least
+23. An Ore graph on at least three vertices contains a vertex of degree at least
 two. Hint: among any three distinct vertices either some pair is non-adjacent, and
 so the Ore condition forces its degree sum to be at least three, or all three are
 pairwise adjacent.
@@ -666,10 +654,10 @@ lemma IsOreGraph.exists_two_le_degree [Fintype V] [G.LocallyFinite]
     grind
 
 /-!
-26. Existence of a vertex of degree at least two implies existence of a path of
+24. Existence of a vertex of degree at least two implies existence of a path of
 length at least two.
 -/
-lemma Walk.exists_isPath_of_two_le_degree [G.LocallyFinite] {v : V}
+lemma exists_isPath_of_two_le_degree [G.LocallyFinite] {v : V}
     (hv : 2 ≤ G.degree v) :
     ∃ (x y : V) (q : G.Walk x y), q.IsPath ∧ 2 ≤ q.length := by
   rw [← card_neighborFinset_eq_degree] at hv
@@ -678,7 +666,7 @@ lemma Walk.exists_isPath_of_two_le_degree [G.LocallyFinite] {v : V}
   exact ⟨x, y, cons hx.symm (cons hy nil), by simp_all [hx.symm.ne, hy.ne]⟩
 
 /-!
-27. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
+25. Restate Mathlib's existence result `exists_isPath_forall_isPath_length_le_length`
 compactly.
 -/
 variable (G) in
@@ -688,14 +676,14 @@ lemma Walk.exists_isMaximumPath [Nonempty V] [Finite G.edgeSet] :
   ⟨u, v, p, hp, hmax⟩
 
 /-!
-28. The reverse of a maximum-length path is again a maximum-length path.
+26. The reverse of a maximum-length path is again a maximum-length path.
 -/
 lemma Walk.IsMaximumPath.reverse {u v : V} {p : G.Walk u v} (h : p.IsMaximumPath) :
     p.reverse.IsMaximumPath :=
   ⟨h.isPath.reverse, fun _ _ _ hq => p.length_reverse ▸ h.length_le hq⟩
 
 /-!
-29. A maximum-length path in an Ore graph on at least three vertices has length
+27. A maximum-length path in an Ore graph on at least three vertices has length
 at least two.
 -/
 lemma IsOreGraph.two_le_length_of_isMaximumPath [Fintype V] [G.LocallyFinite]
@@ -707,7 +695,7 @@ lemma IsOreGraph.two_le_length_of_isMaximumPath [Fintype V] [G.LocallyFinite]
   exact hlen.trans (hmax.length_le hq)
 
 /-!
-30. A maximum-length path is in particular a *maximal* path, in the sense of the
+28. A maximum-length path is in particular a *maximal* path, in the sense of the
 chapter's `Walk.IsMaximalPath`: neither endpoint has a neighbour missing from it.
 Hint: if a neighbour of the start were missing then `cons` would give a strictly
 longer path; for the end vertex apply the same argument to `p.reverse`, using
@@ -726,16 +714,16 @@ lemma Walk.IsMaximumPath.isMaximalPath {u v : V} {p : G.Walk u v}
     fun w h => by grind [hstart hmax.reverse w h, support_reverse]⟩
 
 /-!
-31. If `p` is a walk from a vertex in a set `S` to a vertex outside of `S`, there
+29. If `p` is a walk from a vertex in a set `S` to a vertex outside of `S`, there
 are adjacent vertices `c ∈ S` and `d ∉ S`. Hint: `Walk.exists_boundary_dart`.
 -/
 lemma Walk.exists_cross_adj {a b} {S : Set V} (p : G.Walk a b) (ha : a ∈ S)
-    (hb : b ∉ S) : ∃ c ∈ S, ∃ d ∉ S, G.Adj c d  := by
+    (hb : b ∉ S) : ∃ c ∈ S, ∃ d ∉ S, G.Adj c d := by
   obtain ⟨⟨⟨c, d⟩, hcd⟩, -, ⟨hc, hd⟩⟩ := p.exists_boundary_dart S ha hb
   use c, hc, d, hd, hcd
 
 /-!
-32. In a non-nil closed walk the first vertex also occurs as the last, so a vertex
+30. In a non-nil closed walk the first vertex also occurs as the last, so a vertex
 lies in the tail of the support iff it lies in the support.
 -/
 lemma Walk.mem_support_tail_iff {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V} :
@@ -747,7 +735,7 @@ lemma Walk.mem_support_tail_iff {a : V} {c : G.Walk a a} (hc : ¬c.Nil) {x : V} 
   · exact h
 
 /-!
-33. A cycle can be cut at any of its vertices to give a path from that vertex
+31. A cycle can be cut at any of its vertices to give a path from that vertex
 visiting exactly the cycle's vertices, of length one less than the cycle. Hint:
 deduce it from the chapter's `IsCycle.exists_isPath_of_mem_edges`, cutting the cycle
 at the first edge of `c.rotate y hy` (`Walk.mk_start_snd_mem_edges`,
@@ -766,7 +754,7 @@ lemma Walk.IsCycle.exists_isPath_spanning {a : V} {c : G.Walk a a}
   exact ⟨_, q, hq, hlen, hsupp⟩
 
 /-!
-34. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
+32. If `p` is a maximum-length path from `u`, every vertex is reachable from `u`, and
 some cycle through `u` of length one more than `p` visits exactly the vertices of
 `p`, then `p` is Hamiltonian. (Neither Ore's condition nor finiteness is needed.)
 Hint: if `p` missed a vertex, a walk from `u` to it and `exists_cross_adj` would
@@ -794,11 +782,11 @@ lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle [DecidableEq V] {u v : V}
   grind [length_cons, hmax.length_le hlong]
 
 /-!
-35. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
+33. A maximum-length path in an Ore graph is Hamiltonian. Hint: apply
 `IsMaximumPath.isHamiltonian_of_isCycle`. Ore's condition supplies the cycle, via
 `IsOreGraph.two_le_length_of_isMaximumPath` and
-`IsMaximalPath.exists_cycle_spanning` (from the chapter), and the reachability, via
-`IsOreGraph.exists_walk_length_le_two`.
+`IsMaximalPath.exists_cycle_spanning` (from the chapter; `p` is a maximal path by
+Exercise 28), and the reachability, via `IsOreGraph.exists_walk_length_le_two`.
 -/
 lemma Walk.isHamiltonian_of_isMaximumPath [Fintype V] [DecidableEq V]
     [G.LocallyFinite] (h : G.IsOreGraph)
@@ -813,8 +801,8 @@ lemma Walk.isHamiltonian_of_isMaximumPath [Fintype V] [DecidableEq V]
   exact q.reachable
 
 /-!
-36. Give a direct proof of Ore's theorem, not using the closure: take a
-maximum-length path; it is Hamiltonian of length ≥ 2, so
+34. Give a direct proof of Ore's theorem, not using the closure: take a
+maximum-length path; it is Hamiltonian of length at least two, so
 `IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair` closes it into a Hamiltonian
 cycle.
 -/
@@ -822,8 +810,8 @@ example [Fintype V] [DecidableEq V] [G.LocallyFinite] (h : G.IsOreGraph)
     (hn : 3 ≤ Fintype.card V) : G.IsHamiltonian := by
   intro
   have : Nonempty V := Fintype.card_pos_iff.mp (hn.trans_lt' (by decide))
-  -- A maximum-length path `p` is Hamiltonian and has length ≥ 2, so it closes up
-  -- into a Hamiltonian cycle.
+  -- A maximum-length path `p` is Hamiltonian and has length at least two, so it
+  -- closes up into a Hamiltonian cycle.
   obtain ⟨u, v, p, hmax⟩ := exists_isMaximumPath G
   have hham := p.isHamiltonian_of_isMaximumPath h hn hmax
   exact ⟨u, hham.exists_isHamiltonianCycle_of_isOrePair

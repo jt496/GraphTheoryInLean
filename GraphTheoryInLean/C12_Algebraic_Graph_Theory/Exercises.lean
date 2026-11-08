@@ -5,9 +5,11 @@ Authors: John Talbot
 -/
 import GraphTheoryInLean.C12_Algebraic_Graph_Theory.C12_Algebraic_Graph_Theory
 namespace SimpleGraph
+open Finset
 variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
+
 1. Let `M` be a group. Prove that for any `s : Set M` the Cayley graph
 `mulCayley s` is vertex-transitive. (Start by showing that left multiplication by any
 `g : M` is an automorphism of `mulCayley s`.)
@@ -23,9 +25,9 @@ lemma isVertexTransitive_mulCayley' {M : Type*} [Group M] (s : Set M) :
 /-!
 2. Show that the automorphisms of a complete graph are exactly the permutations of
 its vertices, i.e. that its automorphism group is the symmetric group
-`Equiv.Perm V`, and deduce that `K[n]` has `n!` automorphisms. (Hint: Mathlib's
+`Equiv.Perm V`, and deduce that `K[n]` has `n!` automorphisms. Hint: Mathlib's
 `Iso.completeGraph` turns a bijection into an isomorphism of complete graphs, and
-`Nat.card_perm` counts permutations.)
+`Nat.card_perm` counts permutations.
 -/
 def autTopMulEquivPerm' (V : Type*) :
     ((⊤ : SimpleGraph V) ≃g (⊤ : SimpleGraph V)) ≃* Equiv.Perm V :=
@@ -35,18 +37,18 @@ lemma card_aut_completeGraph' (n : ℕ) : Nat.card (K[n] ≃g K[n]) = n.factoria
   sorry
 
 /-!
-3. Show that a graph and its complement have the same automorphisms. (Hint: for the
-inverse map, treat the pairs of vertices `a = b` and `a ≠ b` separately.)
+3. Show that a graph and its complement have the same automorphisms. Hint: for the
+inverse map, treat the pairs of vertices `a = b` and `a ≠ b` separately.
 -/
 def autComplMulEquiv' : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) :=
   sorry
 
 /-!
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
-has even degree. (Hint: such a graph is regular by
+has even degree. Hint: such a graph is regular by
 `IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
 form `sum_degrees_eq_twice_card_edges'` of [The Handshake
-Lemma](#section-the-handshake-lemma).)
+Lemma](#section-the-handshake-lemma).
 -/
 lemma even_degree_of_isVertexTransitive' [Fintype V] [G.LocallyFinite]
     (h : G.IsVertexTransitive) (hodd : Odd (Fintype.card V)) (v : V) :
@@ -67,8 +69,8 @@ example : petersenGraph.IsVertexTransitive := by
   sorry
 
 /-!
-6. Show that the cycle `C[n + 3]` has `2 * (n + 3)` automorphisms. (Hint: use
-`autCycleGraphMulEquivDihedral` and `DihedralGroup.nat_card`.)
+6. Show that the cycle `C[n + 3]` has `2 * (n + 3)` automorphisms. Hint: use
+`autCycleGraphMulEquivDihedral` and `DihedralGroup.nat_card`.
 -/
 lemma card_aut_cycleGraph' (n : ℕ) :
     Nat.card (C[n + 3] ≃g C[n + 3]) = 2 * (n + 3) := by
@@ -78,17 +80,19 @@ lemma card_aut_cycleGraph' (n : ℕ) :
 7. Show that the trace of the square of the adjacency matrix of a finite graph is
 twice the number of edges.
 -/
-open Finset in
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     (G.adjMatrix ℕ ^ 2).trace = 2 * #G.edgeFinset := by
   sorry
 
 /-!
-8. The vector `mycielskianLift t x` again has entries summing to zero, so the
-construction can be repeated. Show this, and deduce that the Grötzsch graph
-`grotzschGraph`, i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
-`grotzschGraph` is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
-`mycielskianCompleteTwoIsoCycleFive`.)
+8. In the chapter, `mycielskianLift t` turns an eigenvector `x` of `G` whose
+entries sum to zero into an eigenvector `mycielskianLift t x` of `mμ(G)`, for any
+root `t` of `t ^ 2 = t + 1` (`adjMatrix_mycielskian_mulVec_mycielskianLift`). Show
+that the entries of `mycielskianLift t x` again sum to zero, so that the
+construction can be repeated, and deduce that the Grötzsch graph `grotzschGraph`,
+i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. Hint: `grotzschGraph`
+is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
+`mycielskianCompleteTwoIsoCycleFive`.
 -/
 lemma sum_mycielskianLift' [Fintype V] {R : Type*} [CommRing R] (t : R)
     {x : V → R} (hsum : ∑ v, x v = 0) : ∑ w, mycielskianLift t x w = 0 := by
@@ -103,9 +107,9 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
 /-!
 9. Show that the characteristic polynomial of `C[5]` is
 `(X - 2) * (X ^ 2 + X - 1) ^ 2`, so `-φ` and `-ψ` are eigenvalues of `C[5]` of
-multiplicity two. (Hint: proceed as for the cospectral graphs in
+multiplicity two. Hint: proceed as for the cospectral graphs in
 [Eigenvalues](#section-eigenvalues). The vertex type of `C[5]` is already `Fin 5`, so
-no relabelling is needed.)
+no relabelling is needed.
 -/
 open Polynomial in
 example : (C[5].adjMatrix ℤ).charpoly = (X - 2) * (X ^ 2 + X - 1) ^ 2 := by
@@ -144,20 +148,37 @@ example [Fintype V] [DecidableRel G.Adj] :
 /-!
 14. Show that the Hamming cube is isomorphic to the third construction of the
 hypercube, the Hasse diagram `hypercubeHasse` of the subsets of `Fin n`, by sending a
-vertex `x` to the set of coordinates `i` with `x i = true`. (Hint: adding the basis
+vertex `x` to the set of coordinates `i` with `x i = true`. Hint: adding the basis
 vector `e i` to `x` removes `i` from this set if it is there, and inserts it
 otherwise. Use `hypercubeHamming_adj_iff_exists`, `hasse_adj`,
-`Finset.covBy_iff_exists_insert`, `Finset.covBy_insert` and `Finset.erase_covBy`.)
+`Finset.covBy_iff_exists_insert`, `Finset.covBy_insert` and `Finset.erase_covBy`.
 -/
+def boolVecEquivFinset' (n : ℕ) : (Fin n → Bool) ≃ Finset (Fin n) where
+  toFun x := {i | x i = true}
+  invFun s i := decide (i ∈ s)
+  left_inv x := sorry
+  right_inv s := sorry
+
 open scoped hypercubeHamming in
+lemma boolVecEquivFinset_add_single' {n : ℕ} (x : Fin n → Bool) (i : Fin n) :
+    boolVecEquivFinset' n (x + e i) =
+      if x i = true then (boolVecEquivFinset' n x).erase i
+      else insert i (boolVecEquivFinset' n x) := by
+  sorry
+
+lemma hypercubeHamming_adj_of_covBy' {n : ℕ} {x y : Fin n → Bool}
+    (h : boolVecEquivFinset' n x ⋖ boolVecEquivFinset' n y) :
+    (hypercubeHamming n).Adj x y := by
+  sorry
+
 def hypercubeHammingIsoHasse' (n : ℕ) : hypercubeHamming n ≃g hypercubeHasse n :=
   sorry
 
 /-!
-15. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
-`u — v` there is an automorphism sending `x` to `u` and `y` to `v`. (Hint: if
+15. Show that the Hamming cube is *arc-transitive*: for any two edges `x — y` and
+`u — v` there is an automorphism sending `x` to `u` and `y` to `v`. Hint: if
 `y = x + e i` and `v = u + e j`, compose a translation, the coordinate permutation
-`Equiv.swap i j` and another translation.)
+`Equiv.swap i j` and another translation.
 -/
 open scoped hypercubeHamming in
 lemma exists_aut_hypercubeHamming_of_adj' {n : ℕ} {x y u v : Fin n → Bool}
@@ -169,7 +190,7 @@ lemma exists_aut_hypercubeHamming_of_adj' {n : ℕ} {x y u v : Fin n → Bool}
 16. Show that the copies of any graph `A` in a complete graph are just the injective
 maps between the vertex types. Deduce that `K[n]` contains
 `n.descFactorial (k + 3) = n * (n - 1) * ⋯ * (n - k - 2)` labelled copies of
-`C[k + 3]`. (Hint: `Fintype.card_embedding_eq`.)
+`C[k + 3]`. Hint: `Fintype.card_embedding_eq`.
 -/
 def copyTopEquiv' {W : Type*} (A : SimpleGraph V) :
     Copy A (⊤ : SimpleGraph W) ≃ (V ↪ W) :=
@@ -181,19 +202,38 @@ lemma labelledCopyCount_completeGraph_cycleGraph' (n k : ℕ) :
 
 /-!
 17. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
-i.e. unlabelled copies of `C[n + 3]`. (Hint: `labelledCopyCount_cycleGraph`.)
+i.e. unlabelled copies of `C[n + 3]`. Hint: `labelledCopyCount_cycleGraph`.
 -/
 lemma copyCount_completeGraph_cycleGraph' (n : ℕ) :
     2 * (n + 3) * K[n + 3].copyCount C[n + 3] = (n + 3).factorial := by
   sorry
 
 /-!
-18. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
+18. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
+-/
+lemma labelledCopyCount_cycleGraph_five_self' :
+    C[5].labelledCopyCount C[5] = 10 := by
+  sorry
+
+/-!
+19. Show that the number of labelled copies of a finite complete graph `⊤` in a
+finite graph `G` is the number of cliques of `G` of the same size, multiplied by the
+number of permutations of the vertices of `⊤`. Hint: combine `copyCount_top` and
+`labelledCopyCount_eq_copyCount_mul_labelledCopyCount` with Exercise 2.
+-/
+lemma labelledCopyCount_top' {W : Type*} [Fintype V] [Fintype W] [DecidableEq V]
+    [DecidableRel G.Adj] :
+    G.labelledCopyCount (⊤ : SimpleGraph W) =
+      #(G.cliqueFinset (Fintype.card W)) * (Fintype.card W).factorial := by
+  sorry
+
+/-!
+20. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
-`n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
+`n.choose 2 * 2 ^ (n - 2)` unlabelled ones. Hint: transport
 `labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
 `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]`, using `Iso.labelledCopyCount_eq` and
-`Iso.copyCount_eq_left`.)
+`Iso.copyCount_eq`.
 -/
 lemma labelledCopyCount_hypercube_cycleGraph_four' (n : ℕ) :
     Q[n].labelledCopyCount C[4] = 2 ^ n * (n * (n - 1)) := by
@@ -201,13 +241,6 @@ lemma labelledCopyCount_hypercube_cycleGraph_four' (n : ℕ) :
 
 lemma copyCount_hypercube_cycleGraph_four' (n : ℕ) (hn : 2 ≤ n) :
     Q[n].copyCount C[4] = n.choose 2 * 2 ^ (n - 2) := by
-  sorry
-
-/-!
-19. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
--/
-lemma labelledCopyCount_cycleGraph_five_self' :
-    C[5].labelledCopyCount C[5] = 10 := by
   sorry
 
 /-! SOLUTIONS -/
@@ -230,9 +263,9 @@ lemma isVertexTransitive_mulCayley {M : Type*} [Group M] (s : Set M) :
 /-!
 2. Show that the automorphisms of a complete graph are exactly the permutations of
 its vertices, i.e. that its automorphism group is the symmetric group
-`Equiv.Perm V`, and deduce that `K[n]` has `n!` automorphisms. (Hint: Mathlib's
+`Equiv.Perm V`, and deduce that `K[n]` has `n!` automorphisms. Hint: Mathlib's
 `Iso.completeGraph` turns a bijection into an isomorphism of complete graphs, and
-`Nat.card_perm` counts permutations.)
+`Nat.card_perm` counts permutations.
 
 An automorphism of `⊤` is determined by its underlying permutation, and conversely
 every permutation `σ` preserves adjacency (`σ a ≠ σ b ↔ a ≠ b`), which is
@@ -251,8 +284,8 @@ lemma card_aut_completeGraph (n : ℕ) : Nat.card (K[n] ≃g K[n]) = n.factorial
     Nat.card_fin]
 
 /-!
-3. Show that a graph and its complement have the same automorphisms. (Hint: for the
-inverse map, treat the pairs of vertices `a = b` and `a ≠ b` separately.)
+3. Show that a graph and its complement have the same automorphisms. Hint: for the
+inverse map, treat the pairs of vertices `a = b` and `a ≠ b` separately.
 
 An automorphism `e` of `G` preserves non-adjacency of distinct vertices, so `simp`
 shows that it is an automorphism of `Gᶜ`. Conversely, if `e` is an automorphism of
@@ -273,10 +306,10 @@ def autComplMulEquiv : (G ≃g G) ≃* (Gᶜ ≃g Gᶜ) where
 
 /-!
 4. Show that every vertex of a vertex-transitive graph with an odd number of vertices
-has even degree. (Hint: such a graph is regular by
+has even degree. Hint: such a graph is regular by
 `IsVertexTransitive.exists_isRegularOfDegree`; now use the handshake lemma in the
 form `sum_degrees_eq_twice_card_edges'` of [The Handshake
-Lemma](#section-the-handshake-lemma).)
+Lemma](#section-the-handshake-lemma).
 
 If `G` is `d`-regular then the handshake lemma says that `|V| * d` is twice the
 number of edges, hence even, and since `|V|` is odd `d` must be even.
@@ -329,8 +362,8 @@ lemma isVertexTransitive_kneserGraph (n k : ℕ) : Kn[n, k].IsVertexTransitive :
 example : petersenGraph.IsVertexTransitive := isVertexTransitive_kneserGraph 5 2
 
 /-!
-6. Show that the cycle `C[n + 3]` has `2 * (n + 3)` automorphisms. (Hint: use
-`autCycleGraphMulEquivDihedral` and `DihedralGroup.nat_card`.)
+6. Show that the cycle `C[n + 3]` has `2 * (n + 3)` automorphisms. Hint: use
+`autCycleGraphMulEquivDihedral` and `DihedralGroup.nat_card`.
 -/
 /-- The cycle `C[n + 3]` has `2 * (n + 3)` automorphisms. -/
 lemma card_aut_cycleGraph (n : ℕ) :
@@ -342,7 +375,6 @@ lemma card_aut_cycleGraph (n : ℕ) :
 7. Show that the trace of the square of the adjacency matrix of a finite graph is
 twice the number of edges.
 -/
-open Finset in
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
     (G.adjMatrix ℕ ^ 2).trace = 2 * #G.edgeFinset := by
   simp_rw [Matrix.trace, Matrix.diag, sq, adjMatrix_mul_self_apply_self,
@@ -350,11 +382,14 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] :
   exact sum_degrees_eq_twice_card_edges G
 
 /-!
-8. The vector `mycielskianLift t x` again has entries summing to zero, so the
-construction can be repeated. Show this, and deduce that the Grötzsch graph
-`grotzschGraph`, i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. (Hint:
-`grotzschGraph` is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
-`mycielskianCompleteTwoIsoCycleFive`.)
+8. In the chapter, `mycielskianLift t` turns an eigenvector `x` of `G` whose
+entries sum to zero into an eigenvector `mycielskianLift t x` of `mμ(G)`, for any
+root `t` of `t ^ 2 = t + 1` (`adjMatrix_mycielskian_mulVec_mycielskianLift`). Show
+that the entries of `mycielskianLift t x` again sum to zero, so that the
+construction can be repeated, and deduce that the Grötzsch graph `grotzschGraph`,
+i.e. `mμ(C[5])`, has eigenvalues `1`, `-φ ^ 2` and `-ψ ^ 2`. Hint: `grotzschGraph`
+is isomorphic to `mμ(mμ(K[2]))`, by `Iso.mapMycielskian` applied to
+`mycielskianCompleteTwoIsoCycleFive`.
 -/
 lemma sum_mycielskianLift [Fintype V] {R : Type*} [CommRing R] (t : R)
     {x : V → R} (hsum : ∑ v, x v = 0) : ∑ w, mycielskianLift t x w = 0 := by
@@ -394,9 +429,9 @@ example : 1 ∈ spectrum ℝ (grotzschGraph.adjMatrix ℝ) ∧
 /-!
 9. Show that the characteristic polynomial of `C[5]` is
 `(X - 2) * (X ^ 2 + X - 1) ^ 2`, so `-φ` and `-ψ` are eigenvalues of `C[5]` of
-multiplicity two. (Hint: proceed as for the cospectral graphs in
+multiplicity two. Hint: proceed as for the cospectral graphs in
 [Eigenvalues](#section-eigenvalues). The vertex type of `C[5]` is already `Fin 5`, so
-no relabelling is needed.)
+no relabelling is needed.
 -/
 open Polynomial in
 example : (C[5].adjMatrix ℤ).charpoly = (X - 2) * (X ^ 2 + X - 1) ^ 2 := by
@@ -441,7 +476,7 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
     { card := by decide
       regular := by intro v; decide +revert
       of_adj := by decide
-      of_not_adj := by unfold Pairwise; decide }
+      of_not_adj := by intro u v; decide +revert}
   refine ⟨h, h.ediam_eq_two (fun h' => ?_) one_ne_zero⟩
   have hne : ¬ C[5].Adj 0 2 := by decide
   exact hne (by rw [h', top_adj]; decide)
@@ -457,10 +492,10 @@ example [Fintype V] [DecidableRel G.Adj] :
 /-!
 14. Show that the Hamming cube is isomorphic to the third construction of the
 hypercube, the Hasse diagram `hypercubeHasse` of the subsets of `Fin n`, by sending a
-vertex `x` to the set of coordinates `i` with `x i = true`. (Hint: adding the basis
+vertex `x` to the set of coordinates `i` with `x i = true`. Hint: adding the basis
 vector `e i` to `x` removes `i` from this set if it is there, and inserts it
 otherwise. Use `hypercubeHamming_adj_iff_exists`, `hasse_adj`,
-`Finset.covBy_iff_exists_insert`, `Finset.covBy_insert` and `Finset.erase_covBy`.)
+`Finset.covBy_iff_exists_insert`, `Finset.covBy_insert` and `Finset.erase_covBy`.
 
 We first give the bijection and compute the effect of adding a basis vector.
 -/
@@ -510,10 +545,10 @@ def hypercubeHammingIsoHasse (n : ℕ) : hypercubeHamming n ≃g hypercubeHasse 
     · exact .inl (Finset.covBy_insert (by simpa [boolVecEquivFinset] using hi))
 
 /-!
-15. Show that the hypercube is *arc-transitive*: for any two edges `x — y` and
-`u — v` there is an automorphism sending `x` to `u` and `y` to `v`. (Hint: if
+15. Show that the Hamming cube is *arc-transitive*: for any two edges `x — y` and
+`u — v` there is an automorphism sending `x` to `u` and `y` to `v`. Hint: if
 `y = x + e i` and `v = u + e j`, compose a translation, the coordinate permutation
-`Equiv.swap i j` and another translation.)
+`Equiv.swap i j` and another translation.
 
 Translating by `x` sends `x` to `0` and `y = x + eᵢ` to `eᵢ`; swapping the
 coordinates `i` and `j` fixes `0` and sends `eᵢ` to `eⱼ`; and translating by `u`
@@ -537,7 +572,7 @@ lemma exists_aut_hypercubeHamming_of_adj {n : ℕ} {x y u v : Fin n → Bool}
 16. Show that the copies of any graph `A` in a complete graph are just the injective
 maps between the vertex types. Deduce that `K[n]` contains
 `n.descFactorial (k + 3) = n * (n - 1) * ⋯ * (n - k - 2)` labelled copies of
-`C[k + 3]`. (Hint: `Fintype.card_embedding_eq`.)
+`C[k + 3]`. Hint: `Fintype.card_embedding_eq`.
 
 Adjacency in `⊤` is `≠`, so an injective map sends adjacent vertices (which are
 distinct) to adjacent vertices: every injective map is a copy.
@@ -556,7 +591,7 @@ lemma labelledCopyCount_completeGraph_cycleGraph (n k : ℕ) :
 
 /-!
 17. Deduce that `K[n + 3]` contains `(n + 3)! / (2 * (n + 3))` Hamiltonian cycles,
-i.e. unlabelled copies of `C[n + 3]`. (Hint: `labelledCopyCount_cycleGraph`.)
+i.e. unlabelled copies of `C[n + 3]`. Hint: `labelledCopyCount_cycleGraph`.
 -/
 lemma copyCount_completeGraph_cycleGraph (n : ℕ) :
     2 * (n + 3) * K[n + 3].copyCount C[n + 3] = (n + 3).factorial := by
@@ -565,12 +600,38 @@ lemma copyCount_completeGraph_cycleGraph (n : ℕ) :
   rw [h, mul_comm]
 
 /-!
-18. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
+18. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
+-/
+lemma labelledCopyCount_cycleGraph_five_self :
+    C[5].labelledCopyCount C[5] = 10 := by
+  rw [labelledCopyCount, Fintype.card_eq_nat_card, Nat.card_congr (copyEquivAut _),
+    card_aut_cycleGraph 2]
+
+/-!
+19. Show that the number of labelled copies of a finite complete graph `⊤` in a
+finite graph `G` is the number of cliques of `G` of the same size, multiplied by the
+number of permutations of the vertices of `⊤`. Hint: combine `copyCount_top` and
+`labelledCopyCount_eq_copyCount_mul_labelledCopyCount` with Exercise 2.
+
+The unlabelled copies are the cliques (`copyCount_top`), and by Exercise 2 the
+automorphisms of `⊤` are the permutations of its vertices.
+-/
+lemma labelledCopyCount_top {W : Type*} [Fintype V] [Fintype W] [DecidableEq V]
+    [DecidableRel G.Adj] :
+    G.labelledCopyCount (⊤ : SimpleGraph W) =
+      #(G.cliqueFinset (Fintype.card W)) * (Fintype.card W).factorial := by
+  rw [labelledCopyCount_eq_copyCount_mul_labelledCopyCount, copyCount_top,
+    labelledCopyCount, Fintype.card_eq_nat_card (α := Copy (⊤ : SimpleGraph W) ⊤),
+    Nat.card_congr ((copyEquivAut _).trans (autTopMulEquivPerm W).toEquiv),
+    Nat.card_perm, Nat.card_eq_fintype_card]
+
+/-!
+20. Count the `4`-cycles in the hypercube: show that `Q[n]` contains
 `2 ^ n * (n * (n - 1))` labelled copies of `C[4]` and, for `2 ≤ n`,
-`n.choose 2 * 2 ^ (n - 2)` unlabelled ones. (Hint: transport
+`n.choose 2 * 2 ^ (n - 2)` unlabelled ones. Hint: transport
 `labelledCopyCount_hypercube` and `copyCount_hypercube` along the isomorphism
 `hypercubeTwoIsoCycleFour : Q[2] ≃g C[4]`, using `Iso.labelledCopyCount_eq` and
-`Iso.copyCount_eq_left`.)
+`Iso.copyCount_eq`.
 
 The labelled count is `labelledCopyCount_hypercube n 2`, since
 `n.descFactorial 2 = n * (n - 1)`, and the unlabelled count is
@@ -584,15 +645,7 @@ lemma labelledCopyCount_hypercube_cycleGraph_four (n : ℕ) :
 
 lemma copyCount_hypercube_cycleGraph_four (n : ℕ) (hn : 2 ≤ n) :
     Q[n].copyCount C[4] = n.choose 2 * 2 ^ (n - 2) := by
-  rw [← hypercubeTwoIsoCycleFour.copyCount_eq_left Q[n], copyCount_hypercube n 2 hn]
-
-/-!
-19. Show that `C[5]` has `10` labelled copies in itself, using Exercise 6.
--/
-lemma labelledCopyCount_cycleGraph_five_self :
-    C[5].labelledCopyCount C[5] = 10 := by
-  rw [labelledCopyCount, Fintype.card_eq_nat_card, Nat.card_congr (copyEquivAut _),
-    card_aut_cycleGraph 2]
+  rw [← hypercubeTwoIsoCycleFour.copyCount_eq .refl, copyCount_hypercube n 2 hn]
 
 /-! END SOLUTIONS -/
 

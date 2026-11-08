@@ -21,18 +21,20 @@ lower bound for the chromatic number.
 In this chapter we study graph colourings (`Coloring`), colourability (`Colorable`),
 the chromatic number (`chromaticNumber`) and bipartite graphs (`IsBipartite`). We
 relate colourings to cliques and independent sets, showing that a finite graph has at
-most `χ G * ⍺ G` vertices and that colourings of two graphs whose supports meet in a
-clique can be amalgamated. We then colour some concrete graphs: blow-ups, box
-products and hypercubes. We show that the chromatic number of the Mycielskian is
-exactly one more than that of the original graph, which is what makes the clique
-bound arbitrarily bad. We also look briefly at edge colourings.
+most `χ G * ⍺ G` vertices (`natCard_le_chromaticNumber_mul_indepNum`) and that
+colourings of two graphs whose supports meet in a clique can be amalgamated
+(`Colorable.sup_of_isClique_inter`). We then colour some concrete graphs: blow-ups,
+box products and hypercubes. We show that the chromatic number of the Mycielskian is
+exactly one more than that of the original graph (`chromaticNumber_mycielskian`),
+which is what makes the clique bound arbitrarily bad. We also look briefly at edge
+colourings.
 
 Finally we turn to the *greedy* colouring algorithm. We first define it in a form
-that is easy to reason about, using `Nat.find` and well-founded recursion, and use
-this to prove that any locally finite graph on a countable vertex type with all
-degrees at most `Δ` is `(Δ + 1)`-colourable. We look at the crown graph to see how
-badly the greedy colouring can perform. We end by looking at how to make it more
-efficient to run.
+that is easy to reason about, using `Nat.find` and well-founded recursion (`greedy`),
+and use this to prove that any locally finite graph on a countable vertex type with
+all degrees at most `Δ` is `(Δ + 1)`-colourable
+(`colorable_of_degree_le_of_countable`). We look at the crown graph to see how badly
+the greedy colouring can perform. We end by looking at how to make it more efficient.
 
 # Colourings
 
@@ -74,8 +76,7 @@ sets, one for each colour. Mathlib makes this precise with `Coloring.toPartition
 Any cycle graph can be `3`-coloured, and any even cycle can be `2`-coloured using
 `Bool` as the set of colours. Colourings of concrete graphs can also be evaluated.
 -/
-#eval cycleGraph.tricoloring 7 (by decide) -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 0, 3 ↦ 1,
-                                           --         4 ↦ 0, 5 ↦ 1, 6 ↦ 2}
+#eval cycleGraph.tricoloring 7 -- {0 ↦ 0, 1 ↦ 1, 2 ↦ 0, 3 ↦ 1, 4 ↦ 0, 5 ↦ 1, 6 ↦ 2}
 
 #eval cycleGraph.bicoloring_of_even 4 (by decide) -- {0 ↦ true, 1 ↦ false,
                                                   --      2 ↦ true, 3 ↦ false}
@@ -245,7 +246,7 @@ theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
         rw [Nat.card_eq_fintype_card, ← card_univ,
           card_eq_sum_card_fiberwise fun v _ => mem_univ (C v)]
     _ ≤ ∑ _ : Fin k, ⍺ G := by
-        apply sum_le_sum fun i _ => IsIndepSet.card_le_indepNum ?_
+        refine sum_le_sum fun i _ => IsIndepSet.card_le_indepNum ?_
         simpa [Coloring.colorClass] using C.isIndepSet_colorClass i
     _ = k * ⍺ G := by simp
 
@@ -441,7 +442,7 @@ lemma colorable_blowUpGraph_iff {n : ℕ} {ι : Type*} {W : ι → Type*}
     (G : SimpleGraph ι) (f : ∀ i, W i) :
     (G.blowUpGraph W).Colorable n ↔ G.Colorable n :=
   ⟨fun h => h.of_hom (Embedding.blowUp G W f).toHom,
-   fun h => h.of_hom ⟨Sigma.fst, fun h => by simpa [blowUpGraph_adj] using h⟩⟩
+   fun h => h.of_hom ⟨Sigma.fst, fun h => by simpa using h⟩⟩
 
 /-!
 For example, Mathlib's complete multipartite graph `completeMultipartiteGraph W`,
@@ -767,7 +768,7 @@ Combining this with `cliqueNum_iterMycielskian_completeGraph_two` gives what we
 promised, Mycielski's theorem: the graphs `mμ^n(K[2])` all have clique number `2`,
 but their chromatic numbers are unbounded.
 -/
-/-- *Mycielski's theorem*: the nth-iterated Mycielskian of `K[2]` has clique number
+/-- **Mycielski's theorem**: the nth-iterated Mycielskian of `K[2]` has clique number
 `2` and chromatic number `n + 2`. -/
 theorem mycielski (n : ℕ) : ω mμ^n(K[2]) = 2 ∧ χ mμ^n(K[2]) = n + 2 :=
   ⟨cliqueNum_iterMycielskian_completeGraph_two n,
@@ -978,10 +979,10 @@ lemma greedyChoice_congr {c₁ c₂ : ℕ → ℕ} {n : ℕ} (h : ∀ m < n, c�
 /-!
 [Figure: Left: a greedy colouring, with colours $0$, $1$, $2$ and $3$ drawn as red, blue, green and yellow. Right: for each vertex $n$, its earlier neighbours, the colours they forbid, and the least colour not forbidden](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
 
-We use `greedyChoice` to define the greedy colouring `greedy` of `G` by *well-founded
-recursion* on `ℕ`. To colour a vertex `v` we need to know the colours of its
-*earlier* vertices `u < v`, so the value of `greedy` at `v` is defined in terms of
-its values at strictly smaller arguments.
+We use `greedyChoice` to define the greedy colouring `greedy` of `G` by
+*well-founded recursion* on `ℕ`. To colour a vertex `v` we need to know the colours
+of its *earlier* vertices `u < v`, so the value of `greedy` at `v` is defined in
+terms of its values at strictly smaller arguments.
 
 Concretely, we feed `greedyChoice` the "partial colouring" function
 `fun u ↦ if u < v then greedy u else 42`. The `if u < v` guard makes the recursion
@@ -991,7 +992,8 @@ call is at a strictly smaller argument. The `42` in the `else` branch is just fi
 its value is irrelevant, since `greedyChoice` ignores the values of the partial
 colouring at `u ≥ v`.
 -/
-/-- The greedy `ℕ`-colouring of `G` as a function. -/
+/-- The greedy `ℕ`-colouring of `G` as a function, defined using well-founded
+recursion on `ℕ`. -/
 def greedy (v : ℕ) : ℕ :=
   G.greedyChoice (fun u ↦ if u < v then greedy u else 42) v
 
@@ -1074,8 +1076,8 @@ def greedyColoringNat : G.Coloring ℕ where
   toFun := G.greedy
   map_rel' := fun hadj hf => hadj.greedy_ne hf
 
-/-- *The Greedy Colouring Bound:* Any graph on `ℕ` in which every vertex has at most
-`Δ` earlier neighbours is `(Δ + 1)`-colourable. -/
+/-- The **greedy colouring bound**: any graph on `ℕ` in which every vertex has at
+most `Δ` earlier neighbours is `(Δ + 1)`-colourable. -/
 theorem colorable_of_degreeLT_le {Δ : ℕ} (hdeg : ∀ v, G.degreeLT v ≤ Δ) :
     G.Colorable (Δ + 1) :=
   (colorable_iff_exists_bdd_nat_coloring _).2
@@ -1120,9 +1122,7 @@ minus the perfect matching `2 * n ↦ 2 * n + 1`. -/
 @[simps]
 def crownGraph : SimpleGraph ℕ where
   Adj a b := a % 2 ≠ b % 2 ∧ a / 2 ≠ b / 2
-
-instance : DecidableRel crownGraph.Adj := by
-  unfold crownGraph; infer_instance
+deriving instance DecidableRel for (crownGraph.Adj)
 
 /-!
 The earlier neighbours of `n` in `crownGraph` are `{1, 3, ..., n - 1}`, if `n` is
@@ -1315,9 +1315,10 @@ theorem colorable_of_degree_le_of_countable {V : Type*} {G : SimpleGraph V} {Δ 
   exact ⟨greedyColoringFin hdeg⟩
 
 /-!
-Later we will use the [*De Bruijn–Erdős theorem*](#section-de-bruijn-erd-s-theorem)
-to show that the countable assumption is also superfluous, but for this we need to
-understand `Subgraph`s.
+Later we will use the
+[*De Bruijn–Erdős theorem*](#section-de-bruijn-erd-s-theorem) to show that
+the countable assumption is also superfluous, but for this we need to understand
+`Subgraph`s.
 
 ## Making `greedy` Efficient *
 

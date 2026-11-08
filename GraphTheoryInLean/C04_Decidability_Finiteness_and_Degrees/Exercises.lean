@@ -10,9 +10,23 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
 
-The first exercises are on finiteness and counting.
+1. Give a decidable adjacency instance for the line graph `L[G]` of a graph on a
+vertex type with decidable equality. Recall that the vertices of `L[G]` are the edges
+of `G`, and that two of them are adjacent iff they are distinct and share a vertex
+(`lineGraph_adj_iff_exists`).
 
-1. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
+Hint: `∃ v, P v` is not decidable in general, but the bounded `∃ v ∈ s, P v` is
+when `s` is a `Finset` and `P` is decidable. Turn `e₁ : Sym2 V` into a `Finset V`
+with `Sym2.toFinset`, note that `v ∈ e₂` is decidable (`Sym2.Mem.decidable`), and
+finish with `decidable_of_iff`.
+-/
+example [DecidableEq V] : DecidableRel L[G].Adj :=
+  sorry
+
+/-!
+The next few exercises are on finiteness and counting.
+
+2. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
 statement used. Prove that a graph has at most `Fintype.card (Sym2 V)` edges,
 assuming only the two instances that the statement itself mentions.
 -/
@@ -21,7 +35,7 @@ example [Fintype G.edgeSet] [Fintype (Sym2 V)] :
   sorry
 
 /-!
-2. Show that the edge set of a graph on a finite vertex type is finite, using
+3. Show that the edge set of a graph on a finite vertex type is finite, using
 `Finite` rather than `Fintype`. Note that no `DecidableRel G.Adj` is needed, unlike
 for `Fintype G.edgeSet`: why not?
 -/
@@ -29,13 +43,13 @@ example [Finite V] : Finite G.edgeSet := by
   sorry
 
 /-!
-3. The chapter showed `G.edgeSet.ncard = G.edgeFinset.card`. Prove the `ℕ∞` version.
+4. The chapter showed `G.edgeSet.ncard = G.edgeFinset.card`. Prove the `ℕ∞` version.
 -/
 example [Fintype G.edgeSet] : G.edgeSet.encard = G.edgeFinset.card := by
   sorry
 
 /-!
-4. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
+5. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
 `encard` of its edge set is therefore `⊤`, while the `ℕ`-valued `ncard` returns the
 junk value `0`. Hint: the edges `s(n, n + 1)` are distinct for distinct `n`, so
 `Set.infinite_of_injective_forall_mem` shows that the edge set is infinite.
@@ -44,71 +58,29 @@ example : pathNat.edgeSet.encard = ⊤ ∧ pathNat.edgeSet.ncard = 0 := by
   sorry
 
 /-!
-5. The degree of a vertex is the `Nat.card` of its neighbourhood.
+6. The degree of a vertex is the `Nat.card` of its neighbourhood.
 -/
 example (v : V) [Fintype (G.neighborSet v)] :
     Nat.card (G.neighborSet v) = G.degree v := by
   sorry
 
 /-!
-6. In the complete graph every vertex is adjacent to every other vertex: its
+7. In the complete graph every vertex is adjacent to every other vertex: its
 `neighborFinset` is `Finset.univ` with the vertex itself removed.
 -/
 example (n : ℕ) (v : Fin n) : K[n].neighborFinset v = Finset.univ.erase v := by
   sorry
 
 /-!
-7. The infinite path `pathNat` has no minimum or maximum degree in the sense of
-`minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
-is the least, and `2` the greatest, degree of a vertex of `pathNat`.
+8. If `G` is locally finite there is a vertex of degree at least `3` iff
+`∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d`.
 -/
-example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
-    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
+lemma exists_three_le_degree_iff' [G.LocallyFinite] : (∃ v, 3 ≤ G.degree v) ↔
+    ∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d := by
   sorry
 
 /-!
-8. A graph on an odd number of vertices that is regular of degree `d` must have `d`
-even. (Hint: use `IsRegularOfDegree.two_mul_card_edgeFinset`. The statement does not
-mention the edge set, so get the `Fintype G.edgeSet` instance that the proof needs
-from `classical`.)
--/
-example [Fintype V] [G.LocallyFinite] {d : ℕ} (h : G.IsRegularOfDegree d)
-    (hV : Odd (Fintype.card V)) : Even d := by
-  sorry
-
-/-!
-9. Prove that the complete graph on `Fin (n + 1)` has `n * (n + 1) / 2` edges.
--/
-example (n : ℕ) :  K[n + 1].edgeFinset.card = n * (n + 1) / 2 := by
-  sorry
-
-/-!
-10. Show that in any graph
-`G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2`.
--/
-example [Fintype V] [Fintype G.edgeSet] :
-    G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2 := by
-  sorry
-
-/-!
-11. Show that `k` times the number of vertices of degree at least `k` is at most
-twice the number of edges. (The set of such vertices is a `Finset` written with the
-set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
-Compare it with the handshake lemma `sum_degrees_eq_twice_card_edges'`.)
--/
-example [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] (k : ℕ) :
-    k * ({v | k ≤ G.degree v} : Finset V).card ≤ 2 * G.edgeFinset.card := by
-  sorry
-
-/-!
-12. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
-(Hint: use `IsRegularOfDegree.compl`.)
--/
-example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
-  sorry
-
-/-!
-13. We saw that a vertex `w` of the `n`-uniform blow-up `G[n]` has a finite
+9. We saw that a vertex `w` of the `n`-uniform blow-up `G[n]` has a finite
 neighbourhood whenever `w.fst` has a finite neighbourhood in `G`. In this exercise we
 generalize this to blow-ups whose classes may have different sizes and need not all
 be finite: it is enough that the classes of the neighbours of `w.fst` are finite. As
@@ -124,7 +96,58 @@ def blowUpGraphFintypeNeighborSet' {ι : Type*} (H : SimpleGraph ι) (V : ι →
     sorry
 
 /-!
-14. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
+10. The infinite path `pathNat` has no minimum or maximum degree in the sense of
+`minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
+is the least, and `2` the greatest, degree of a vertex of `pathNat`.
+-/
+example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
+    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
+  sorry
+
+/-!
+11. Show that `k` times the number of vertices of degree at least `k` is at most
+twice the number of edges. (The set of such vertices is a `Finset` written with the
+set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
+Compare it with the handshake lemma `sum_degrees_eq_twice_card_edges'`.)
+-/
+example [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] (k : ℕ) :
+    k * ({v | k ≤ G.degree v} : Finset V).card ≤ 2 * G.edgeFinset.card := by
+  sorry
+
+/-!
+12. A graph on an odd number of vertices that is regular of degree `d` must have `d`
+even. Hint: use `IsRegularOfDegree.two_mul_card_edgeFinset`. The statement does not
+mention the edge set, so get the `Fintype G.edgeSet` instance that the proof needs
+from `classical`.
+-/
+example [Fintype V] [G.LocallyFinite] {d : ℕ} (h : G.IsRegularOfDegree d)
+    (hV : Odd (Fintype.card V)) : Even d := by
+  sorry
+
+/-!
+13. Prove that the complete graph on `Fin (n + 1)` has `n * (n + 1) / 2` edges.
+-/
+example (n : ℕ) : K[n + 1].edgeFinset.card = n * (n + 1) / 2 := by
+  sorry
+
+/-!
+14. Show that in any finite graph
+`G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2`.
+-/
+example [Fintype V] [Fintype G.edgeSet] :
+    G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2 := by
+  sorry
+
+/-!
+15. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
+Hint: use `IsRegularOfDegree.compl`, `IsRegularOfDegree.hypercube` and
+`card_hypercubeVert`.
+-/
+example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
+  sorry
+
+/-!
+16. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
 `2 ^ n * Fintype.card V + 2 ^ n - 1` vertices.
 -/
 lemma card_mycielskianVert' (n : ℕ) [Fintype V] :
@@ -141,7 +164,7 @@ definitions build their own instances from them. Use the `classical` tactic for
 any further instances a proof needs. (We also `open Finset` since we will need quite
 a few lemmas about `Finset`.)
 
-15. The degree of the new vertex `none` in the Mycielskian is the number of vertices
+17. The degree of the new vertex `none` in the Mycielskian is the number of vertices
 in the original graph.
 -/
 open Finset
@@ -150,7 +173,7 @@ lemma degree_mycielskian_none' [Fintype V] [Fintype (mμ(G).neighborSet none)] :
   sorry
 
 /-!
-16. The degree of the right copy of a vertex in the Mycielskian is one more than the
+18. The degree of the right copy of a vertex in the Mycielskian is one more than the
 degree of the vertex in the original graph.
 -/
 lemma degree_mycielskian_right' (v : V) [Fintype (G.neighborSet v)]
@@ -159,25 +182,27 @@ lemma degree_mycielskian_right' (v : V) [Fintype (G.neighborSet v)]
   sorry
 
 /-!
-17. The number of edges in `mμ(G)` is `3 * G.edgeFinset.card + Fintype.card V`.
-(Hint: use `sum_degrees_eq_twice_card_edges'`.)
+19. The number of edges in `mμ(G)` is `3 * G.edgeFinset.card + Fintype.card V`.
+Hint: use `sum_degrees_eq_twice_card_edges'`.
 -/
 lemma card_edgeFinset_mycielskian' [Fintype V] [Fintype G.edgeSet]
     [Fintype mμ(G).edgeSet] :
-     #mμ(G).edgeFinset = 3 * # G.edgeFinset + Fintype.card V := by
+    #mμ(G).edgeFinset = 3 * #G.edgeFinset + Fintype.card V := by
   sorry
 
 /-!
-18. The maximum degree of `mμ(G)` is the maximum of `2 * Δ(G)` and the number of
-vertices in `G`.
+20. The maximum degree of `mμ(G)` is the maximum of `2 * Δ(G)` and the number of
+vertices in `G`. Hint: `exists_maximal_degree_vertex`, after treating `IsEmpty V`
+separately.
 -/
 lemma maxDegree_mycielskian' [Fintype V] [DecidableRel G.Adj] :
     Δ(mμ(G)) = max (2 * Δ(G)) (Fintype.card V) := by
   sorry
 
 /-!
-19. The minimum degree of `mμ(G)` is the minimum of `2 * δ(G)` and `δ(G) + 1`.
-Deduce that `δ(mμ(G)) = δ(G) + 1` whenever `δ(G) ≥ 1`.
+21. The minimum degree of `mμ(G)` is the minimum of `2 * δ(G)` and `δ(G) + 1`. Deduce
+that `δ(mμ(G)) = δ(G) + 1` whenever `δ(G) ≥ 1`. Hint: `exists_minimal_degree_vertex`,
+after treating `IsEmpty V` separately.
 -/
 lemma minDegree_mycielskian' [Fintype V] [DecidableRel G.Adj] :
     δ(mμ(G)) = min (2 * δ(G)) (δ(G) + 1) := by
@@ -185,22 +210,6 @@ lemma minDegree_mycielskian' [Fintype V] [DecidableRel G.Adj] :
 
 lemma minDegree_mycielskian_of_one_le' [Fintype V] [DecidableRel G.Adj]
     (h : 1 ≤ δ(G)) : δ(mμ(G)) = δ(G) + 1 := by
-  sorry
-
-/-!
-20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
-of `n - 1`.
--/
-lemma degreeMultiset_top' (n : ℕ) :
-    K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
-  sorry
-
-/-!
-21. A multiset of `n` copies of `n - 1` is graphic, realized by the complete graph
-`K[n]`.
--/
-lemma graphic_const' (n : ℕ) :
-    Graphic (Multiset.replicate n (n - 1)) := by
   sorry
 
 /-!
@@ -212,7 +221,7 @@ theorem Graphic.even_sum' {m : Multiset ℕ} (h : Graphic m) : Even m.sum := by
 
 /-!
 23. In the chapter we computed the degree of the new vertex of `coneGraph H s`. Show
-that an old vertex gains one on its degree exactly when it lies in `s`.
+that an old vertex's degree goes up by one exactly when it lies in `s`.
 -/
 lemma degree_coneGraph_some' [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
     (w : V) [Fintype (H.neighborSet w)]
@@ -222,9 +231,9 @@ lemma degree_coneGraph_some' [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
 
 /-!
 24. The `degreeMultiset` of the cone: the new vertex contributes `#s`, and every old
-vertex has its old degree plus one when it lies in `s`. (Hint: the stub below records
+vertex has its old degree plus one when it lies in `s`. Hint: the stub below records
 that `Finset.univ` on `Option V` is `none` followed by the image of `Finset.univ`
-under `some`. This holds by `rfl`.)
+under `some`. This holds by `rfl`.
 -/
 theorem degreeMultiset_coneGraph' [Fintype V] [DecidableEq V] (H : SimpleGraph V)
     [DecidableRel H.Adj] (s : Finset V) :
@@ -235,13 +244,13 @@ theorem degreeMultiset_coneGraph' [Fintype V] [DecidableEq V] (H : SimpleGraph V
   sorry
 
 /-!
-25. The `degreeMultiset` of `mμ(G)` is the multiset of degrees
-of `G` with each degree doubled, together with the degrees of the new vertices.
-(Hint: the stub below records how `Finset.univ` unfolds on `Option V` and on
-`V ⊕ V`. Both facts hold by `rfl`, as in Exercise 24.)
+25. The `degreeMultiset` of `mμ(G)` is the multiset of degrees of `G` with each
+degree doubled, together with the degrees of the new vertices. Hint: the stub below
+records how `Finset.univ` unfolds on `Option (V ⊕ V)` and on `V ⊕ V`. Both facts hold
+by `rfl`, as in Exercise 24.
 -/
 lemma degreeMultiset_mycielskian' [Fintype V] [DecidableRel G.Adj] :
-    mμ(G).degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * · )
+    mμ(G).degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * ·)
                            + G.degreeMultiset.map (· + 1) := by
   simp only [degreeMultiset]
   have h1 : (Finset.univ : Finset (Option (V ⊕ V))).val =
@@ -250,33 +259,29 @@ lemma degreeMultiset_mycielskian' [Fintype V] [DecidableRel G.Adj] :
                 Finset.univ.val + Multiset.map Sum.inr Finset.univ.val := rfl
   sorry
 
-/-!
-26. If `G` is locally finite there is a vertex of degree at least 3 iff
- `∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d`
--/
-lemma exists_three_le_degree_iff' {V : Type*} (G : SimpleGraph V)
-    [G.LocallyFinite] : (∃ v, 3 ≤ G.degree v) ↔
-      ∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d := by
-  sorry
+/-! SOLUTIONS -/
 
 /-!
-27. Give a decidable adjacency instance for the line graph `L[G]` of a graph on a
+1. Give a decidable adjacency instance for the line graph `L[G]` of a graph on a
 vertex type with decidable equality. Recall that the vertices of `L[G]` are the edges
 of `G`, and that two of them are adjacent iff they are distinct and share a vertex
 (`lineGraph_adj_iff_exists`).
 
-(Hint: `∃ v, P v` is not decidable in general, but the bounded `∃ v ∈ s, P v` is
+Hint: `∃ v, P v` is not decidable in general, but the bounded `∃ v ∈ s, P v` is
 when `s` is a `Finset` and `P` is decidable. Turn `e₁ : Sym2 V` into a `Finset V`
 with `Sym2.toFinset`, note that `v ∈ e₂` is decidable (`Sym2.Mem.decidable`), and
-finish with `decidable_of_iff`.)
+finish with `decidable_of_iff`.
 -/
-example [DecidableEq V] : DecidableRel L[G].Adj :=
-  sorry
+/-- Decidability of the adjacency relation for the line graph. -/
+instance [DecidableEq V] : DecidableRel L[G].Adj := fun e₁ e₂ =>
+  -- Bound the shared vertex by the `Finset` of endpoints of `e₁`
+  decidable_of_iff (e₁ ≠ e₂ ∧ ∃ v ∈ (e₁ : Sym2 V).toFinset, v ∈ (e₂ : Sym2 V))
+    (by simp [lineGraph_adj_iff_exists])
 
-/-! SOLUTIONS -/
+example : L[C[5]].Adj ⟨s(0, 1), by decide⟩ ⟨s(1, 2), by decide⟩ := by decide
 
 /-!
-1. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
+2. In the chapter we saw that `bad_card_edgeFinset` demanded more instances than its
 statement used. Prove that a graph has at most `Fintype.card (Sym2 V)` edges,
 assuming only the two instances that the statement itself mentions.
 -/
@@ -288,7 +293,7 @@ example [Fintype G.edgeSet] [Fintype (Sym2 V)] :
 -- `bad_card_edgeFinset`.
 
 /-!
-2. Show that the edge set of a graph on a finite vertex type is finite, using
+3. Show that the edge set of a graph on a finite vertex type is finite, using
 `Finite` rather than `Fintype`. Note that no `DecidableRel G.Adj` is needed, unlike
 for `Fintype G.edgeSet`: why not?
 -/
@@ -300,13 +305,13 @@ example [Finite V] : Finite G.edgeSet :=
   inferInstance
 
 /-!
-3. The chapter showed `G.edgeSet.ncard = G.edgeFinset.card`. Prove the `ℕ∞` version.
+4. The chapter showed `G.edgeSet.ncard = G.edgeFinset.card`. Prove the `ℕ∞` version.
 -/
 example [Fintype G.edgeSet] : G.edgeSet.encard = G.edgeFinset.card := by
   rw [← coe_edgeFinset, Set.encard_coe_eq_coe_finsetCard]
 
 /-!
-4. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
+5. The infinite path `pathNat` has infinitely many edges. Show that the `ℕ∞`-valued
 `encard` of its edge set is therefore `⊤`, while the `ℕ`-valued `ncard` returns the
 junk value `0`. Hint: the edges `s(n, n + 1)` are distinct for distinct `n`, so
 `Set.infinite_of_injective_forall_mem` shows that the edge set is infinite.
@@ -318,85 +323,30 @@ example : pathNat.edgeSet.encard = ⊤ ∧ pathNat.edgeSet.ncard = 0 := by
   exact ⟨h.encard_eq, h.ncard⟩
 
 /-!
-5. The degree of a vertex is the `Nat.card` of its neighbourhood.
+6. The degree of a vertex is the `Nat.card` of its neighbourhood.
 -/
 example (v : V) [Fintype (G.neighborSet v)] :
     Nat.card (G.neighborSet v) = G.degree v := by
   rw [Nat.card_eq_fintype_card, card_neighborSet_eq_degree]
 
 /-!
-6. In the complete graph every vertex is adjacent to every other vertex: its
+7. In the complete graph every vertex is adjacent to every other vertex: its
 `neighborFinset` is `Finset.univ` with the vertex itself removed.
 -/
 example (n : ℕ) (v : Fin n) : K[n].neighborFinset v = Finset.univ.erase v := by
   ext w; simp [ne_comm]
 
 /-!
-7. The infinite path `pathNat` has no minimum or maximum degree in the sense of
-`minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
-is the least, and `2` the greatest, degree of a vertex of `pathNat`.
+8. If `G` is locally finite there is a vertex of degree at least `3` iff
+`∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d`.
 -/
-example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
-    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
-  -- the degrees `1` and `2` are attained at the vertices `0` and `1`
-  refine ⟨⟨⟨0, by simp⟩, ?_⟩, ⟨⟨1, by simp⟩, ?_⟩⟩
-  all_goals
-    rintro _ ⟨v, rfl⟩
-    simp only [degree_pathNat]
-    split_ifs <;> simp
+lemma exists_three_le_degree_iff [G.LocallyFinite] : (∃ v, 3 ≤ G.degree v) ↔
+    ∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d := by
+  simp only [Nat.succ_le_iff, ← card_neighborFinset_eq_degree,
+            Finset.two_lt_card_iff, mem_neighborFinset]
 
 /-!
-8. A graph on an odd number of vertices that is regular of degree `d` must have `d`
-even. (Hint: use `IsRegularOfDegree.two_mul_card_edgeFinset`. The statement does not
-mention the edge set, so get the `Fintype G.edgeSet` instance that the proof needs
-from `classical`.)
--/
-example [Fintype V] [G.LocallyFinite] {d : ℕ} (h : G.IsRegularOfDegree d)
-    (hV : Odd (Fintype.card V)) : Even d := by
-  classical
-  have h2 : Even (Fintype.card V * d) := h.two_mul_card_edgeFinset ▸ even_two_mul _
-  exact (Nat.even_mul.1 h2).resolve_left (Nat.not_even_iff_odd.2 hV)
-
-/-!
-9. Prove that the complete graph on `Fin (n + 1)` has `n * (n + 1) / 2` edges.
--/
-example (n : ℕ) :  K[n + 1].edgeFinset.card = n * (n + 1) / 2 := by
-  rw [card_edgeFinset_top_eq_card_choose_two, Fintype.card_fin, Nat.choose_two_right,
-      Nat.add_sub_cancel_right, mul_comm]
-
-/-!
-10. Show that in any graph
-`G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2`.
--/
-example [Fintype V] [Fintype G.edgeSet] :
-    G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2 :=
-  G.card_edgeFinset_le_card_choose_two.trans (Nat.choose_two_right _).le
-
-/-!
-11. Show that `k` times the number of vertices of degree at least `k` is at most
-twice the number of edges. (The set of such vertices is a `Finset` written with the
-set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
-Compare it with the handshake lemma `sum_degrees_eq_twice_card_edges'`.)
--/
-example [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] (k : ℕ) :
-    k * ({v | k ≤ G.degree v} : Finset V).card ≤ 2 * G.edgeFinset.card := by
-  rw [← sum_degrees_eq_twice_card_edges']
-  calc k * ({v | k ≤ G.degree v} : Finset V).card
-      = ∑ v ∈ ({v | k ≤ G.degree v} : Finset V), k := by simp [mul_comm]
-    _ ≤ ∑ v ∈ ({v | k ≤ G.degree v} : Finset V), G.degree v :=
-        Finset.sum_le_sum fun v hv => by simpa using hv
-    _ ≤ ∑ v, G.degree v := Finset.sum_le_sum_of_subset (Finset.subset_univ _)
-
-/-!
-12. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
-(Hint: use `IsRegularOfDegree.compl`.)
--/
-example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
-  have := (IsRegularOfDegree.hypercube n).compl
-  rwa [card_hypercubeVert] at this
-
-/-!
-13. We saw that a vertex `w` of the `n`-uniform blow-up `G[n]` has a finite
+9. We saw that a vertex `w` of the `n`-uniform blow-up `G[n]` has a finite
 neighbourhood whenever `w.fst` has a finite neighbourhood in `G`. In this exercise we
 generalize this to blow-ups whose classes may have different sizes and need not all
 be finite: it is enough that the classes of the neighbours of `w.fst` are finite. As
@@ -414,7 +364,72 @@ def blowUpGraphFintypeNeighborSet {ι : Type*} (H : SimpleGraph ι) (V : ι → 
       invFun := fun ⟨⟨k, y⟩, hadj⟩ => ⟨⟨k, hadj⟩, y⟩}
 
 /-!
-14. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
+10. The infinite path `pathNat` has no minimum or maximum degree in the sense of
+`minDegree` and `maxDegree`, since its vertex type is infinite. Show instead that `1`
+is the least, and `2` the greatest, degree of a vertex of `pathNat`.
+-/
+example : IsLeast {d | ∃ v, pathNat.degree v = d} 1 ∧
+    IsGreatest {d | ∃ v, pathNat.degree v = d} 2 := by
+  -- the degrees `1` and `2` are attained at the vertices `0` and `1`
+  refine ⟨⟨⟨0, by simp⟩, ?_⟩, ⟨⟨1, by simp⟩, ?_⟩⟩
+  all_goals
+    rintro _ ⟨v, rfl⟩
+    simp only [degree_pathNat]
+    split_ifs <;> simp
+
+/-!
+11. Show that `k` times the number of vertices of degree at least `k` is at most
+twice the number of edges. (The set of such vertices is a `Finset` written with the
+set-builder notation of [Set-Builder Notation](#section-set-builder-notation).
+Compare it with the handshake lemma `sum_degrees_eq_twice_card_edges'`.)
+-/
+example [Fintype V] [Fintype G.edgeSet] [G.LocallyFinite] (k : ℕ) :
+    k * ({v | k ≤ G.degree v} : Finset V).card ≤ 2 * G.edgeFinset.card := by
+  rw [← sum_degrees_eq_twice_card_edges']
+  calc k * ({v | k ≤ G.degree v} : Finset V).card
+      = ∑ v ∈ ({v | k ≤ G.degree v} : Finset V), k := by simp [mul_comm]
+    _ ≤ ∑ v ∈ ({v | k ≤ G.degree v} : Finset V), G.degree v :=
+        Finset.sum_le_sum fun v hv => by simpa using hv
+    _ ≤ ∑ v, G.degree v := Finset.sum_le_sum_of_subset (Finset.subset_univ _)
+
+/-!
+12. A graph on an odd number of vertices that is regular of degree `d` must have `d`
+even. Hint: use `IsRegularOfDegree.two_mul_card_edgeFinset`. The statement does not
+mention the edge set, so get the `Fintype G.edgeSet` instance that the proof needs
+from `classical`.
+-/
+example [Fintype V] [G.LocallyFinite] {d : ℕ} (h : G.IsRegularOfDegree d)
+    (hV : Odd (Fintype.card V)) : Even d := by
+  classical
+  have h2 : Even (Fintype.card V * d) := h.two_mul_card_edgeFinset ▸ even_two_mul _
+  exact (Nat.even_mul.1 h2).resolve_left (Nat.not_even_iff_odd.2 hV)
+
+/-!
+13. Prove that the complete graph on `Fin (n + 1)` has `n * (n + 1) / 2` edges.
+-/
+example (n : ℕ) : K[n + 1].edgeFinset.card = n * (n + 1) / 2 := by
+  rw [card_edgeFinset_top_eq_card_choose_two, Fintype.card_fin, Nat.choose_two_right,
+      Nat.add_sub_cancel_right, mul_comm]
+
+/-!
+14. Show that in any finite graph
+`G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2`.
+-/
+example [Fintype V] [Fintype G.edgeSet] :
+    G.edgeFinset.card ≤ Fintype.card V * (Fintype.card V - 1) / 2 :=
+  G.card_edgeFinset_le_card_choose_two.trans (Nat.choose_two_right _).le
+
+/-!
+15. The complement of the hypercube `Q[n]` is regular of degree `2 ^ n - 1 - n`.
+Hint: use `IsRegularOfDegree.compl`, `IsRegularOfDegree.hypercube` and
+`card_hypercubeVert`.
+-/
+example (n : ℕ) : Q[n]ᶜ.IsRegularOfDegree (2 ^ n - 1 - n) := by
+  have := (IsRegularOfDegree.hypercube n).compl
+  rwa [card_hypercubeVert] at this
+
+/-!
+16. Prove that if `V` is finite then the `n`-th iterated Mycielskian has
 `2 ^ n * Fintype.card V + 2 ^ n - 1` vertices.
 -/
 lemma card_mycielskianVert (n : ℕ) [Fintype V] :
@@ -427,7 +442,7 @@ lemma card_mycielskianVert (n : ℕ) [Fintype V] :
             ← mul_assoc, ← pow_succ']
 
 /-!
-15. The degree of the new vertex `none` in the Mycielskian is the number of vertices
+17. The degree of the new vertex `none` in the Mycielskian is the number of vertices
 in the original graph.
 -/
 @[simp]
@@ -440,7 +455,7 @@ lemma degree_mycielskian_none [Fintype V] [Fintype (mμ(G).neighborSet none)] :
     card_image_of_injective _ mycielskian.right_injective, card_univ]
 
 /-!
-16. The degree of the right copy of a vertex in the Mycielskian is one more than the
+18. The degree of the right copy of a vertex in the Mycielskian is one more than the
 degree of the vertex in the original graph.
 -/
 @[simp]
@@ -456,15 +471,15 @@ lemma degree_mycielskian_right (v : V) [Fintype (G.neighborSet v)]
     card_image_of_injective _ mycielskian.left_injective, card_singleton]
 
 /-!
-17. The number of edges in `mμ(G)` is `3 * G.edgeFinset.card + Fintype.card V`.
-(Hint: use `sum_degrees_eq_twice_card_edges'`.)
+19. The number of edges in `mμ(G)` is `3 * G.edgeFinset.card + Fintype.card V`.
+Hint: use `sum_degrees_eq_twice_card_edges'`.
 -/
 @[simp]
 lemma card_edgeFinset_mycielskian [Fintype V] [Fintype G.edgeSet]
     [Fintype mμ(G).edgeSet] :
-     #mμ(G).edgeFinset = 3 * # G.edgeFinset + Fintype.card V := by
+    #mμ(G).edgeFinset = 3 * #G.edgeFinset + Fintype.card V := by
   classical
-  apply (Nat.mul_right_inj (show 2 ≠ 0 by decide)).1
+  apply (Nat.mul_right_inj two_ne_zero).1
   simp_rw [← sum_degrees_eq_twice_card_edges' mμ(G), Fintype.sum_option,
     degree_mycielskian_none, Fintype.sum_sum_type, degree_mycielskian_left,
     ← mul_sum, degree_mycielskian_right, sum_add_distrib,
@@ -472,8 +487,9 @@ lemma card_edgeFinset_mycielskian [Fintype V] [Fintype G.edgeSet]
   ring
 
 /-!
-18. The maximum degree of `mμ(G)` is the maximum of `2 * Δ(G)` and the number of
-vertices in `G`.
+20. The maximum degree of `mμ(G)` is the maximum of `2 * Δ(G)` and the number of
+vertices in `G`. Hint: `exists_maximal_degree_vertex`, after treating `IsEmpty V`
+separately.
 -/
 lemma maxDegree_mycielskian [Fintype V] [DecidableRel G.Adj] :
     Δ(mμ(G)) = max (2 * Δ(G)) (Fintype.card V) := by
@@ -496,8 +512,9 @@ lemma maxDegree_mycielskian [Fintype V] [DecidableRel G.Adj] :
         exact mμ(G).degree_le_maxDegree none
 
 /-!
-19. The minimum degree of `mμ(G)` is the minimum of `2 * δ(G)` and `δ(G) + 1`.
-Deduce that `δ(mμ(G)) = δ(G) + 1` whenever `δ(G) ≥ 1`.
+21. The minimum degree of `mμ(G)` is the minimum of `2 * δ(G)` and `δ(G) + 1`. Deduce
+that `δ(mμ(G)) = δ(G) + 1` whenever `δ(G) ≥ 1`. Hint: `exists_minimal_degree_vertex`,
+after treating `IsEmpty V` separately.
 -/
 lemma minDegree_mycielskian [Fintype V] [DecidableRel G.Adj] :
     δ(mμ(G)) = min (2 * δ(G)) (δ(G) + 1) := by
@@ -528,22 +545,6 @@ lemma minDegree_mycielskian_of_one_le [Fintype V] [DecidableRel G.Adj]
   grind [minDegree_mycielskian]
 
 /-!
-20. The `degreeMultiset` of the complete graph `K[n]` is the multiset of `n` copies
-of `n - 1`.
--/
-lemma degreeMultiset_top (n : ℕ) :
-    K[n].degreeMultiset = Multiset.replicate n (n - 1) := by
-  simp [degreeMultiset]
-
-/-!
-21. A multiset of `n` copies of `n - 1` is graphic, realized by the complete graph
-`K[n]`.
--/
-lemma graphic_const (n : ℕ) :
-    Graphic (Multiset.replicate n (n - 1)) :=
-  degreeMultiset_top n ▸ graphic_degreeMultiset K[n]
-
-/-!
 22. Every graphic multiset has an even sum. (This shows that the parity condition in
 the Erdős–Gallai theorem is necessary.)
 -/
@@ -556,7 +557,7 @@ theorem Graphic.even_sum {m : Multiset ℕ} (h : Graphic m) : Even m.sum := by
 
 /-!
 23. In the chapter we computed the degree of the new vertex of `coneGraph H s`. Show
-that an old vertex gains one on its degree exactly when it lies in `s`.
+that an old vertex's degree goes up by one exactly when it lies in `s`.
 -/
 @[simp]
 theorem degree_coneGraph_some [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
@@ -574,24 +575,30 @@ theorem degree_coneGraph_some [DecidableEq V] (H : SimpleGraph V) (s : Finset V)
 
 /-!
 24. The `degreeMultiset` of the cone: the new vertex contributes `#s`, and every old
-vertex has its old degree plus one when it lies in `s`.
+vertex has its old degree plus one when it lies in `s`. Hint: the stub below records
+that `Finset.univ` on `Option V` is `none` followed by the image of `Finset.univ`
+under `some`. This holds by `rfl`.
 -/
 theorem degreeMultiset_coneGraph [Fintype V] [DecidableEq V] (H : SimpleGraph V)
     [DecidableRel H.Adj] (s : Finset V) :
     (coneGraph H s).degreeMultiset = #s ::ₘ (Finset.univ : Finset V).val.map
       (fun w => H.degree w + if w ∈ s then 1 else 0) := by
-  unfold degreeMultiset
   -- `Finset.univ` on `Option V` is by definition `none` followed by the image of
   -- `Finset.univ` under `some`
-  change (none ::ₘ (Finset.univ : Finset V).val.map some).map _ = _
+  have h : (Finset.univ : Finset (Option V)).val =
+      none ::ₘ (Finset.univ : Finset V).val.map some := rfl
+  unfold degreeMultiset
+  rw [h]
   simp
 
 /-!
-25. The `degreeMultiset` of `mμ(G)` is the multiset of degrees
-of `G` with each degree doubled, together with the degrees of the new vertices.
+25. The `degreeMultiset` of `mμ(G)` is the multiset of degrees of `G` with each
+degree doubled, together with the degrees of the new vertices. Hint: the stub below
+records how `Finset.univ` unfolds on `Option (V ⊕ V)` and on `V ⊕ V`. Both facts hold
+by `rfl`, as in Exercise 24.
 -/
 lemma degreeMultiset_mycielskian [Fintype V] [DecidableRel G.Adj] :
-    mμ(G).degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * · )
+    mμ(G).degreeMultiset = {Fintype.card V} + G.degreeMultiset.map (2 * ·)
                            + G.degreeMultiset.map (· + 1) := by
   simp only [degreeMultiset]
   -- Split the universe of `Option (V ⊕ V)` into the new vertex `none`, the left
@@ -601,41 +608,10 @@ lemma degreeMultiset_mycielskian [Fintype V] [DecidableRel G.Adj] :
   have h2 : (Finset.univ : Finset (V ⊕ V)).val = Multiset.map Sum.inl
                 Finset.univ.val + Multiset.map Sum.inr Finset.univ.val := rfl
   rw [h1, h2]
-  simp only [Multiset.map_cons, Multiset.map_add, Multiset.map_map, Function.comp,
+  simp_rw [Multiset.map_cons, Multiset.map_add, Multiset.map_map, Function.comp,
     degree_mycielskian_none, degree_mycielskian_left, degree_mycielskian_right]
-  rw [← Multiset.singleton_add]
-  abel
-
-/-!
-26. If `G` is locally finite there is a vertex of degree at least 3 iff
- `∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d`
--/
-lemma exists_three_le_degree_iff {V : Type*} (G : SimpleGraph V)
-    [G.LocallyFinite] : (∃ v, 3 ≤ G.degree v) ↔
-      ∃ a b c d, G.Adj a b ∧ G.Adj a c ∧ G.Adj a d ∧ b ≠ c ∧ b ≠ d ∧ c ≠ d := by
-  simp only [Nat.succ_le_iff, ← card_neighborFinset_eq_degree,
-            Finset.two_lt_card_iff, mem_neighborFinset]
-
-/-!
-27. Give a decidable adjacency instance for the line graph `L[G]` of a graph on a
-vertex type with decidable equality. Recall that the vertices of `L[G]` are the edges
-of `G`, and that two of them are adjacent iff they are distinct and share a vertex
-(`lineGraph_adj_iff_exists`).
-
-(Hint: `∃ v, P v` is not decidable in general, but the bounded `∃ v ∈ s, P v` is
-when `s` is a `Finset` and `P` is decidable. Turn `e₁ : Sym2 V` into a `Finset V`
-with `Sym2.toFinset`, note that `v ∈ e₂` is decidable (`Sym2.Mem.decidable`), and
-finish with `decidable_of_iff`.)
--/
-/-- Decidability of the adjacency relation for the line graph. -/
-instance [DecidableEq V] : DecidableRel L[G].Adj := fun e₁ e₂ =>
-  -- Bound the shared vertex by the `Finset` of endpoints of `e₁`
-  decidable_of_iff (e₁ ≠ e₂ ∧ ∃ v ∈ (e₁ : Sym2 V).toFinset, v ∈ (e₂ : Sym2 V))
-    (by simp [lineGraph_adj_iff_exists])
-
-example : L[C[5]].Adj ⟨s(0, 1), by decide⟩ ⟨s(1, 2), by decide⟩ := by decide
+  grind [← Multiset.singleton_add]
 
 /-! END SOLUTIONS -/
-
 
 end SimpleGraph

@@ -18,16 +18,13 @@ example (n : ℕ) : IsEmpty (K[n + 1] →g K[n]) := by
 2. Define an embedding of `P[n]` into `P[n + k]` so that the image is exactly the
 last `n` vertices.
 -/
-example (n k : ℕ) : P[n] ↪g P[n + k] where
-  toFun i := i.addNat k
-  inj' := sorry
-  map_rel_iff' := sorry
+def pathGraph.embedding' (n k : ℕ) : P[n] ↪g P[n + k] := sorry
 
 /-!
 3. Show that any `G ↪g H` gives rise to an embedding of `G` into any blow-up of `H`
 with nonempty parts.
 -/
-def Embedding.mapBlowUp' {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
+def Embedding.toBlowUp' {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
     (e : G ↪g H) (U : ι → Type*) (f : ∀ (i : ι), U i) :
     G ↪g H.blowUpGraph U := by
   sorry
@@ -52,14 +49,14 @@ example (G : SimpleGraph V) (f : G ≃g (⊥ : SimpleGraph W)) : G = ⊥ := by
 
 /-!
 7. Show that the path graph `P[4]` is *self-complementary*, i.e. isomorphic to its
-own complement. (Hint: find a suitable permutation of the vertices; you can define it
-and its inverse using `Matrix` vector notation `![_, _, _, _]`.)
+own complement. Hint: find a suitable permutation of the vertices; you can define it
+and its inverse using `Matrix` vector notation `![_, _, _, _]`.
 -/
 example : P[4] ≃g P[4]ᶜ := by
   sorry
 
 /-!
-8. Show that the cycle `C[5]` is also self-complementary. (Hint: try `i ↦ 2 * i`.)
+8. Show that the cycle `C[5]` is also self-complementary. Hint: try `i ↦ 2 * i`.
 -/
 example : C[5] ≃g C[5]ᶜ := by
   sorry
@@ -96,12 +93,12 @@ open HypercubeVert
 noncomputable def hypercubeTwoIsoCycleFour' : Q[2] ≃g C[4] := sorry
 
 /-!
-The next two exercises are about vertex transitive graphs.
+The next two exercises are about vertex-transitive graphs.
 
 12. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
-that the empty graph `⊥` is vertex-transitive. (Hint: as in Exercise 5, an
+that the empty graph `⊥` is vertex-transitive. Hint: as in Exercise 5, an
 automorphism of `G` is also an automorphism of `Gᶜ`; and `compl_top` says
-`⊤ᶜ = ⊥`.)
+`⊤ᶜ = ⊥`.
 -/
 lemma IsVertexTransitive.compl' {G : SimpleGraph V} (h : G.IsVertexTransitive) :
     Gᶜ.IsVertexTransitive := by
@@ -116,9 +113,7 @@ vertex-transitive Mycielskians assumes that `V` is nonempty. Show that this
 assumption is needed: if `V` is empty then the Mycielskian of any graph on `V` is
 vertex-transitive, but the graph is not isomorphic to `K[2]`.
 
-If `V` is empty then the Mycielskian has the single vertex `none`, so the identity
-sends any vertex to any other; and an isomorphism to `K[2]` would give an element
-`e.symm 0` of `V`.
+Hint: if `V` is empty then the Mycielskian has the single vertex `none`.
 -/
 lemma isVertexTransitive_mycielskian_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) :
     mμ(G).IsVertexTransitive :=
@@ -130,7 +125,8 @@ lemma isEmpty_iso_completeGraph_two_of_isEmpty' [IsEmpty V] (G : SimpleGraph V) 
 
 /-!
 Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
-from the starred section [Tensor Products*](#section-tensor-products).
+from [Indexed Tensor Products](#section-indexed-tensor-products), in the starred
+section on tensor products.
 
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.
@@ -151,15 +147,16 @@ example {ι : Type*} {U : ι → Type*} (i₀ : ι) {K : SimpleGraph X}
 16. Prove that if `ι` is empty then there is a graph homomorphism from a graph `K`
 to the indexed tensor product `⨂g i, G i` iff `K` is the empty graph `⊥`.
 -/
-example {ι : Type*} [IsEmpty ι] {U : ι → Type*} {K : SimpleGraph X}
-    (G : ∀ i, SimpleGraph (U i)) : Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
+lemma nonempty_hom_piTensorProd_iff_of_isEmpty' {ι : Type*} [IsEmpty ι]
+    {U : ι → Type*} {K : SimpleGraph X} (G : ∀ i, SimpleGraph (U i)) :
+    Nonempty (K →g ⨂g i, G i) ↔ K = ⊥ := by
   sorry
 
 /-!
 17. The degree of `f` in the indexed tensor product is the product of the degrees of
-its components. The neighbour set is the `Fintype.piFinset` of the componentwise
-neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
-automatic.
+its components. Hint: the neighbour set is the `Fintype.piFinset` of the
+componentwise neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the
+adjacency is automatic.
 -/
 example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
     {f : (i : ι) → U i} [Fintype ι] [Nonempty ι]
@@ -221,7 +218,7 @@ with nonempty parts.
 -/
 /-- An embedding `e : G ↪g H` gives an embedding of `G` into any blow-up of `H` with
 nonempty parts: compose `e` with `Embedding.blowUp`. -/
-def Embedding.mapBlowUp {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
+def Embedding.toBlowUp {G : SimpleGraph V} {ι : Type*} {H : SimpleGraph ι}
     (e : G ↪g H) (U : ι → Type*) (f : ∀ (i : ι), U i) :
     G ↪g H.blowUpGraph U :=
   (Embedding.blowUp H U f).comp e
@@ -238,7 +235,7 @@ example {G H : SimpleGraph V} (h : G ≤ H) : G ⊑ H :=
 5. Show that if `G ≃g H` then `Gᶜ ≃g Hᶜ`.
 -/
 example (G : SimpleGraph V) (H : SimpleGraph W) (f : G ≃g H) : Gᶜ ≃g Hᶜ :=
-    ⟨f, by simp [f.map_adj_iff, f.injective.eq_iff]⟩
+  ⟨f, by simp [f.map_adj_iff, f.injective.eq_iff]⟩
 
 /-!
 6. Show that a graph isomorphic to `⊥` is itself `⊥`.
@@ -249,8 +246,8 @@ example (G : SimpleGraph V) (f : G ≃g (⊥ : SimpleGraph W)) : G = ⊥ := by
 
 /-!
 7. Show that the path graph `P[4]` is *self-complementary*, i.e. isomorphic to its
-own complement. (Hint: find a suitable permutation of the vertices; you can define it
-and its inverse using `Matrix` vector notation `![_, _, _, _]`.)
+own complement. Hint: find a suitable permutation of the vertices; you can define it
+and its inverse using `Matrix` vector notation `![_, _, _, _]`.
 -/
 example : P[4] ≃g P[4]ᶜ where
   toFun := ![1, 3, 0, 2]
@@ -260,7 +257,7 @@ example : P[4] ≃g P[4]ᶜ where
   map_rel_iff' := by decide
 
 /-!
-8. Show that the cycle `C[5]` is also self-complementary. (Hint: try `i ↦ 2 * i`.)
+8. Show that the cycle `C[5]` is also self-complementary. Hint: try `i ↦ 2 * i`.
 (Multiplication by `2` sends the edges `{i, i + 1}` of `C[5]` to the pairs
 `{2 * i, 2 * i + 2}`, which are exactly the edges of the complement; its inverse is
 multiplication by `3`.)
@@ -323,12 +320,12 @@ def hypercubeTwoIsoCycleFour : Q[2] ≃g C[4] where
   map_rel_iff' := by decide
 
 /-!
-The next two exercises are about vertex transitive graphs.
+The next two exercises are about vertex-transitive graphs.
 
 12. Show that if `G` is vertex-transitive then so is its complement `Gᶜ`, and deduce
-that the empty graph `⊥` is vertex-transitive. (Hint: as in Exercise 5, an
+that the empty graph `⊥` is vertex-transitive. Hint: as in Exercise 5, an
 automorphism of `G` is also an automorphism of `Gᶜ`; and `compl_top` says
-`⊤ᶜ = ⊥`.)
+`⊤ᶜ = ⊥`.
 -/
 lemma IsVertexTransitive.compl {G : SimpleGraph V} (h : G.IsVertexTransitive) :
     Gᶜ.IsVertexTransitive := by
@@ -346,9 +343,7 @@ vertex-transitive Mycielskians assumes that `V` is nonempty. Show that this
 assumption is needed: if `V` is empty then the Mycielskian of any graph on `V` is
 vertex-transitive, but the graph is not isomorphic to `K[2]`.
 
-If `V` is empty then the Mycielskian has the single vertex `none`, so the identity
-sends any vertex to any other; and an isomorphism to `K[2]` would give an element
-`e.symm 0` of `V`.
+Hint: if `V` is empty then the Mycielskian has the single vertex `none`.
 -/
 lemma isVertexTransitive_mycielskian_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
     mμ(G).IsVertexTransitive :=
@@ -360,7 +355,8 @@ lemma isEmpty_iso_completeGraph_two_of_isEmpty [IsEmpty V] (G : SimpleGraph V) :
 
 /-!
 Exercises 14–18 are about the indexed tensor product `⨂g i, G i` (`piTensorProd`)
-from the starred section [Tensor Products*](#section-tensor-products).
+from [Indexed Tensor Products](#section-indexed-tensor-products), in the starred
+section on tensor products.
 
 14. Show that for each index `j` the projection out of the indexed tensor product
 `⨂g i, G i` is a graph homomorphism to `G j`.
@@ -410,7 +406,7 @@ lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
     -- Lean has the `Subsingleton` type class for types with at most one element.
     have : Subsingleton ((i : ι) → U i) := inferInstance
     -- So `f a = f b` since they are both elements of a `Subsingleton` type.
-    apply Subsingleton.elim
+    exact Subsingleton.elim _ _
     -- Note: none of the `have` statements above are needed; they are for exposition.
   · rintro rfl
     -- We need to show that there is a graph homomorphism from `⊥` to the indexed
@@ -420,9 +416,9 @@ lemma nonempty_hom_piTensorProd_iff_of_isEmpty {ι : Type*} [IsEmpty ι]
 
 /-!
 17. The degree of `f` in the indexed tensor product is the product of the degrees of
-its components. The neighbour set is the `Fintype.piFinset` of the componentwise
-neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the adjacency is
-automatic.
+its components. Hint: the neighbour set is the `Fintype.piFinset` of the
+componentwise neighbour sets, and (using `[Nonempty ι]`) the `≠` condition in the
+adjacency is automatic.
 -/
 example {ι : Type*} {U : ι → Type*} {G : (i : ι) → SimpleGraph (U i)}
     {f : (i : ι) → U i} [Fintype ι] [Nonempty ι]

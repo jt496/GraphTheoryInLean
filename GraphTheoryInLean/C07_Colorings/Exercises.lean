@@ -11,42 +11,30 @@ variable {V : Type*} {G : SimpleGraph V}
 /-!
 # Exercises
 
-1. Show that the cycle graph `C[5]` is not `2`-colourable.
+1. Show that the cycle graph `C[5]` is not `2`-colourable. Hint:
+`chromaticNumber_cycleGraph_of_odd`.
 -/
 example : ¬ C[5].Colorable 2 := by
   sorry
 
 /-!
-2. Show that if `G` has an edge then `2 ≤ χ G`. Hint: the endpoints of an edge form
-a clique, so you can use `IsClique.card_le_chromaticNumber`.
--/
-example {u v : V} (h : G.Adj u v) : 2 ≤ χ G := by
-  sorry
-
-/-!
-3. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ`. Hint: combine
-`natCard_le_chromaticNumber_mul_indepNum` with `cliqueNum_compl`.
+2. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ`. Hint: combine
+`natCard_le_chromaticNumber_mul_indepNum` with `cliqueNum_compl` and
+`cliqueNum_le_chromaticNumber`.
 -/
 example : Nat.card V ≤ χ G * χ Gᶜ := by
   sorry
 
 /-!
-4. Show that the chromatic number of the hypercube `Q[n + 1]` is `2`. Hint:
-`chromaticNumber_eq_two_iff` reduces this to facts proved in this chapter.
--/
-example (n : ℕ) : χ Q[n + 1] = 2 := by
-  sorry
-
-/-!
-5. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
+3. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
 subsets of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. Show that
 it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouring is
 given below: colour a vertex by its least element, merging all the large colours into
 one. This is the hardest exercise in this chapter: the case where both vertices
-receive the merged colour needs a pigeonhole argument which is in Mathlib as
-`Finset.inter_nonempty_of_card_lt_card_add_card`. Here `s.min' h` is the least
-element of a nonempty finset `s`, and its basic properties are `Finset.min'_mem` and
-`Finset.min'_le`.
+receive the merged colour needs a pigeonhole argument, which is
+`isIndepSet_kneserGraph_of_card_lt` from [Cliques](#chapter-cliques). Here `s.min' h`
+is the least element of a nonempty finset `s`, and its basic properties are
+`Finset.min'_mem` and `Finset.min'_le`.
 
 [Figure: The colouring below for the Petersen graph $\mathrm{Kn}(5,2)$, with $5 - 2 \cdot 2 + 2 = 3$ colours: a vertex is red if its least element is $0$, blue if its least element is $1$, and green (the merged colour) otherwise](https://jt496.github.io/GraphTheoryInLean/figures/kneser_colouring.svg)
 -/
@@ -67,25 +55,32 @@ def kneserGraph.coloring' (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
     sorry
 
 /-!
-6. Show that if `0 < k`, `2 * k ≤ n` and `Kn[n, k]` is `m`-colourable then
-`n ≤ k * m`, so that `χ Kn[n, k] ≥ n / k`. Hint: use
+4. Show that if `2 * k ≤ n`, `0 < k` and `Kn[n, k]` is `m`-colourable then
+`n ≤ k * m`, so that `n ≤ k * χ Kn[n, k]`. Hint: use
 `Colorable.natCard_le_mul_indepNum` and the independence number of the Kneser graph,
 `indepNum_kneserGraph`, from the previous chapter; `Nat.add_one_mul_choose_eq` will
 help with the binomial coefficients.
 -/
-theorem le_mul_of_colorable_kneserGraph' {n k m : ℕ} (hk : 0 < k) (hn : 2 * k ≤ n)
+theorem le_mul_of_colorable_kneserGraph' {n k m : ℕ} (hn : 2 * k ≤ n) (hk : 0 < k)
     (h : Kn[n, k].Colorable m) : n ≤ k * m := by
   sorry
 
 /-!
-7. Use the previous two exercises to show that the Petersen graph `Kn[5, 2]` has
+5. Use the previous two exercises to show that the Petersen graph `Kn[5, 2]` has
 chromatic number `3`.
 -/
 example : χ Kn[5, 2] = 3 := by
   sorry
 
 /-!
-8. Prove the claim from the chapter that for `G : SimpleGraph ℕ` a vertex `v` has at
+6. Show that the chromatic number of the hypercube `Q[n + 1]` is `2`. Hint:
+`chromaticNumber_eq_two_iff` reduces this to facts proved in this chapter.
+-/
+example (n : ℕ) : χ Q[n + 1] = 2 := by
+  sorry
+
+/-!
+7. Prove the claim from the chapter that for `G : SimpleGraph ℕ` a vertex `v` has at
 most `v` earlier neighbours.
 -/
 lemma degreeLT_le_self' (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSet v)] :
@@ -93,29 +88,7 @@ lemma degreeLT_le_self' (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSe
   sorry
 
 /-!
-9. The *infinite star* `starNat` joins `0` to every other natural number. Show that
-`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
-bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
-nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
-most one earlier neighbour.
--/
-/-- The infinite star on `ℕ`: the vertex `0` is adjacent to every other vertex. -/
-abbrev starNat : SimpleGraph ℕ where
-  Adj a b := (a = 0 ∧ b ≠ 0) ∨ (b = 0 ∧ a ≠ 0)
-
-example : (starNat.neighborSet 0).Infinite ∧ starNat.Colorable 2 := by
-  sorry
-
-/-!
-10. Show that the greedy colouring of the complete graph on `ℕ` colours vertex `n`
-with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
-`Nat.strong_induction_on`.)
--/
-example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
-  sorry
-
-/-!
-11. Show that the greedy colouring really is greedy: if `k` is less than the greedy
+8. Show that the greedy colouring really is greedy: if `k` is less than the greedy
 colour of `v`, then some earlier neighbour of `v` has greedy colour `k`. Hint:
 rewrite with `greedy_eq_greedyChoice` and use `Nat.find_min`.
 -/
@@ -125,19 +98,7 @@ lemma exists_greedy_eq_of_lt_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
   sorry
 
 /-!
-12. The crown graph shows that a bad ordering of the vertices can make the greedy
-colouring use arbitrarily many colours. Conversely, show that a good ordering makes
-it optimal: if `C` is a colouring of `G` in which every vertex comes before all
-vertices of larger colour, then the greedy colour of each vertex `v` is at most
-`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
-greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
--/
-example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
-    (hC : ∀ u v, C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
-  sorry
-
-/-!
-13. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
+9. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
 earlier neighbours of every vertex form a clique. (For example, ordering the vertices
 of an interval graph by the left endpoints of their intervals gives such an
 ordering.) Show that if the natural ordering of `G` is a perfect elimination ordering
@@ -152,11 +113,11 @@ example (G : SimpleGraph ℕ) {k : ℕ}
   sorry
 
 /-!
-14. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
+10. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
 `f 0 < f 1 < ⋯ < f k = v`, in which consecutive vertices are adjacent. (We describe
 the path by a function `f : ℕ → ℕ`, since walks only appear in the next chapter.)
 Hint: prove the statement for all `v` with `G.greedy v = k` by induction on `k`.
-Exercise 11 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
+Exercise 8 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
 extends the path `f` ending at `u`.
 -/
 lemma exists_increasing_path_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
@@ -165,7 +126,7 @@ lemma exists_increasing_path_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
   sorry
 
 /-!
-15. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
+11. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
 `k`-colourable. In particular, a graph in which no path has `k + 1` vertices is
 `k`-colourable. Hint: as in `colorable_of_degreeLT_le`, use
 `colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
@@ -175,10 +136,45 @@ example (G : SimpleGraph ℕ) {k : ℕ}
     G.Colorable k := by
   sorry
 
+/-!
+12. Show that the greedy colouring of the complete graph on `ℕ` colours vertex `n`
+with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
+`Nat.strong_induction_on`.)
+-/
+example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
+  sorry
+
+/-!
+13. The *infinite star* `starNat` joins `0` to every other natural number. Show that
+`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
+bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
+nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
+most one earlier neighbour.
+-/
+/-- The infinite star on `ℕ`: the vertex `0` is adjacent to every other vertex. -/
+abbrev starNat : SimpleGraph ℕ where
+  Adj a b := (a = 0 ∧ b ≠ 0) ∨ (b = 0 ∧ a ≠ 0)
+
+example : (starNat.neighborSet 0).Infinite ∧ starNat.Colorable 2 := by
+  sorry
+
+/-!
+14. The crown graph shows that a bad ordering of the vertices can make the greedy
+colouring use arbitrarily many colours. Conversely, show that a good ordering makes
+it optimal: if `C` is a colouring of `G` in which every vertex comes before all
+neighbours of larger colour, then the greedy colour of each vertex `v` is at most
+`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
+greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
+-/
+example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
+    (hC : ∀ u v, G.Adj u v → C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
+  sorry
+
 /-! SOLUTIONS -/
 
 /-!
-1. Show that the cycle graph `C[5]` is not `2`-colourable.
+1. Show that the cycle graph `C[5]` is not `2`-colourable. Hint:
+`chromaticNumber_cycleGraph_of_odd`.
 -/
 example : ¬ C[5].Colorable 2 := by
   rw [← chromaticNumber_le_iff_colorable,
@@ -186,17 +182,9 @@ example : ¬ C[5].Colorable 2 := by
   decide
 
 /-!
-2. Show that if `G` has an edge then `2 ≤ χ G`. Hint: the endpoints of an edge form
-a clique, so you can use `IsClique.card_le_chromaticNumber`.
--/
-example {u v : V} (h : G.Adj u v) : 2 ≤ χ G := by
-  classical
-  have hc : G.IsClique ({u, v} : Finset V) := by simpa using fun _ => h
-  simpa [card_pair h.ne] using hc.card_le_chromaticNumber
-
-/-!
-3. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ`. Hint: combine
-`natCard_le_chromaticNumber_mul_indepNum` with `cliqueNum_compl`.
+2. Show that a graph `G` on `n` vertices satisfies `n ≤ χ G * χ Gᶜ`. Hint: combine
+`natCard_le_chromaticNumber_mul_indepNum` with `cliqueNum_compl` and
+`cliqueNum_le_chromaticNumber`.
 -/
 example : Nat.card V ≤ χ G * χ Gᶜ :=
   -- an independent set of `G` is a clique of `Gᶜ`
@@ -208,27 +196,15 @@ example : Nat.card V ≤ χ G * χ Gᶜ :=
     _ ≤ χ G * χ Gᶜ := by gcongr; exact cliqueNum_le_chromaticNumber
 
 /-!
-4. Show that the chromatic number of the hypercube `Q[n + 1]` is `2`. Hint:
-`chromaticNumber_eq_two_iff` reduces this to facts proved in this chapter.
--/
-example (n : ℕ) : χ Q[n + 1] = 2 := by
-  -- bipartiteness was proved in this chapter, so it only remains to show
-  -- `Q[n + 1] ≠ ⊥` for which we need a vertex of `Q[n]` (each gives an edge in
-  -- the next dimension)
-  obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
-  refine chromaticNumber_eq_two_iff.2 ⟨IsBipartite.hypercube _, ?_⟩
-  exact ne_bot_iff_exists_adj.2 ⟨(v, false), (v, true), by simp⟩
-
-/-!
-5. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
+3. Recall the Kneser graph `Kn[n, k]`: the graph whose vertices are the `k`-element
 subsets of `Fin n = {0, ..., n - 1}` with edges between disjoint subsets. Show that
 it has an `(n - 2 * k + 2)`-colouring for `2 * k ≤ n` and `0 < k`. The colouring is
 given below: colour a vertex by its least element, merging all the large colours into
 one. This is the hardest exercise in this chapter: the case where both vertices
-receive the merged colour needs a pigeonhole argument which is in Mathlib as
-`Finset.inter_nonempty_of_card_lt_card_add_card`. Here `s.min' h` is the least
-element of a nonempty finset `s`, and its basic properties are `Finset.min'_mem` and
-`Finset.min'_le`.
+receive the merged colour needs a pigeonhole argument, which is
+`isIndepSet_kneserGraph_of_card_lt` from [Cliques](#chapter-cliques). Here `s.min' h`
+is the least element of a nonempty finset `s`, and its basic properties are
+`Finset.min'_mem` and `Finset.min'_le`.
 -/
 /-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
 def kneserGraph.coloring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
@@ -268,15 +244,14 @@ def kneserGraph.coloring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
         (by grind [Fin.card_Ioi])
       exact hind (hsub _ _ h1) (hsub _ _ h3) hadj.2 hadj
 
-
 /-!
-6. Show that if `0 < k`, `2 * k ≤ n` and `Kn[n, k]` is `m`-colourable then
-`n ≤ k * m`, so that `χ Kn[n, k] ≥ n / k`. Hint: use
+4. Show that if `2 * k ≤ n`, `0 < k` and `Kn[n, k]` is `m`-colourable then
+`n ≤ k * m`, so that `n ≤ k * χ Kn[n, k]`. Hint: use
 `Colorable.natCard_le_mul_indepNum` and the independence number of the Kneser graph,
 `indepNum_kneserGraph`, from the previous chapter; `Nat.add_one_mul_choose_eq` will
 help with the binomial coefficients.
 -/
-theorem le_mul_of_colorable_kneserGraph {n k m : ℕ} (hk : 0 < k) (hn : 2 * k ≤ n)
+theorem le_mul_of_colorable_kneserGraph {n k m : ℕ} (hn : 2 * k ≤ n) (hk : 0 < k)
     (h : Kn[n, k].Colorable m) : n ≤ k * m := by
   have : NeZero k := ⟨hk.ne'⟩
   -- `Kn[n, k]` has `n.choose k` vertices and independence number
@@ -295,7 +270,7 @@ theorem le_mul_of_colorable_kneserGraph {n k m : ℕ} (hk : 0 < k) (hn : 2 * k �
     _ = k * m * (n - 1).choose (k - 1) := by ring
 
 /-!
-7. Use the previous two exercises to show that the Petersen graph `Kn[5, 2]` has
+5. Use the previous two exercises to show that the Petersen graph `Kn[5, 2]` has
 chromatic number `3`.
 -/
 example : χ Kn[5, 2] = 3 :=
@@ -307,7 +282,19 @@ example : χ Kn[5, 2] = 3 :=
        simpa using le_mul_of_colorable_kneserGraph (by norm_num) (by norm_num) h⟩
 
 /-!
-8. Prove the claim from the chapter that for `G : SimpleGraph ℕ` a vertex `v` has at
+6. Show that the chromatic number of the hypercube `Q[n + 1]` is `2`. Hint:
+`chromaticNumber_eq_two_iff` reduces this to facts proved in this chapter.
+-/
+example (n : ℕ) : χ Q[n + 1] = 2 := by
+  -- bipartiteness was proved in this chapter, so it only remains to show
+  -- `Q[n + 1] ≠ ⊥` for which we need a vertex of `Q[n]` (each gives an edge in
+  -- the next dimension)
+  obtain ⟨v⟩ : Nonempty (HypercubeVert n) := inferInstance
+  refine chromaticNumber_eq_two_iff.2 ⟨IsBipartite.hypercube _, ?_⟩
+  exact ne_bot_iff_exists_adj.2 ⟨(v, false), (v, true), by simp⟩
+
+/-!
+7. Prove the claim from the chapter that for `G : SimpleGraph ℕ` a vertex `v` has at
 most `v` earlier neighbours.
 -/
 lemma degreeLT_le_self (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSet v)] :
@@ -319,38 +306,7 @@ lemma degreeLT_le_self (G : SimpleGraph ℕ) (v : ℕ) [Fintype (G.neighborLTSet
   intro x hx; simp_all
 
 /-!
-9. The *infinite star* `starNat` joins `0` to every other natural number. Show that
-`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
-bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
-nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
-most one earlier neighbour.
--/
-example : (starNat.neighborSet 0).Infinite ∧ starNat.Colorable 2 := by
-  refine ⟨Set.infinite_of_injective_forall_mem (f := Nat.succ) Nat.succ_injective
-    (by simp), starNat.colorable_of_degreeLT_le (Δ := 1) fun v => ?_⟩
-  -- the only earlier neighbour that a vertex can have is `0`
-  rw [degreeLT, Finset.card_le_one]
-  intro a ha b hb
-  rw [mem_neighborLTFinset] at ha hb
-  grind
-
-/-!
-10. Show that the greedy colouring of the complete graph on `ℕ` colours vertex `n`
-with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
-`Nat.strong_induction_on`.)
--/
-example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
-  -- as in `greedy_crownGraph_eq` we use strong induction on `n`
-  induction n using Nat.strong_induction_on with
-  | _ n ih =>
-  -- the earlier neighbours of `n` are `{0, ..., n - 1}`, and by induction they use
-  -- exactly the colours `{0, ..., n - 1}`
-  refine (⊤ : SimpleGraph ℕ).greedy_eq_of_image_eq_range ?_
-  ext c
-  grind [mem_neighborLTFinset, top_adj]
-
-/-!
-11. Show that the greedy colouring really is greedy: if `k` is less than the greedy
+8. Show that the greedy colouring really is greedy: if `k` is less than the greedy
 colour of `v`, then some earlier neighbour of `v` has greedy colour `k`. Hint:
 rewrite with `greedy_eq_greedyChoice` and use `Nat.find_min`.
 -/
@@ -362,30 +318,7 @@ lemma exists_greedy_eq_of_lt_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
   simpa using not_not.mp <| Nat.find_min (Finset.exists_notMem _) hk
 
 /-!
-12. The crown graph shows that a bad ordering of the vertices can make the greedy
-colouring use arbitrarily many colours. Conversely, show that a good ordering makes
-it optimal: if `C` is a colouring of `G` in which every vertex comes before all
-vertices of larger colour, then the greedy colour of each vertex `v` is at most
-`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
-greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
--/
-example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
-    (hC : ∀ u v, C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
-  induction v using Nat.strong_induction_on with
-  | _ v ih =>
-  refine (G.greedy_le_card_image v).trans ?_
-  -- every earlier neighbour `u` of `v` has `greedy u ≤ C u < C v`
-  have hsub : (G.neighborLTFinset v).image G.greedy ⊆ range (C v) := by
-    intro c hc
-    obtain ⟨u, hu, rfl⟩ := mem_image.mp hc
-    rw [mem_neighborLTFinset] at hu
-    have hne : C u ≠ C v := C.valid hu.2.symm
-    have hle : ¬ C v < C u := fun h => (hC v u h).not_gt hu.1
-    exact mem_range.2 ((ih u hu.1).trans_lt (by grind))
-  simpa using card_le_card hsub
-
-/-!
-13. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
+9. An ordering of the vertices of `G` is a *perfect elimination ordering* if the
 earlier neighbours of every vertex form a clique. (For example, ordering the vertices
 of an interval graph by the left endpoints of their intervals gives such an
 ordering.) Show that if the natural ordering of `G` is a perfect elimination ordering
@@ -414,11 +347,11 @@ example (G : SimpleGraph ℕ) {k : ℕ}
   exact G.colorable_of_degreeLT_le fun v => by grind [hdeg v]
 
 /-!
-14. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
+10. Show that if the greedy colour of `v` is `k` then `G` contains an increasing path
 `f 0 < f 1 < ⋯ < f k = v`, in which consecutive vertices are adjacent. (We describe
 the path by a function `f : ℕ → ℕ`, since walks only appear in the next chapter.)
 Hint: prove the statement for all `v` with `G.greedy v = k` by induction on `k`.
-Exercise 11 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
+Exercise 8 gives the vertex `u` before `v`, and `Function.update f (k + 1) v`
 extends the path `f` ending at `u`.
 -/
 lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
@@ -445,7 +378,7 @@ lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
         ⟨hu.1, hu.2.symm⟩
 
 /-!
-15. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
+11. Deduce that if `G` has no increasing path on `k + 1` vertices then `G` is
 `k`-colourable. In particular, a graph in which no path has `k + 1` vertices is
 `k`-colourable. Hint: as in `colorable_of_degreeLT_le`, use
 `colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
@@ -461,6 +394,60 @@ example (G : SimpleGraph ℕ) {k : ℕ}
   by_contra! hk
   obtain ⟨f, -, hf⟩ := G.exists_increasing_path_greedy v
   exact h ⟨f, fun i hi => hf i (by grind [greedyColoringNat_apply])⟩
+
+/-!
+12. Show that the greedy colouring of the complete graph on `ℕ` colours vertex `n`
+with colour `n`. (See `greedy_crownGraph_eq` for a similar proof using
+`Nat.strong_induction_on`.)
+-/
+example (n : ℕ) : (⊤ : SimpleGraph ℕ).greedy n = n := by
+  -- as in `greedy_crownGraph_eq` we use strong induction on `n`
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+  -- the earlier neighbours of `n` are `{0, ..., n - 1}`, and by induction they use
+  -- exactly the colours `{0, ..., n - 1}`
+  refine (⊤ : SimpleGraph ℕ).greedy_eq_of_image_eq_range ?_
+  ext c
+  grind [mem_neighborLTFinset, top_adj]
+
+/-!
+13. The *infinite star* `starNat` joins `0` to every other natural number. Show that
+`0` has infinitely many neighbours, so that `starNat` is not locally finite and the
+bound `colorable_of_degree_le_of_countable` does not apply, but that `starNat` is
+nevertheless `2`-colourable, using `colorable_of_degreeLT_le`: every vertex has at
+most one earlier neighbour.
+-/
+example : (starNat.neighborSet 0).Infinite ∧ starNat.Colorable 2 := by
+  refine ⟨Set.infinite_of_injective_forall_mem (f := Nat.succ) Nat.succ_injective
+    (by simp), starNat.colorable_of_degreeLT_le (Δ := 1) fun v => ?_⟩
+  -- the only earlier neighbour that a vertex can have is `0`
+  rw [degreeLT, Finset.card_le_one]
+  intro a ha b hb
+  rw [mem_neighborLTFinset] at ha hb
+  grind
+
+/-!
+14. The crown graph shows that a bad ordering of the vertices can make the greedy
+colouring use arbitrarily many colours. Conversely, show that a good ordering makes
+it optimal: if `C` is a colouring of `G` in which every vertex comes before all
+neighbours of larger colour, then the greedy colour of each vertex `v` is at most
+`C v`. Hint: use strong induction on `v` and `greedy_le_card_image`, showing that the
+greedy colours of the earlier neighbours of `v` all lie in `range (C v)`.
+-/
+example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
+    (hC : ∀ u v, G.Adj u v → C u < C v → u < v) (v : ℕ) : G.greedy v ≤ C v := by
+  induction v using Nat.strong_induction_on with
+  | _ v ih =>
+  refine (G.greedy_le_card_image v).trans ?_
+  -- every earlier neighbour `u` of `v` has `greedy u ≤ C u < C v`
+  have hsub : (G.neighborLTFinset v).image G.greedy ⊆ range (C v) := by
+    intro c hc
+    obtain ⟨u, hu, rfl⟩ := mem_image.mp hc
+    rw [mem_neighborLTFinset] at hu
+    have hne : C u ≠ C v := C.valid hu.2.symm
+    have hle : ¬ C v < C u := fun h => (hC v u hu.2 h).not_gt hu.1
+    exact mem_range.2 ((ih u hu.1).trans_lt (by grind))
+  simpa using card_le_card hsub
 
 /-! END SOLUTIONS -/
 

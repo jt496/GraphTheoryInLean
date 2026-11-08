@@ -21,7 +21,7 @@ can be found in Mathlib together with a few new ones. The idea is to give a flav
 of the kinds of constructions that are possible in Mathlib. It also offers a good
 excuse to introduce many of the fundamental types that may be unfamiliar to graph
 theorists but are used throughout Mathlib. These include `Bool`, `Fin`, `Option`,
-`Prod`, `Sigma`, `Subtype`, `Sum` and `Unit`.
+`Prod`, `Sigma`, `Subtype`, `Sum`, `Unit` and `ZMod`.
 
 Two of the constructions we introduce below, the
 [hypercube](#section-hypercube) and
@@ -37,7 +37,6 @@ examples using `#eval` and `decide`. We will look at such computations in much m
 detail in the next chapter, but for them to work we need to provide decidability
 instances for adjacency in the graphs we define. Feel free to ignore these and
 revisit them once you have read the next chapter.
-
 
 # Basic Families of Graphs
 
@@ -143,7 +142,6 @@ example (n : ℕ) (a b : Fin n) :
 
 /-!
 [Figure: The path graphs $P_2$, $P_4$ and $P_7$](https://jt496.github.io/GraphTheoryInLean/figures/paths.svg)
-
 
 We introduce notation for the path graph on `Fin n`.
 -/
@@ -315,6 +313,14 @@ example : SimpleGraph (ZMod 17) := paleyGraph (ZMod 17)
 
 /-!
 [Figure: The Paley graph $P(17)$](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph.svg)
+
+The vertex type here is `ZMod 17` rather than `Fin 17` because `paleyGraph` needs a
+field. Although `ZMod 17` is defined to be `Fin 17`, instance search does not unfold
+this definition, so the two types can carry different instances. Mathlib puts the
+`Field` instance on `ZMod p` and has none on `Fin n`. The cycle graph `C[n]`, on the
+other hand, only needs addition mod `n`, and Mathlib does make `Fin n` an additive
+group for `n ≠ 0`. Since `cycleGraph n` has to make sense for every `n`, and
+`ZMod 0` is `ℤ`, `Fin n` is the better vertex type there.
 
 ## Cayley Graphs
 
@@ -663,9 +669,10 @@ example (u v : HypercubeVert 0) : ¬ Q[0].Adj u v := by simp
 /-!
 The `_succ` lemmas just unfold the definition by one step, and we leave them out of
 the `simp` set, as Mathlib does for recursive definitions (e.g. `pow_zero` is a
-`simp` lemma but `pow_succ` is not). `simp` simplifies the parts of a term before the
-term itself, so if `hypercube_succ` were a `simp` lemma it would turn `Q[n + 1]` into
-`Q[n] □ ⊤` before any lemma about the hypercube got a chance to apply.
+`simp` lemma but `pow_succ` is not). Recall that `simp` simplifies the parts of a
+term before the term itself ([The Simplifier](#section-the-simplifier)), so if
+`hypercube_succ` were a `simp` lemma it would turn `Q[n + 1]` into `Q[n] □ ⊤` before
+any lemma about the hypercube got a chance to apply.
 
 The exception is `hypercube_succ_adj`. It also unfolds a step, but only inside the
 proposition `Q[n + 1].Adj u v`, which `simp` can rewrite wherever it occurs, and it
@@ -736,10 +743,8 @@ Mycielskians](#section-vertex-transitivity-of-mycielskians)), and the Mycielskia
 [Grötzsch 1959](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-grotzsch-1959).
 -/
 /-- The *Grötzsch graph* (i.e. the Mycielskian of `C[5]`). -/
-@[simps!]
 abbrev grotzschGraph : SimpleGraph (Option (Fin 5 ⊕ Fin 5)) := mμ(C[5])
 
-#check grotzschGraph_adj
 /-!
 [Figure: The Grötzsch graph (i.e. the Mycielskian of $C_5$)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian.svg)
 
@@ -751,11 +756,13 @@ matching, just like the constructors `none`, `some`, `Sum.inl` and `Sum.inr`.
 -/
 namespace mycielskian
 
-/-- A copy of the vertex `v` in the "left" part of the Mycielskian. -/
+/-- The left copy `some (Sum.inl v)` of `v` in `Option (V ⊕ V)`, the vertex type of
+the Mycielskian. -/
 @[match_pattern]
 abbrev left (v : V) : Option (V ⊕ V) := some (Sum.inl v)
 
-/-- A copy of the vertex `v` in the "right" part of the Mycielskian. -/
+/-- The right copy `some (Sum.inr v)` of `v` in `Option (V ⊕ V)`, the vertex type of
+the Mycielskian. -/
 @[match_pattern]
 abbrev right (v : V) : Option (V ⊕ V) := some (Sum.inr v)
 
@@ -765,9 +772,11 @@ end mycielskian
 We can introduce notation for these as follows. The left copy of `v : V` is denoted
 `vˡ` and the right copy is denoted `vʳ`.
 -/
-/-- `vˡ` is the copy of the vertex `v` in the "left" part of the Mycielskian. -/
+/-- `vˡ` is the left copy `some (Sum.inl v)` of `v` in `Option (V ⊕ V)`, the vertex
+type of the Mycielskian. -/
 scoped postfix:max "ˡ" => mycielskian.left
-/-- `vʳ` is the copy of the vertex `v` in the "right" part of the Mycielskian. -/
+/-- `vʳ` is the right copy `some (Sum.inr v)` of `v` in `Option (V ⊕ V)`, the vertex
+type of the Mycielskian. -/
 scoped postfix:max "ʳ" => mycielskian.right
 
 /-!
@@ -850,21 +859,11 @@ lemma neighborSet_mycielskian_none {G : SimpleGraph V} :
   grind [mem_neighborSet, mycielskian_adj]
 
 /-!
-The left copies, the right copies and `none` are pairwise disjoint.
+The left and right copies are disjoint.
 -/
 @[simp]
 lemma mycielskian.disjoint_image_left_image_right (s t : Set V) :
     Disjoint (s.image (·ˡ)) (t.image (·ʳ)) := by
-  grind
-
-@[simp]
-lemma mycielskian.disjoint_image_left_none (s : Set V) :
-    Disjoint (s.image (·ˡ)) {none} := by
-  grind
-
-@[simp]
-lemma mycielskian.disjoint_image_right_none (s : Set V) :
-    Disjoint (s.image (·ʳ)) {none} := by
   grind
 
 end mycielskian_section
@@ -925,8 +924,7 @@ the right copy of the right copy of the left copy of `0`, which is a vertex of t
 term `some (Sum.inr (some (Sum.inr (some (Sum.inl 0)))))`. The adjacency lemmas above
 peel off one layer at a time: left–left and right–left pairs are adjacent exactly
 when the underlying vertices are, so `(0 : Fin 5)ˡʳʳ` is adjacent to `(1 : Fin 5)ˡˡˡ`
-because `0` and `1` are adjacent in `C[5]`. In the proof, `simpa [lemmas] using e`
-simplifies both the goal and the type of `e`, then closes the goal with `e`.
+because `0` and `1` are adjacent in `C[5]`.
 -/
 example : mμ^3(C[5]).Adj (0 : Fin 5)ˡʳʳ (1 : Fin 5)ˡˡˡ := by
   simpa [iterMycielskian_succ] using (by decide : C[5].Adj 0 1)
@@ -987,11 +985,8 @@ We give two concrete examples.
 -/
 /-- The complete multipartite graph with `n` classes, where each class is a copy of
 `ℕ`. -/
-@[simps!]
 abbrev completeMultipartiteFinNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
   completeMultipartiteGraph fun (_ : Fin n) => ℕ
-
-#check completeMultipartiteFinNat_adj -- produced by the `@[simps!]` attribute
 
 /-!
 We can also define the complete multipartite graph with classes indexed by `ℕ`, where
@@ -1000,11 +995,8 @@ types, `Σ _ : Fin n, ℕ` and `Σ n : ℕ, Fin n`.)
 -/
 /-- The complete multipartite graph with classes indexed by `ℕ`, where the `n`-th
 class is `Fin n`. -/
-@[simps!]
 abbrev completeMultipartiteNatFin : SimpleGraph (Σ n : ℕ, Fin n) :=
   completeMultipartiteGraph fun n => Fin n
-
-#check completeMultipartiteNatFin_adj
 
 /-!
 Deciding whether two vertices are adjacent in a complete multipartite graph is easy:
@@ -1028,11 +1020,8 @@ construction, which is the special case where `G` is a complete graph.)
 -/
 /-- The blow-up of a graph `G` given by replacing each vertex `i` with a class of
 vertices `V i`. -/
-@[simps!]
 abbrev blowUpGraph {ι : Type*} (G : SimpleGraph ι) (V : ι → Type*) :
     SimpleGraph (Σ i, V i) := SimpleGraph.comap Sigma.fst G
-
-#check blowUpGraph_adj -- (G.blowUpGraph V).Adj u v = G.Adj u.fst v.fst
 
 /-!
 The `n`-uniform blow-up of a graph `G` is the blow-up of `G` where each vertex is
@@ -1040,7 +1029,6 @@ replaced by a class of size `n`.
 -/
 /-- The `n`-uniform blow-up of a graph `G` given by replacing each vertex `i` with
 `n` vertices (`Fin n`), denoted `G[n]`. -/
-@[simps!]
 abbrev blowUpN {ι : Type*} (G : SimpleGraph ι) (n : ℕ) :
     SimpleGraph (Σ _ : ι, Fin n) := G.blowUpGraph fun _ => Fin n
 

@@ -18,14 +18,14 @@ many important graph parameters are defined in terms of it: the *eccentricity*
 (`radius`) of a graph. Distance is also closely related to the *girth* (`girth`,
 `egirth`).
 
-In this chapter we introduce Mathlib's distance `edist` and its basic properties,
-and show that the distance in the hypercube `Q[n]` is the Hamming distance. We study
-eccentricity, diameter and radius, with vertex-transitive graphs, the hypercube and
-the Mycielskian as examples. As an application of distance to colouring we prove
-*Albertson's theorem*: a precolouring of vertices that are pairwise far apart extends
-to a colouring with one extra colour (`Colorable.extend_precoloring`). We then focus
-on girth, which we compute for complete bipartite graphs, cycle graphs, hypercubes
-and Mycielskians.
+In this chapter we introduce Mathlib's distance `edist` and its basic properties, and
+show that the distance in the hypercube `Q[n]` is the Hamming distance
+(`edist_eq_hammingDist`). We study eccentricity, diameter and radius, with
+vertex-transitive graphs, the hypercube and the Mycielskian as examples. As an
+application of distance to colouring we prove *Albertson's theorem*: a precolouring
+of vertices that are pairwise far apart extends to a colouring with one extra colour
+(`Colorable.extend_precoloring`). We then focus on girth, which we compute for
+complete bipartite graphs, cycle graphs, hypercubes and Mycielskians.
 
 The final section looks at counting vertices in the distance layers from a fixed
 vertex. This gives the *Moore bound* (`moore_bound`) and the *cage bound*
@@ -416,6 +416,9 @@ distance hypothesis guarantees that the recoloured neighbourhoods of distinct
 vertices of `s` are non-adjacent (any edge between them would give a walk of length
 `≤ 3` between two vertices of `s`), so no new monochromatic edge is created.
 -/
+/-- **Albertson's precolouring extension theorem**: if `G` is `k`-colourable, then
+any assignment of colours from `Fin (k + 1)` to a set of vertices that are pairwise
+at distance at least `4` extends to a `(k + 1)`-colouring of `G`. -/
 theorem Colorable.extend_precoloring {k : ℕ} (hk : G.Colorable k) {s : Set V}
     (hs : s.Pairwise fun u w ↦ 4 ≤ G.edist u w) (f : s → Fin (k + 1)) :
     ∃ C : G.Coloring (Fin (k + 1)), ∀ w : s, C w = f w := by
@@ -1025,6 +1028,8 @@ a single vertex `r` of eccentricity at most `k`, so a bound on the radius suffic
 radius is at most the diameter this gives the usual form. Note that no connectivity
 hypothesis is needed: a finite radius already forces the graph to be connected.
 -/
+/-- The **Moore bound**, radius form: a graph with maximum degree at most `d + 1` and
+radius at most `k` has at most `1 + (d + 1) * ∑ i < k, d ^ i` vertices. -/
 theorem moore_bound_of_radius_le (G : SimpleGraph V) [G.LocallyFinite]
     (d k : ℕ) (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.radius ≤ k) :
     ENat.card V ≤ (1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i : ℕ) := by
@@ -1039,6 +1044,8 @@ hypothesis is stated with `ediam` rather than `diam`. The empty graph `E[2]` has
 maximum degree `0`, and its `diam` is the junk value `0`, since it is disconnected;
 but it has `2` vertices, while the bound with `d = k = 0` is `1`.
 -/
+/-- The **Moore bound**: a graph with maximum degree at most `d + 1` and diameter at
+most `k` has at most `1 + (d + 1) * ∑ i < k, d ^ i` vertices. -/
 theorem moore_bound (G : SimpleGraph V) [G.LocallyFinite] (d k : ℕ)
     (h_deg : ∀ v, G.degree v ≤ d + 1) (h : G.ediam ≤ k) :
     ENat.card V ≤ (1 + (d + 1) * ∑ i ∈ Finset.range k, d ^ i : ℕ) := by
@@ -1192,6 +1199,9 @@ As for the Moore bound, we state it with `ENat.card V`, so that no `[Finite V]`
 hypothesis is needed, but here for the opposite reason: `ENat.card V` is `⊤` for an
 infinite type, so a lower bound on it holds trivially for infinite graphs.
 -/
+/-- The **cage bound**, odd girth: a graph with at least one vertex, minimum degree
+at least `d + 1` and girth at least `2 * k + 1` has at least
+`1 + (d + 1) * ∑ i < k, d ^ i` vertices. -/
 theorem cage_bound_odd (G : SimpleGraph V) [G.LocallyFinite]
     [Nonempty V] (d k : ℕ) (h_deg : ∀ v, d + 1 ≤ G.degree v)
     (h_girth : 2 * k + 1 ≤ G.egirth) :
@@ -1317,6 +1327,9 @@ than to `s`, a vertex of `Bⱼ` is closer to `s` than to `r`, and each family is
 contained in the distance layers around one endpoint. So together they contain at
 least `2 * ∑ i < k, d ^ i` vertices.
 -/
+/-- The **cage bound**, even girth: a graph with at least one vertex, minimum degree
+at least `d + 1` and girth at least `2 * k` has at least `2 * ∑ i < k, d ^ i`
+vertices. -/
 theorem cage_bound_even (G : SimpleGraph V) [G.LocallyFinite]
     [Nonempty V] (d k : ℕ) (h_deg : ∀ v, d + 1 ≤ G.degree v)
     (h_girth : 2 * k ≤ G.egirth) :

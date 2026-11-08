@@ -45,8 +45,8 @@ Mathlib.
 | `v[a, b, …]` | Hypercube vertex (`open HypercubeVert`) | `((((), a), b), …)` |
 | `G[n]` | `n`-uniform blow-up of a graph `G` | `blowUpN G n` |
 | `mμ(G)` | Mycielskian of a graph `G` | `mycielskian G` |
-| `vˡ` | "Left" copy of `v` in the Mycielskian | `mycielskian.left v` |
-| `vʳ` | "Right" copy of `v` in the Mycielskian | `mycielskian.right v` |
+| `vˡ` | Left copy of `v` in `Option (V ⊕ V)` | `mycielskian.left v` |
+| `vʳ` | Right copy of `v` in `Option (V ⊕ V)` | `mycielskian.right v` |
 | `mμᵥ^n(V)` | Vertices of the `n`-th iterated Mycielskian | `MycielskianVert V n` |
 | `mμ^n(G)` | `n`-th iterated Mycielskian of a graph `G` | `iterMycielskian G n` |
 | `Kn[n, k]` | Kneser graph on `k`-subsets of `Fin n` | `kneserGraph (Fin n) k` |
@@ -98,8 +98,10 @@ The following custom definitions and abbreviations are introduced in this guide:
   hypercube.
 * `mycielskian` / `mμ(G)`: the Mycielskian of a graph `G`.
 * `grotzschGraph`: Grötzsch graph (i.e. `mμ(C[5])`).
-* `mycielskian.left` / `vˡ`: left copy of a vertex in the Mycielskian.
-* `mycielskian.right` / `vʳ`: right copy of a vertex in the Mycielskian.
+* `mycielskian.left` / `vˡ`: left copy of a vertex in `Option (V ⊕ V)`, the vertex
+  type of the Mycielskian.
+* `mycielskian.right` / `vʳ`: right copy of a vertex in `Option (V ⊕ V)`, the vertex
+  type of the Mycielskian.
 * `MycielskianVert` / `mμᵥ^n(V)`: vertex type of the `n`-th iterated Mycielskian.
 * `iterMycielskian` / `mμ^n(G)`: `n`-th iterated Mycielskian of `G`.
 * `completeMultipartiteFinNat`: complete multipartite graph with copies of `ℕ` as
@@ -192,7 +194,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 * `pathGraph.embedding`: embedding of a path graph `P[n]` into a longer path
   `P[n + k]`.
-* `Embedding.mapBlowUp`: embedding of `G` into the blow-up `H.blowUpGraph U` given
+* `Embedding.toBlowUp`: embedding of `G` into the blow-up `H.blowUpGraph U` given
   `G ↪g H` and nonempty parts.
 * `hypercube.embedding`: embedding of `Q[n]` into `Q[n + k]` by iterating
   `hypercube.embedFalse`.
@@ -428,10 +430,6 @@ The following custom definitions and abbreviations are introduced in this guide:
   cube is the hyperoctahedral group.
 * `autHypercubeMulEquivHyperoctahedral`: the automorphism group of `Q[n]` is the
   hyperoctahedral group `ℤ/2 ≀ Sₙ`.
-* `chosenSubgraphIso`: a choice, for each subgraph `C` of `B` isomorphic to `A`, of a
-  reference isomorphism `A ≃g C.coe`.
-* `subgraphIsoEquivAut`: equivalence between the isomorphisms `A ≃g C.coe` of a
-  subgraph `C` isomorphic to `A` and the automorphisms of `A`.
 * `copyEquivSigmaIso`: equivalence between `A.Copy B` and the Sigma type of subgraphs
   of `B` isomorphic to `A` with their isomorphisms.
 * `copyEquivSubgraphIsoProdAut`: equivalence
@@ -447,8 +445,8 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `hypercubeHamming.extendEmb` / `hypercubeHamming.extendHom`: extension of a
   `k`-vector to an `n`-vector along an embedding of directions `Fin k ↪ Fin n`, and
   the induced homomorphism of Hamming cubes.
-* `subcubeCopy`: the canonical copy of `Q[k]` in `Q[n]` with a given base point and
-  set of free directions.
+* `hypercubeHamming.subcubeCopy`: the canonical copy of `Q[k]` in `Q[n]` with a
+  given base point and set of free directions.
 * `hypercubeHamming.copyEquivProd`: the copies of `Q[k]` in `Q[n]` correspond to
   pairs of a base point and a direction embedding.
 * `copyEquivEmbedding`: if every copy of `A` in `B` reflects adjacency, then copies
@@ -468,6 +466,8 @@ The following custom definitions and abbreviations are introduced in this guide:
   vertices.
 
 ## Chapter 13: Theorems
+* `subdividedStar`: the subdivided star on `ι`, with centre `none` adjacent to every
+  `iʳ` and each `iˡ` adjacent only to `iʳ`.
 * `IsCompleteMultipartite.finpartition`: the parts of a finite complete multipartite
   graph, as a `Finpartition` of its vertices.
 * `IsCopyExtremal`: `G` has property `p` and the most copies of `H` among the graphs
@@ -476,9 +476,9 @@ The following custom definitions and abbreviations are introduced in this guide:
   with the most `s`-cliques among such graphs on its vertices.
 * `cliqueUnion`: the union of the `s`-cliques of `G`; distinct vertices are adjacent
   when they lie in a common `s`-clique.
-* `paleyGraph₉`: the Paley graph on `9` vertices, as the circulant graph on
-  `ZMod 3 × ZMod 3` in which two vertices are adjacent when they agree in one
-  coordinate.
+* `paleyGraph₉`: the Paley graph on `9` vertices, of the field `𝔽₃[i]` built as
+  `QuadraticAlgebra (ZMod 3) (-1) 0`; two vertices are adjacent when they agree in
+  one coordinate.
 * `IsDirection`: a direction of `G`, a consistent choice of a component of `G - K`
   for every finite set `K` of vertices (the component for `L` lies inside the one
   for `K` whenever `K ⊆ L`).
@@ -598,7 +598,8 @@ The following results are proved in this guide and its exercises:
 
 *From the exercises:*
 
-* `cliqueNum_mono`: the clique number is monotone in the subgraph order.
+* `cliqueNum_mono`: the clique number of a finite graph is monotone in the subgraph
+  order.
 * `cliqueNum_add_indepNum_le`: `ω G + ⍺ G ≤ |V| + 1` for a finite
   graph.
 * `not_cliqueFree_three_and_indepSetFree_three`: every graph on at least `6` vertices
@@ -653,7 +654,7 @@ The following results are proved in this guide and its exercises:
 *From the exercises:*
 
 * `le_mul_of_colorable_kneserGraph`: if the Kneser graph `Kn[n, k]` is
-  `m`-colourable then `n ≤ k * m`, so `χ Kn[n, k] ≥ n / k`.
+  `m`-colourable then `n ≤ k * m`, so `n ≤ k * χ Kn[n, k]`.
 
 ## Chapter 8: Walks (Results)
 * `Walk.exists_odd_isCycle` / `isBipartite_iff_forall_isCycle_even`: a closed walk of
@@ -740,13 +741,13 @@ The following results are proved in this guide and its exercises:
 
 *From the exercises:*
 
+* `Subgraph.mem_verts_iff_of_isCompl`: if subgraphs `H` and `K` are complementary
+  (`IsCompl H K`) then no edge of `G` has exactly one endpoint in `H`.
 * `Walk.exists_odd_isCycle_toSubgraph_le` / `Walk.exists_odd_isCycle_length_le`: a
   closed walk of odd length `k` contains an odd cycle that is a subgraph of the walk,
   and so has length at most `k`.
 * `Walk.IsTrail.length_le_of_toSubgraph_le`: a trail that is a subgraph of a walk is
   no longer than the walk.
-* `Subgraph.mem_verts_iff_of_isCompl`: if subgraphs `H` and `K` are complementary
-  (`IsCompl H K`) then no edge of `G` has exactly one endpoint in `H`.
 * `colorable_of_forall_finite_induce_colorable`: a graph is `n`-colourable if all its
   finite induced subgraphs `G.induce s` are.
 * `matchingNum_mono`: the matching number is monotone in the subgraph order.
@@ -932,7 +933,8 @@ The following results are proved in this guide and its exercises:
 * `labelledCopyCount_hypercube` / `copyCount_hypercube`: the number of labelled
   (resp. unlabelled) copies of `Q[k]` in `Q[n]` is `2 ^ n * n.descFactorial k` (resp.
   `n.choose k * 2 ^ (n - k)`).
-* `edist_subcubeCopy`: canonical subcube copies are isometric embeddings.
+* `hypercubeHamming.edist_subcubeCopy`: canonical subcube copies are isometric
+  embeddings.
 * `copy_hypercube_adj_iff` / `card_embedding_hypercube`: every copy of `Q[k]` in
   `Q[n]` is induced, so there are `2 ^ n * n.descFactorial k` embeddings
   `Q[k] ↪g Q[n]`.
@@ -965,8 +967,6 @@ The following results are proved in this guide and its exercises:
   `4`-cycles.
 
 ## Chapter 13: Theorems (Results)
-* `exists_isMatching_of_forall_ncard_le'`: Hall's theorem for one side of a
-  bipartite graph, without assuming local finiteness.
 * `exists_isMatching_of_forall_ncard_le_add`: Hall's theorem with deficiency `d` — if
   every `s ⊆ p₁` has at least `|s| - d` neighbours, a matching covers all but at most
   `d` vertices of `p₁`.
@@ -976,9 +976,9 @@ The following results are proved in this guide and its exercises:
 * `IsCompleteMultipartite.nonempty_iso_turanGraph`: a complete multipartite
   `(r + 1)`-clique-free graph with balanced parts, to which no edge can be added
   without creating an `(r + 1)`-clique, is isomorphic to the Turán graph.
-* `CliqueFree.exists_colorable_two_mul_card_edgeFinset_le`: Füredi's stability
-  theorem — an `(r + 1)`-clique-free graph can be made `r`-colourable by deleting at
-  most `turanNumber n r - e(G)` edges.
+* `CliqueFree.exists_colorable_deleteEdges`: Füredi's stability theorem — an
+  `(r + 1)`-clique-free graph can be made `r`-colourable by deleting at most
+  `turanNumber n r - e(G)` edges.
 * `card_cliqueFinset_replaceVertex`: giving `b` the neighbours of `a` (the graph
   `G.replaceVertex a b`) removes the `s`-cliques through `b` and adds as many as
   there are `s`-cliques through `a` but not `b`.
@@ -1035,6 +1035,8 @@ The following results are proved in this guide and its exercises:
   contains a corner `(x, y), (x + d, y), (x, y + d)` with `d ≠ 0`.
 * `exists_seq_covby_of_forall_covby_finite`: Kőnig's lemma, in an order-theoretic
   form.
+* `Connected.pathNat_isContained`: Kőnig's lemma — an infinite, connected, locally
+  finite graph contains a ray, a copy of `pathNat`.
 * `nonempty_ends_of_infinite`: an infinite, connected, locally finite graph has at
   least one end.
 
@@ -1045,12 +1047,14 @@ The following results are proved in this guide and its exercises:
 * `IsRegularOfDegree.colorable_lineGraph`: Kőnig's line colouring theorem for regular
   graphs — the edges of a `k`-regular bipartite graph can be properly coloured with
   `k` colours.
-* `card_cliqueFinset_two`: a graph has as many `2`-cliques as edges, so Zykov's
-  theorem for `s = 2` is the edge bound of Turán's theorem.
 * `sum_degree_le_erdosGallai`: the degrees of a set `S` of `k` vertices sum to at
   most `k * (k - 1) + ∑ v ∈ Sᶜ, min k (G.degree v)`.
 * `Graphic.erdosGallaiLE`: a graphic multiset satisfies the Erdős–Gallai
   inequalities, so with `Graphic.even_sum` the conditions in `erdos_gallai` are
   necessary.
+* `card_cliqueFinset_two`: a graph has as many `2`-cliques as edges, so Zykov's
+  theorem for `s = 2` is the edge bound of Turán's theorem.
+* `nonempty_ends_of_pathNat_isContained`: a graph containing a ray (a copy of
+  `pathNat`) has an end.
 -/
 end SimpleGraph

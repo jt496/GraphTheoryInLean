@@ -26,7 +26,7 @@ vertex-transitivity, a notion that recurs throughout the guide.
 
 The chapter ends with two more advanced sections, on the tensor product of graphs
 and on claw-free graphs, where we characterize when the line graph of a graph
-contains a triangle.
+contains a triangle (`top_three_isContained_lineGraph_iff`).
 
 # Functions, Embeddings and Equivalences
 
@@ -1133,6 +1133,18 @@ lemma piTensorProd_adj_of_nonempty {ι : Type*} [Nonempty ι] {V : ι → Type*}
   exact fun e => (h i).ne (congrFun e i)
 
 /-!
+The proof above uses `refine`, which we will use often. Like `exact` it takes a term
+that proves the goal, but the term may contain holes `?_`, and each hole becomes a
+new goal. Here the term is an anonymous constructor for the `↔`: `And.left` proves
+the forward direction outright, and the reverse direction is `fun h => ⟨h, ?_⟩`. So
+after `refine` the only goal is the hole, `f ≠ g`, with `h` in context.
+
+Compare this with `apply`, which chooses the new goals itself: it makes a goal of
+every argument that it cannot fill in. Here `apply Iff.intro` leaves both directions
+as goals, including the one that `And.left` proves. Moreover `apply` elaborates its
+term before comparing it with the goal, so `apply ⟨And.left, fun h => ⟨h, ?_⟩⟩`
+fails: an anonymous constructor must know which type it is constructing.
+
 We can only expect to decide adjacency in the indexed tensor product by checking
 every factor when the index type is finite: you can't check infinitely many
 conditions! The tensor product of a finite family of graphs has decidable
@@ -1393,10 +1405,9 @@ lemma top_three_or_claw_isContained_of_isContained_lineGraph {V : Type*}
 
 /-!
 Putting everything together we have a complete characterization.
-
-The line graph of `G` contains a triangle iff `G` contains a triangle or a copy
-of the claw.
 -/
+/-- The line graph of `G` contains a triangle iff `G` contains a triangle or a copy
+of the claw. -/
 theorem top_three_isContained_lineGraph_iff {V : Type*}
     {G : SimpleGraph V} : K[3] ⊑ L[G] ↔ K[3] ⊑ G ∨ K[1, 3] ⊑ G :=
   ⟨top_three_or_claw_isContained_of_isContained_lineGraph,

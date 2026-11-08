@@ -24,10 +24,11 @@ clique-free graphs (`CliqueFree`), and show that graph homomorphisms map cliques
 cliques. Mathlib has no `Decidable` instance for `CliqueFree`, so we build one from
 the finset of all `n`-cliques (`cliqueFinset`). We then introduce the clique number
 (`cliqueNum`), independent sets (`IsIndepSet`) and the independence number
-(`indepNum`), and compute the independence number of the Kneser graph using the
-Erdős–Ko–Rado theorem. Finally we prove the well-known result that the Mycielskian
-preserves the clique number, and give a formula for the independence number of the
-Mycielskian.
+(`indepNum`), and compute the independence number of the Kneser graph
+(`indepNum_kneserGraph`) using the Erdős–Ko–Rado theorem (`Finset.erdos_ko_rado`).
+Finally we prove the well-known result that the Mycielskian preserves the clique
+number (`cliqueNum_mycielskian_of_ne_bot`), and give a formula for the independence
+number of the Mycielskian (`indepNum_mycielskian`).
 
 # Cliques
 
@@ -448,7 +449,7 @@ theorem IsNClique.cliqueNum_eq_of_cliqueFree {s : Finset V}
     {n : ℕ} (hs : G.IsNClique n s) (h : G.CliqueFree (n + 1)) :
     ω G = n := by
   refine h.cliqueNum_le.antisymm ?_
-  apply le_csSup (s := {k | ∃ t, G.IsNClique k t}) ?_ ⟨s, hs⟩
+  refine le_csSup (s := {k | ∃ t, G.IsNClique k t}) ?_ ⟨s, hs⟩
   refine ⟨n, ?_⟩
   rintro k ⟨t, ht⟩
   by_contra! hk
