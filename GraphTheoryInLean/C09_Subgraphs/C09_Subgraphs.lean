@@ -98,7 +98,7 @@ the union of both.
 #check Subgraph.sup_adj
 
 /-!
-[Figure: Left: a graph $G$. Top: subgraphs $H_1$ and $H_2$ of $G$, with the vertices they omit dashed. Bottom: their inf $H_1 \sqcap H_2$ and sup $H_1 \sqcup H_2$, with the edges in both subgraphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf_subgraph.svg)
+[Figure: Inf and sup of subgraphs](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#figure-inf_subgraph)
 
 If `G : SimpleGraph V` then the top subgraph `⊤` of `G` has the same vertex set and
 edge set as `G`, so mathematically `⊤ : G.Subgraph` *is* `G` (but with type
@@ -196,7 +196,7 @@ example (p : G.Walk u v) (h : p.Nil) : p.toSubgraph.support = ∅ := by
 For non-nil walks the `Walk.toSubgraph.support` is the same as the set of vertices in
 the `List V` `Walk.support`.
 -/
-example (p : G.Walk u v) (h : ¬ p.Nil) :
+example (p : G.Walk u v) (h : ¬p.Nil) :
   p.toSubgraph.support = {w | w ∈ p.support} := by
   ext x
   simp only [Subgraph.mem_support, Walk.adj_toSubgraph_iff_mem_edges,
@@ -316,9 +316,8 @@ example {v w : V} (s : Set (Sym2 V)) :
 #check Subgraph.deleteEdges_verts -- (G'.deleteEdges s).verts = G'.verts
 
 /-!
-[Figure: Left: a graph $G$. Centre: deleting the vertices $v_1$ and $v_3$, which also removes their edges. Right: deleting the edges $v_1 v_4$ and $v_2 v_5$](https://jt496.github.io/GraphTheoryInLean/figures/deletion.svg)
--/
-/-!
+[Figure: Deleting vertices and edges](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#figure-deletion)
+
 # Subgraphs as Simple Graphs
 
 A `G.Subgraph` is not a `SimpleGraph`, so results about the latter do not
@@ -393,7 +392,7 @@ In the opposite direction, if `G H : SimpleGraph V` and `H ≤ G` then we can co
 A subgraph `H : G.Subgraph` is *spanning* if `H.verts = Set.univ`, i.e. it contains
 every vertex in `V`.
 
-[Figure: A graph $G$, a spanning subgraph, and a non-spanning subgraph](https://jt496.github.io/GraphTheoryInLean/figures/spanning_vs_non.svg)
+[Figure: Spanning and non-spanning](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#figure-spanning_vs_non)
 -/
 example (H : G.Subgraph) : H.IsSpanning ↔ H.verts = Set.univ := isSpanning_iff
 
@@ -785,7 +784,7 @@ variable {V : Type*} {G : SimpleGraph V}
 
 #source Subgraph.IsMatching        -- ∀ ⦃v⦄, v ∈ M.verts → ∃! w, M.Adj v w
 #source Subgraph.IsPerfectMatching -- M.IsMatching ∧ M.IsSpanning
-#source SimpleGraph.IsMatchingFree --  ∀ M : Subgraph G, ¬ M.IsPerfectMatching
+#source SimpleGraph.IsMatchingFree --  ∀ M : Subgraph G, ¬M.IsPerfectMatching
 
 /-!
 A matching `M` is not spanning in general: its vertex set is the set of *matched*
@@ -793,7 +792,7 @@ vertices, and each of these has exactly one neighbour in `M`. A perfect matching
 then simply a spanning matching. (This makes it natural to describe a matching as a
 `G.Subgraph`.)
 
-[Figure: Left: a matching $M$, which leaves $c$ and $f$ unmatched. Right: a perfect matching](https://jt496.github.io/GraphTheoryInLean/figures/matching.svg)
+[Figure: Matching and perfect matching](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#figure-matching)
 
 For example, a graph, or rather its `⊤` subgraph, is a perfect matching iff it is
 `1`-regular, i.e. every vertex has exactly one neighbour.
@@ -1024,7 +1023,7 @@ distinct vertex from each of them. For *bipartite* graphs this is an equality
 `C[2 * k + 3]` has `ν = k + 1` and `τ = k + 2`. (The exercises check the smallest
 case, `K[3]`.)
 
-[Figure: Left: in $C_5$ a maximum matching (red) has $2$ edges, but a minimum vertex cover (green) needs $3$ vertices, so $\nu = 2 < 3 = \tau$. Right: in the bipartite graph $C_6$ the two are equal, $\nu = \tau = 3$](https://jt496.github.io/GraphTheoryInLean/figures/matching_cover.svg)
+[Figure: Matchings and vertex covers](https://jt496.github.io/GraphTheoryInLean/Subgraphs/#figure-matching_cover)
 
 The proof of `ν G ≤ τ G` rests on two elementary facts, which we isolate as reusable
 lemmas.
@@ -1443,7 +1442,7 @@ protected def ColoringOn.singleton (a : V) (c : γ) :
 
 /-- The partial colouring of a pair of non-adjacent vertices by a colour `c`. -/
 @[simps]
-def ColoringOn.ofNotAdj {a b : V} (h : ¬ G.Adj a b) (c : γ) :
+def ColoringOn.ofNotAdj {a b : V} (h : ¬G.Adj a b) (c : γ) :
     G.ColoringOn γ {a, b} where
   toFun := fun _ ↦ c
   map_rel' := by

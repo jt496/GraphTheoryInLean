@@ -10,6 +10,7 @@ import Mathlib.Combinatorics.SimpleGraph.Partition
 import Mathlib.Logic.Equiv.Fintype
 import Mathlib.Combinatorics.SimpleGraph.FiveWheelLike
 import Mathlib.Data.List.GetD
+import Mathlib.Data.Rat.Encodable
 namespace SimpleGraph
 /-!
 A *proper colouring* of a graph assigns a colour to each vertex so that adjacent
@@ -286,7 +287,8 @@ On a clique both colourings are injective, so `Equiv.Perm.exists_extending_pair`
 gives a permutation `σ` of the palette with `σ (c₂ x) = c₁ x` for every `x` in the
 overlap. Then `c₁` on `G₁` and the recoloured `c₂` elsewhere agree on the overlap.
 
-[Figure: Top left: $G_1$ coloured by $c_1$ and $G_2$ coloured by $c_2$; supports meet on $x$, $y$, $z$, and $c_1$ and $c_2$ disagree at $x$ and $y$. Bottom left: $G_1$ again, and $G_2$ recoloured by $\sigma \circ c_2$, where $\sigma$ swaps red and blue. Right: the glued colouring of $G_1 \sqcup G_2$](https://jt496.github.io/GraphTheoryInLean/figures/clique_sum_colouring.svg)
+[Figure: Gluing colourings over a clique](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-clique_sum_colouring)
+
 -/
 theorem Colorable.sup_of_isClique_inter {G₁ G₂ : SimpleGraph V}
     (hs₁ : G₁.IsClique (G₁.support ∩ G₂.support))
@@ -414,7 +416,7 @@ More generally, any `Bool`-colouring `c` of `G` makes `G` bipartite with parts t
 vertices coloured `true` and the vertices coloured `false`.
 -/
 lemma Coloring.isBipartiteWith (c : G.Coloring Bool) :
-    G.IsBipartiteWith {v | c v} {v | ¬ c v} where
+    G.IsBipartiteWith {v | c v} {v | ¬c v} where
   disjoint := Set.disjoint_left.2 fun _ h h' => h' h
   mem_of_adj _ _ h := by grind [c.valid h]
 
@@ -583,7 +585,7 @@ lemma hypercube.bicoloring_apply {n : ℕ} (v : HypercubeVert n) :
 By `Coloring.isBipartiteWith`, the hypercube is bipartite with the two parts being
 the sets of vertices with parity `true` and `false`.
 -/
-example (n : ℕ) : Q[n].IsBipartiteWith {v | v.parity} {v | ¬ v.parity} := by
+example (n : ℕ) : Q[n].IsBipartiteWith {v | v.parity} {v | ¬v.parity} := by
   simpa only [hypercube.bicoloring_apply] using
     (hypercube.bicoloring n).isBipartiteWith
 
@@ -620,7 +622,7 @@ in `Vʳ` (the "right" copy of `V`), this ensures that no vertex in `Vʳ` is colo
 with the colour of `vˡ`, if this doesn't equal `k`, and otherwise with the colour of
 `vʳ` (which by construction is not `k`).
 
-[Figure: The 3-colouring of $C_5$ induced from a 4-colouring of $mμ(C_5)$](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_coloring.svg)
+[Figure: Colouring `C[5]` from `mμ(C[5])`](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-mycielskian_coloring)
 
 Conversely given a `k`-colouring of `G` we can get a `(k + 1)`-colouring of `mμ(G)`
 by colouring the "left" and "right" copies of `V` with the same colours as used by
@@ -977,7 +979,7 @@ lemma greedyChoice_congr {c₁ c₂ : ℕ → ℕ} {n : ℕ} (h : ∀ m < n, c�
   simp_all [greedyChoice]
 
 /-!
-[Figure: Left: a greedy colouring, with colours $0$, $1$, $2$ and $3$ drawn as red, blue, green and yellow. Right: for each vertex $n$, its earlier neighbours, the colours they forbid, and the least colour not forbidden](https://jt496.github.io/GraphTheoryInLean/figures/greedy.svg)
+[Figure: A greedy colouring](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-greedy)
 
 We use `greedyChoice` to define the greedy colouring `greedy` of `G` by
 *well-founded recursion* on `ℕ`. To colour a vertex `v` we need to know the colours
@@ -1102,9 +1104,7 @@ end greedy
 /-!
 Note that evaluating vertex `30` of `⊤` would take several minutes. We will see why,
 and fix it, below.
--/
 
-/-!
 ## Greedy Colouring vs. the Crown Graph
 
 The classic example of a graph on which greedy colouring performs badly is the
@@ -1113,8 +1113,6 @@ the *crown graph*, with its vertices ordered left, right, left, right, ...
 
 We will look at its countably infinite incarnation and show that the greedy colouring
 will use arbitrarily large colours, despite the graph being `2`-colourable.
-
-[Figure: Left: the greedy colouring of `crownGraph` gives vertex `n` colour `n / 2`. Right: an optimal `2`-colouring, by parity](https://jt496.github.io/GraphTheoryInLean/figures/crownGraph.svg)
 -/
 
 /-- The *crown graph* is the complete bipartite graph on even and odd naturals,
@@ -1125,6 +1123,8 @@ def crownGraph : SimpleGraph ℕ where
 deriving instance DecidableRel for (crownGraph.Adj)
 
 /-!
+[Figure: Colourings of `crownGraph`](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-crownGraph)
+
 The earlier neighbours of `n` in `crownGraph` are `{1, 3, ..., n - 1}`, if `n` is
 even, and `{0, 2, ..., n - 3}` if `n` is odd. We can see this in examples via `#eval`
 and will prove it below.
@@ -1184,6 +1184,26 @@ from `V` to `ℕ` together with a partial inverse `Encodable.decode : ℕ → Op
 which satisfies `decode (encode v) = some v` for all `v : V`.
 -/
 #source Encodable
+/-!
+For example, the rationals are encodable.
+-/
+#synth Encodable Rat -- Rat.instEncodable
+/-!
+This instance writes a rational in lowest form as `n / d`, with `0 < d`, and encodes
+it as `Nat.pair (encode n) d`. Here `encode` on `ℤ` sends `0, -1, 1, -2, 2, …` to
+`0, 1, 2, 3, 4, …`, and `Nat.pair a b` is `b * b + a` if `a < b` and `a * a + a + b`
+otherwise, which gives a bijection from `ℕ × ℕ` to `ℕ`. So `1 / 2` is encoded as
+`Nat.pair 2 2 = 8`. Not every natural number is a code: `0 = Nat.pair 0 0` has
+denominator `0`, and `4 = Nat.pair 0 2` would be `0 / 2`, which is not in lowest
+terms, so `decode` returns `none` for both.
+
+[Figure: Encoding the rationals](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-encodableRat)
+
+-/
+#eval Encodable.encode (1 / 2 : ℚ)    -- 8
+#eval (Encodable.decode 8 : Option ℚ) -- some (1 / 2)
+#eval (Encodable.decode 4 : Option ℚ) -- none
+#check Nat.pair
 /-!
 If `G` has an encodable vertex type then we can construct a greedy colouring of `G`
 by first encoding its vertices in `ℕ` and then applying the greedy colouring

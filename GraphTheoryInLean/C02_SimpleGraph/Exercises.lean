@@ -58,9 +58,7 @@ guide. We use a prime, as in `shiftedPathNat'`, to denote a version of a definit
 or result that contains a `sorry`. This is so that we can use the same names (without
 a prime) in the solutions below, thus ensuring that when we refer to them in later
 chapters they resolve to the correct definition.
--/
 
-/-!
 7. For `i : ℕ`, define the graph `shiftedPathNat' i` to be a `SimpleGraph ℕ` with
 edges from `n` to `n + 1` iff `i ≤ n`. (If `aesop_graph` can prove the `symm` and
 `loopless` fields for your definition then you can simply delete those two lines.)

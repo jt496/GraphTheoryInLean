@@ -9901,17 +9901,6 @@
         "Distance",
         "Eccentricity, Diameter and Radius"]}},
      "address": "/Distance/"}],
-   "SimpleGraph.diam_mycielskian_le_four":
-   [{"id": "SimpleGraph___diam_mycielskian_le_four",
-     "data":
-     {"/Distance/#SimpleGraph___diam_mycielskian_le_four":
-      {"display": "diam_mycielskian_le_four",
-       "context":
-       ["Graph Theory in Lean",
-        "Distance",
-        "Eccentricity, Diameter and Radius",
-        "Distances in the Mycielskian"]}},
-     "address": "/Distance/"}],
    "SimpleGraph.diam_hypercube":
    [{"id": "SimpleGraph___diam_hypercube",
      "data":
@@ -15707,6 +15696,226 @@
  {"title": "Lean constant reference",
   "description": "Documentation for Lean constants",
   "contents": {}},
+ "STIL.figure":
+ {"title": "STIL.figure",
+  "description": null,
+  "contents":
+  {"zykov_transfer":
+   [{"id": "figure-zykov_transfer", "data": null, "address": "/Theorems/"}],
+   "zykov_move":
+   [{"id": "figure-zykov_move", "data": null, "address": "/Theorems/"}],
+   "whitney_strict":
+   [{"id": "figure-whitney_strict", "data": null, "address": "/Connectivity/"}],
+   "walkcount":
+   [{"id": "figure-walkcount",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}],
+   "walk_bypass":
+   [{"id": "figure-walk_bypass", "data": null, "address": "/Walks/"}],
+   "tutte": [{"id": "figure-tutte", "data": null, "address": "/Theorems/"}],
+   "turan": [{"id": "figure-turan", "data": null, "address": "/Theorems/"}],
+   "trail_vs_path":
+   [{"id": "figure-trail_vs_path", "data": null, "address": "/Walks/"}],
+   "tensorprod":
+   [{"id": "figure-tensorprod", "data": null, "address": "/Maps/"}],
+   "szemeredi":
+   [{"id": "figure-szemeredi", "data": null, "address": "/Theorems/"}],
+   "sum": [{"id": "figure-sum", "data": null, "address": "/Constructions/"}],
+   "subcube":
+   [{"id": "figure-subcube",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}],
+   "spanning_vs_non":
+   [{"id": "figure-spanning_vs_non", "data": null, "address": "/Subgraphs/"}],
+   "spanning_tree":
+   [{"id": "figure-spanning_tree", "data": null, "address": "/Connectivity/"}],
+   "sigmaCompleteNat":
+   [{"id": "figure-sigmaCompleteNat",
+     "data": null,
+     "address": "/Constructions/"}],
+   "sdiff": [{"id": "figure-sdiff", "data": null, "address": "/SimpleGraph/"}],
+   "replace_vertex":
+   [{"id": "figure-replace_vertex", "data": null, "address": "/Theorems/"}],
+   "reading_routes":
+   [{"id": "figure-reading_routes", "data": null, "address": "/Introduction/"}],
+   "precolouring_k33":
+   [{"id": "figure-precolouring_k33", "data": null, "address": "/Distance/"}],
+   "posa_cycle":
+   [{"id": "figure-posa_cycle", "data": null, "address": "/Walks/"}],
+   "posa": [{"id": "figure-posa", "data": null, "address": "/Walks/"}],
+   "petersen_layers":
+   [{"id": "figure-petersen_layers", "data": null, "address": "/Distance/"}],
+   "petersen":
+   [{"id": "figure-petersen", "data": null, "address": "/Constructions/"}],
+   "paths":
+   [{"id": "figure-paths", "data": null, "address": "/Constructions/"}],
+   "path3_compl":
+   [{"id": "figure-path3_compl", "data": null, "address": "/Theorems/"}],
+   "paleyGraph9":
+   [{"id": "figure-paleyGraph9", "data": null, "address": "/Theorems/"}],
+   "paleyGraph":
+   [{"id": "figure-paleyGraph", "data": null, "address": "/Constructions/"}],
+   "odd_cycle_bypass":
+   [{"id": "figure-odd_cycle_bypass", "data": null, "address": "/Walks/"}],
+   "mycielskian_path":
+   [{"id": "figure-mycielskian_path", "data": null, "address": "/Walks/"}],
+   "mycielskian_cycle":
+   [{"id": "figure-mycielskian_cycle", "data": null, "address": "/Walks/"}],
+   "mycielskian_coloring":
+   [{"id": "figure-mycielskian_coloring",
+     "data": null,
+     "address": "/Colorings/"}],
+   "mycielskian_bridge":
+   [{"id": "figure-mycielskian_bridge",
+     "data": null,
+     "address": "/Connectivity/"}],
+   "mycielskian_adjmatrix":
+   [{"id": "figure-mycielskian_adjmatrix",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}],
+   "mycielskian_K2":
+   [{"id": "figure-mycielskian_K2", "data": null, "address": "/Maps/"}],
+   "mycielskianZigZag":
+   [{"id": "figure-mycielskianZigZag", "data": null, "address": "/Walks/"}],
+   "mycielskian":
+   [{"id": "figure-mycielskian", "data": null, "address": "/Constructions/"}],
+   "minmaxdegree":
+   [{"id": "figure-minmaxdegree",
+     "data": null,
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "matching_cover":
+   [{"id": "figure-matching_cover", "data": null, "address": "/Subgraphs/"}],
+   "matching":
+   [{"id": "figure-matching", "data": null, "address": "/Subgraphs/"}],
+   "map": [{"id": "figure-map", "data": null, "address": "/Maps/"}],
+   "lineGraphTriangleClaw":
+   [{"id": "figure-lineGraphTriangleClaw", "data": null, "address": "/Maps/"}],
+   "lineGraph":
+   [{"id": "figure-lineGraph", "data": null, "address": "/Constructions/"}],
+   "laplacian":
+   [{"id": "figure-laplacian",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}],
+   "konig": [{"id": "figure-konig", "data": null, "address": "/Theorems/"}],
+   "kneser_star":
+   [{"id": "figure-kneser_star", "data": null, "address": "/Cliques/"}],
+   "kneser_colouring":
+   [{"id": "figure-kneser_colouring", "data": null, "address": "/Colorings/"}],
+   "k4_3cycle":
+   [{"id": "figure-k4_3cycle", "data": null, "address": "/Walks/"}],
+   "inf_subgraph":
+   [{"id": "figure-inf_subgraph", "data": null, "address": "/Subgraphs/"}],
+   "inf": [{"id": "figure-inf", "data": null, "address": "/SimpleGraph/"}],
+   "induced": [{"id": "figure-induced", "data": null, "address": "/Maps/"}],
+   "hypercube":
+   [{"id": "figure-hypercube", "data": null, "address": "/Constructions/"}],
+   "homembed": [{"id": "figure-homembed", "data": null, "address": "/Maps/"}],
+   "hierholzer":
+   [{"id": "figure-hierholzer", "data": null, "address": "/Connectivity/"}],
+   "hasse":
+   [{"id": "figure-hasse", "data": null, "address": "/Constructions/"}],
+   "handshake":
+   [{"id": "figure-handshake",
+     "data": null,
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "hamiltonian":
+   [{"id": "figure-hamiltonian", "data": null, "address": "/Walks/"}],
+   "hall_infinite":
+   [{"id": "figure-hall_infinite", "data": null, "address": "/Theorems/"}],
+   "hall": [{"id": "figure-hall", "data": null, "address": "/Theorems/"}],
+   "greedy": [{"id": "figure-greedy", "data": null, "address": "/Colorings/"}],
+   "grayWalk": [{"id": "figure-grayWalk", "data": null, "address": "/Walks/"}],
+   "girth": [{"id": "figure-girth", "data": null, "address": "/Distance/"}],
+   "furedi": [{"id": "figure-furedi", "data": null, "address": "/Theorems/"}],
+   "euler_two_odd":
+   [{"id": "figure-euler_two_odd", "data": null, "address": "/Walks/"}],
+   "erdosGallai":
+   [{"id": "figure-erdosGallai",
+     "data": null,
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "ends": [{"id": "figure-ends", "data": null, "address": "/Theorems/"}],
+   "encodableRat":
+   [{"id": "figure-encodableRat", "data": null, "address": "/Colorings/"}],
+   "empty":
+   [{"id": "figure-empty", "data": null, "address": "/Constructions/"}],
+   "edge_connectivity":
+   [{"id": "figure-edge_connectivity",
+     "data": null,
+     "address": "/Connectivity/"}],
+   "eccentricity":
+   [{"id": "figure-eccentricity", "data": null, "address": "/Distance/"}],
+   "distance_bfs":
+   [{"id": "figure-distance_bfs", "data": null, "address": "/Distance/"}],
+   "deletion":
+   [{"id": "figure-deletion", "data": null, "address": "/Subgraphs/"}],
+   "cycles":
+   [{"id": "figure-cycles", "data": null, "address": "/Constructions/"}],
+   "crownGraph":
+   [{"id": "figure-crownGraph", "data": null, "address": "/Colorings/"}],
+   "cospectral":
+   [{"id": "figure-cospectral",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}],
+   "connected_components":
+   [{"id": "figure-connected_components",
+     "data": null,
+     "address": "/Connectivity/"}],
+   "coneGraph":
+   [{"id": "figure-coneGraph",
+     "data": null,
+     "address": "/Decidability___-Finiteness-and-Degrees/"}],
+   "completemultipartite":
+   [{"id": "figure-completemultipartite",
+     "data": null,
+     "address": "/Constructions/"}],
+   "completebipartite":
+   [{"id": "figure-completebipartite",
+     "data": null,
+     "address": "/Constructions/"}],
+   "completeMultipartiteNatFin":
+   [{"id": "figure-completeMultipartiteNatFin",
+     "data": null,
+     "address": "/Constructions/"}],
+   "completeMultipartiteFinNat":
+   [{"id": "figure-completeMultipartiteFinNat",
+     "data": null,
+     "address": "/Constructions/"}],
+   "complete":
+   [{"id": "figure-complete", "data": null, "address": "/Constructions/"}],
+   "comap": [{"id": "figure-comap", "data": null, "address": "/Maps/"}],
+   "closure_rounds":
+   [{"id": "figure-closure_rounds", "data": null, "address": "/Walks/"}],
+   "cliques": [{"id": "figure-cliques", "data": null, "address": "/Cliques/"}],
+   "clique_through_edge":
+   [{"id": "figure-clique_through_edge",
+     "data": null,
+     "address": "/Theorems/"}],
+   "clique_sum_colouring":
+   [{"id": "figure-clique_sum_colouring",
+     "data": null,
+     "address": "/Colorings/"}],
+   "circulant":
+   [{"id": "figure-circulant", "data": null, "address": "/Constructions/"}],
+   "circuit_vs_cycle":
+   [{"id": "figure-circuit_vs_cycle", "data": null, "address": "/Walks/"}],
+   "cayley":
+   [{"id": "figure-cayley", "data": null, "address": "/Constructions/"}],
+   "brooks_split":
+   [{"id": "figure-brooks_split", "data": null, "address": "/Connectivity/"}],
+   "bridges":
+   [{"id": "figure-bridges", "data": null, "address": "/Connectivity/"}],
+   "boxprod":
+   [{"id": "figure-boxprod", "data": null, "address": "/Constructions/"}],
+   "blowup_c5":
+   [{"id": "figure-blowup_c5", "data": null, "address": "/Theorems/"}],
+   "blowup_c4":
+   [{"id": "figure-blowup_c4", "data": null, "address": "/Constructions/"}],
+   "blocks":
+   [{"id": "figure-blocks", "data": null, "address": "/Connectivity/"}],
+   "adjmatrix":
+   [{"id": "figure-adjmatrix",
+     "data": null,
+     "address": "/Algebraic-Graph-Theory/"}]}},
  "STIL.bibliography":
  {"title": "STIL.bibliography",
   "description": null,

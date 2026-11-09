@@ -14,7 +14,7 @@ open Finset
 1. Show that a graph with an isolated vertex has no perfect matching.
 -/
 example (v : V) (hv : G.IsIsolated v) :
-    ¬ ∃ M : G.Subgraph, M.IsPerfectMatching := by
+    ¬∃ M : G.Subgraph, M.IsPerfectMatching := by
   sorry
 
 /-!
@@ -138,7 +138,7 @@ theorem Graphic.erdosGallaiLE' {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
 triangle-free with minimum degree `2 * t = 2 * n / 5`, but it is not bipartite.
 -/
 example (t : ℕ) :
-    C[5][t + 1].CliqueFree 3 ∧ ¬ C[5][t + 1].Colorable 2 ∧
+    C[5][t + 1].CliqueFree 3 ∧ ¬C[5][t + 1].Colorable 2 ∧
       ∀ v, C[5][t + 1].degree v = 2 * (t + 1) := by
   sorry
 
@@ -224,7 +224,7 @@ example : Nat.card (hasse ℤ □ hasse ℤ).end = 1 := by
 1. Show that a graph with an isolated vertex has no perfect matching.
 -/
 example (v : V) (hv : G.IsIsolated v) :
-    ¬ ∃ M : G.Subgraph, M.IsPerfectMatching := by
+    ¬∃ M : G.Subgraph, M.IsPerfectMatching := by
   rintro ⟨M, hM⟩
   obtain ⟨w, hw, -⟩ := Subgraph.isPerfectMatching_iff.1 hM v
   exact hv w hw.adj_sub
@@ -522,7 +522,7 @@ theorem Graphic.erdosGallaiLE {m : Multiset ℕ} (h : Graphic m) {k : ℕ}
 triangle-free with minimum degree `2 * t = 2 * n / 5`, but it is not bipartite.
 -/
 example (t : ℕ) :
-    C[5][t + 1].CliqueFree 3 ∧ ¬ C[5][t + 1].Colorable 2 ∧
+    C[5][t + 1].CliqueFree 3 ∧ ¬C[5][t + 1].Colorable 2 ∧
       ∀ v, C[5][t + 1].degree v = 2 * (t + 1) := by
   refine ⟨(cliqueFree_blowUpGraph_iff _ _ fun _ => 0).2 (by decide), fun h => ?_, ?_⟩
   · have h5 := ((colorable_blowUpGraph_iff _ fun _ => 0).1 h).chromaticNumber_le

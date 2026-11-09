@@ -52,8 +52,7 @@ example : ω (paleyGraph (ZMod 17)) = 3 := by
 In the next few exercises we look at the clique number of graph products starting
 with the tensor product `G ⊗g H`. Recall that two vertices `(v₁, w₁), (v₂, w₂)` of
 the tensor product are adjacent if and only if `G.Adj v₁ v₂` and `H.Adj w₁ w₂`.
--/
-/-!
+
 6. The first projection of a clique in the tensor product `G ⊗g H` is a clique in
 `G`.
 -/
@@ -93,8 +92,7 @@ We now turn to the box product `G □ H`. Recall that two vertices `(v₁, w₁)
 of the box product are adjacent if and only if either `G.Adj v₁ v₂` and `w₁ = w₂`, or
 `v₁ = v₂` and `H.Adj w₁ w₂`. This implies that cliques are always constant in one
 coordinate.
--/
-/-!
+
 10. A clique `s` in `G` gives a "row" clique in the box product `G □ H` (so long as
 there is a vertex `w₀` in `H` to fix the second coordinate).
 -/
@@ -193,7 +191,7 @@ independence numbers with `CliqueFree.cliqueNum_le`. Mathlib's `degree_compl`
 relates the degrees of a vertex in `G` and `Gᶜ`.
 -/
 theorem not_cliqueFree_three_and_indepSetFree_three' [Fintype V]
-    (h : 6 ≤ Fintype.card V) : ¬ (G.CliqueFree 3 ∧ G.IndepSetFree 3) := by
+    (h : 6 ≤ Fintype.card V) : ¬(G.CliqueFree 3 ∧ G.IndepSetFree 3) := by
   sorry
 
 /-!
@@ -230,18 +228,17 @@ lemma cliqueNum_mycielskian_bot' [Nonempty V] :
 /-!
 The last few exercises are on independent sets in complete bipartite graphs (and
 their Mycielskians).
--/
-/-!
+
 24. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
 lemma completeBipartiteGraph_not_adj_inl_iff' {W : Type*} {v : V} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (.inl v) x ↔
+    ¬(completeBipartiteGraph V W).Adj (.inl v) x ↔
       x ∈ Set.range .inl := by
   sorry
 
 lemma completeBipartiteGraph_not_adj_inr_iff' {W : Type*} {w : W} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (.inr w) x ↔
+    ¬(completeBipartiteGraph V W).Adj (.inr w) x ↔
       x ∈ Set.range .inr := by
   sorry
 
@@ -290,8 +287,7 @@ plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give thi
 in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
 `mycielskian_indepSet_card_le` from the starred section [Independence Number of the
 Mycielskian*](#section-independence-number-of-the-mycielskian).
--/
-/-!
+
 29. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies
 `#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract finset `t` in place of
 `N(s)ᶜ`, characterized by its membership property, so that the lemma applies
@@ -302,7 +298,7 @@ vertex of `s`), so each has size at most that of the part.
 -/
 lemma completeBipartiteGraph_isIndepSet_card_add_le' {a b : ℕ} (hab : a ≤ b)
     {s t : Finset (Fin a ⊕ Fin b)} (hs : K[a, b].IsIndepSet ↑s)
-    (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬ K[a, b].Adj y x) :
+    (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬K[a, b].Adj y x) :
     #s + #t ≤ 2 * b := by
   sorry
 
@@ -368,8 +364,7 @@ example : ω (paleyGraph (ZMod 17)) = 3 := by
 In the next few exercises we look at the clique number of graph products starting
 with the tensor product `G ⊗g H`. Recall that two vertices `(v₁, w₁), (v₂, w₂)` of
 the tensor product are adjacent if and only if `G.Adj v₁ v₂` and `H.Adj w₁ w₂`.
--/
-/-!
+
 6. The first projection of a clique in the tensor product `G ⊗g H` is a clique in
 `G`.
 -/
@@ -421,8 +416,8 @@ lemma cliqueNum_tensorProd {W : Type*} [Finite V] [Finite W] {H : SimpleGraph W}
     set m := min (ω G) (ω H)
     obtain ⟨s, hs⟩ := G.exists_isNClique_cliqueNum
     obtain ⟨t, ht⟩ := H.exists_isNClique_cliqueNum
-    have hG : ¬ G.CliqueFree m := fun hf => hf.mono (min_le_left ..) s hs
-    have hH : ¬ H.CliqueFree m := fun hf => hf.mono (min_le_right ..) t ht
+    have hG : ¬G.CliqueFree m := fun hf => hf.mono (min_le_left ..) s hs
+    have hH : ¬H.CliqueFree m := fun hf => hf.mono (min_le_right ..) t ht
     -- so both contain a copy of the complete graph on `Fin m`
     rw [not_cliqueFree_iff_top_isContained] at hG hH
     obtain ⟨f⟩ := hG
@@ -435,8 +430,7 @@ We now turn to the box product `G □ H`. Recall that two vertices `(v₁, w₁)
 of the box product are adjacent if and only if either `G.Adj v₁ v₂` and `w₁ = w₂`, or
 `v₁ = v₂` and `H.Adj w₁ w₂`. This implies that cliques are always constant in one
 coordinate.
--/
-/-!
+
 10. A clique `s` in `G` gives a "row" clique in the box product `G □ H` (so long as
 there is a vertex `w₀` in `H` to fix the second coordinate).
 -/
@@ -607,7 +601,7 @@ independence numbers with `CliqueFree.cliqueNum_le`. Mathlib's `degree_compl`
 relates the degrees of a vertex in `G` and `Gᶜ`.
 -/
 theorem not_cliqueFree_three_and_indepSetFree_three [Fintype V]
-    (h : 6 ≤ Fintype.card V) : ¬ (G.CliqueFree 3 ∧ G.IndepSetFree 3) := by
+    (h : 6 ≤ Fintype.card V) : ¬(G.CliqueFree 3 ∧ G.IndepSetFree 3) := by
   classical
   rintro ⟨h3, hi3⟩
   -- `Gᶜ` is also triangle-free, since `G` has no independent set of size `3`
@@ -687,18 +681,17 @@ lemma cliqueNum_mycielskian_bot [Nonempty V] :
 /-!
 The last few exercises are on independent sets in complete bipartite graphs (and
 their Mycielskians).
--/
-/-!
+
 24. In a complete bipartite graph the non-neighbours of a left vertex are precisely
 the left part, and similarly for right vertices.
 -/
 lemma completeBipartiteGraph_not_adj_inl_iff {W : Type*} {v : V} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (.inl v) x ↔
+    ¬(completeBipartiteGraph V W).Adj (.inl v) x ↔
       x ∈ Set.range .inl := by
   cases x <;> simp
 
 lemma completeBipartiteGraph_not_adj_inr_iff {W : Type*} {w : W} {x : V ⊕ W} :
-    ¬ (completeBipartiteGraph V W).Adj (.inr w) x ↔
+    ¬(completeBipartiteGraph V W).Adj (.inr w) x ↔
       x ∈ Set.range .inr := by
   cases x <;> simp
 
@@ -768,8 +761,7 @@ plus the size of the complement of its open neighbourhood `N(s)ᶜ`. We give thi
 in the next exercise. The last exercise uses `le_indepNum_mycielskian` and
 `mycielskian_indepSet_card_le` from the starred section [Independence Number of the
 Mycielskian*](#section-independence-number-of-the-mycielskian).
--/
-/-!
+
 29. Any independent set `s` of `K[a, b]` (with `a ≤ b`) satisfies
 `#s + #N(s)ᶜ ≤ 2 * b`. We state this with an abstract finset `t` in place of
 `N(s)ᶜ`, characterized by its membership property, so that the lemma applies
@@ -780,7 +772,7 @@ vertex of `s`), so each has size at most that of the part.
 -/
 lemma completeBipartiteGraph_isIndepSet_card_add_le {a b : ℕ} (hab : a ≤ b)
     {s t : Finset (Fin a ⊕ Fin b)} (hs : K[a, b].IsIndepSet ↑s)
-    (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬ K[a, b].Adj y x) :
+    (ht : ∀ x, x ∈ t ↔ ∀ y ∈ s, ¬K[a, b].Adj y x) :
     #s + #t ≤ 2 * b := by
   rcases s.eq_empty_or_nonempty with rfl | ⟨x, hx⟩
   · -- `s = ∅` : `t` has at most `a + b ≤ 2 * b` vertices

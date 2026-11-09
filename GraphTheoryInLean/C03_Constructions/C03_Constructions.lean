@@ -58,8 +58,6 @@ elements of the complete atomic Boolean algebra formed by `SimpleGraph V` (see
 As we saw in [Top and Bottom](#section-top-and-bottom), results about these graphs
 use the `top` and `bot` names, as in `top_adj` and `bot_adj`.
 
-[Figure: The complete graphs $K_3$ and $K_5$](https://jt496.github.io/GraphTheoryInLean/figures/complete.svg)
-
 Given `n : ℕ`, `Fin n` is the type of natural numbers less than `n` with addition mod
 `n`. (In particular `Fin 0` is the empty type.)
 
@@ -76,6 +74,9 @@ is opened.)
 scoped notation "K[" n "]" => completeGraph (Fin n)
 
 /-!
+
+[Figure: Complete graphs `K[0]`, `K[3]`, `K[5]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-complete)
+
 Since `Fin n` has decidable equality, `K[n]` has decidable adjacency: if we have a
 procedure for deciding whether two vertices are equal then we can decide whether
 they are adjacent in the complete graph, since adjacency is precisely not-equal-to
@@ -88,6 +89,13 @@ We also introduce notation for the empty graph on `Fin n`.
 -/
 /-- `E[n]` is the empty graph on `Fin n`. -/
 scoped notation "E[" n "]" => emptyGraph (Fin n)
+
+/-!
+[Figure: Empty graphs `E[0]`, `E[3]`, `E[5]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-empty)
+-/
+
+#check E[7]        -- E[7] : SimpleGraph (Fin 7)
+#eval E[4].Adj 1 2 -- false
 
 /-!
 ## A Single Edge
@@ -115,12 +123,12 @@ In Mathlib the canonical path graph on `n` vertices is constructed as the Hasse
 diagram of the linear order on `Fin n`, so we first describe Hasse diagrams.
 
 Given a poset `(P, ≤)` we say that `a ∈ P` is *covered by* `b ∈ P` if `a < b` and
-`∀ c ∈ P, a < c → ¬ c < b`. In Mathlib this is denoted `a ⋖ b`.
+`∀ c ∈ P, a < c → ¬c < b`. In Mathlib this is denoted `a ⋖ b`.
 
 The *Hasse diagram* of a poset `(P, ≤)` is the graph with vertex set `P` and edges
 between pairs of vertices such that one is covered by the other.
 
-[Figure: The Hasse diagram of the divisors poset of 60](https://jt496.github.io/GraphTheoryInLean/figures/hasse.svg)
+[Figure: Hasse diagram of divisors of `60`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-hasse)
 -/
 
 example {P : Type*} {u v : P} [PartialOrder P] :
@@ -141,7 +149,6 @@ example (n : ℕ) (a b : Fin n) :
     (pathGraph n).Adj a b ↔ a.val + 1 = b.val ∨ b.val + 1 = a.val := pathGraph_adj
 
 /-!
-[Figure: The path graphs $P_2$, $P_4$ and $P_7$](https://jt496.github.io/GraphTheoryInLean/figures/paths.svg)
 
 We introduce notation for the path graph on `Fin n`.
 -/
@@ -149,6 +156,8 @@ We introduce notation for the path graph on `Fin n`.
 scoped notation "P[" n "]" => pathGraph n
 
 /-!
+[Figure: The paths `P[2]`, `P[4]` and `P[7]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-paths)
+
 ## Cycle Graphs
 
 For any `n : ℕ` we can define the *cycle graph* on `n` vertices as the graph with
@@ -178,7 +187,6 @@ The solution is to define `cycleGraph n` to be the empty graph for `n = 0` and
                    --      Adj a b := a - b = 1 ∨ b - a = 1
                    --    }
 /-!
-[Figure: The cycle graphs $C_3$ and $C_6$](https://jt496.github.io/GraphTheoryInLean/figures/cycles.svg)
 
 We introduce notation for cycle graphs.
 -/
@@ -187,9 +195,11 @@ scoped notation "C[" n "]" => cycleGraph n
 
 #check C[5]   -- C[5] : SimpleGraph (Fin 5)
 example : C[5].Adj 0 1 := by decide
-example : ¬ C[5].Adj 4 2 := by decide
+example : ¬C[5].Adj 4 2 := by decide
 
 /-!
+[Figure: The cycle graphs `C[3]` and `C[6]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-cycles)
+
 As we saw above, for `n = 0` and `n = 1`, `C[n]` is the empty graph on `Fin n`, while
 for `n = 2` it is the complete graph `K[2]`. The first two of these are
 *definitional* equalities (in the sense of [Definitional and Propositional
@@ -225,14 +235,15 @@ This gives a natural way to define *complete bipartite* graphs.
 -/
 #source completeBipartiteGraph
 /-!
-[Figure: The complete bipartite graph $K_{4,5}$](https://jt496.github.io/GraphTheoryInLean/figures/completebipartite.svg)
 
 We introduce notation for the canonical complete bipartite graph with parts `Fin s`
 and `Fin t`.
 -/
 /-- `K[s, t]` is the complete bipartite graph on `Fin s ⊕ Fin t`. -/
 scoped notation "K[" s ", " t "]" => completeBipartiteGraph (Fin s) (Fin t)
-
+/-!
+[Figure: The complete bipartite graph `K[4, 5]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-completebipartite)
+-/
 #check K[4, 5]  -- K[4, 5] : SimpleGraph (Fin 4 ⊕ Fin 5)
 
 /-!
@@ -275,9 +286,8 @@ symmetrized so that the resulting graph is undirected and loopless).
 example : SimpleGraph (Fin 8) := circulantGraph ({1, 3} : Set (Fin 8))
 
 /-!
-[Figure: The circulant graph on $\mathbb{Z}_8$ with differences 1 and 3](https://jt496.github.io/GraphTheoryInLean/figures/circulant.svg)
--/
-/-!
+[Figure: A circulant graph on `Fin 8`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-circulant)
+
 ### Paley Graphs
 
 A special case of a circulant graph is the Paley graph. If `F` is a finite field, the
@@ -312,7 +322,7 @@ instance fact_prime_seventeen : Fact (Nat.Prime 17) := ⟨by decide⟩
 example : SimpleGraph (ZMod 17) := paleyGraph (ZMod 17)
 
 /-!
-[Figure: The Paley graph $P(17)$](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph.svg)
+[Figure: The Paley graph `paleyGraph (ZMod 17)`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-paleyGraph)
 
 The vertex type here is `ZMod 17` rather than `Fin 17` because `paleyGraph` needs a
 field. Although `ZMod 17` is defined to be `Fin 17`, instance search does not unfold
@@ -365,9 +375,8 @@ example : cayleyS4 = mulCayley {c[0, 1, 2]} ⊔ mulCayley {c[0, 1, 2, 3]} := by
   rw [← mulCayley_union, Set.singleton_union]
 
 /-!
-[Figure: The Cayley graph of $S_4$ generated by a 3-cycle and a 4-cycle](https://jt496.github.io/GraphTheoryInLean/figures/cayley.svg)
--/
-/-!
+[Figure: The Cayley graph `cayleyS4`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-cayley)
+
 # Operations on Graphs
 
 So far each construction has built a graph from scratch. We now look at some ways
@@ -407,7 +416,7 @@ edge shares a vertex with itself, and simple graphs have no loops. The condition
 edge is coerced twice: first from `↑G.edgeSet` to `Sym2 V`, and then from `Sym2 V` to
 `Set V`, the set of its endpoints.
 
-[Figure: Left: $K_4$. Right: its line graph, the octahedron](https://jt496.github.io/GraphTheoryInLean/figures/lineGraph.svg)
+[Figure: The line graph `L[K[4]]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-lineGraph)
 
 For example, `s(0, 1)` and `s(0, 2)` are adjacent in `L[K[4]]`. In the proof below,
 the first goal is that they are distinct and the second that they share a vertex, for
@@ -434,7 +443,7 @@ pairs `(g, h)`; for `x : V × W` the two components are `x.1` and `x.2` (also wr
 of `G` in `G □ H`, the *`G`-fibre* at `h`; similarly each vertex `g` of `G` gives a
 copy of `H`, the *`H`-fibre* at `g`.
 
-[Figure: The box product of $P_3$ and $K_3$, with the $K_3$-fibre at $1$ (orange) and the $P_3$-fibre at $0$ (green).](https://jt496.github.io/GraphTheoryInLean/figures/boxprod.svg)
+[Figure: The box product `P[3] □ K[3]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-boxprod)
 -/
 #source boxProd
 
@@ -456,6 +465,8 @@ vertices `Sum.inl v₁` and `Sum.inl v₂` are adjacent iff `G.Adj v₁ v₂`, t
 vertices `Sum.inr w₁` and `Sum.inr w₂` are adjacent iff `H.Adj w₁ w₂`, and no
 vertex `Sum.inl v` is adjacent to any vertex `Sum.inr w`. Mathlib defines `G ⊕g H`
 by pattern matching on these cases.
+
+[Figure: The sum `C[4] ⊕g K[3]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-sum)
 -/
 #source SimpleGraph.sum
 #check sum_adj_inl
@@ -526,6 +537,8 @@ abbrev sigmaCompleteNat : SimpleGraph (Σ i, Fin i) :=
   Σg fun i : ℕ => K[i]
 
 /-!
+[Figure: Part of `sigmaCompleteNat`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-sigmaCompleteNat)
+
 In our next example we show that two vertices `⟨i, a⟩` and `⟨j, b⟩` of
 `sigmaCompleteNat` are adjacent iff they lie in the same complete graph (`i = j`)
 and are distinct. We cannot write `a ≠ b` here, since `a : Fin i` and `b : Fin j`
@@ -635,12 +648,14 @@ def hypercube : (n : ℕ) → SimpleGraph (HypercubeVert n)
 
 /-!
 We will use `Q[n]` as notation for the `n`-dimensional hypercube.
-
-[Figure: The 4-dimensional hypercube $Q_4$](https://jt496.github.io/GraphTheoryInLean/figures/hypercube.svg)
 -/
 /-- `Q[n]` is the `n`-dimensional hypercube `hypercube n`, the box product of `n`
 copies of `K₂`. -/
 scoped notation "Q[" n "]" => hypercube n
+
+/-!
+[Figure: The `4`-dimensional hypercube `Q[4]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-hypercube)
+-/
 
 @[simp]
 lemma hypercube_zero : Q[0] = ⊥ := rfl
@@ -662,9 +677,9 @@ recorded their defining equations as the lemmas `hypercubeVert_zero`,
 
 The `_zero` lemmas replace `HypercubeVert 0` and `Q[0]` by `Unit` and `⊥`, which
 `simp` already knows a lot about, so they can only make a goal simpler. For example,
-`simp` can prove `¬ Q[0].Adj u v` by chaining `hypercube_zero` with `bot_adj`.
+`simp` can prove `¬Q[0].Adj u v` by chaining `hypercube_zero` with `bot_adj`.
 -/
-example (u v : HypercubeVert 0) : ¬ Q[0].Adj u v := by simp
+example (u v : HypercubeVert 0) : ¬Q[0].Adj u v := by simp
 
 /-!
 The `_succ` lemmas just unfold the definition by one step, and we leave them out of
@@ -746,7 +761,7 @@ Mycielskians](#section-vertex-transitivity-of-mycielskians)), and the Mycielskia
 abbrev grotzschGraph : SimpleGraph (Option (Fin 5 ⊕ Fin 5)) := mμ(C[5])
 
 /-!
-[Figure: The Grötzsch graph (i.e. the Mycielskian of $C_5$)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian.svg)
+[Figure: The `grotzschGraph` (`mμ(C[5])`)](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-mycielskian)
 
 In order to talk about the vertices of `mμ(G)` it will be useful to introduce some
 terminology. We name the two copies of `V` in a `mycielskian` namespace, since these
@@ -810,7 +825,7 @@ adjacency between named vertices.
 -/
 example {G : SimpleGraph V} (v w : V) : mμ(G).Adj vˡ wʳ ↔ G.Adj v w := by simp
 
-example {G : SimpleGraph V} (v w : V) : ¬ mμ(G).Adj vʳ wʳ := by simp
+example {G : SimpleGraph V} (v w : V) : ¬mμ(G).Adj vʳ wʳ := by simp
 
 /-!
 We now prove a few lemmas about the Mycielskian construction that will be useful
@@ -939,7 +954,6 @@ formally introduce until [Comaps](#section-comaps). In order to properly underst
 these constructions you may wish to read that short section now.
 
 ## Complete Multipartite Graphs
-[Figure: A complete 4-partite graph](https://jt496.github.io/GraphTheoryInLean/figures/completemultipartite.svg)
 
 A *complete multipartite* graph is a graph in which the vertices are partitioned into
 classes so that two vertices are adjacent if and only if they are in different
@@ -949,6 +963,8 @@ classes. The definition in Mathlib looks rather forbidding at first glance:
                                    --             := SimpleGraph.comap Sigma.fst ⊤
 
 /-!
+[Figure: A complete `4`-partite graph](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-completemultipartite)
+
 We start with an index type `ι` (the labels of the vertex classes) and a function
 `V : ι → Type*`. The vertex type of the graph is `Σ i, V i`, the dependent pair or
 `Sigma` type that we met in the definition of `SimpleGraph.sigma`.
@@ -989,6 +1005,8 @@ abbrev completeMultipartiteFinNat (n : ℕ) : SimpleGraph (Σ _ : Fin n, ℕ) :=
   completeMultipartiteGraph fun (_ : Fin n) => ℕ
 
 /-!
+[Figure: Part of `completeMultipartiteFinNat 3`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-completeMultipartiteFinNat)
+
 We can also define the complete multipartite graph with classes indexed by `ℕ`, where
 the `n`-th class is `Fin n`. (The names of these two graphs spell out their vertex
 types, `Σ _ : Fin n, ℕ` and `Σ n : ℕ, Fin n`.)
@@ -999,6 +1017,8 @@ abbrev completeMultipartiteNatFin : SimpleGraph (Σ n : ℕ, Fin n) :=
   completeMultipartiteGraph fun n => Fin n
 
 /-!
+[Figure: Part of `completeMultipartiteNatFin`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-completeMultipartiteNatFin)
+
 Deciding whether two vertices are adjacent in a complete multipartite graph is easy:
 they are adjacent if and only if their first components are different. So
 decidability of adjacency follows from decidability of equality on their index type.
@@ -1007,7 +1027,7 @@ Since `Fin n` and `ℕ` have decidable equality, `completeMultipartiteFinNat` an
 -/
 example : (completeMultipartiteFinNat 3).Adj ⟨0, 12⟩ ⟨2, 10⟩ := by decide
 
-example : ¬ completeMultipartiteNatFin.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
+example : ¬completeMultipartiteNatFin.Adj ⟨3, 0⟩ ⟨3, 1⟩ := by decide
 
 /-!
 ## Blow-ups
@@ -1041,10 +1061,10 @@ scoped notation:max G "[" n "]" => blowUpN G n
 
 #check C[4][3] -- the blow-up of `C[4]` replacing each vertex by a class of size `3`
 example : C[4][3].Adj ⟨1, 0⟩ ⟨2, 0⟩ := by decide
-example : ¬ C[4][3].Adj ⟨0, 0⟩ ⟨2, 1⟩ := by decide
+example : ¬C[4][3].Adj ⟨0, 0⟩ ⟨2, 1⟩ := by decide
 
 /-!
-[Figure: The 3-uniform blow-up of $C_4$](https://jt496.github.io/GraphTheoryInLean/figures/blowup_c4.svg)
+[Figure: The blow-up `C[4][3]`](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-blowup_c4)
 
 # Kneser Graphs *
 
@@ -1115,7 +1135,7 @@ which is `Kn[5, 2]`.
 abbrev petersenGraph : SimpleGraph {s : Finset (Fin 5) // s.card = 2} := Kn[5, 2]
 
 /-!
-[Figure: The Petersen graph as the Kneser graph $Kn(5,2)$](https://jt496.github.io/GraphTheoryInLean/figures/petersen.svg)
+[Figure: The `petersenGraph` (`Kn[5, 2]`)](https://jt496.github.io/GraphTheoryInLean/Constructions/#figure-petersen)
 
 We will look at the independence number of `Kn[n, k]` in [Cliques](#chapter-cliques)
 and colourings of `Kn[n, k]` in [Exercises](#section-exercises-colorings). Computing

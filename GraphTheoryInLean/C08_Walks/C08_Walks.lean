@@ -443,7 +443,7 @@ example (p : G.Walk u v) : p.IsPath ↔ p.support.Nodup := isPath_def p
 #check IsPath.mk' -- easier to use than the default constructor `IsPath.mk`
 
 /-!
-[Figure: A trail that is not a path, and a path, in the same graph](https://jt496.github.io/GraphTheoryInLean/figures/trail_vs_path.svg)
+[Figure: A trail and a path](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-trail_vs_path)
 
 Any path is a trail.
 -/
@@ -504,7 +504,8 @@ it is a path. In Mathlib given any walk `p : G.Walk u v` we can get a path from 
 to `v` using `Walk.bypass`. This need not be a shortest path; it is simply the walk
 constructed from `p` by removing closed subwalks between repeated vertices.
 
-[Figure: `Walk.bypass` removes closed subwalks to produce a path](https://jt496.github.io/GraphTheoryInLean/figures/walk_bypass.svg)
+[Figure: `Walk.bypass` makes a path](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-walk_bypass)
+
 -/
 #source Walk.bypass
 /-!
@@ -547,9 +548,7 @@ reachable vertices.
 /-!
 We study reachability and connectivity in detail in
 [Connectivity](#chapter-connectivity).
--/
 
-/-!
 ## Circuits and Cycles
 
 A *circuit* is a closed trail `p` (i.e. a walk from a vertex to itself without
@@ -565,7 +564,7 @@ no repeated vertices.
 #source Walk.IsCycle  -- .. Prop extends isCircuit : IsCircuit p where
                       --      support_nodup : p.support.tail.Nodup
 /-!
-[Figure: A circuit that is not a cycle, and a cycle, in the same graph](https://jt496.github.io/GraphTheoryInLean/figures/circuit_vs_cycle.svg)
+[Figure: A circuit and a cycle](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-circuit_vs_cycle)
 
 Any cycle is a circuit.
 -/
@@ -589,7 +588,7 @@ The cycle `c₃` defined above and pictured below is `cons` applied three times:
 follows the edges `0 — 1`, `1 — 2` and `2 — 0`, so it is the cycle `0 1 2 0`. The
 remaining vertex `3` of `K[4]` is not used.
 
-[Figure: The 3-cycle 0 1 2 0 in the complete graph $K_4$](https://jt496.github.io/GraphTheoryInLean/figures/k4_3cycle.svg)
+[Figure: A `3`-cycle in `K[4]`](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-k4_3cycle)
 
 A closed walk is a cycle if and only if it has length at least 3 and its tail is a
 path.
@@ -644,7 +643,8 @@ we can split `p` as `(p.takeUntil w) ++ (p.dropUntil w)` and insert `c` to get
 again a trail. We will use this to prove Euler's theorem in
 [Eulerian Circuits and Trails](#section-eulerian-circuits-and-trails).
 
-[Figure: Splicing a closed trail $c$ (red) at $w$ into a trail $p$ (blue) from $a$ to $b$ gives a longer trail from $a$ to $b$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/euler_two_odd.svg)
+[Figure: Splicing a closed trail](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-euler_two_odd)
+
 -/
 lemma Walk.IsTrail.takeUntil_append_append_dropUntil [DecidableEq V] {a b : V}
     {p : G.Walk a b} (hp : p.IsTrail) (hw : w ∈ p.support) {c : G.Walk w w}
@@ -698,7 +698,8 @@ we split `q` at `a`. In this second case `Walk.bypass` would discard the closed 
 `cons h (q.takeUntil a)` and keep `q.dropUntil a`. This preserves parity only if the
 closed walk has even length; if it has odd length then it is an odd cycle.
 
-[Figure: Left: skipping an even detour leaves a path from $a$ to $b$ of the same parity. Right: an odd detour is an odd cycle](https://jt496.github.io/GraphTheoryInLean/figures/odd_cycle_bypass.svg)
+[Figure: Even and odd detours](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-odd_cycle_bypass)
+
 -/
 #source Walk.bypass
 
@@ -901,7 +902,7 @@ five-vertex graph. Both visit every vertex, but, just as for any path or cycle, 
 need not use every edge: the grey chords are left untraversed (contrast this with an
 Eulerian trail, which must use every edge).
 
-[Figure: A Hamiltonian path and a Hamiltonian cycle on the same graph](https://jt496.github.io/GraphTheoryInLean/figures/hamiltonian.svg)
+[Figure: Hamiltonian path and cycle](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-hamiltonian)
 
 A rotation of a walk is a Hamiltonian cycle iff the walk is a Hamiltonian cycle.
 -/
@@ -982,7 +983,7 @@ but is expected to have type
 example (p : G.Walk v w) (h : p ≠ nil) : 0 < p.length := by sorry
 
 /-!
-The solution is to use the predicate `¬ p.Nil` instead.
+The solution is to use the predicate `¬p.Nil` instead.
 -/
 #source Walk.Nil -- inductive Nil : {v w : V} → G.Walk v w → Prop
                  --   | nil {u : V} : Nil (nil : G.Walk u u)
@@ -1027,7 +1028,7 @@ Moreover, the fact that a `cons` walk is not `Nil` can be proved by `nofun`. The
 are simply no cases to consider!
 -/
 
-example {h : G.Adj u v} {p : G.Walk v w} : ¬ (cons h p).Nil := by nofun
+example {h : G.Adj u v} {p : G.Walk v w} : ¬(cons h p).Nil := by nofun
 
 /-!
 `Nil` is essentially a bespoke `Eq` for walks: both are single-constructor inductive
@@ -1039,7 +1040,7 @@ types indexed by values, whose single constructor forces the indices to coincide
 /-!
 Finally, we can prove that a non-nil walk has positive length as follows.
 -/
-example (p : G.Walk v w) (hn : ¬ p.Nil) : 0 < p.length := by
+example (p : G.Walk v w) (hn : ¬p.Nil) : 0 < p.length := by
   cases p with
   | nil => exact hn.elim Nil.nil
   | cons _ _ => simp
@@ -1295,9 +1296,7 @@ that field is *definitionally* the new set. Whether the data being replaced live
 a field or, as for walks, in the type, the effect is the same: a defeq problem
 becomes a one-off proof obligation. We will meet another `copy` of this kind in the
 next chapter (`ColoringOn.copy`).
--/
 
-/-!
 # Mapping Walks
 
 Given a walk `p : G.Walk u v` and a graph homomorphism `f : G →g H` we can map `p` to
@@ -1527,8 +1526,7 @@ We will use Hamming paths to show that the hypercube is connected in [Connected
 Graphs](#section-connected-graphs), and in [Distance in the
 Hypercube](#section-distance-in-the-hypercube) we will see that the Hamming distance
 is the graph distance in `Q[n]`.
--/
-/-!
+
 ## Gray Code
 
 The hypercube contains a canonical Hamiltonian path called the *Gray code*
@@ -1585,7 +1583,7 @@ def hypercube.grayPath : (n : ℕ) → Q[n].Walk (grayStart n) (grayEnd n)
     firstHalf.append <| cons crossAdj secondHalf
 
 /-!
-[Figure: The Gray code walk in $Q_n$ for $n = 1, 2, 3, 4$, from `grayStart n` (green) to `grayEnd n` (red)](https://jt496.github.io/GraphTheoryInLean/figures/grayWalk.svg)
+[Figure: Gray code walks in `Q[n]`](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-grayWalk)
 
 Textbooks usually list the Gray code as `000`, `001`, `011`, `010`, and so on. Our
 strings are these reversed (`000`, `100`, `110`, `010`, …). The vertices of
@@ -1665,28 +1663,28 @@ Suppose we have built the walk in `mμ(G)` from `vˡ` to `vʳ` corresponding to 
 non-nil walk `p : G.Walk v w`, and let `h : G.Adj u v`. The walk for `cons h p` is
 the edge `uˡ — vʳ`, then the reverse of the walk for `p`, then the edge `vˡ — uʳ`:
 `mycielskianZigZag(cons h p) = uˡ — [mycielskianZigZag(p).reverse] — uʳ`.
-
-[Figure: The two cases of the zig-zag walk: `cons h nil` (left) and `cons h (cons h' p')` (right)](https://jt496.github.io/GraphTheoryInLean/figures/mycielskianZigZag.svg)
 -/
 section mycielskian
 variable {V : Type*} {G : SimpleGraph V}
 
 /-- Given a non-nil walk from `u` to `w` in `G`, this is the zig-zag walk from `uˡ`
 to `uʳ` in `mμ(G)`. -/
-def Walk.mycielskianZigZag {u w : V} {p : G.Walk u w} (hn : ¬ p.Nil) :
+def Walk.mycielskianZigZag {u w : V} {p : G.Walk u w} (hn : ¬p.Nil) :
     mμ(G).Walk uˡ uʳ :=
   match p with
-  | nil => (hn .nil).elim  -- This case is ruled out by the `¬ p.Nil` hypothesis
+  | nil => (hn .nil).elim  -- This case is ruled out by the `¬p.Nil` hypothesis
   | cons' u v w h p =>
     -- the last edge of the walk `vˡ — uʳ`
     have hl : mμ(G).Adj vˡ uʳ := h.symm
     match p with
     | nil => cons' _ vˡ _ h <| cons hl nil -- `uˡ — vˡ — uʳ`
     | cons h' p' =>
-      have hn' : ¬ (p'.cons h').Nil := nofun
+      have hn' : ¬(p'.cons h').Nil := nofun
       cons' _ vʳ _ h ((mycielskianZigZag hn').reverse.concat hl)
 
 /-!
+[Figure: The zig-zag walk](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-mycielskianZigZag)
+
 If we had marked the definition of `mycielskianZigZag` with the `@[simp]` attribute
 then its automatically generated equational lemmas would be available for `simp` to
 use with names like `mycielskianZigZag.eq_1`. We instead state these as simp lemmas
@@ -1694,14 +1692,14 @@ that have more meaningful names.
 -/
 @[simp]
 lemma Walk.mycielskianZigZag_cons_nil {u v} (h : G.Adj u v)
-    (hn : ¬ (cons h nil).Nil) : mycielskianZigZag hn = cons (by simpa using h)
+    (hn : ¬(cons h nil).Nil) : mycielskianZigZag hn = cons (by simpa using h)
       (cons (by simpa using h.symm : mμ(G).Adj vˡ uʳ) nil) := rfl
 
 @[simp]
 lemma Walk.mycielskianZigZag_cons_cons {u v x w} (h : G.Adj u v) (h' : G.Adj v x)
-    (p' : G.Walk x w) (hn : ¬ (cons h (cons h' p')).Nil) :
+    (p' : G.Walk x w) (hn : ¬(cons h (cons h' p')).Nil) :
     mycielskianZigZag hn = cons (by simpa using h)
-      ((mycielskianZigZag (nofun : ¬ (cons h' p').Nil)).reverse.concat
+      ((mycielskianZigZag (nofun : ¬(cons h' p').Nil)).reverse.concat
         (by simpa using h.symm)) := rfl
 
 /-!
@@ -1718,7 +1716,7 @@ exactly, which plain induction on the walk does not.
 The zig-zag walk is twice as long as the original walk.
 -/
 @[simp]
-lemma Walk.length_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
+lemma Walk.length_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬p.Nil) :
     (mycielskianZigZag hn).length = 2 * p.length := by
   induction hn using mycielskianZigZag.induct with
   | case1 => rfl
@@ -1734,12 +1732,12 @@ two edges `uʳ — none — wʳ` at the end of the zig-zag walk.
 /-- Given a non-nil walk from `u` to `w` in `G`, this is a walk from `uˡ` to
 `wʳ` in `mμ(G)`. If the original walk was a (Hamiltonian) path then so is the new
 walk. -/
-protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬ p.Nil) :
+protected def Walk.mycielskian {u w} {p : Walk G u w} (hn : ¬p.Nil) :
     mμ(G).Walk uˡ wʳ :=
   mycielskianZigZag hn |>.concat (by simp) |>.concat (by simp : mμ(G).Adj none _)
 
 /-!
-[Figure: Converting a path in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_path.svg)
+[Figure: A path in the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-mycielskian_path)
 
 Using this walk we can also map closed walks in `G` to closed walks in the
 Mycielskian. This preserves the property of being a cycle and in particular maps
@@ -1766,12 +1764,12 @@ lemma Walk.mycielskianClosed_cons_cons {u v w} (h : G.Adj u v) (h' : G.Adj v w)
         (by simpa using h) := rfl
 
 /-!
-[Figure: Converting a cycle in $G$ to one in its Mycielskian](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_cycle.svg)
+[Figure: A cycle in the Mycielskian](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-mycielskian_cycle)
 
 The `Walk.mycielskian` of a non-nil walk `p` has length `2 * p.length + 2`.
 -/
 @[simp]
-lemma Walk.length_mycielskian {u w} (p : Walk G u w) (hn : ¬ p.Nil) :
+lemma Walk.length_mycielskian {u w} (p : Walk G u w) (hn : ¬p.Nil) :
     (p.mycielskian hn).length = 2 * p.length + 2 := by
   simp [Walk.mycielskian]
 
@@ -1780,7 +1778,7 @@ The `Walk.mycielskianClosed` of a non-nil closed walk `c` has length
 `2 * c.length + 1`.
 -/
 @[simp]
-lemma Walk.length_mycielskianClosed {u} {c : Walk G u u} (hn : ¬ c.Nil) :
+lemma Walk.length_mycielskianClosed {u} {c : Walk G u u} (hn : ¬c.Nil) :
     c.mycielskianClosed.length = 2 * c.length + 1 :=
   match c with
   | nil => (hn .nil).elim
@@ -1797,7 +1795,7 @@ The zig-zag walk only visits left or right copies of vertices from the original
 walk.
 -/
 lemma Walk.exists_of_mem_support_mycielskianZigZag {u w z} {p : G.Walk u w}
-    (hn : ¬ p.Nil) (hz : z ∈ (mycielskianZigZag hn).support) :
+    (hn : ¬p.Nil) (hz : z ∈ (mycielskianZigZag hn).support) :
     ∃ y ∈ p.support, z = yˡ ∨ z = yʳ := by
   induction hn using mycielskianZigZag.induct <;> aesop
 
@@ -1806,7 +1804,7 @@ In particular, the zig-zag walk does not visit `none`.
 -/
 @[simp]
 lemma Walk.none_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
-    (hn : ¬ p.Nil) :
+    (hn : ¬p.Nil) :
     none ∉ (mycielskianZigZag hn).support := by
   intro h_in
   obtain ⟨y, _, hy⟩ := exists_of_mem_support_mycielskianZigZag hn h_in
@@ -1818,14 +1816,14 @@ visit `wʳ`.
 -/
 @[simp]
 lemma Walk.end_right_notMem_support_mycielskianZigZag {u w} {p : G.Walk u w}
-    (hn : ¬ p.Nil) (hp : p.IsPath) : wʳ ∉ (mycielskianZigZag hn).support := by
+    (hn : ¬p.Nil) (hp : p.IsPath) : wʳ ∉ (mycielskianZigZag hn).support := by
   induction hn using mycielskianZigZag.induct <;> aesop
 
 /-!
 The second vertex of the `Walk.mycielskian` is in the zig-zag walk.
 -/
 @[simp]
-lemma Walk.snd_mem_support_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬ p.Nil) :
+lemma Walk.snd_mem_support_mycielskianZigZag {u w} {p : G.Walk u w} (hn : ¬p.Nil) :
   (p.mycielskian hn).snd ∈ (mycielskianZigZag hn).support := by
   induction hn using mycielskianZigZag.induct
     <;> simp_all [Walk.mycielskian]
@@ -1836,7 +1834,7 @@ path.
 -/
 @[simp]
 lemma Walk.IsPath.mycielskianZigZag {u w} {p : G.Walk u w} (hp : p.IsPath)
-    (hn : ¬ p.Nil) : (mycielskianZigZag hn).IsPath := by
+    (hn : ¬p.Nil) : (mycielskianZigZag hn).IsPath := by
   apply IsPath.mk'
   induction hn using mycielskianZigZag.induct with
   | case1 u v h hl hn => simpa using h.ne
@@ -1850,7 +1848,7 @@ If the original walk `p : G.Walk u w` is a path, then the `Walk.mycielskian` is 
 path.
 -/
 @[simp]
-lemma Walk.IsPath.mycielskian {u w} {p : G.Walk u w} (hp : p.IsPath) (hn : ¬ p.Nil) :
+lemma Walk.IsPath.mycielskian {u w} {p : G.Walk u w} (hp : p.IsPath) (hn : ¬p.Nil) :
     (p.mycielskian hn).IsPath := by
   apply IsPath.mk'
   have := (hp.mycielskianZigZag hn).support_nodup
@@ -1862,7 +1860,7 @@ If the original walk `p : G.Walk u u` is a cycle then the `Walk.mycielskianClose
 a cycle. (In fact this holds under the weaker assumption that `p` is not nil and
 `p.support.tail` contains no repeated vertices.)
 -/
-lemma Walk.isCycle_mycielskianClosed {u} {p : Walk G u u} (hn : ¬ p.Nil)
+lemma Walk.isCycle_mycielskianClosed {u} {p : Walk G u u} (hn : ¬p.Nil)
     (hc : p.support.tail.Nodup) : (mycielskianClosed p).IsCycle :=
   match p with
   | nil => (hn .nil).elim
@@ -1894,7 +1892,7 @@ If the original walk `p : G.Walk u w` is a Hamiltonian path, then the
 `Walk.mycielskian` is a Hamiltonian path.
 -/
 protected lemma Walk.IsHamiltonian.mycielskian [DecidableEq V] {u w} {p : G.Walk u w}
-    (hp : p.IsHamiltonian) (hn : ¬ p.Nil) : (p.mycielskian hn).IsHamiltonian := by
+    (hp : p.IsHamiltonian) (hn : ¬p.Nil) : (p.mycielskian hn).IsHamiltonian := by
   have : Fintype V := hp.fintype
   refine isHamiltonian_iff_isPath_and_length_eq.2 ⟨hp.isPath.mycielskian hn, ?_⟩
   grind [length_mycielskian, Fintype.card_option, Fintype.card_sum, hp.length_eq,
@@ -1985,7 +1983,7 @@ vertex `v`, i.e. `h : G.Adj (p.getVert i) v`, we split `p` at index `i` using
 `p.take i` with the edge from `p.getVert i` to `v` (i.e. `h`) followed by the reverse
 of the tail of `p.drop i`, which goes from `v` to `p.getVert (i + 1)`.
 
-[Figure: A Pósa rotation. Top: a path with a chord from $v_i$ to its endpoint $v_k$. Bottom: the rotated path, which ends at $v_{i+1}$](https://jt496.github.io/GraphTheoryInLean/figures/posa.svg)
+[Figure: A Pósa rotation](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-posa)
 -/
 section bondy_chvatal
 variable {V : Type*} {G : SimpleGraph V}
@@ -2027,7 +2025,7 @@ theorem Walk.IsPath.posaRotate (hp : p.IsPath) (h : G.Adj (p.getVert i) v) :
   -- there are six applications of .IsPath notation in the next line
   apply (hp.take _).append_cons (hp.drop _).tail.copy.reverse
   -- it remains to prove that the two parts of the walk are disjoint
-  have hnn : ¬ (p.drop i).Nil := by
+  have hnn : ¬(p.drop i).Nil := by
     grind [nil_drop_iff, lt_length_of_adj_getVert_end h]
   rw [← p.append_take_drop_eq i, isPath_def, support_append, List.nodup_append',
        ← (p.drop i).support_tail_of_not_nil hnn] at hp
@@ -2056,7 +2054,7 @@ lemma Walk.mem_support_posaRotate_iff {u v : V} {i : ℕ} (p : G.Walk u v)
     (h₁ : G.Adj (p.getVert i) v) (x : V) :
     x ∈ (p.posaRotate h₁).support ↔ x ∈ p.support := by
   have hi := lt_length_of_adj_getVert_end h₁
-  have hdropnn : ¬ (p.drop i).Nil := by grind [nil_drop_iff]
+  have hdropnn : ¬(p.drop i).Nil := by grind [nil_drop_iff]
   rw [posaRotate, mem_support_append_iff, support_cons, List.mem_cons,
       support_reverse, List.mem_reverse, support_copy,
       (p.drop i).support_tail_of_not_nil hdropnn]
@@ -2065,7 +2063,7 @@ lemma Walk.mem_support_posaRotate_iff {u v : V} {i : ℕ} (p : G.Walk u v)
       ← cons_tail_support (p.drop i), List.mem_cons]
 
 /-!
-[Figure: Closing a Pósa rotation. Top: the rotated path with an edge from its endpoint $v_{i+1}$ back to $v_0$. Bottom: the resulting cycle](https://jt496.github.io/GraphTheoryInLean/figures/posa_cycle.svg)
+[Figure: Closing a Pósa rotation](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-posa_cycle)
 
 If `p` is a walk from `u` to `v` and `h₁ : G.Adj (p.getVert i) v` then we can form
 the Pósa rotation ending at `p.getVert (i + 1)`. If there is also an edge
@@ -2249,7 +2247,7 @@ non-adjacent then their degree sum is at least the number of vertices. (An
 equal or adjacent pair satisfies the condition vacuously.) -/
 def IsOrePair (G : SimpleGraph V) [Fintype V] (u v : V)
     [Fintype (G.neighborSet u)] [Fintype (G.neighborSet v)] : Prop :=
-  u ≠ v → ¬ G.Adj u v → Fintype.card V ≤ G.degree u + G.degree v
+  u ≠ v → ¬G.Adj u v → Fintype.card V ≤ G.degree u + G.degree v
 
 /-!
 The `u ≠ v` condition matters when we require Ore's condition of every pair of
@@ -2610,7 +2608,7 @@ their degree sum is `4 < 5`. But the first round joins the eligible pairs `1, 3`
 too, and the closure is the complete graph with `10` edges. So the closure can be
 complete even when Ore's condition fails.
 
-[Figure: Taking the closure of $C_5$ with the chords `0 — 2` and `0 — 3`](https://jt496.github.io/GraphTheoryInLean/figures/closure_rounds.svg)
+[Figure: `closure` of `C[5]` with chords](https://jt496.github.io/GraphTheoryInLean/Walks/#figure-closure_rounds)
 -/
 #eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).edgeFinset             -- 7 edges
 #eval (C[5] ⊔ edge 0 2 ⊔ edge 0 3).closureStep.edgeFinset -- 9 edges

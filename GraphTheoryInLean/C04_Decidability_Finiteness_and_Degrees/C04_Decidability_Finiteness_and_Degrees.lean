@@ -46,7 +46,7 @@ of a graph with a given graphic degree sequence.
 
 In classical logic the *law of the excluded middle* says that every proposition is
 either true or false. For proofs this is very useful: it allows us to reason by
-cases. In one branch of a proof we assume `p` holds and in the other we assume `¬ p`
+cases. In one branch of a proof we assume `p` holds and in the other we assume `¬p`
 holds. But for computations this isn't very helpful: we want to know *which* branch
 to take.
 
@@ -128,13 +128,13 @@ In Lean, decidability is expressed by the type class `Decidable`. An instance of
 
 /-!
 The proof field uses `Bool.Reflects`, which is defined so that `true.Reflects p` is
-`p` and `false.Reflects p` is `¬ p`. So an instance of `Decidable p` is either
-`⟨true, h⟩` with `h : p`, or `⟨false, h⟩` with `h : ¬ p`, and Lean names these two as
+`p` and `false.Reflects p` is `¬p`. So an instance of `Decidable p` is either
+`⟨true, h⟩` with `h : p`, or `⟨false, h⟩` with `h : ¬p`, and Lean names these two as
 `Decidable.isTrue h` and `Decidable.isFalse h`. Proofs are erased when code is
 compiled, so evaluating an instance amounts to computing the Boolean `decide p`,
 which tells us whether `p` is true or false.
 
-So how do we provide such instances? Given a proof of `p` or `¬ p` we can construct a
+So how do we provide such instances? Given a proof of `p` or `¬p` we can construct a
 `Decidable p` instance directly:
 -/
 example {p : Prop} (h : p) : Decidable p := ⟨true, h⟩
@@ -325,7 +325,7 @@ with `decide`. Note that the `decide` tactic still uses the same instance of
 `DecidableRel C[n].Adj` as `#eval` to decide adjacency.
 -/
 set_option trace.Meta.synthInstance true in
-example : ¬ C[5].Adj 0 2 := by decide
+example : ¬C[5].Adj 0 2 := by decide
 
 /-!
 We will introduce `Fintype` instances formally later in this chapter. For now it is
@@ -497,9 +497,7 @@ the end of the definition itself, and Lean builds the instance in the same way. 
 only works if the definition already takes every instance needed to decide its value;
 otherwise we can use `deriving instance` as above, supplying the missing instances as
 section variables.
--/
 
-/-!
 Finally we have `pathNatFromEdgeSet` which was defined using
 `SimpleGraph.fromEdgeSet`. Lean again fails to infer the required instance (despite
 this being an `abbrev`).
@@ -653,7 +651,7 @@ Now both `#eval` and `decide` work fine!
 -/
 #eval (edge (0 : Fin 5) 2).Adj 0 2 -- true
 example : (edge 0  2).Adj 0 2 := by decide
-example : ¬ (edge 0 2).Adj 1 2 := by decide
+example : ¬(edge 0 2).Adj 1 2 := by decide
 
 /-!
 In practice we rarely call `decidable_of_decidable_of_iff` directly:
@@ -1403,8 +1401,6 @@ For a finite graph we can talk about the minimum degree `δ(G)` and maximum degr
 `Δ(G)`. In Mathlib these are `G.minDegree` and `G.maxDegree`. Both require
 `Fintype V` and `DecidableRel G.Adj`, and (very reasonably) default to `0` if `G` has
 no vertices.
-
-[Figure: A graph with vertices of minimum and maximum degree marked](https://jt496.github.io/GraphTheoryInLean/figures/minmaxdegree.svg)
 -/
 #source minDegree  -- def minDegree [DecidableRel G.Adj] : ℕ :=
                    --   WithTop.untopD 0 (univ.image fun v => G.degree v).min
@@ -1419,6 +1415,8 @@ maximum degree of the graph `G`.
 @[inherit_doc maxDegree] scoped notation "Δ(" G ")" => SimpleGraph.maxDegree G
 
 /-!
+[Figure: Vertices of degree `δ(G)` and `Δ(G)`](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#figure-minmaxdegree)
+
 Every vertex has degree at least the minimum degree and at most the maximum degree.
 -/
 #check minDegree_le_degree  -- δ(G) ≤ G.degree v
@@ -1466,7 +1464,7 @@ lemma degree_pathNat (n : ℕ) :
 
 In a finite graph the sum of all vertex degrees equals twice the number of edges.
 
-[Figure: Each edge contributes two darts, one from each endpoint](https://jt496.github.io/GraphTheoryInLean/figures/handshake.svg)
+[Figure: Two darts per edge](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#figure-handshake)
 -/
 #check sum_degrees_eq_twice_card_edges -- ∑ v, G.degree v = 2 * G.edgeFinset.card
 
@@ -2357,7 +2355,7 @@ the induced subgraph on `sₖ` has at most `k * (k - 1) / 2` edges and contribut
 most `k * (k - 1)` to the sum. Each vertex `vₖ₊ᵢ` sends at most `min(k, dₖ₊ᵢ)` edges
 to `sₖ`, and summing these bounds the number of edges in the bipartite graph.
 
-[Figure: The case $k = 3$ for degrees $(4, 4, 4, 4, 2, 2)$. The sum $d_1 + d_2 + d_3 = 12$ counts each edge inside $s_3$ (blue) twice and each edge leaving $s_3$ (orange) once, and is at most $3 \cdot 2 + \min(3, 4) + \min(3, 2) + \min(3, 2) = 13$](https://jt496.github.io/GraphTheoryInLean/figures/erdosGallai.svg)
+[Figure: Erdős–Gallai for `k = 3`](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#figure-erdosGallai)
 
 We can use `Multiset.sort`, `List.sum`, `List.take` and `List.drop` to express this
 predicate in Lean. `Multiset.sort` sorts a multiset and returns the sorted `List`
@@ -2493,8 +2491,6 @@ show that a sequence `[d₁, d₂, …, dₙ]` is graphic iff the sequence
 is easy: if the second sequence is graphic and it is realized by the graph `H`, and
 `s` is the set of `d₁` vertices of `H` with degrees `d₂ - 1`, ..., `dₖ₊₁ - 1` then
 `coneGraph H s` is a graph that realizes the original degree sequence.
-
-[Figure: The sequence $(3, 3, 2, 2, 2)$ reduces to $(2, 2, 1, 1)$, which the path $H$ realizes. `coneGraph H s` joins the new vertex `none` to the $d_1 = 3$ vertices of $s$ (orange edges). Degrees in $H$ and then in `coneGraph H s` are shown](https://jt496.github.io/GraphTheoryInLean/figures/coneGraph.svg)
 -/
 
 /-- `coneGraph H s` adds a new vertex `none` to `H`, adjacent to precisely the
@@ -2510,6 +2506,8 @@ def coneGraph (H : SimpleGraph V) (s : Set V) : SimpleGraph (Option V) where
   loopless := ⟨by rintro (_ | a) h <;> simp_all⟩
 
 /-!
+[Figure: A Havel–Hakimi step](https://jt496.github.io/GraphTheoryInLean/Decidability___-Finiteness-and-Degrees/#figure-coneGraph)
+
 If membership of the set `s` is decidable then the cone graph has a decidable
 adjacency relation (assuming `H` does).
 -/

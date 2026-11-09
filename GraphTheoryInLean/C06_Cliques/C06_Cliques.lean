@@ -86,7 +86,7 @@ If `u ≠ v` then any set of vertices `s` is a clique in `G ⊔ edge u v` if and
 /-!
 # Finite Cliques
 
-[Figure: Examples of cliques in a graph](https://jt496.github.io/GraphTheoryInLean/figures/cliques.svg)
+[Figure: Examples of cliques in a graph](https://jt496.github.io/GraphTheoryInLean/Cliques/#figure-cliques)
 
 If `s : Finset V` is a clique with `n` vertices then we call it an `n`-clique. This
 is `IsNClique` in Lean, which is a structure that bundles a proof that `s` is a
@@ -142,7 +142,7 @@ For now we just check that a particular set of `3` vertices in the 3rd iterated
 Mycielskian of `K[2]` (`mμ^3(K[2])`) is not a `3`-clique.
 -/
 example :
-    ¬ mμ^3(K[2]).IsNClique 3 {(0 : Fin 2)ʳʳʳ, (1 : Fin 2)ˡˡˡ, (1 : Fin 2)ˡʳˡ} := by
+    ¬mμ^3(K[2]).IsNClique 3 {(0 : Fin 2)ʳʳʳ, (1 : Fin 2)ˡˡˡ, (1 : Fin 2)ˡʳˡ} := by
   decide
 
 /-!
@@ -201,9 +201,9 @@ We say that a graph `G` is *`n`-clique-free* if it contains no `n`-cliques.
 #source CliqueFree -- def CliqueFree (n : ℕ) : Prop := ∀ t, ¬G.IsNClique n t
 
 /-!
-So `¬ G.CliqueFree n` holds if and only if `G` contains an `n`-clique.
+So `¬G.CliqueFree n` holds if and only if `G` contains an `n`-clique.
 -/
-example (n : ℕ) : ¬ G.CliqueFree n ↔ ∃ t, G.IsNClique n t := by
+example (n : ℕ) : ¬G.CliqueFree n ↔ ∃ t, G.IsNClique n t := by
   simp [CliqueFree]
 
 /-!
@@ -690,7 +690,8 @@ not disjoint. When `1 ≤ k` and `2 * k ≤ #β` this is a largest independent s
 will see below that the Erdős–Ko–Rado theorem gives the matching upper bound. (For
 larger `k` the graph has no edges at all.)
 
-[Figure: The star at $0$, a largest independent set in the Petersen graph $\mathrm{Kn}(5,2)$](https://jt496.github.io/GraphTheoryInLean/figures/kneser_star.svg)
+[Figure: A star in the `petersenGraph`](https://jt496.github.io/GraphTheoryInLean/Cliques/#figure-kneser_star)
+
 -/
 lemma isIndepSet_kneserGraph_of_mem (i : β) :
     (kneserGraph β k).IsIndepSet {b | i ∈ b.val} := by
@@ -1058,7 +1059,7 @@ lemma mem_openNeighborhoodSet {G : SimpleGraph V} {s : Set V} {x : V} :
   simp [openNeighborhoodSet]
 
 lemma mem_compl_openNeighborhoodSet {G : SimpleGraph V} {s : Set V} {x : V} :
-    x ∈ (G.openNeighborhoodSet s)ᶜ ↔ ∀ a ∈ s, ¬ G.Adj a x := by
+    x ∈ (G.openNeighborhoodSet s)ᶜ ↔ ∀ a ∈ s, ¬G.Adj a x := by
   simp
 
 /-!
@@ -1108,7 +1109,7 @@ lemma coe_openNeighborhoodFinset [G.LocallyFinite] [DecidableEq V] (s : Finset V
   simp
 
 lemma mem_compl_openNeighborhoodFinset [Fintype V] [G.LocallyFinite] [DecidableEq V]
-    {s : Finset V} {x : V} : x ∈ N(s)ᶜ ↔ ∀ a ∈ s, ¬ G.Adj a x := by
+    {s : Finset V} {x : V} : x ∈ N(s)ᶜ ↔ ∀ a ∈ s, ¬G.Adj a x := by
   simp
 
 /-!

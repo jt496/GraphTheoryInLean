@@ -14,7 +14,7 @@ variable {V : Type*} {G : SimpleGraph V}
 1. Show that the cycle graph `C[5]` is not `2`-colourable. Hint:
 `chromaticNumber_cycleGraph_of_odd`.
 -/
-example : ¬ C[5].Colorable 2 := by
+example : ¬C[5].Colorable 2 := by
   sorry
 
 /-!
@@ -36,7 +36,7 @@ receive the merged colour needs a pigeonhole argument, which is
 is the least element of a nonempty finset `s`, and its basic properties are
 `Finset.min'_mem` and `Finset.min'_le`.
 
-[Figure: The colouring below for the Petersen graph $\mathrm{Kn}(5,2)$, with $5 - 2 \cdot 2 + 2 = 3$ colours: a vertex is red if its least element is $0$, blue if its least element is $1$, and green (the merged colour) otherwise](https://jt496.github.io/GraphTheoryInLean/figures/kneser_colouring.svg)
+[Figure: A `3`-colouring of the `petersenGraph`](https://jt496.github.io/GraphTheoryInLean/Colorings/#figure-kneser_colouring)
 -/
 /-- The `(n - 2 * k + 2)`-colouring of the Kneser graph `Kn[n, k]`. -/
 def kneserGraph.coloring' (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
@@ -132,7 +132,7 @@ lemma exists_increasing_path_greedy' (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 `colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
 -/
 example (G : SimpleGraph ℕ) {k : ℕ}
-    (h : ¬ ∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
+    (h : ¬∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
     G.Colorable k := by
   sorry
 
@@ -176,7 +176,7 @@ example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
 1. Show that the cycle graph `C[5]` is not `2`-colourable. Hint:
 `chromaticNumber_cycleGraph_of_odd`.
 -/
-example : ¬ C[5].Colorable 2 := by
+example : ¬C[5].Colorable 2 := by
   rw [← chromaticNumber_le_iff_colorable,
     chromaticNumber_cycleGraph_of_odd 5 (by decide) (by decide)]
   decide
@@ -231,7 +231,7 @@ def kneserGraph.coloring (n k : ℕ) (hn : 2 * k ≤ n) (hk : 0 < k) :
       exact Finset.disjoint_left.mp hadj.1 (min'_mem _ hune) (h ▸ min'_mem _ hvne)
     · grind -- impossible: one colour is ≤ `n - 2 * k`, the other is `n - 2 * k + 1`
     · grind -- impossible: one colour is ≤ `n - 2 * k`, the other is `n - 2 * k + 1`
-    · -- `push Not` pushes the negations inwards (`¬ a ≤ b` becomes `b < a`)
+    · -- `push Not` pushes the negations inwards (`¬a ≤ b` becomes `b < a`)
       push Not at h1 h3
       -- both `u` and `v` lie in `{n - 2 * k + 1, ..., n - 1}`, which has only
       -- `2 * k - 1` elements, so they lie in an independent set of `Kn[n, k]`
@@ -384,7 +384,7 @@ lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
 `colorable_iff_exists_bdd_nat_coloring` with `greedyColoringNat`.
 -/
 example (G : SimpleGraph ℕ) {k : ℕ}
-    (h : ¬ ∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
+    (h : ¬∃ f : ℕ → ℕ, ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1))) :
     G.Colorable k := by
   classical
   refine (colorable_iff_exists_bdd_nat_coloring _).2
@@ -445,7 +445,7 @@ example (G : SimpleGraph ℕ) [DecidableRel G.Adj] (C : G.Coloring ℕ)
     obtain ⟨u, hu, rfl⟩ := mem_image.mp hc
     rw [mem_neighborLTFinset] at hu
     have hne : C u ≠ C v := C.valid hu.2.symm
-    have hle : ¬ C v < C u := fun h => (hC v u hu.2 h).not_gt hu.1
+    have hle : ¬C v < C u := fun h => (hC v u hu.2 h).not_gt hu.1
     exact mem_range.2 ((ih u hu.1).trans_lt (by grind))
   simpa using card_le_card hsub
 

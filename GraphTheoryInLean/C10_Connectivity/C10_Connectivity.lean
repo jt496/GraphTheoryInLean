@@ -66,7 +66,7 @@ example (h : G.Connected) {u v : V} : G.Reachable u v := h.preconnected u v
 example (h : G.Connected) : Nonempty V := h.nonempty
 
 example : (⊥ : SimpleGraph Empty).Preconnected := fun u => u.elim
-example : ¬ (⊥ : SimpleGraph Empty).Connected := fun h => h.nonempty.some.elim
+example : ¬(⊥ : SimpleGraph Empty).Connected := fun h => h.nonempty.some.elim
 
 /-!
 Notice that rather than having to write `h.preconnected u v` for `G.Reachable u v`
@@ -118,7 +118,7 @@ if `u` is an isolated vertex in `G` then `uˡ` is an isolated vertex in `mμ(G)`
 
 Hence `mμ(G)` is connected iff `G` has no isolated vertices.
 -/
-theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬ G.IsIsolated v := by
+theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬G.IsIsolated v := by
   simp_rw [IsIsolated, not_forall, not_not]
   constructor <;> intro h
   · intro v
@@ -137,7 +137,7 @@ theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬ G.IsIsolated 
 
 The *connected components* of `G` are the equivalence classes of `Reachable`.
 
-[Figure: A graph with three connected components](https://jt496.github.io/GraphTheoryInLean/figures/connected_components.svg)
+[Figure: A graph with three connected components](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-connected_components)
 -/
 
 #source ConnectedComponent -- def ConnectedComponent := Quot G.Reachable
@@ -279,9 +279,8 @@ def isoSigmaConnectedComponents :
 An edge `e` is a *bridge* if deleting it disconnects its two endpoints from each
 other.
 
-[Figure: A graph with its bridge edges highlighted](https://jt496.github.io/GraphTheoryInLean/figures/bridges.svg)
+[Figure: Bridges in a graph](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-bridges)
 -/
-
 #source SimpleGraph.IsBridge
 
 /-!
@@ -303,7 +302,7 @@ only neighbour of `uʳ`, so deleting the edge `none — uʳ` cuts `uʳ` off. Hen
 bridges of `mμ(G)` are precisely the edges `none — uʳ` where `u` is an isolated
 vertex of `G`.
 
-[Figure: Left: a graph $G$ with an isolated vertex $u$. Right: its Mycielskian, with its unique bridge edge highlighted](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_bridge.svg)
+[Figure: A bridge in a Mycielskian](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-mycielskian_bridge)
 -/
 
 lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ(G).edgeSet) :
@@ -339,7 +338,7 @@ lemma isBridge_mycielskian_iff {e} (he : e ∈ mμ(G).edgeSet) :
     rw [isBridge_iff]
     -- `u` is isolated in `G`, so `none` is the only neighbour of `uʳ`: once the
     -- edge `none — uʳ` is deleted, `uʳ` has no neighbours at all
-    have hnb : ∀ w, ¬ (mμ(G).deleteEdges {s(none, uʳ)}).Adj uʳ w := by
+    have hnb : ∀ w, ¬(mμ(G).deleteEdges {s(none, uʳ)}).Adj uʳ w := by
       rintro (_ | w | w) h <;> simp_all [Sym2.eq_swap, IsIsolated]
     -- so a walk from `uʳ` to `none` has nowhere to take its first step
     intro h
@@ -553,7 +552,7 @@ Every connected graph has a spanning tree. Since `T` and `G` are both of type
 `SimpleGraph V`, the subgraph `T ≤ G` is automatically spanning (see
 [Spanning Subgraphs](#section-spanning-subgraphs)).
 
-[Figure: A spanning tree in the Grötzsch graph](https://jt496.github.io/GraphTheoryInLean/figures/spanning_tree.svg)
+[Figure: A spanning tree in the `grotzschGraph`](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-spanning_tree)
 -/
 #check Connected.exists_isTree_le
 
@@ -705,7 +704,7 @@ lemma IsTrail.exists_unused_edge_of_even {v w} (h2 : ∀ x, Even (G.degree x))
     ∃ x, G.Adj w x ∧ s(w, x) ∉ p.edges := by
   classical
   -- the number of edges in `p` that are incident to `w` is odd
-  have hodd : ¬ Even (p.edges.countP (fun e => w ∈ e)) := by
+  have hodd : ¬Even (p.edges.countP (fun e => w ∈ e)) := by
     rw [hp.even_countP_edges_iff w]; simp [hvw]
   -- if every edge at `w` were used, that number would be `degree w`, which is even
   by_contra! h
@@ -815,7 +814,7 @@ still has positive degree in the graph obtained by deleting the edges of `p`.
 -/
 lemma IsTrail.exists_support_pos_deleted {u v} (hG : G.EdgesInOneComponent)
     (hu : u ∈ G.support) {p : G.Walk u v}
-    (hp : p.IsTrail) (hne : ¬ p.IsEulerian) :
+    (hp : p.IsTrail) (hne : ¬p.IsEulerian) :
     ∃ w ∈ p.support, 0 < (G.deleteEdges {e | e ∈ p.edges}).degree w := by
   let Gp := G.deleteEdges {e | e ∈ p.edges}
   -- some edge `a — b` of `G` is not used by `p`
@@ -843,7 +842,7 @@ even degree in the graph obtained by deleting the edges of `p`. Find a vertex `w
 transfer it back into `G`, and splice it into `p` at `w`
 (`IsTrail.takeUntil_append_append_dropUntil`).
 
-[Figure: Splice a new circuit $c$ (red) at $w$ into the circuit $p$ (blue) starting at $v$, to obtain an Eulerian circuit starting at $w$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/hierholzer.svg)
+[Figure: Splicing circuits](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-hierholzer)
 
 Notice that this lemma will allow us to handle both the closed case (`a = b`, the
 Eulerian *circuit*, where the parity hypothesis `hdel` comes from
@@ -853,7 +852,7 @@ Eulerian *circuit*, where the parity hypothesis `hdel` comes from
 lemma IsTrail.exists_longer_of_not_isEulerian [Finite G.edgeSet] {a b}
     (hG : G.EdgesInOneComponent) (ha : a ∈ G.support) {p : G.Walk a b}
     (hp : p.IsTrail) (hdel : ∀ x, Even ((G.deleteEdges {e | e ∈ p.edges}).degree x))
-    (hne : ¬ p.IsEulerian) :
+    (hne : ¬p.IsEulerian) :
     ∃ q : G.Walk a b, q.IsTrail ∧ p.length < q.length := by
   -- some vertex `w` on `p` is incident to an edge of `G` unused by `p`
   obtain ⟨w, hw_supp, hw_pos⟩ := hp.exists_support_pos_deleted hG ha hne
@@ -1082,7 +1081,7 @@ graph with no vertices) is `k`-edge-connected for every `k`.
 #check IsEdgeConnected.preconnected
 
 /-!
-[Figure: A 3-edge-connected graph with a 3-edge cut (red)](https://jt496.github.io/GraphTheoryInLean/figures/edge_connectivity.svg)
+[Figure: A `3`-edge-connected graph](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-edge_connectivity)
 
 An edge is a bridge iff its endpoints are not `2`-edge-reachable. So a graph is
 `2`-edge-connected iff deleting any single `e : Sym2 V` leaves it preconnected. Here
@@ -1244,7 +1243,7 @@ set `t` of vertices, avoiding `u` and `v`, that meets every element of
 `s.erase s(u, v)` and has at most as many vertices as this set has elements.
 -/
 lemma _root_.Finset.exists_cover_avoiding [DecidableEq V] (u v : V)
-    (s : Finset (Sym2 V)) (hs : ∀ e ∈ s, ¬ e.IsDiag) :
+    (s : Finset (Sym2 V)) (hs : ∀ e ∈ s, ¬e.IsDiag) :
     ∃ t : Finset V, #t ≤ #(s.erase s(u, v)) ∧ u ∉ t ∧ v ∉ t ∧
       ∀ e ∈ s, e ≠ s(u, v) → ∃ x ∈ e, x ∈ t := by
   -- We use `choose!` below which needs `V` to be nonempty.
@@ -1475,7 +1474,7 @@ sharing a vertex, deleting the shared vertex disconnects the graph, so `κ = 1`,
 `λ = δ = 2`. Two copies of `K[4]` joined by a single edge (the *barbell*) have
 `λ = 1`, since that edge is a bridge, while `δ = 3`.
 
-[Figure: Left: the bowtie, with $\kappa = 1 < \lambda = 2$. Right: the barbell, with $\lambda = 1 < \delta = 3$](https://jt496.github.io/GraphTheoryInLean/figures/whitney_strict.svg)
+[Figure: The bowtie and the barbell](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-whitney_strict)
 
 The two definitions disagree on graphs with at most one vertex. Mathlib's
 `IsEdgeConnected k` has no condition on the number of vertices, so such a graph is
@@ -1528,7 +1527,7 @@ say, and by
 /-- **Brooks' theorem (Δ = 2)**: a graph with all degrees at most `2` is
 `2`-colourable unless it has a component that is an odd cycle. -/
 theorem brooks_two [G.LocallyFinite] (hdeg : ∀ v, G.degree v ≤ 2)
-    (hcyc : ¬ ∃ (u : V) (c : G.Walk u u),
+    (hcyc : ¬∃ (u : V) (c : G.Walk u u),
       c.IsCycle ∧ Odd c.length ∧ c.toSubgraph = G⟦u⟧.toSubgraph) :
     G.Colorable 2 := by
   apply isBipartite_iff_forall_isCycle_even.mpr
@@ -1589,7 +1588,7 @@ the non-adjacent pair `{v₁, v₃}`; moreover `A`, `B` and `E` are proper subse
 colour `D` and `E` separately and then glue them together using our
 `ColoringOn.union` construction.
 
-[Figure: Left: the sets $A$, $B$, $D$ and $E$ when $\Delta = 3$. Right: Step 1 on $D$, with the colouring order numbered and the search from $v_2$ in blue](https://jt496.github.io/GraphTheoryInLean/figures/brooks_split.svg)
+[Figure: The split when `Δ = 3`](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-brooks_split)
 
 1. *`D` has a colouring in which `v₁` and `v₃` have the same colour.*
    (`exists_coloring_eq`)
@@ -1696,7 +1695,7 @@ explicitly.)
 -/
 lemma CliqueFree.exists_ne_adj_not_adj_of_le_degree [G.LocallyFinite]
     (hcf : G.CliqueFree (Δ + 1)) {a : V} (hd : Δ ≤ G.degree a) :
-    ∃ v₁ v₃, v₁ ≠ v₃ ∧ G.Adj a v₁ ∧ G.Adj a v₃ ∧ ¬ G.Adj v₁ v₃ := by
+    ∃ v₁ v₃, v₁ ≠ v₃ ∧ G.Adj a v₁ ∧ G.Adj a v₃ ∧ ¬G.Adj v₁ v₃ := by
   classical
   by_contra! h
   refine hcf.mono (by grind : Δ + 1 ≤ G.degree a + 1)
@@ -1754,7 +1753,7 @@ and `v₃` the same colour, by induction on the number of unsettled vertices.
 -/
 private lemma exists_coloringOn_sdiff [G.LocallyFinite] [DecidableEq V]
     (W : Finset V) (v₂ : V) {v₁ v₃ : V} (hΔ : 0 < Δ)
-    (hnadj : ¬ G.Adj v₁ v₃) (hdeg : ∀ x ∈ W, G.degree x = Δ)
+    (hnadj : ¬G.Adj v₁ v₃) (hdeg : ∀ x ∈ W, G.degree x = Δ)
     (hW : Disjoint W {v₁, v₃})
     (hconn : ((⊤ : G.Subgraph).induce W).Connected) :
     ∀ (S : Finset V), v₂ ∈ S → S ⊆ W →
@@ -1824,7 +1823,7 @@ Step 1 of the sketch: `K` has a `Δ`-colouring giving `v₁` and `v₃` the *sam
 private lemma exists_coloring_eq [DecidableEq V] [G.LocallyFinite] (K : Finset V)
     {v₁ v₂ v₃ : V} (hΔ : 0 < Δ)
     (hv₂K : v₂ ∈ K) (hv₁K : v₁ ∈ K) (hv₃K : v₃ ∈ K)
-    (hne13 : v₁ ≠ v₃) (hnadj : ¬ G.Adj v₁ v₃) (hdv₂ : G.degree v₂ = Δ)
+    (hne13 : v₁ ≠ v₃) (hnadj : ¬G.Adj v₁ v₃) (hdv₂ : G.degree v₂ = Δ)
     (ha1 : G.Adj v₂ v₁) (ha3 : G.Adj v₂ v₃)
     (hdeg : ∀ x ∈ K \ {v₁, v₃}, G.degree x = Δ)
     (hnbhd : G.neighborFinset v₂ ⊆ K.erase v₂)
@@ -1845,7 +1844,7 @@ giving them the *same* colour, when their numbers of neighbours in `B` sum to le
 than `Δ`, so that together they see less than `Δ` colours.
 -/
 private lemma exists_two_eq [DecidableRel G.Adj] [DecidableEq V] (B : Finset V)
-    (C : G.ColoringOn (Fin Δ) ↑B) {x y : V} (hnxy : ¬ G.Adj x y)
+    (C : G.ColoringOn (Fin Δ) ↑B) {x y : V} (hnxy : ¬G.Adj x y)
     (h : G.degIn B x + G.degIn B y < Δ) :
     ∃ C' : G.ColoringOn (Fin Δ) ↑(insert x (insert y B)), C' x = C' y := by
   classical
@@ -1870,7 +1869,7 @@ Case (b) of Step 2. Extend a colouring of `A` by two new non-adjacent vertices
 distinct from that of `y` remains.
 -/
 private lemma exists_two_ne [DecidableRel G.Adj] [DecidableEq V] (A : Finset V)
-    (C : G.ColoringOn (Fin Δ) ↑A) {x y : V} (hxy : x ≠ y) (hnxy : ¬ G.Adj x y)
+    (C : G.ColoringOn (Fin Δ) ↑A) {x y : V} (hxy : x ≠ y) (hnxy : ¬G.Adj x y)
     (hy : G.degIn A y < Δ) (hx : G.degIn A x + 1 < Δ) :
     ∃ C' : G.ColoringOn (Fin Δ) ↑(insert x (insert y A)), C' x ≠ C' y := by
   classical
@@ -2005,7 +2004,7 @@ private lemma exists_colorings_pattern_iff [DecidableEq V] [G.LocallyFinite]
     (hΔ : 3 ≤ Δ) (K A : Finset V) {v₁ v₂ v₃ : V}
     (hclosed : ∀ u ∈ K, G.neighborFinset u ⊆ K)
     (hregK : ∀ u ∈ K, G.degree u = Δ) (ih : ∀ t ⊂ K, G.ColorableOn Δ ↑t)
-    (hne13 : v₁ ≠ v₃) (hnadj : ¬ G.Adj v₁ v₃)
+    (hne13 : v₁ ≠ v₃) (hnadj : ¬G.Adj v₁ v₃)
     (ha1 : G.Adj v₂ v₁) (ha3 : G.Adj v₂ v₃)
     (hAsub : A ⊆ K \ {v₁, v₃}) (hv₂A : v₂ ∈ A)
     (hAconn : ((⊤ : G.Subgraph).induce (A : Set V)).Connected)
@@ -2207,7 +2206,7 @@ with no `1`-clique has no vertices, and a graph with no `2`-clique has no edges
 is `Δ`-colourable, unless `Δ = 2` and one of its components is an odd cycle. -/
 theorem brooks [G.LocallyFinite] {Δ : ℕ}
     (hdeg : ∀ v, G.degree v ≤ Δ) (hcf : G.CliqueFree (Δ + 1))
-    (hcyc : Δ = 2 → ¬ ∃ (u : V) (c : G.Walk u u),
+    (hcyc : Δ = 2 → ¬∃ (u : V) (c : G.Walk u u),
       c.IsCycle ∧ Odd c.length ∧ c.toSubgraph = G⟦u⟧.toSubgraph) :
     G.Colorable Δ := by
   rcases (by grind : Δ = 0 ∨ Δ = 1 ∨ Δ = 2 ∨ 3 ≤ Δ) with rfl | rfl | rfl | hΔ
@@ -2256,7 +2255,7 @@ definition of `IsVertexConnected 2` the deleted set `S` has at most one vertex. 
 iff it has at least three vertices, is connected and has no cut vertex.
 -/
 lemma isVertexConnected_two_iff : G.IsVertexConnected 2 ↔
-    3 ≤ ENat.card V ∧ G.Connected ∧ ∀ x, ¬ G.IsCutVertex x := by
+    3 ≤ ENat.card V ∧ G.Connected ∧ ∀ x, ¬G.IsCutVertex x := by
   have h3 : (2 : ℕ∞) + 1 = 3 := by norm_num
   constructor
   · rintro ⟨hcard, h⟩
@@ -2296,7 +2295,7 @@ our sense; in particular a graph with no edges has no blocks at all. (This is wh
 colouring results assume `n ≥ 1`: the graph `K[1]` has no blocks, so all its blocks
 are (vacuously) `0`-colourable, but `K[1]` is not `0`-colourable.)
 
-[Figure: A graph with four blocks, its edges coloured by block. The cut vertices $c$ and $f$ lie in three and two blocks, and the isolated vertex $i$ lies in no block](https://jt496.github.io/GraphTheoryInLean/figures/blocks.svg)
+[Figure: The blocks of a graph](https://jt496.github.io/GraphTheoryInLean/Connectivity/#figure-blocks)
 
 Like the deleted sets in `IsEdgeReachable`, cycle-equivalence is most conveniently
 defined on all of `Sym2 V`, not just on `G.edgeSet`. We call an element `s(u, v)` of
@@ -2591,7 +2590,7 @@ some edge `a — b` of `G` has no near endpoint, that is, every walk from `u` to
 to `b` goes via `x`.
 -/
 lemma splitsAt_of_forall_walk_mem_support {u x a b : V} (hux : u ≠ x)
-    (hu : ¬ G.IsIsolated u) (hab : G.Adj a b) (ha : ∀ p : G.Walk u a, x ∈ p.support)
+    (hu : ¬G.IsIsolated u) (hab : G.Adj a b) (ha : ∀ p : G.Walk u a, x ∈ p.support)
     (hb : ∀ p : G.Walk u b, x ∈ p.support) : G.SplitsAt x := by
   -- `R z`: the vertex `z` is near.
   let R : V → Prop := fun z => ∃ p : G.Walk u z, x ∉ p.support
@@ -2602,8 +2601,8 @@ lemma splitsAt_of_forall_walk_mem_support {u x a b : V} (hux : u ≠ x)
   let G₂ := G \ G₁
   obtain ⟨u', hu'⟩ := exists_adj_iff_not_isIsolated.2 hu
   have hRu : R u := ⟨.nil, by simpa using hux.symm⟩
-  have hRa : ¬ R a := fun ⟨p, hp⟩ => hp (ha p)
-  have hRb : ¬ R b := fun ⟨p, hp⟩ => hp (hb p)
+  have hRa : ¬R a := fun ⟨p, hp⟩ => hp (ha p)
+  have hRb : ¬R b := fun ⟨p, hp⟩ => hp (hb p)
   refine ⟨G₁, G₂, lt_of_le_not_ge inf_le_left fun h => ?_,
     lt_of_le_not_ge sdiff_le fun h => ?_, sup_sdiff_cancel_right inf_le_left, ?_⟩
   · simpa [G₁, hRa, hRb] using h hab
@@ -2611,8 +2610,8 @@ lemma splitsAt_of_forall_walk_mem_support {u x a b : V} (hux : u ≠ x)
   · rintro z ⟨⟨y, hy⟩, ⟨y', hy'⟩⟩
     by_contra hzx
     simp only [sdiff_adj, inf_adj, fromRel_adj, Set.mem_ofPred_eq, G₁, G₂] at hy hy'
-    have hz : ¬ R z := by grind
-    have : ¬ R y := fun hRy => hz (hR hRy hy.1.symm hzx)
+    have hz : ¬R z := by grind
+    have : ¬R y := fun hRy => hz (hR hRy hy.1.symm hzx)
     grind
 
 /-!
@@ -2649,7 +2648,7 @@ neither endpoint of `c — d` is near relative to `a`, so
 two edges.
 -/
 lemma splitsAt_of_not_reachable {a b c d : V} (hab : G.Adj a b) (hcd : G.Adj c d)
-    (hac : ¬ G.Reachable a c) (x : V) : G.SplitsAt x := by
+    (hac : ¬G.Reachable a c) (x : V) : G.SplitsAt x := by
   rcases eq_or_ne a x with rfl | hax
   · -- take `u := c`; no walk from `c` reaches the edge `a — b`
     exact splitsAt_of_forall_walk_mem_support (fun h => hac (by rw [h]))
@@ -2669,7 +2668,7 @@ then shortening it to a path and closing it up with the two edges gives a cycle
 through both. Otherwise every walk from `u` to `w` passes through `x`, while
 `u — x — w` joins them, so `x` is a cut vertex and `G` splits at `x`.
 -/
-lemma blockEquivalent_of_adj_of_adj (hG : ∀ x, ¬ G.SplitsAt x) {x u w : V}
+lemma blockEquivalent_of_adj_of_adj (hG : ∀ x, ¬G.SplitsAt x) {x u w : V}
     (hu : G.Adj x u) (hw : G.Adj x w) : G.BlockEquivalent s(x, u) s(x, w) := by
   classical
   rcases eq_or_ne u w with rfl | huw
@@ -2691,7 +2690,7 @@ For two arbitrary edges `a — b` and `c — d` we chain the previous result alo
 walk from `a` to `c`. Such a walk exists: otherwise the edges `a — b` and `c — d`
 lie in different components, so `G` would split at every vertex.
 -/
-lemma blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬ G.SplitsAt x) {a b c d : V}
+lemma blockEquivalent_of_not_splitsAt (hG : ∀ x, ¬G.SplitsAt x) {a b c d : V}
     (hab : G.Adj a b) (hcd : G.Adj c d) : G.BlockEquivalent s(a, b) s(c, d) := by
   have key : ∀ {y} (q : G.Walk y c) {z}, G.Adj y z →
       G.BlockEquivalent s(y, z) s(c, d) := by

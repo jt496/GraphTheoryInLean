@@ -139,17 +139,17 @@ material. Sections or subsections whose titles are marked with a star are more
 advanced. Later sections sometimes use their results, and recall what they need when
 they do.
 
-[Figure: A route through the guide](https://jt496.github.io/GraphTheoryInLean/figures/reading_routes.svg)
+[Figure: A route through the guide](https://jt496.github.io/GraphTheoryInLean/Introduction/#figure-reading_routes)
 
 You certainly don't have to read the guide in order. If you prefer to start from
 something familiar, pick a theorem you already know in
 [Theorems](#chapter-theorems), see how it is stated in Lean, and work
 backwards to the definitions it uses.
 
-We use three running examples throughout: the `n`-dimensional hypercube `Q[n]`
-([Hypercube](#section-hypercube)), the Mycielskian `mμ(G)` of a graph `G`
-([Mycielskian](#section-mycielskian)), and the infinite path `pathNat` on `ℕ`
-([Constructing a SimpleGraph](#section-constructing-a-simplegraph)).
+We use three running examples throughout:
+*  `pathNat`: [the infinite path on `ℕ`](#section-constructing-a-simplegraph)
+*  `Q[n]`: [the `n`-dimensional hypercube](#section-hypercube)
+*  `mμ(G)`: [the Mycielskian](#section-mycielskian)
 
 Examples of more advanced topics that we cover in the guide include:
 
@@ -167,6 +167,8 @@ Examples of more advanced topics that we cover in the guide include:
 * [Moore and Cage Bounds](#section-moore-and-cage-bounds)
 * [Albertson's Precolouring Extension
   Theorem](#section-albertson-s-precolouring-extension-theorem)
+* [The Laplacian](#section-the-laplacian)
+* [Strongly Regular Graphs](#section-strongly-regular-graphs)
 * [Counting Copies](#section-counting-copies)
 * [The Automorphism Group of the
   Hypercube](#section-the-automorphism-group-of-the-hypercube)
@@ -174,6 +176,7 @@ Examples of more advanced topics that we cover in the guide include:
 * [Füredi's Stability Theorem](#section-f-redi-s-stability-theorem)
 * [Zykov's Theorem](#section-zykov-s-theorem)
 * [Ruzsa–Szemerédi Theorem](#section-the-ruzsa-szemer-di-theorem)
+* [Ends](#section-ends)
 
 Theorems from Mathlib that we survey, mostly in the final chapter
 [Theorems](#chapter-theorems), include:
@@ -184,12 +187,10 @@ Theorems from Mathlib that we survey, mostly in the final chapter
   [Mantel's Theorem](#section-mantel-s-theorem)
 * [Andrásfai–Erdős–Sós Theorem](#section-the-andr-sfai-erd-s-s-s-theorem)
 * [Erdős–Stone Theorem](#section-tur-n-density-and-the-erd-s-stone-theorem)
-* [The Laplacian](#section-the-laplacian)
-* [Strongly Regular Graphs](#section-strongly-regular-graphs)
 * [Szemerédi Regularity Lemma](#section-the-szemer-di-regularity-lemma)
 * [Triangle Removal Lemma](#section-the-triangle-removal-lemma) and
   [Roth's Theorem](#section-roth-s-theorem)
-* [Kőnig's Lemma](#section-k-nig-s-lemma) and [Ends](#section-ends)
+* [Kőnig's Lemma](#section-k-nig-s-lemma)
 
 Each chapter (except this one) has some exercises with worked solutions. Each set of
 exercises is given first with `sorry`, and the solutions follow.

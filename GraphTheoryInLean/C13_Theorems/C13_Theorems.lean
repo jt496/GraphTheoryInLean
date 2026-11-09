@@ -108,7 +108,7 @@ matching has an even number of vertices.
 For example, the Mycielskian `mμ(G)` of a finite graph has `2 * |V| + 1` vertices, an
 odd number, so it never has a perfect matching.
 -/
-example [Finite V] (M : mμ(G).Subgraph) : ¬ M.IsPerfectMatching := fun hM => by
+example [Finite V] (M : mμ(G).Subgraph) : ¬M.IsPerfectMatching := fun hM => by
   have := Fintype.ofFinite V
   simpa [Nat.even_add_one] using hM.even_card
 
@@ -125,7 +125,7 @@ says that this condition implies that `G` has a matching whose vertices include 
 of `p₁`. (The converse is easy: the partners of the vertices in `s` are distinct
 neighbours of `s`.)
 
-[Figure: A bipartite graph with a subset $s$ and its open neighbourhood $N(s)$](https://jt496.github.io/GraphTheoryInLean/figures/hall.svg)
+[Figure: A set and its neighbourhood](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-hall)
 -/
 #check exists_isMatching_of_forall_ncard_le
 
@@ -193,11 +193,11 @@ least as many neighbours as elements, but no matching covers them all: whichever
 is matched to `none`, the vertex `jˡ` is left unmatched, since `jʳ` is its only
 neighbour. In particular, a subdivided star has no perfect matching.
 
-[Figure: The subdivided star `subdividedStar ℕ`. A matching (red) covering `none` ($\ast$) leaves a vertex (orange) unmatched](https://jt496.github.io/GraphTheoryInLean/figures/hall_infinite.svg)
+[Figure: `subdividedStar ℕ`](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-hall_infinite)
 -/
 /-- A subdivided star has no perfect matching. -/
 lemma not_exists_isPerfectMatching_subdividedStar {ι : Type*} :
-    ¬ ∃ M : (subdividedStar ι).Subgraph, M.IsPerfectMatching := by
+    ¬∃ M : (subdividedStar ι).Subgraph, M.IsPerfectMatching := by
   rintro ⟨M, hM, hspan⟩
   -- `none` is matched to a right vertex `jʳ`
   obtain ⟨w, hw, -⟩ := hM (hspan none)
@@ -216,7 +216,7 @@ lemma not_exists_isPerfectMatching_subdividedStar {ι : Type*} :
 In Lean, though, this graph fails Hall's condition for the set `{none}`: `none` has
 infinitely many neighbours, so the `Set.ncard` of its neighbourhood is `0`.
 -/
-example : ¬ ({none} : Set (Option (ℕ ⊕ ℕ))).ncard ≤
+example : ¬({none} : Set (Option (ℕ ⊕ ℕ))).ncard ≤
     (⋃ x ∈ ({none} : Set _), (subdividedStar ℕ).neighborSet x).ncard := by
   -- the neighbours of `none` are the right vertices `iʳ`
   have h : ((subdividedStar ℕ).neighborSet none).Infinite :=
@@ -362,7 +362,7 @@ together with `N(s₀)`, form a vertex cover: an edge with an endpoint in `p₁`
 starts in `p₁ \ s₀` or ends in `N(s₀)`. This vertex cover has
 `|p₁| - |s₀| + |N(s₀)| = |p₁| - d` vertices, so `τ G ≤ ν G`.
 
-[Figure: A bipartite graph with parts $p_1$ and $p_2$, in which $s_0$ has the largest deficiency $d = |s_0| - |N(s_0)| = 1$. The vertex cover $(p_1 \setminus s_0) \cup N(s_0)$ and a maximum matching both have $|p_1| - d = 4$ elements.](https://jt496.github.io/GraphTheoryInLean/figures/konig.svg)
+[Figure: Deficiency and a vertex cover](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-konig)
 -/
 /-- **Kőnig's theorem**: in a finite bipartite graph the matching number equals the
 vertex cover number. -/
@@ -457,7 +457,7 @@ remains (i.e. of `G - U`) must have a vertex matched into `U`, so there are at m
 is called a *Tutte violator*. Tutte's theorem says that `G` has a perfect matching
 iff there is no Tutte violator.
 
-[Figure: A Tutte violator $U$ with three odd components of $G - U$](https://jt496.github.io/GraphTheoryInLean/figures/tutte.svg)
+[Figure: A Tutte violator](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-tutte)
 -/
 #source SimpleGraph.IsTutteViolator
 
@@ -493,8 +493,6 @@ clique of size `r + 1`.
 
 The extremal graphs are the *Turán graphs*. Mathlib defines `turanGraph n r` on
 `Fin n`, and we introduce the notation `T[n, r]`.
-
-[Figure: The Turán graph $T(10, 3)$](https://jt496.github.io/GraphTheoryInLean/figures/turan.svg)
 -/
 #source turanGraph
 
@@ -503,6 +501,8 @@ The extremal graphs are the *Turán graphs*. Mathlib defines `turanGraph n r` on
 scoped notation "T[" n ", " r "]" => turanGraph n r
 
 /-!
+[Figure: The Turán graph `T[10, 3]`](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-turan)
+
 Two vertices of `T[n, r]` are adjacent iff they have different residues modulo
 `r`, so it is the complete `r`-partite graph whose parts are the residue classes.
 These parts are *balanced*: any two differ in size by at most one, since the residue
@@ -611,7 +611,7 @@ same degree (`IsTuranMaximal.degree_eq_of_not_adj`). It follows that non-adjacen
 transitive (`IsTuranMaximal.not_adj_trans`), so the graph is complete multipartite
 (`IsCompleteMultipartite`).
 
-[Figure: Left: a graph with non-adjacent vertices $s$ and $t$. Right: `G.replaceVertex s t`.](https://jt496.github.io/GraphTheoryInLean/figures/replace_vertex.svg)
+[Figure: `G.replaceVertex s t`](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-replace_vertex)
 -/
 #source replaceVertex
 
@@ -804,7 +804,7 @@ and the set `Vᵣ` of non-neighbours of `x` in `S`. We colour `Vᵣ` with the ne
 `r`. Each of the three sums over `S` then splits into four blocks, according to
 whether `v` and `w` lie in `N` or in `Vᵣ`.
 
-[Figure: $V_r$ ($x$ and its non-neighbours) gets colour $r$ (orange). In $N$, $x'$ and its non-neighbours get $r - 1$ (green) and $N'$ is coloured recursively (blue). Dashed edges are monochromatic](https://jt496.github.io/GraphTheoryInLean/figures/furedi.svg)
+[Figure: Colouring in Füredi's proof](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-furedi)
 -/
 lemma _root_.Finset.sum_card_filter_union [DecidableEq V] {s t : Finset V}
     (h : Disjoint s t) (p : V → V → Prop) [DecidableRel p] :
@@ -880,7 +880,7 @@ twice: the total is at most the number of edges of the complete multipartite gra
 whose parts are the colour classes.
 -/
 private lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
-    ∀ S : Finset V, (∀ t ⊆ S, ¬ G.IsNClique (r + 1) t) →
+    ∀ S : Finset V, (∀ t ⊆ S, ¬G.IsNClique (r + 1) t) →
       ∃ c : V → ℕ, (∀ v ∈ S, c v < r) ∧
         ∑ v ∈ S, (G.degIn S v + #{w ∈ S | G.Adj v w ∧ c w = c v}) ≤
           ∑ v ∈ S, #{w ∈ S | c w ≠ c v} := by
@@ -899,11 +899,11 @@ private lemma furedi_aux [DecidableRel G.Adj] (r : ℕ) :
     -- `x` has maximum degree into `S`; split `S` into `N = S ∩ N(x)` and the rest
     obtain ⟨x, hxS, hx⟩ := exists_max_image S (G.degIn S) hne
     set N := {w ∈ S | G.Adj x w}
-    set Vᵣ := {w ∈ S | ¬ G.Adj x w}
+    set Vᵣ := {w ∈ S | ¬G.Adj x w}
     have hdisj : Disjoint N Vᵣ := disjoint_filter_filter_not _ _ _
     have huni : N ∪ Vᵣ = S := filter_union_filter_not_eq _ _
     -- `N` has no `(r + 1)`-clique, since `x` would extend it to an `(r + 2)`-clique
-    have hN : ∀ t ⊆ N, ¬ G.IsNClique (r + 1) t := fun t ht hc =>
+    have hN : ∀ t ⊆ N, ¬G.IsNClique (r + 1) t := fun t ht hc =>
       hS (insert x t) (insert_subset hxS (ht.trans (filter_subset _ _)))
         (hc.insert fun w hw => (mem_filter.1 (ht hw)).2)
     obtain ⟨c', hc'r, hc'⟩ := ih N hN
@@ -1038,7 +1038,7 @@ gives a different type of stability result related to the minimum degree: any
 triangle-free graph with minimum degree greater than `2 * n / 5` is bipartite. The
 uniform blow-up `C[5][t]` shows that `2 * n / 5` cannot be lowered (Exercise 12).
 
-[Figure: The $3$-uniform blow-up of $C_5$: a non-bipartite triangle-free graph with minimum degree $2n/5$](https://jt496.github.io/GraphTheoryInLean/figures/blowup_c5.svg)
+[Figure: The blow-up `C[5][3]`](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-blowup_c5)
 -/
 #check colorable_of_cliqueFree_lt_minDegree
 
@@ -1342,7 +1342,7 @@ calls this `IsPathGraph3Compl`, since `u`, `v` and `w` induce the complement of 
 path on three vertices, and a graph is complete multipartite exactly when it contains
 no such triple (`not_isCompleteMultipartite_iff_exists_isPathGraph3Compl`).
 
-[Figure: Left: $P_3$. Right: its complement.](https://jt496.github.io/GraphTheoryInLean/figures/path3_compl.svg)
+[Figure: `P[3]` and its complement](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-path3_compl)
 
 Symmetrizing twice, replacing `u` and `w` by copies of `v`, changes the number of
 `s`-cliques by `dₛ(v) - dₛ(u) + dₛ(v) - dₛ(w) + dₛ(u, w)`, where `dₛ(u, w)` counts
@@ -1486,7 +1486,7 @@ same part of `G`, as on the right of the figure below. We need this twice: in
 `IsNCliqueMaximal.not_cliqueFree_of_not_adj`, where `H` is `G` with an edge added
 inside a part.
 
-[Figure: A complete multipartite graph with four parts and a $4$-clique $t$ (blue). Left: if $x$ and $y$ lie in different parts, the vertices of $t$ outside the parts of $x$ and $y$ form a $4$-clique with $x$ and $y$ (orange). Right: if $x$ and $y$ lie in the same part and the edge between them (dashed) is added, any two vertices of $t$ outside that part form a $4$-clique with $x$ and $y$.](https://jt496.github.io/GraphTheoryInLean/figures/clique_through_edge.svg)
+[Figure: One clique implies many](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-clique_through_edge)
 
 If `G` is complete multipartite and has an `s`-clique, then every edge of a graph
 `H` containing `G` lies in an `s`-clique of `H`.
@@ -1552,7 +1552,7 @@ number of `s`-cliques changes by `#A - #B - 1` times the number of `(s - 2)`-cli
 in the other parts. To contradict maximality we need this change to be positive, and
 it is as long as `G` has an `s`-clique.
 
-[Figure: Moving $w$ from the part $A$ to the part $B$ of $v$ turns $G$ (left) into `G.replaceVertex v w` (right). The triangles containing $w$ and a vertex $c$ of another part $C$ change from one for each vertex of $B$ to one for each vertex of $A$ other than $w$, in this case from $3$ to $4$.](https://jt496.github.io/GraphTheoryInLean/figures/zykov_move.svg)
+[Figure: Moving a vertex between parts](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-zykov_move)
 
 The figure above shows why moving `w` works, but the proof does not compute these
 numbers directly. Instead it compares the cliques that the move destroys with those
@@ -1573,7 +1573,7 @@ is the only vertex of `A` in this neighbourhood, `σ` sends vertices in differen
 parts to vertices in different parts, so it preserves adjacency there. It is also
 injective there, and never takes the value `w` or `a`.
 
-[Figure: Left: the map $\sigma$ sends $w$ to $v$, maps $B$ injectively into $A \setminus \{w, a\}$, and fixes every other vertex. Right: $\sigma$ pairs each triangle that the move destroys (blue) with a triangle containing $v$ but not $w$ (orange); the move creates a copy of it with $w$ in place of $v$. No triangle is paired with the magenta one containing $a$, so the move creates more triangles than it destroys.](https://jt496.github.io/GraphTheoryInLean/figures/zykov_transfer.svg)
+[Figure: Pairing destroyed triangles](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-zykov_transfer)
 
 Let `G` be complete multipartite, let the part of `w` have at least two more
 vertices than the part of `v`, and let `a ≠ w` lie in the part of `w`. Then some map
@@ -1866,7 +1866,7 @@ says that for every `ε > 0`, every finite graph can be approximated by a struct
 one: its vertices can be partitioned into a bounded number of almost equal parts so
 that most pairs of parts are `ε`-uniform.
 
-[Figure: An $\varepsilon$-uniform partition; the band between two parts is shaded by their edge density](https://jt496.github.io/GraphTheoryInLean/figures/szemeredi.svg)
+[Figure: An `ε`-uniform partition](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-szemeredi)
 
 In Mathlib's statement, `Finpartition.IsEquipartition` says the parts of a
 `Finpartition` differ in size by at most `1`, and `Finpartition.IsUniform` says that
@@ -1948,7 +1948,7 @@ field and `ω² = a + b ω` has no solution in `R`. Here `-1` is not a square in
 we supply this as an instance. Mathlib has no `Fintype` instance for
 `QuadraticAlgebra`, so we transfer one from `R × R`.
 -/
-instance : Fact (¬ IsSquare (-1 : ZMod 3)) := ⟨by decide⟩
+instance : Fact (¬IsSquare (-1 : ZMod 3)) := ⟨by decide⟩
 
 instance {R : Type*} [Fintype R] {a b : R} : Fintype (QuadraticAlgebra R a b) :=
   Fintype.ofEquiv _ (QuadraticAlgebra.equivProd a b).symm
@@ -1972,7 +1972,7 @@ example : paleyGraph₉.LocallyLinear := by decide +kernel
 #eval #(paleyGraph₉.cliqueFinset 3) -- 6
 
 /-!
-[Figure: The Paley graph on $9$ vertices. Its $6$ triangles are drawn as circles, whose three arcs are edges.](https://jt496.github.io/GraphTheoryInLean/figures/paleyGraph9.svg)
+[Figure: The Paley graph `paleyGraph₉`](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-paleyGraph9)
 
 Locally linear graphs are behind the proof of the corners theorem: a corner-free set
 `A` gives a locally linear graph with `#A` triangles, and the removal lemma shows
@@ -2167,6 +2167,8 @@ component does not depend on the choice of tail. So a ray chooses, for each fini
 `K`, a component of `G - K`, and these choices are consistent: if `K ⊆ L` then the
 component chosen for `L` lies inside the one chosen for `K`. Any consistent choice of
 components is called a *direction*.
+
+[Figure: A graph with three ends](https://jt496.github.io/GraphTheoryInLean/Theorems/#figure-ends)
 -/
 section ends
 open CategoryTheory Opposite

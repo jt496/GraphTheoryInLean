@@ -109,7 +109,7 @@ constructing concrete graphs, but often appears in proofs; we return to it in
 Given `f : V → W` and `G : SimpleGraph W`, `G.comap f` is the `SimpleGraph V` where
 two vertices are adjacent iff their images under `f` are adjacent in `G`.
 
-[Figure: $G$ (right) pulled back along $f : V \to W$ (dashed arrows), to give `G.comap f` (left)](https://jt496.github.io/GraphTheoryInLean/figures/comap.svg)
+[Figure: The pullback `G.comap f`](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-comap)
 -/
 #source SimpleGraph.comap
 example {V W : Type*} (f : V → W) {v₁ v₂ : V} (G : SimpleGraph W) :
@@ -150,13 +150,13 @@ The `SimpleGraph.comap` gives a natural way to define induced subgraphs
 into `V` as a `Subtype` is given by `Function.Embedding.subtype (· ∈ s)`.
 -/
 section induced
-variable {V : Type*} {s : Set V}
+variable {V : Type*} {s : Set V} {G : SimpleGraph V}
 #check Function.Embedding.subtype (· ∈ s) -- {x // x ∈ s} ↪ V
 /-!
 The induced subgraph of `G` on the vertex set `s` is then given by the
 `SimpleGraph.comap` of `G` by this embedding.
 
-[Figure: Left: a graph $G$ with a subset $s$ of its vertices. Right: the induced subgraph on $s$](https://jt496.github.io/GraphTheoryInLean/figures/induced.svg)
+[Figure: An induced subgraph](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-induced)
 -/
 #source induce -- abbrev induce (s : Set V) (G : SimpleGraph V) : SimpleGraph s :=
                --   G.comap (Function.Embedding.subtype _)
@@ -172,19 +172,19 @@ vertices in this graph we need to provide a pair `⟨v, hv⟩` where `v : Fin 5`
 using `simp` or `decide`. (Either will work in the example below.)
 -/
 example : (C[5].induce {0, 1, 2}).Adj ⟨0, by simp⟩ ⟨1, by decide⟩ := by decide
-
+#check petersenGraph
 /-!
 In the subgraph of the path on `ℕ` induced by even natural numbers, no two
 (necessarily even) vertices are adjacent.
 -/
-example {a b : {n : ℕ // Even n}} : ¬ (pathNat.induce {n | Even n}).Adj a b := by
+example {a b : {n : ℕ // Even n}} : ¬(pathNat.induce {n | Even n}).Adj a b := by
   rw [induce_adj, pathNat_adj]
   grind
 
 example {a b : ℕ} :
-    ¬ (pathNat.induce {n | Even n}).Adj ⟨2 * a, by simp⟩ ⟨2 * b, by simp⟩ := by
+    ¬(pathNat.induce {n | Even n}).Adj ⟨2 * a, by simp⟩ ⟨2 * b, by simp⟩ := by
   rw [induce_adj, pathNat_adj]
-  -- ⊢ ¬ (↑⟨2 * a, ⋯⟩ + 1 = ↑⟨2 * b, ⋯⟩ ∨ ↑⟨2 * b, ⋯⟩ + 1 = ↑⟨2 * a, ⋯⟩)
+  -- ⊢ ¬(↑⟨2 * a, ⋯⟩ + 1 = ↑⟨2 * b, ⋯⟩ ∨ ↑⟨2 * b, ⋯⟩ + 1 = ↑⟨2 * a, ⋯⟩)
   grind
 
 /-!
@@ -192,7 +192,6 @@ If you want a subgraph whose vertices have type `V` but containing only the vert
 in `s` (which is often a more useful definition of an induced subgraph) then you need
 to use the `Subgraph` type (see [Subgraphs](#chapter-subgraphs) for details).
 -/
-variable {G : SimpleGraph V}
 #check (⊤ : G.Subgraph).induce s
 
 end induced
@@ -211,7 +210,7 @@ for the corresponding `Rel*` types in Mathlib. This means that occasionally when
 working with these maps we will use results that refer to `RelHom`, `RelEmbedding` or
 `RelIso`.
 
-[Figure: Left: a homomorphism from $C_4$ onto $K_2$, identifying opposite vertices. Centre: an embedding of a path. Right: an isomorphism](https://jt496.github.io/GraphTheoryInLean/figures/homembed.svg)
+[Figure: Homomorphism, embedding, isomorphism](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-homembed)
 
 ## Graph Homomorphisms
 -/
@@ -512,7 +511,13 @@ end coe
 
 /-!
 # Maps
+-/
 
+section maps
+variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
+
+#source SimpleGraph.map
+/-!
 Given any function `f : V → W` we can form the *map* of a graph `G : SimpleGraph V`
 along `f`. This gives a graph `G.map f : SimpleGraph W` on the vertex set `W` where
 two vertices are adjacent iff they are distinct and are the images of adjacent
@@ -520,12 +525,8 @@ vertices in `G`. The distinctness condition is needed because `f` need not be
 injective: if `f` sends two adjacent vertices to the same vertex then their edge
 would otherwise become a loop.
 
-[Figure: $G$ (left) pushed forward along $f : V \to W$ (dashed arrows), to give `G.map f` (right)](https://jt496.github.io/GraphTheoryInLean/figures/map.svg)
+[Figure: The pushforward `G.map f`](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-map)
 -/
-section maps
-variable {V W X : Type*} {G : SimpleGraph V} {H : SimpleGraph W} {K : SimpleGraph X}
-
-#source SimpleGraph.map
 
 example (f : V → W) {w₁ w₂ : W} :
     (G.map f).Adj w₁ w₂ ↔ w₁ ≠ w₂ ∧ ∃ v₁ v₂, G.Adj v₁ v₂ ∧ f v₁ = w₁ ∧ f v₂ = w₂ :=
@@ -612,6 +613,7 @@ example {s : Set V} {G : SimpleGraph V} :
   (G.induce s).spanningCoe = G ↔ G.support ⊆ s := spanningCoe_induce_eq_self ..
 
 end spanningcoe
+
 /-!
 We have now met three ways of describing a subgraph of `G : SimpleGraph V`: a graph
 `H ≤ G` with the same vertex type `V` ([Order](#section-order)), such as
@@ -620,9 +622,7 @@ vertex type is the subtype `↑s` of `V`; and a copy `Copy A G` of a graph `A` w
 vertices may have any type ([Copies](#section-copies)). Mathlib has a fourth,
 `G.Subgraph`, in which the vertex set can vary inside `V`. We compare all four later
 in [Which Notion of Subgraph?](#section-which-notion-of-subgraph).
--/
 
-/-!
 # Hypercubes and Mycielskians
 
 We now introduce the natural maps associated with hypercubes and Mycielskians.
@@ -931,8 +931,6 @@ To help in the proof we first construct a graph isomorphism from `mμ(K[2])` to
 Mathlib's *vector notation*: `![a, b, c]` is the function `Fin 3 → α` sending `0`,
 `1` and `2` to `a`, `b` and `c`. So the forward map sends the apex `none` to `0`,
 `0ˡ` and `1ˡ` to `3` and `2`, and `0ʳ` and `1ʳ` to `1` and `4`.
-
-[Figure: Left: $K_2$. Right: its Mycielskian drawn as a $5$-cycle. The orange numbers are the vertices of $C_5$ to which `mycielskianCompleteTwoIsoCycleFive` sends them](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_K2.svg)
 -/
 /-- A graph isomorphism from `mμ(K[2])` to `C[5]`. -/
 def mycielskianCompleteTwoIsoCycleFive : mμ(K[2]) ≃g C[5] where
@@ -943,6 +941,8 @@ def mycielskianCompleteTwoIsoCycleFive : mμ(K[2]) ≃g C[5] where
   map_rel_iff' := by decide +revert
 
 /-!
+[Figure: The Mycielskian `mμ(K[2])`](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-mycielskian_K2)
+
 The forward direction only needs `mμ(G)` to be regular, so we isolate it as a lemma:
 comparing the degrees of `uˡ`, `uʳ` and `none` shows that if `V` is finite and
 nonempty and `mμ(G)` is regular then `G` is a single edge.
@@ -1005,7 +1005,7 @@ We introduce the notation `G ⊗g H` for the tensor product of two graphs.
 scoped infixl:70 " ⊗g " => SimpleGraph.tensorProd
 
 /-!
-[Figure: Tensor product $P_3\otimes K_3$](https://jt496.github.io/GraphTheoryInLean/figures/tensorprod.svg)
+[Figure: The tensor product `P[3] ⊗g K[3]`](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-tensorprod)
 
 Adjacency in the tensor product is given by the adjacency relations of the two
 graphs.
@@ -1314,7 +1314,7 @@ theorem claw_isContained_iff {V : Type*} (G : SimpleGraph V) [G.LocallyFinite] :
 Next we look at the line graphs of `K[3]` and `K[1, 3]` themselves: both are
 isomorphic to `K[3]`.
 
-[Figure: Left: $K_3$ and its line graph. Right: the claw $K_{1,3}$ and its line graph.](https://jt496.github.io/GraphTheoryInLean/figures/lineGraphTriangleClaw.svg)
+[Figure: Line graphs `L[K[3]]` and `L[K[1, 3]]`](https://jt496.github.io/GraphTheoryInLean/Maps/#figure-lineGraphTriangleClaw)
 
 In defining the two isomorphisms we make heavy use of `decide`. Indeed it is in
 situations like this that we see the value of making things computable. We really

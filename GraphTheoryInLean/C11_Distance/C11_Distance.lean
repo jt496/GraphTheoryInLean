@@ -44,7 +44,7 @@ distance `0`. In this chapter we will work almost entirely with `edist`, and pas
 `dist` only when a natural number is needed; we explain why in
 [edist vs dist](#section-edist-vs-dist).
 
-[Figure: breadth-first search layers from a root vertex partition $V$ by graph distance](https://jt496.github.io/GraphTheoryInLean/figures/distance_bfs.svg)
+[Figure: Breadth-first search layers](https://jt496.github.io/GraphTheoryInLean/Distance/#figure-distance_bfs)
 -/
 variable {V : Type*} {G : SimpleGraph V}
 open Walk
@@ -100,6 +100,18 @@ This is the convention for cardinalities from
 `(ENat.card α).toNat`, so an infinite type has `Nat.card` equal to `0`, just as
 `G.dist u v` is `(G.edist u v).toNat`, which sends `⊤` to `0`. Each `ℕ∞`-valued
 parameter in this chapter is related to its `ℕ`-valued version in the same way.
+
+So when should we use `dist`? Statements and hypotheses are best phrased with
+`edist`, but inside a proof `dist` is often more convenient. Once we know that `u`
+and `v` are reachable, `G.dist u v` is a natural number equal to their distance
+(`Reachable.coe_dist_eq_edist`), so `grind` works directly, as do subtraction,
+induction on the distance and indexing such as `getVert`. With `edist` we must
+first `lift` the distance to `ℕ` or move between `ℕ` and `ℕ∞` with `norm_cast`, as
+many of the proofs below do. Some Mathlib lemmas are also stated only for `dist`: to
+show that a shortest walk is a path we use `Walk.isPath_of_length_eq_dist`, which has
+no `edist` counterpart; the walk itself shows that its endpoints are reachable, so
+the junk value cannot arise. Finally, for a finite connected graph the `ℕ`-valued
+version is often the more natural statement, as in `diam_hypercube` below.
 
 ## Distance under Homomorphisms and Isomorphisms
 
@@ -197,7 +209,7 @@ the *centre* of the graph. As with the distance, Mathlib provides an `ℕ∞`-va
 diameter `ediam` and an `ℕ`-valued `diam`. The eccentricity and the radius come only
 in `ℕ∞`-valued versions.
 
-[Figure: A graph of radius 2 and diameter 4 with a diametric path highlighted](https://jt496.github.io/GraphTheoryInLean/figures/eccentricity.svg)
+[Figure: Radius and diameter](https://jt496.github.io/GraphTheoryInLean/Distance/#figure-eccentricity)
 -/
 #source SimpleGraph.eccent  -- .. : ℕ∞ := ⨆ v, G.edist u v
 #source SimpleGraph.ediam   -- .. : ℕ∞ := ⨆ u, G.eccent u
@@ -356,7 +368,7 @@ lemma edist_mycielskian_none_left_le_two {u v : V} (h : G.Adj u v) :
   have h2 : mμ(G).Adj uʳ vˡ := by simpa
   exact edist_le (cons h1 <| cons h2 nil)
 
-theorem radius_mycielskian_le_two (h : ∀ v : V, ¬ G.IsIsolated v) :
+theorem radius_mycielskian_le_two (h : ∀ v : V, ¬G.IsIsolated v) :
     mμ(G).radius ≤ 2 := by
   refine radius_le_eccent.trans ((eccent_le_iff none _).mpr ?_)
   rintro (_ | ⟨v | v⟩)
@@ -372,26 +384,9 @@ rewrites with an inequality instead of an equation, using the same monotonicity
 facts as `gcongr`: since multiplication by `2` is monotone, the bound
 `mμ(G).radius ≤ 2` turns the goal into `2 * 2 ≤ 4`, which holds by `rfl`.
 -/
-theorem ediam_mycielskian_le_four (h : ∀ v : V, ¬ G.IsIsolated v) :
+theorem ediam_mycielskian_le_four (h : ∀ v : V, ¬G.IsIsolated v) :
     mμ(G).ediam ≤ 4 :=
   ediam_le_two_mul_radius.trans <| by grw [radius_mycielskian_le_two h]; rfl
-
-/-!
-The `ℕ`-valued version of the bound, on the other hand, needs no hypothesis at all,
-since the diameter of a disconnected graph is the junk value `0`. Here the junk value
-removes a hypothesis, but only because the `ℕ`-valued statement says nothing about
-the disconnected case.
--/
-theorem diam_mycielskian_le_four : mμ(G).diam ≤ 4 := by
-  by_cases! h : ∀ v : V, ¬ G.IsIsolated v
-  · exact ENat.toNat_le_of_le_natCast (ediam_mycielskian_le_four h)
-  · -- an isolated vertex `v` of `G` makes `vˡ` isolated in `mμ(G)`
-    obtain ⟨v, hv⟩ := h
-    refine (diam_eq_zero_of_not_connected fun hc => ?_).trans_le (by norm_num)
-    obtain ⟨p⟩ := hc.preconnected vˡ none
-    cases p with
-    | @cons _ x _ ha _ =>
-      rcases x with _ | x | x <;> simp_all [IsIsolated]
 
 /-!
 # Albertson's Precolouring Extension Theorem
@@ -459,7 +454,7 @@ the two sides of `K[3, 3]` need disjoint sets of colours, which is impossible wi
 three colours. The graph is bipartite, so this precolouring of a `2`-colourable graph
 does not extend to a `3`-colouring.
 
-[Figure: $K_{3,3}$ with a precoloured pendant at each vertex, and the colours still available to each vertex of $K_{3,3}$](https://jt496.github.io/GraphTheoryInLean/figures/precolouring_k33.svg)
+[Figure: A precoloured `K[3, 3]`](https://jt496.github.io/GraphTheoryInLean/Distance/#figure-precolouring_k33)
 
 # Girth
 
@@ -473,7 +468,7 @@ Girth also enters the Mycielski construction: `mμ(G)` raises the chromatic numb
 (`chromaticNumber_mycielskian`) while staying triangle-free
 (`CliqueFree.mycielskian`), and below we compute its girth exactly.
 
-[Figure: A graph of girth $3$, with a shortest cycle highlighted](https://jt496.github.io/GraphTheoryInLean/figures/girth.svg)
+[Figure: A graph of girth `3`](https://jt496.github.io/GraphTheoryInLean/Distance/#figure-girth)
 -/
 
 #check egirth  -- G.egirth : ℕ∞
@@ -777,7 +772,7 @@ breadth-first search tree rooted at `r`, as in the figure below of the Petersen 
 bounds relating the number of vertices of a graph to its degrees, its diameter and
 its girth.
 
-[Figure: The Petersen graph by distance from the root $r = \{0, 1\}$](https://jt496.github.io/GraphTheoryInLean/figures/petersen_layers.svg)
+[Figure: The `petersenGraph` by distance](https://jt496.github.io/GraphTheoryInLean/Distance/#figure-petersen_layers)
 
 * The *Moore bound*
   [Hoffman–Singleton 1960](https://jt496.github.io/GraphTheoryInLean/Bibliography/#bib-hoffman-singleton-1960):

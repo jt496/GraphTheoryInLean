@@ -127,7 +127,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
 the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
-    (h : ∀ v, ¬ G.IsIsolated v) :
+    (h : ∀ v, ¬G.IsIsolated v) :
     Module.finrank ℝ (mμ(G).lapMatrix ℝ).toLin'.ker = 1 := by
   sorry
 
@@ -142,7 +142,7 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
 13. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
 example [Fintype V] [DecidableRel G.Adj] :
-    ¬ G.IsSRGWith 10 4 0 1 := by
+    ¬G.IsSRGWith 10 4 0 1 := by
   sorry
 
 /-!
@@ -461,7 +461,7 @@ example [Fintype V] [DecidableEq V] [DecidableRel G.Adj] (i : V) :
 the Mycielskian `mμ(G)` is `1`-dimensional.
 -/
 example [Fintype V] [DecidableEq V] [DecidableRel G.Adj]
-    (h : ∀ v, ¬ G.IsIsolated v) :
+    (h : ∀ v, ¬G.IsIsolated v) :
     Module.finrank ℝ (mμ(G).lapMatrix ℝ).toLin'.ker = 1 := by
   rw [← card_connectedComponent_eq_finrank_ker_toLin'_lapMatrix,
     Fintype.card_eq_nat_card]
@@ -478,14 +478,14 @@ example : C[5].IsSRGWith 5 2 0 1 ∧ C[5].ediam = 2 := by
       of_adj := by decide
       of_not_adj := by intro u v; decide +revert}
   refine ⟨h, h.ediam_eq_two (fun h' => ?_) one_ne_zero⟩
-  have hne : ¬ C[5].Adj 0 2 := by decide
+  have hne : ¬C[5].Adj 0 2 := by decide
   exact hne (by rw [h', top_adj]; decide)
 
 /-!
 13. Show that there is no strongly regular graph with parameters `(10, 4, 0, 1)`.
 -/
 example [Fintype V] [DecidableRel G.Adj] :
-    ¬ G.IsSRGWith 10 4 0 1 := fun h => by
+    ¬G.IsSRGWith 10 4 0 1 := fun h => by
   have := h.param_eq G (by norm_num)
   norm_num at this
 

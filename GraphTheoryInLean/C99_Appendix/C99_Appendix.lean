@@ -335,7 +335,7 @@ The following custom definitions and abbreviations are introduced in this guide:
   `c`.
 * `ColoringOn.singleton`: colouring of `{a}` by any colour `c`.
 * `ColoringOn.ofNotAdj`: colouring of `{a, b}` by a single colour `c` when
-  `¬ G.Adj a b`.
+  `¬G.Adj a b`.
 * `ColoringOn.union`: combination of compatible colourings of `s` and `t` into a
   colouring of `s ∪ t`.
 * `ColoringOn.insert`: extension of a colouring of `s` to `insert a s` using a colour
@@ -847,8 +847,6 @@ The following results are proved in this guide and its exercises:
   radius `n`.
 * `radius_mycielskian_le_two` / `ediam_mycielskian_le_four`: the Mycielskian of a
   graph without isolated vertices has radius at most `2` and diameter at most `4`.
-* `diam_mycielskian_le_four`: the `ℕ`-valued diameter of any Mycielskian is at most
-  `4`.
 * `Colorable.extend_precoloring`: Albertson's theorem, a precolouring of vertices
   pairwise at distance at least `4` in a `k`-colourable graph extends to a
   `(k + 1)`-colouring.

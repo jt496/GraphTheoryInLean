@@ -56,8 +56,8 @@ example {W : Type*} {H : SimpleGraph W}
 6. Show that if `G` has no isolated vertices then the Mycielskian `mμ(G)` has no
 bridges. Hint: `isBridge_mycielskian_iff`.
 -/
-example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
-    (he : e ∈ mμ(G).edgeSet) : ¬ mμ(G).IsBridge e := by
+example (hG : ∀ v, ¬G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
+    (he : e ∈ mμ(G).edgeSet) : ¬mμ(G).IsBridge e := by
   sorry
 
 /-!
@@ -227,7 +227,7 @@ lemma isEdgeConnected_hypercube' (n : ℕ) : Q[n].IsEdgeConnected n := by
   sorry
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
-    ¬ Q[n + 2].IsBridge s(u, v) := by
+    ¬Q[n + 2].IsBridge s(u, v) := by
   sorry
 
 /-!
@@ -352,16 +352,16 @@ example [Nonempty V] : G.Connected ∨ Gᶜ.Connected := by
   simp only [Preconnected, not_forall] at hG
   obtain ⟨u, v, huv⟩ := hG
   -- vertices that are not reachable from each other in `G` are adjacent in `Gᶜ`
-  have hadj (x y : V) (h : ¬ G.Reachable x y) : Gᶜ.Adj x y :=
+  have hadj (x y : V) (h : ¬G.Reachable x y) : Gᶜ.Adj x y :=
     ⟨fun hxy => h (hxy ▸ .refl _), fun hxy => h hxy.reachable⟩
   refine .inr ⟨fun x y => ?_⟩
   by_cases hxy : G.Reachable x y
   · -- `x` and `y` lie in one component of `G`, which misses `u` or `v`
     by_cases hxu : G.Reachable x u
-    · have hxv : ¬ G.Reachable x v := fun h => huv (hxu.symm.trans h)
-      have hyv : ¬ G.Reachable y v := fun h => hxv (hxy.trans h)
+    · have hxv : ¬G.Reachable x v := fun h => huv (hxu.symm.trans h)
+      have hyv : ¬G.Reachable y v := fun h => hxv (hxy.trans h)
       exact (hadj x v hxv).reachable.trans (hadj y v hyv).reachable.symm
-    · have hyu : ¬ G.Reachable y u := fun h => hxu (hxy.trans h)
+    · have hyu : ¬G.Reachable y u := fun h => hxu (hxy.trans h)
       exact (hadj x u hxu).reachable.trans (hadj y u hyu).reachable.symm
   · exact (hadj x y hxy).reachable
 
@@ -430,8 +430,8 @@ example {W : Type*} {H : SimpleGraph W}
 6. Show that if `G` has no isolated vertices then the Mycielskian `mμ(G)` has no
 bridges. Hint: `isBridge_mycielskian_iff`.
 -/
-example (hG : ∀ v, ¬ G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
-    (he : e ∈ mμ(G).edgeSet) : ¬ mμ(G).IsBridge e := fun hb => by
+example (hG : ∀ v, ¬G.IsIsolated v) {e : Sym2 (Option (V ⊕ V))}
+    (he : e ∈ mμ(G).edgeSet) : ¬mμ(G).IsBridge e := fun hb => by
   obtain ⟨u, hu, -⟩ := (isBridge_mycielskian_iff he).mp hb
   exact hG u hu
 
@@ -703,7 +703,7 @@ lemma isEdgeConnected_hypercube (n : ℕ) : Q[n].IsEdgeConnected n :=
   (isVertexConnected_hypercube n).isEdgeConnected
 
 example (n : ℕ) {u v : HypercubeVert (n + 2)} (h : Q[n + 2].Adj u v) :
-    ¬ Q[n + 2].IsBridge s(u, v) := fun hb =>
+    ¬Q[n + 2].IsBridge s(u, v) := fun hb =>
   (isBridge_iff_not_isEdgeReachable_two h).mp hb
     ((isEdgeConnected_hypercube (n + 2)).anti (by simp) u v)
 
@@ -735,7 +735,7 @@ example : κ(bowtie) < λ(bowtie) := by
   have h2e : bowtie.IsEdgeConnected 2 :=
     isEdgeConnected_two_iff_forall_preconnected.mpr (by decide)
   -- deleting the shared vertex `0` disconnects it
-  have h2v : ¬ bowtie.IsVertexConnected 2 := fun h =>
+  have h2v : ¬bowtie.IsVertexConnected 2 := fun h =>
     absurd ((isVertexConnected_iff_induce.mp h).2 {0} (by simp)) (by decide)
   have hκ : κ(bowtie) < 2 := not_le.mp (mt le_vertexConnectivity_iff.mp h2v)
   exact hκ.trans_le (le_edgeConnectivity_iff.mpr h2e)
@@ -750,7 +750,7 @@ In fact `λ(barbell) = 1`, since `3 — 4` is a bridge, and `δ(barbell) = 3`.
 -/
 example : λ(barbell) < δ(barbell) := by
   -- deleting the bridge `3 — 4` disconnects the barbell
-  have h2e : ¬ barbell.IsEdgeConnected 2 := fun h =>
+  have h2e : ¬barbell.IsEdgeConnected 2 := fun h =>
     absurd (isEdgeConnected_two_iff_forall_preconnected.mp h s(3, 4)) (by decide)
   have hl : λ(barbell) < 2 := not_le.mp (mt le_edgeConnectivity_iff.mp h2e)
   -- every vertex has degree at least `3`

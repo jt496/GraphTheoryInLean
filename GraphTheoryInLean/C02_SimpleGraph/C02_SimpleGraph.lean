@@ -61,9 +61,9 @@ so we can treat it as the undirected edge `u — v`.)
 example {u v : V} (h : G.Adj u v) : G.Adj v u := h.symm
 /-!
 The fact that `G` does not have a loop at a vertex `u` is the proposition
-`¬ G.Adj u u`.
+`¬G.Adj u u`.
 -/
-example {u : V} : ¬ G.Adj u u := G.irrefl
+example {u : V} : ¬G.Adj u u := G.irrefl
 /-!
 # Edges
 
@@ -98,7 +98,7 @@ step is `induction e using Sym2.ind`. Every term of `Sym2 V` is `s(x, y)` for so
 `x y : V`, and `Sym2.ind` reduces the goal to that case. For example, no edge of `G`
 is a loop. Mathlib calls a pair of the form `s(v, v)` *diagonal* (`Sym2.IsDiag`).
 -/
-example (e : Sym2 V) (he : e ∈ G.edgeSet) : ¬ e.IsDiag := by
+example (e : Sym2 V) (he : e ∈ G.edgeSet) : ¬e.IsDiag := by
   induction e using Sym2.ind with
   | _ x y =>                 -- he : s(x, y) ∈ G.edgeSet ⊢ ¬s(x, y).IsDiag
     rw [mem_edgeSet] at he
@@ -286,7 +286,7 @@ variable (H : SimpleGraph V)
 The definition of *proper* subgraph (`G < H`) is phrased differently to how we might
 expect. Rather than `G < H ↔ G ≤ H ∧ G ≠ H` we have:
 -/
-example : G < H ↔ G ≤ H ∧ ¬ H ≤ G := by rfl
+example : G < H ↔ G ≤ H ∧ ¬H ≤ G := by rfl
 /-!
 Of course they are equivalent.
 -/
@@ -303,7 +303,7 @@ The *inf* of `G` and `H`, denoted `G ⊓ H`, is the `SimpleGraph V` in which any
 of vertices from `V` are adjacent iff they are adjacent in both `G` and `H` (i.e. it
 is the intersection of `G` and `H`).
 
-[Figure: Top: graphs $G$ (blue) and $H$ (red) on the same vertices. Bottom: their inf $G \sqcap H$ (left) and sup $G \sqcup H$ (right), with the edges in both graphs in green](https://jt496.github.io/GraphTheoryInLean/figures/inf.svg)
+[Figure: Inf and sup of two graphs](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#figure-inf)
 -/
 #check inf_adj
 
@@ -321,7 +321,7 @@ are necessarily unchanged.)
 #check sdiff_adj
 
 /-!
-[Figure: Top: graphs $G$ and $H$. Bottom: the complement $G^c$ (left) and the set difference $G \setminus H$ (right)](https://jt496.github.io/GraphTheoryInLean/figures/sdiff.svg)
+[Figure: Complement and difference](https://jt496.github.io/GraphTheoryInLean/SimpleGraph/#figure-sdiff)
 
 We can remove a set of edges `s : Set (Sym2 V)` from a graph `G` to form
 `G.deleteEdges s`. If `s = H.edgeSet` then this is the same as the set difference
@@ -367,8 +367,7 @@ Notice that the last few proofs all made use of results about orders rather than
 anything specific to graphs. They all follow easily from Mathlib's instance of
 `CompleteAtomicBooleanAlgebra (SimpleGraph V)`, which we displayed with `#synth` at
 the start of this section.
--/
-/-!
+
 # Constructing a SimpleGraph
 
 The simplest way to build a `SimpleGraph` is with its default constructor:

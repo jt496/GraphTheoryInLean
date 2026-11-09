@@ -62,7 +62,7 @@ example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
 not `2`-colourable. Hint: `recolorOfEquiv` and `finTwoEquiv` turn a colouring by
 `Fin 2` into a `Bool`-colouring.
 -/
-example : ¬ C[5].Colorable 2 := by
+example : ¬C[5].Colorable 2 := by
   sorry
 
 /-!
@@ -80,7 +80,7 @@ lemma Walk.cons_isHamiltonianCycle_iff' [DecidableEq V] {u v : V} (p : G.Walk v 
 three.
 -/
 lemma Walk.IsCycle.not_nil_tail' {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
-    ¬ c.tail.Nil := by
+    ¬c.tail.Nil := by
   sorry
 
 /-!
@@ -181,13 +181,13 @@ abbrev chordedC5 : SimpleGraph (Fin 5) := C[5] ⊔ edge 0 2 ⊔ edge 0 3
 18. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
 have degree `2`.
 -/
-example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
+example : ¬chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   sorry
 
 /-!
 19. Show that `chordedC5` is not an Ore graph.
 -/
-example : ¬ chordedC5.IsOreGraph := by
+example : ¬chordedC5.IsOreGraph := by
   sorry
 
 /-!
@@ -203,8 +203,7 @@ maximum-length paths. The chapter's crossing-pair machinery
 (`Walk.IsMaximalPath.exists_cycle_spanning`) will be useful here; the exercises
 supply the extremal argument that replaces the closure. We begin with some
 warm-up properties of Ore graphs.
--/
-/-!
+
 21. In an Ore graph any two distinct vertices are either adjacent or have a common
 neighbour. Hint: if distinct vertices `u` and `v` are non-adjacent and have no
 common neighbour, then their neighbourhoods are disjoint subsets of `V \ {u, v}`,
@@ -367,6 +366,7 @@ example [Fintype V] [DecidableEq V] [G.LocallyFinite] (h : G.IsOreGraph)
   sorry
 
 /-! SOLUTIONS -/
+
 /-!
 1. Show that if `p : G.Walk u v` has length `0` then `u = v`. Hint: use `cases p`.
 -/
@@ -425,7 +425,7 @@ example : eulerC5.IsEulerian ∧ eulerC5.IsCircuit := by
 not `2`-colourable. Hint: `recolorOfEquiv` and `finTwoEquiv` turn a colouring by
 `Fin 2` into a `Bool`-colouring.
 -/
-example : ¬ C[5].Colorable 2 := by
+example : ¬C[5].Colorable 2 := by
   rintro ⟨c⟩
   -- as a `Bool`-colouring, `c` would give the closed walk `eulerC5` even length
   have := ((C[5]).recolorOfEquiv finTwoEquiv c).even_length_iff eulerC5
@@ -450,7 +450,7 @@ lemma Walk.cons_isHamiltonianCycle_iff [DecidableEq V] {u v : V} (p : G.Walk v u
 three.
 -/
 lemma Walk.IsCycle.not_nil_tail {u : V} {c : G.Walk u u} (hc : c.IsCycle) :
-    ¬ c.tail.Nil := by
+    ¬c.tail.Nil := by
   grind [length_tail_add_one, hc.three_le_length]
 
 /-!
@@ -558,13 +558,13 @@ lemma Walk.IsHamiltonian.isHamiltonianCycle_posaClosed {u v} {i} [DecidableEq V]
 18. Check that the vertices `1` and `4` of `chordedC5` are not adjacent and that both
 have degree `2`.
 -/
-example : ¬ chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
+example : ¬chordedC5.Adj 1 4 ∧ chordedC5.degree 1 = 2 ∧ chordedC5.degree 4 = 2 := by
   decide
 
 /-!
 19. Show that `chordedC5` is not an Ore graph.
 -/
-example : ¬ chordedC5.IsOreGraph := by
+example : ¬chordedC5.IsOreGraph := by
   -- the non-adjacent vertices `1` and `4` have degree sum `4 < 5`
   intro h
   have h14 := h 1 4

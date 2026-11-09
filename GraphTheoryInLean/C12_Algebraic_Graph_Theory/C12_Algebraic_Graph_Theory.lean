@@ -140,7 +140,7 @@ lemma card_aut_pathNat : Nat.card (pathNat ≃g pathNat) = 1 :=
 /-!
 In particular `pathNat` is not vertex-transitive.
 -/
-lemma not_isVertexTransitive_pathNat : ¬ pathNat.IsVertexTransitive := by
+lemma not_isVertexTransitive_pathNat : ¬pathNat.IsVertexTransitive := by
   intro h
   obtain ⟨e, he⟩ := h 0 1
   simp [aut_pathNat_apply_zero] at he
@@ -324,7 +324,7 @@ The *adjacency matrix* `G.adjMatrix R` of `G` over a type `R` with a zero and a 
 (`[Zero R], [One R]`) has `(i, j)` entry `1` if `i` and `j` are adjacent in `G` and
 `0` otherwise. (Informally we will denote it by `A`.)
 
-[Figure: A graph $G$ and its adjacency matrix](https://jt496.github.io/GraphTheoryInLean/figures/adjmatrix.svg)
+[Figure: A graph `G` and its adjacency matrix `G.adjMatrix`](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-adjmatrix)
 
 Mathlib writes a matrix row by row with the `!![⋯]` notation, separating the entries
 of a row by commas and the rows by semicolons.
@@ -353,7 +353,7 @@ matrix `1` is defined by comparing indices. `[G.LocallyFinite]` is not enough: i
 makes the number of walks of each length between two vertices finite, which is all
 `finsetWalkLength` needs, but Mathlib's matrix product needs a finite index type.)
 
-[Figure: The two length-2 walks from vertex 1 to vertex 3 and the entry $(A^2)_{1,3}=2$](https://jt496.github.io/GraphTheoryInLean/figures/walkcount.svg)
+[Figure: Walks counted by `A²`](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-walkcount)
 -/
 #source finsetWalkLength
 #check adjMatrix_pow_apply_eq_card_walk
@@ -494,7 +494,7 @@ check the resulting integer matrix, a finite computation. We then expand the
 determinant along its rows with `det_succ_row_zero`, and finish the proof with
 `ring`.
 
-[Figure: Left: the star $K_{4,1}$. Right: the disjoint union of $C_4$ and $K_1$. Vertices are numbered by `finSumFinEquiv` as in the matrices below. Both graphs have characteristic polynomial $x^5 -4x^3$](https://jt496.github.io/GraphTheoryInLean/figures/cospectral.svg)
+[Figure: Two cospectral graphs](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-cospectral)
 
 -/
 example : (K[4, 1].adjMatrix ℤ).charpoly = X ^ 5 - 4 * X ^ 3 := by
@@ -537,7 +537,7 @@ But `K[4, 1]` has no isolated vertices, while `C[4] ⊕g K[1]` obviously does.
 -/
 example : IsEmpty (K[4, 1] ≃g C[4] ⊕g K[1]) := ⟨fun e => by
   have h₁ : ∀ v, ∃ w, K[4, 1].Adj v w := by decide
-  have h₂ : ∀ w, ¬ (C[4] ⊕g K[1]).Adj (.inr 0) w := by decide
+  have h₂ : ∀ w, ¬(C[4] ⊕g K[1]).Adj (.inr 0) w := by decide
   obtain ⟨w, hw⟩ := h₁ (e.symm (.inr 0))
   exact h₂ (e w) (by simpa using e.map_adj_iff.2 hw)⟩
 
@@ -565,7 +565,7 @@ adjacency matrix of `mμ(G)` has the block form shown in the figure.
  `   left   [  0     A     A  ] * [ t x ] = [ (t + 1) A x ]   `
  `   right  [  1     A     0  ]   [ x   ]   [ t A x       ]   `
 
-[Figure: The adjacency matrix of the Mycielskian, applied to a vector with blocks $0$, $tx$ and $x$](https://jt496.github.io/GraphTheoryInLean/figures/mycielskian_adjmatrix.svg)
+[Figure: Mycielskian adjacency matrix](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-mycielskian_adjmatrix)
 
 Now let `x` be an eigenvector of `A` with eigenvalue `ξ` whose entries sum to zero,
 i.e. `x` is orthogonal to `1`: so `A x = ξ x` and `1ᵀ x = 0`. The vector `y` with
@@ -691,9 +691,8 @@ entries form the `degreeMultiset`, and listing them in non-increasing order give
 
 The *Laplacian* (`lapMatrix`) is given by `L = D - A`.
 
-[Figure: A graph $G$ and its Laplacian $L = D - A$](https://jt496.github.io/GraphTheoryInLean/figures/laplacian.svg)
+[Figure: A graph and its Laplacian](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-laplacian)
 -/
-
 #source degMatrix -- Matrix V V R := Matrix.diagonal (G.degree ·)
 #source lapMatrix -- Matrix V V R := G.degMatrix R - G.adjMatrix R
 
@@ -824,7 +823,7 @@ Layers](#section-distance-layers)), but `decide` can check the facts we need to 
 lemma ediam_petersenGraph : petersenGraph.ediam = 2 := by
   have : Nontrivial {s : Finset (Fin 5) // s.card = 2} :=
     Fintype.one_lt_card_iff_nontrivial.mp (by decide)
-  have hne : ¬ petersenGraph.Adj ⟨{0, 1}, rfl⟩ ⟨{0, 2}, rfl⟩ := by decide
+  have hne : ¬petersenGraph.Adj ⟨{0, 1}, rfl⟩ ⟨{0, 2}, rfl⟩ := by decide
   refine IsSRGWith.petersenGraph.ediam_eq_two (fun h => hne ?_) one_ne_zero
   rw [h, top_adj]
   decide
@@ -982,7 +981,7 @@ girth `5` by `IsSRGWith.five_le_egirth`, with the pentagon `P₀` giving a copy 
 `k = 2`.
 -/
 lemma ediam_hoffmanSingletonGraph : hoffmanSingletonGraph.ediam = 2 := by
-  have hne : ¬ hoffmanSingletonGraph.Adj (.inl (0, 0)) (.inl (0, 2)) := by decide
+  have hne : ¬hoffmanSingletonGraph.Adj (.inl (0, 0)) (.inl (0, 2)) := by decide
   refine IsSRGWith.hoffmanSingletonGraph.ediam_eq_two (fun h => hne ?_) one_ne_zero
   rw [h, top_adj]
   decide
@@ -1907,7 +1906,7 @@ directions: the vertex `x` of `Q[k]` is sent to `b + extendEmb d x`, where
 `extendEmb d x` places the coordinates of `x` in the positions selected by `d`
 and is `false` elsewhere.
 
-[Figure: Left: $Q_2$. Right: the canonical copy `subcubeCopy b d` of $Q_2$ in $Q_4$, with base point $b = \mathtt{FTFF}$ and free directions `d 0 = 0` and `d 1 = 3`](https://jt496.github.io/GraphTheoryInLean/figures/subcube.svg)
+[Figure: A copy of `Q[2]` in `Q[4]`](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-subcube)
 -/
 namespace hypercubeHamming
 
