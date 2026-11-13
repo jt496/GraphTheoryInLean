@@ -665,16 +665,20 @@ lemma ediam_cycleGraph (n : ℕ) : (cycleGraph (n + 3)).ediam = ((n + 3) / 2 : �
 ## Girth of the Hypercube
 
 The hypercube is triangle-free (`cliqueFree_hypercube_three`), so its girth is at
-least `4`, and for `n ≥ 2` it contains a `4`-cycle: in `Q[2]` the Gray-code
-Hamiltonian cycle `hypercube.grayCycle` is one. Each larger cube contains a copy of
-the previous one, via the embedding `hypercube.embedFalse`, so by
-`IsContained.egirth_le` again its girth is at most that of the smaller cube.
+least `4`, and for `n ≥ 2` it contains a `4`-cycle. In the exercises on walks
+([Exercises](#section-exercises-walks)) we showed that `Q[n]` is Hamiltonian for
+`n ≠ 1` (`isHamiltonian_hypercube`), and a Hamiltonian cycle in `Q[2]`, which has `4`
+vertices, is a `4`-cycle. Each larger cube contains a copy of the previous one, via
+the embedding `hypercube.embedFalse`, so by `IsContained.egirth_le` again its girth
+is at most that of the smaller cube.
 -/
 lemma egirth_hypercube {n : ℕ} : egirth Q[n + 2] = 4 := by
   refine
     (four_le_egirth_of_cliqueFree_three (cliqueFree_hypercube_three _)).antisymm' ?_
   induction n with
-  | zero => exact (hypercube.isCycle_grayCycle 0).egirth_le_length
+  | zero =>
+    have ⟨_, _, hp⟩ := isHamiltonian_hypercube (n := 2) (by simp) (by simp)
+    exact hp.egirth_le_length.trans (by simp [hp.length_eq])
   | succ n ih =>
     exact (IsContained.egirth_le ⟨(hypercube.embedFalse _).toCopy⟩).trans ih
 

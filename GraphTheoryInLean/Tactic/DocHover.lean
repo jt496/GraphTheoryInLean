@@ -83,7 +83,11 @@ In a chapter of a guide (a file `C01_Introduction/X.lean`, say), each cross-refe
 `<REF>tag</REF>` or `<REF tag>text</REF>`, or `[text](#tag)` as the plain export
 writes one, goes to the heading of the guide with that tag on Ctrl-click, and shows
 the heading's title on hover, even when the heading is in a chapter the file does not
-import. A tag that names no heading gets a warning.
+import. A tag that names no heading gets a warning. A cross-reference
+`<REF key:tag>text</REF>` into another published guide (one of the `remotes` of
+`guide.json`; see `stil/tools/remotes.py`) shows that guide's title for the heading,
+its number there and a link to it on hover, from the index the build keeps in
+`.lake/stil-remotes/`; one that does not resolve gets a warning saying why.
 
 Turn it off with `set_option linter.docHover false`. The guide's generated Verso
 files do, since Verso highlights their code from the info trees the linter adds to.
@@ -402,6 +406,71 @@ partial def guideChapterTitles (dir : FilePath) : IO Json := do
   match dir.parent with
   | some parent => if parent == dir then return .null else guideChapterTitles parent
   | none => return .null
+
+/-- The nearest directory at or above `dir` that has a `guide.json`. -/
+partial def guideDir? (dir : FilePath) : IO (Option FilePath) := do
+  if ← (dir / "guide.json").pathExists then
+    return some dir
+  match dir.parent with
+  | some parent => if parent == dir then return none else guideDir? parent
+  | none => return none
+
+/-- The key and tag of a cross-reference `key:tag` into another guide (one of the
+`remotes` of `guide.json`; see `stil/tools/remotes.py`). The guide's own tags are
+slugs, which have no colon. -/
+def remoteRef? (tag : String) : Option (String × String) :=
+  match tag.splitOn ":" with
+  | key :: rest@(_ :: _) =>
+    let t := ":".intercalate rest
+    if key.front.isAlpha && key.all (fun c => c.isAlphanum || c == '_' || c == '-')
+        && !t.isEmpty then
+      some (key, t)
+    else none
+  | _ => none
+
+/-- The JSON files last read for `remoteHover`, with their modification times. -/
+initialize remoteJsonCache :
+    IO.Ref (Std.HashMap FilePath (IO.FS.SystemTime × Json)) ← IO.mkRef {}
+
+/-- The JSON in the file `path`, read again only after it has changed; `none` if it
+is missing or not JSON. -/
+def readJsonCached? (path : FilePath) : IO (Option Json) := do
+  unless ← path.pathExists do
+    return none
+  let modified := (← path.metadata).modified
+  if let some (t, j) := (← remoteJsonCache.get)[path]? then
+    if t == modified then
+      return some j
+  match Json.parse (← IO.FS.readFile path) with
+  | .ok j =>
+    remoteJsonCache.modify (·.insert path (modified, j))
+    return some j
+  | .error _ => return none
+
+/-- What hovering over the cross-reference `key:tag` into another guide shows (the
+heading's title and number there, and a link to it), from the index that the build
+keeps in `.lake/stil-remotes/key.json` of the guide in `dir`; or, as an error, why
+it does not resolve. -/
+def remoteHover (dir : FilePath) (key tag : String) : IO (Except String String) := do
+  let configured := match ← readJsonCached? (dir / "guide.json") with
+    | some cfg => ((cfg.getObjValD "remotes").getObjVal? key).isOk
+    | none => false
+  unless configured do
+    return .error s!"no remote `{key}` in the `remotes` of guide.json"
+  let some index ← readJsonCached? (dir / ".lake" / "stil-remotes" / s!"{key}.json")
+    | return .error s!"no index of the remote `{key}`: run `make deps`"
+  let short := (index.getObjValAs? String "short_name").toOption.getD key.toUpper
+  let guide := (index.getObjValAs? String "title").toOption.getD short
+  let .ok entry := (index.getObjValD "sections").getObjVal? tag
+    | return .error s!"{short} has no chapter or section with the tag `{tag}` \
+        (after a change to {short}, run `make remotes`)"
+  let title := (entry.getObjValAs? String "title").toOption.getD tag
+  let url := (entry.getObjValAs? String "url").toOption.getD ""
+  let place := match entry.getObjValAs? String "number" with
+    | .ok n =>
+      if tag.startsWith "chapter-" then s!"Chapter {n} of " else s!"§{n} of "
+    | .error _ => "in "
+  return .ok s!"*{title}*, {place}*{guide}*\n\n[{url}]({url})"
 
 /-- The modification times of the files of the chapter directories in `root`, from
 which `headingIndex` was last computed, with its result. -/
@@ -1062,6 +1131,13 @@ def docHoverLinter : Linter where
     -- The headings of the guide, read only for a comment with a cross-reference.
     let index? ← if docs.any fun doc => !(refs (commentBody doc).getAtomVal).isEmpty
       then currentHeadingIndex? else pure none
+    -- The guide's directory, for cross-references into other guides.
+    let dir? ← if index?.isSome then do
+        let file ← try IO.FS.realPath (← getFileName) catch _ => pure (← getFileName)
+        match file.parent with
+        | some d => guideDir? d
+        | none => pure none
+      else pure none
     let fileMap ← getFileMap
     -- `liftTermElabM` records the info nodes with the context the server needs.
     let vars ← liftTermElabM do
@@ -1166,6 +1242,18 @@ def docHoverLinter : Linter where
           let b : String.Pos.Raw := ⟨start.byteIdx + b⟩
           let e : String.Pos.Raw := ⟨start.byteIdx + e⟩
           let ref := Syntax.atom (.synthetic b e (canonical := true)) tag
+          -- A heading of another guide: its title, number and link on hover.
+          if let some (key, rtag) := remoteRef? tag then
+            let some dir := dir? | continue
+            match ← remoteHover dir key rtag with
+            | .ok hover =>
+              pushInfoLeaf <| .ofDelabTermInfo {
+                elaborator := .anonymous, stx := ref, lctx := ← getLCtx
+                expectedType? := none, expr := mkStrLit tag
+                location? := none
+                mkDocString? := some fun _ => pure hover }
+            | .error msg => Linter.logLint linter.docHover ref m!"{msg}"
+            continue
           let some target := index[tag]?
             | Linter.logLint linter.docHover ref
                 m!"no heading of the guide has the tag `{tag}`"

@@ -720,7 +720,7 @@ lemma IsTrail.exists_unused_edge_of_even {v w} (h2 : ∀ x, Even (G.degree x))
 /-!
 A trail repeats no edges, so its length is at most the number of edges in the graph.
 -/
-#check IsTrail.length_le_card_edgeFinset  -- p.IsTrail → p.length ≤ #G.edgeFinset
+#check IsTrail.length_le_ncard_edgeSet  -- p.IsTrail → p.length ≤ G.edgeSet.ncard
 
 /-!
 In an all-even-degree graph, any trail `p` starting at `v` can be extended to a
@@ -730,9 +730,9 @@ closed trail from `v` of length at least `p.length`, by repeatedly applying
 obvious to Lean that this is well-founded so we need to give a termination argument.
 
 We know that no trail is longer than the number of edges in the graph
-(`IsTrail.length_le_card_edgeFinset`), and the trail in the recursive call is
+(`IsTrail.length_le_ncard_edgeSet`), and the trail in the recursive call is
 strictly longer than the original trail `p`, so the measure
-`Nat.card G.edgeSet - p.length` strictly decreases with each recursive call. This is
+`G.edgeSet.ncard - p.length` strictly decreases with each recursive call. This is
 what we are doing in the `termination_by` and `decreasing_by` section below. The
 lemma assumes `[Finite G.edgeSet]`: in a graph with infinitely many edges, such as
 the two-way infinite path, a trail can be extended forever.
@@ -750,11 +750,8 @@ lemma IsTrail.exists_closed_isTrail_length_le [Finite G.edgeSet]
     -- Call the theorem recursively on this longer trail.
     obtain ⟨q, hq, hlen⟩ := hp'.exists_closed_isTrail_length_le h2
     exact ⟨q, hq, by grind [length_concat]⟩
-termination_by Nat.card G.edgeSet - p.length
-decreasing_by
-  have := Fintype.ofFinite G.edgeSet
-  grind [hp'.length_le_card_edgeFinset, length_concat, Nat.card_eq_fintype_card,
-    edgeFinset_card]
+termination_by G.edgeSet.ncard - p.length
+decreasing_by grind [hp'.length_le_ncard_edgeSet, length_concat]
 
 /-!
 Starting from any vertex of positive degree in an all-even-degree graph there is a
@@ -881,13 +878,12 @@ end Walk
 ## Euler's Theorem
 
 Both cases of Euler's theorem now follow. Let `q` be a longest trail from `a` to `b`
-(trails have length at most `#G.edgeFinset`, so one exists as long as there is any
+(trails have length at most `G.edgeSet.ncard`, so one exists as long as there is any
 trail `q₀` from `a` to `b`). If `q` is not Eulerian then
 `IsTrail.exists_longer_of_not_isEulerian` gives a longer trail, a contradiction. The
 two cases differ only in why deleting the edges of a trail leaves every degree even,
 so we take this as the hypothesis `hdel`.
 -/
-open Finset
 variable [G.LocallyFinite] [DecidableEq V] [Finite G.edgeSet]
 
 lemma exists_isEulerian_of_isTrail {a b} (hG : G.EdgesInOneComponent)
@@ -896,17 +892,16 @@ lemma exists_isEulerian_of_isTrail {a b} (hG : G.EdgesInOneComponent)
       ∀ x, Even ((G.deleteEdges {e | e ∈ q.edges}).degree x)) :
     ∃ p : G.Walk a b, p.IsEulerian := by
   classical
-  have : Fintype G.edgeSet := (Set.toFinite _).fintype
   -- `P k` says there is a trail from `a` to `b` of length `k`
   let P : ℕ → Prop := fun k => ∃ q : G.Walk a b, q.IsTrail ∧ q.length = k
   -- let `q` be a longest trail from `a` to `b`
   obtain ⟨q, hq, hq_len⟩ := Nat.findGreatest_spec (P := P) (m := q₀.length)
-    (n := #G.edgeFinset) hq₀.length_le_card_edgeFinset ⟨q₀, hq₀, rfl⟩
+    (n := G.edgeSet.ncard) hq₀.length_le_ncard_edgeSet ⟨q₀, hq₀, rfl⟩
   refine ⟨q, by_contra fun hne => ?_⟩
   -- the graph with `q`'s edges deleted has even degrees, so `q` can be extended
   obtain ⟨q', hq', hlt⟩ := hq.exists_longer_of_not_isEulerian hG ha (hdel q hq) hne
-  have : q'.length ≤ Nat.findGreatest P #G.edgeFinset :=
-    Nat.le_findGreatest hq'.length_le_card_edgeFinset ⟨q', hq', rfl⟩
+  have : q'.length ≤ Nat.findGreatest P G.edgeSet.ncard :=
+    Nat.le_findGreatest hq'.length_le_ncard_edgeSet ⟨q', hq', rfl⟩
   grind
 
 /-!

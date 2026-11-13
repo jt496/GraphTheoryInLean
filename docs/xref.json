@@ -8684,48 +8684,6 @@
         "Walks in the Hypercube",
         "Gray Code"]}},
      "address": "/Walks/"}],
-   "SimpleGraph.hypercube.isHamiltonianCycle_grayCycle'":
-   [{"id": "SimpleGraph___hypercube___isHamiltonianCycle_grayCycle___",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___isHamiltonianCycle_grayCycle___":
-      {"display": "hypercube.isHamiltonianCycle_grayCycle'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.isHamiltonianCycle_grayCycle":
-   [{"id": "SimpleGraph___hypercube___isHamiltonianCycle_grayCycle",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___isHamiltonianCycle_grayCycle":
-      {"display": "hypercube.isHamiltonianCycle_grayCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.isCycle_grayCycle'":
-   [{"id": "SimpleGraph___hypercube___isCycle_grayCycle___",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___isCycle_grayCycle___":
-      {"display": "hypercube.isCycle_grayCycle'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.isCycle_grayCycle":
-   [{"id": "SimpleGraph___hypercube___isCycle_grayCycle",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___isCycle_grayCycle":
-      {"display": "hypercube.isCycle_grayCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.grayPath_snd_false'":
-   [{"id": "SimpleGraph___hypercube___grayPath_snd_false___",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___grayPath_snd_false___":
-      {"display": "hypercube.grayPath_snd_false'",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.grayPath_snd_false":
-   [{"id": "SimpleGraph___hypercube___grayPath_snd_false",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___grayPath_snd_false":
-      {"display": "hypercube.grayPath_snd_false",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
-     "address": "/Walks/"}],
    "SimpleGraph.hypercube.grayPath":
    [{"id": "SimpleGraph___hypercube___grayPath",
      "data":
@@ -8736,13 +8694,6 @@
         "Walks",
         "Walks in the Hypercube",
         "Gray Code"]}},
-     "address": "/Walks/"}],
-   "SimpleGraph.hypercube.grayCycle":
-   [{"id": "SimpleGraph___hypercube___grayCycle",
-     "data":
-     {"/Walks/#SimpleGraph___hypercube___grayCycle":
-      {"display": "hypercube.grayCycle",
-       "context": ["Graph Theory in Lean", "Walks", "Exercises"]}},
      "address": "/Walks/"}],
    "SimpleGraph.hypercube.embedding'":
    [{"id": "SimpleGraph___hypercube___embedding___",

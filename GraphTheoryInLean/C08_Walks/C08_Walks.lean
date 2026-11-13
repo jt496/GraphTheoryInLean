@@ -882,6 +882,12 @@ example [Fintype V] [DecidableEq V] (p : G.Walk u v) (hp : p.IsHamiltonian) :
     p.length = Fintype.card V - 1 := hp.length_eq
 
 /-!
+Mathlib also states this as `p.length + 1 = Fintype.card V`, which avoids the
+truncated subtraction of `ℕ`. This is the form we use in proofs later in the chapter.
+-/
+#check Walk.IsHamiltonian.length_add_one_eq -- p.length + 1 = Fintype.card V
+
+/-!
 A walk is a finite object: its support is a list. So in the same way that an
 Eulerian trail in a graph provides a `Fintype` instance for its edge set, a
 Hamiltonian path provides a `Fintype` instance for the vertex set (provided we also
@@ -1895,8 +1901,8 @@ protected lemma Walk.IsHamiltonian.mycielskian [DecidableEq V] {u w} {p : G.Walk
     (hp : p.IsHamiltonian) (hn : ¬p.Nil) : (p.mycielskian hn).IsHamiltonian := by
   have : Fintype V := hp.fintype
   refine isHamiltonian_iff_isPath_and_length_eq.2 ⟨hp.isPath.mycielskian hn, ?_⟩
-  grind [length_mycielskian, Fintype.card_option, Fintype.card_sum, hp.length_eq,
-    not_nil_iff_lt_length]
+  grind [length_mycielskian, Fintype.card_option, Fintype.card_sum,
+    hp.length_add_one_eq]
 
 /-!
 If the original walk `p : G.Walk u u` is a Hamiltonian cycle, then the
@@ -2284,7 +2290,7 @@ lemma Walk.IsHamiltonian.exists_isHamiltonianCycle_of_isOrePair [Fintype V]
     ⟨hp.isPath, fun w _ => hp.mem_support w, fun w _ => hp.mem_support w⟩
   obtain ⟨c, hcyc, hclen, -⟩ := hmax.exists_cycle_spanning h2 hcard
   exact ⟨c, isHamiltonianCycle_iff_isCycle_and_length_eq.2
-    ⟨hcyc, by grind [hp.length_support, Walk.length_support]⟩⟩
+    ⟨hcyc, hclen.trans hp.length_add_one_eq⟩⟩
 
 /-!
 ## The Bondy–Chvátal Theorem
@@ -2412,8 +2418,8 @@ theorem isHamiltonian_sup_edge_iff [Fintype V] [DecidableEq V] {u v : V}
     obtain ⟨p, hham, hpe⟩ := hc.exists_isHamiltonian_walk_of_mem_edges hmem
     -- the path avoids the new edge, so it transfers to `G`, where we close it up
     have hq := hham.transfer (p.edges_mem_edgeSet_of_notMem hpe)
-    exact ⟨u, hq.exists_isHamiltonianCycle_of_isOrePair (by grind [hq.length_eq])
-      hcard⟩
+    exact ⟨u, hq.exists_isHamiltonianCycle_of_isOrePair
+      (by grind [hq.length_add_one_eq]) hcard⟩
   · -- the cycle avoids the new edge: transfer it to `G` directly
     exact ⟨a, _, hc.transfer (c.edges_mem_edgeSet_of_notMem hmem)⟩
 

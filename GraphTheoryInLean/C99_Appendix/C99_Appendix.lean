@@ -303,7 +303,6 @@ The following custom definitions and abbreviations are introduced in this guide:
 
 *From the exercises:*
 
-* `hypercube.grayCycle`: Gray code Hamiltonian cycle in `Q[n + 2]`.
 * `chordedC5`: `C[5]` with the two chords `0 — 2` and `0 — 3`, a graph that is not
   an Ore graph but whose closure is complete.
 * `Walk.IsMaximumPath`: a *maximum-length* path — a path such that no path in `G` is
@@ -710,8 +709,6 @@ The following results are proved in this guide and its exercises:
 
 * `HypercubeVert.hammingDist_comm`: the Hamming distance on the hypercube is
   symmetric.
-* `hypercube.isHamiltonianCycle_grayCycle`: closing the Gray code walk yields a
-  Hamiltonian cycle in `Q[n + 2]`.
 * `isHamiltonian_hypercube`: the hypercube `Q[n]` is Hamiltonian for `n ≠ 1`.
 * `Walk.IsHamiltonian.isHamiltonianCycle_posaClosed`: closing a Hamiltonian path via
   a Pósa rotation yields a Hamiltonian cycle.

@@ -790,6 +790,7 @@ We can introduce notation for these as follows. The left copy of `v : V` is deno
 /-- `vˡ` is the left copy `some (Sum.inl v)` of `v` in `Option (V ⊕ V)`, the vertex
 type of the Mycielskian. -/
 scoped postfix:max "ˡ" => mycielskian.left
+
 /-- `vʳ` is the right copy `some (Sum.inr v)` of `v` in `Option (V ⊕ V)`, the vertex
 type of the Mycielskian. -/
 scoped postfix:max "ʳ" => mycielskian.right
