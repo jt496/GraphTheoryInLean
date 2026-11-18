@@ -382,7 +382,7 @@ The following custom definitions and abbreviations are introduced in this guide:
 * `botComponentEquiv`: equivalence between the connected components of the empty
   graph and its vertex type.
 * `Hom.sigmaElim`: the universal property of the disjoint union: a family of
-  homomorphisms `G i →g H` gives a homomorphism `Σg G →g H`.
+  homomorphisms `F i →g H` gives a homomorphism `Σg F →g H`.
 * `Finset.fiberProj`: the vertices `z` of `G` whose copy `(z, b)` in the `G`-fibre at
   `b` of `G □ K₂` lies in a given vertex set.
 * `bowtie`: two triangles sharing a vertex, a graph with `κ(G) < λ(G)`.

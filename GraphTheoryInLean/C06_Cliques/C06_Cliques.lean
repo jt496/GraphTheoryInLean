@@ -762,10 +762,10 @@ lemma kneserGraph_eq_bot_of_card_lt [Finite β] (h : Nat.card β < 2 * k) :
     kneserGraph β k = ⊥ := by
   have := Fintype.ofFinite β
   rw [Nat.card_eq_fintype_card] at h
-  have := isIndepSet_kneserGraph_of_card_lt (k := k) (s := Finset.univ)
+  have hind := isIndepSet_kneserGraph_of_card_lt (k := k) (s := Finset.univ)
     (by simpa using h)
   ext u v
-  simpa using fun huv => this (by simp) (by simp) huv.2 huv
+  simpa using fun huv => hind (by simp) (by simp) huv.2 huv
 
 /-!
 To apply the Erdős–Ko–Rado theorem we must transport an independent set of

@@ -393,10 +393,10 @@ theorem IsBipartite.matchingNum_eq_vertexCoverNum [Finite V] (h : G.IsBipartite)
   -- it has at most `|p₁| - d` vertices, and `M` has at least `|p₁| - d` edges
   replace hMd : (p₁ \ M.verts).ncard ≤ d := by
     rwa [← Set.Finite.cast_ncard_eq (Set.toFinite _), Nat.cast_le] at hMd
-  have := Set.ncard_union_le (p₁ \ s₀) N₀
-  have := Set.ncard_sdiff_add_ncard_of_subset hs₀
-  have := Set.ncard_inter_add_ncard_sdiff_eq_ncard p₁ M.verts
-  have := hM.ncard_inter_le h₁
+  have hunion := Set.ncard_union_le (p₁ \ s₀) N₀
+  have hsdiff := Set.ncard_sdiff_add_ncard_of_subset hs₀
+  have hinter := Set.ncard_inter_add_ncard_sdiff_eq_ncard p₁ M.verts
+  have hMcard := hM.ncard_inter_le h₁
   calc τ G ≤ ((p₁ \ s₀) ∪ N₀).encard := hC.vertexCoverNum_le
     _ = ((p₁ \ s₀) ∪ N₀).ncard := (Set.Finite.cast_ncard_eq (Set.toFinite _)).symm
     _ ≤ M.edgeSet.ncard := by grind [Nat.cast_le]
@@ -974,12 +974,12 @@ theorem CliqueFree.exists_colorable_deleteEdges [Fintype V] [DecidableRel G.Adj]
       ∑ v, (G ⊓ K).degree v + ∑ v, #{w | G.Adj v w ∧ c w = c v} := by
     rw [← sum_add_distrib]
     exact sum_congr rfl fun v _ => dG v
-  have := (hKcol.cliqueFree (Nat.lt_succ_self r)).card_edgeFinset_le
-  have := sum_degrees_eq_twice_card_edges K
-  have := sum_degrees_eq_twice_card_edges G
+  have hKedges := (hKcol.cliqueFree (Nat.lt_succ_self r)).card_edgeFinset_le
+  have hsumK := sum_degrees_eq_twice_card_edges K
+  have hsumG := sum_degrees_eq_twice_card_edges G
   -- our primed version accepts the `Fintype (G ⊓ K).edgeSet` instance found here
-  have := sum_degrees_eq_twice_card_edges' (G ⊓ K)
-  have := card_sdiff_of_subset (edgeFinset_mono hle)
+  have hsumGK := sum_degrees_eq_twice_card_edges' (G ⊓ K)
+  have hsdiff := card_sdiff_of_subset (edgeFinset_mono hle)
   grind
 
 /-!
@@ -1329,8 +1329,8 @@ lemma IsNCliqueMaximal.card_filter_mem_eq_of_not_adj [Fintype V] [DecidableEq V]
     #{t ∈ G.cliqueFinset s | a ∈ t} = #{t ∈ G.cliqueFinset s | b ∈ t} := by
   have kab := card_cliqueFinset_replaceVertex_of_not_adj hn s
   have kba := card_cliqueFinset_replaceVertex_of_not_adj (fun h' => hn h'.symm) s
-  have := h.card_cliqueFinset_le (h.1.replaceVertex a b)
-  have := h.card_cliqueFinset_le (h.1.replaceVertex b a)
+  have hab := h.card_cliqueFinset_le (h.1.replaceVertex a b)
+  have hba := h.card_cliqueFinset_le (h.1.replaceVertex b a)
   grind
 
 /-!
@@ -1464,12 +1464,12 @@ lemma IsNCliqueMaximal.isCompleteMultipartite_of_le_cliqueUnion [Fintype V]
   by_contra hcm
   obtain ⟨v, u, w, h3⟩ := exists_isPathGraph3Compl_of_not_isCompleteMultipartite hcm
   have hk := card_cliqueFinset_replaceVertex_replaceVertex h3 s
-  have := h.card_filter_mem_eq_of_not_adj h3.not_adj_fst
-  have := h.card_filter_mem_eq_of_not_adj h3.not_adj_snd
-  have := h.card_cliqueFinset_le ((h.1.replaceVertex v u).replaceVertex v w)
+  have hvu := h.card_filter_mem_eq_of_not_adj h3.not_adj_fst
+  have hvw := h.card_filter_mem_eq_of_not_adj h3.not_adj_snd
+  have hcl := h.card_cliqueFinset_le ((h.1.replaceVertex v u).replaceVertex v w)
   -- the edge `u — w` lies in an `s`-clique
   obtain ⟨-, t, ht, hut, hwt⟩ := hG h3.adj
-  have : 0 < #{t ∈ G.cliqueFinset s | u ∈ t ∧ w ∈ t} :=
+  have hpos : 0 < #{t ∈ G.cliqueFinset s | u ∈ t ∧ w ∈ t} :=
     card_pos.2 ⟨t, by simp [ht, hut, hwt]⟩
   grind
 
@@ -1503,9 +1503,10 @@ lemma IsCompleteMultipartite.exists_isNClique_of_le (hc : G.IsCompleteMultiparti
     by_contra hab
     exact hc.trans _ _ _ (fun h => ha.2 h.symm) hb.2 (ht.1 ha.1 hb.1 hab)
   have hcard : s - 2 ≤ #{a ∈ t | G.Adj x a ∧ G.Adj y a} := by
-    have := card_filter_add_card_filter_not (s := t) fun a => G.Adj x a ∧ G.Adj y a
-    simp only [not_and_or, filter_or] at this
-    have := card_union_le {a ∈ t | ¬G.Adj x a} {a ∈ t | ¬G.Adj y a}
+    have hsplit :=
+      card_filter_add_card_filter_not (s := t) fun a => G.Adj x a ∧ G.Adj y a
+    simp only [not_and_or, filter_or] at hsplit
+    have hunion := card_union_le {a ∈ t | ¬G.Adj x a} {a ∈ t | ¬G.Adj y a}
     grind [hle x, hle y, ht.2]
   obtain ⟨t₀, ht₀, ht₀2⟩ := exists_subset_card_eq hcard
   have hxyt₀ (a) (ha : a ∈ t₀) : G.Adj x a ∧ G.Adj y a := (mem_filter.1 (ht₀ ha)).2
@@ -2109,16 +2110,16 @@ theorem Connected.pathNat_isContained [Infinite V] [G.LocallyFinite]
     { le u w := G.dist v u + G.dist u w = G.dist v w
       le_refl u := by simp
       le_trans u w x h₁ h₂ := by
-        have := hG.dist_triangle (u := v) (v := u) (w := x)
-        have := hG.dist_triangle (u := u) (v := w) (w := x)
+        have t₁ := hG.dist_triangle (u := v) (v := u) (w := x)
+        have t₂ := hG.dist_triangle (u := u) (v := w) (w := x)
         grind
       le_antisymm u w h₁ h₂ := by
         have := G.dist_comm (u := u) (v := w)
         exact hG.dist_eq_zero_iff.1 (by grind) }
   -- `G.dist v` is strictly monotone, so the order is well founded
   have hdist : StrictMono (G.dist v) := fun u w h => by
-    have := hG.pos_dist_of_ne h.ne
-    have : G.dist v u + G.dist u w = G.dist v w := h.le
+    have hpos := hG.pos_dist_of_ne h.ne
+    have hle : G.dist v u + G.dist u w = G.dist v w := h.le
     grind
   have : WellFoundedLT V := hdist.wellFoundedLT
   -- if `w` covers `u` then they are adjacent
@@ -2126,11 +2127,11 @@ theorem Connected.pathNat_isContained [Infinite V] [G.LocallyFinite]
     obtain ⟨_ | @⟨_, x, _, hux, p⟩, hp⟩ := hG.exists_walk_length_eq_dist u w
     · exact absurd rfl h.ne
     rw [Walk.length_cons] at hp
-    have := dist_le p
-    have := dist_eq_one_iff_adj.2 hux
-    have := hG.dist_triangle (u := v) (v := u) (w := x)
-    have := hG.dist_triangle (u := v) (v := x) (w := w)
-    have : G.dist v u + G.dist u w = G.dist v w := h.le
+    have hlen := dist_le p
+    have hux1 := dist_eq_one_iff_adj.2 hux
+    have t₁ := hG.dist_triangle (u := v) (v := u) (w := x)
+    have t₂ := hG.dist_triangle (u := v) (v := x) (w := w)
+    have hle : G.dist v u + G.dist u w = G.dist v w := h.le
     obtain rfl | rfl := h.eq_or_eq (c := x)
       (show G.dist v u + G.dist u x = G.dist v x by grind)
       (show G.dist v x + G.dist x w = G.dist v w by grind)

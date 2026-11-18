@@ -198,7 +198,7 @@ inductively on `j`.
 def pathNat.path (i j : ℕ) : pathNat.Walk i (i + j) :=
   match j with
   | 0 => nil
-  | j + 1 => (pathNat.path i j).concat (by grind)
+  | k + 1 => (pathNat.path i k).concat (by grind)
 
 /-!
 The walk `pathNat.path i j` has length `j` since it is built by
@@ -493,7 +493,8 @@ lemma pathNat.isPath_path (i j : ℕ) : (pathNat.path i j).IsPath := by
   | succ n ih => exact (isPath_concat _).2 ⟨ih, by simp⟩
 
 /-!
-A walk is a path iff `getVert` is injective on the set `{i | i ≤ p.length}`.
+A walk is a path iff `getVert` is injective on `Set.Iic p.length`, the set
+`{i | i ≤ p.length}`.
 -/
 #check IsPath.getVert_injOn_iff
 
@@ -596,7 +597,8 @@ path.
 #check isCycle_iff_isPath_tail_and_le_length
 
 /-!
-If `c` is a cycle then `getVert` is injective on `{i | 1 ≤ i ∧ i ≤ c.length}`.
+If `c` is a cycle then `getVert` is injective on `Set.Ioc 0 c.length`, the set
+`{i | 0 < i ∧ i ≤ c.length}`.
 -/
 #check IsCycle.getVert_injOn
 
@@ -703,8 +705,8 @@ closed walk has even length; if it has odd length then it is an odd cycle.
 -/
 #source Walk.bypass
 
-lemma Walk.exists_isPath_or_odd_isCycle {a b : V} (p : G.Walk a b) :
-    (∃ q : G.Walk a b, q.IsPath ∧ (Even q.length ↔ Even p.length)) ∨
+lemma Walk.exists_isPath_or_odd_isCycle {x y : V} (p : G.Walk x y) :
+    (∃ q : G.Walk x y, q.IsPath ∧ (Even q.length ↔ Even p.length)) ∨
       ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length := by
   classical
   induction p with
@@ -1348,10 +1350,10 @@ then see straight through the `copy`.
 def pathGraph.path (n : ℕ) : P[n + 1].Walk 0 (Fin.last n) :=
   match n with
   | 0 => nil
-  | n + 1 =>
-      (pathGraph.path n).map (pathGraph.embedding (n + 1) 1).toHom |>.copy
+  | m + 1 =>
+      (pathGraph.path m).map (pathGraph.embedding (m + 1) 1).toHom |>.copy
         (by simp) (by simp) |>.cons
-          (by simp [pathGraph_adj] : P[n + 2].Adj 0 1)
+          (by simp [pathGraph_adj] : P[m + 2].Adj 0 1)
 
 /-!
 We could have defined this walk directly; indeed we previously defined walks directly
@@ -1843,8 +1845,8 @@ lemma Walk.IsPath.mycielskianZigZag {u w} {p : G.Walk u w} (hp : p.IsPath)
     (hn : ¬p.Nil) : (mycielskianZigZag hn).IsPath := by
   apply IsPath.mk'
   induction hn using mycielskianZigZag.induct with
-  | case1 u v h hl hn => simpa using h.ne
-  | case2 u v h hl w x h' p' hn hnp ih =>
+  | case1 a b h hl hn => simpa using h.ne
+  | case2 a b h hl c d h' p' hn hnp ih =>
     -- `grind` can solve this with a little help
     grind [mycielskianZigZag_cons_cons, support_concat, support_reverse, isPath_def,
       exists_of_mem_support_mycielskianZigZag hnp]
@@ -1872,7 +1874,7 @@ lemma Walk.isCycle_mycielskianClosed {u} {p : Walk G u u} (hn : ¬p.Nil)
   | nil => (hn .nil).elim
   | cons h' nil => (h'.ne rfl).elim
   -- we use the `cons'` pattern here to make the InfoView more readable.
-  | cons' _ v _ h (cons' _ w _ h' p) => by
+  | cons' _ v _ h (cons' _ w _ h' q) => by
     -- we now use `cons_isCycle_iff_length_ne_one` that we proved earlier to reduce
     -- this to showing that the `Walk.mycielskian` is a path of length not equal to 1
     rw [mycielskianClosed, cons_isCycle_iff_length_ne_one]
@@ -2650,9 +2652,9 @@ lemma isClosed_closureAux [Fintype V] [DecidableEq V] :
       (closureAux fuel G).IsClosed
   | 0, G, _, hf => by
     -- with no fuel left, `G` has no missing edges, so no eligible pair either
-    intro x y hne _
+    intro u v hne _
     by_contra hadj
-    have : s(x, y) ∈ Gᶜ.edgeFinset := by simpa [hne, closureAux] using hadj
+    have : s(u, v) ∈ Gᶜ.edgeFinset := by simpa [hne, closureAux] using hadj
     simp_all
   | fuel + 1, G, _, hf => by
     by_cases hG : G.IsClosed

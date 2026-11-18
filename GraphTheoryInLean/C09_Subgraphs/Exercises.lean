@@ -331,15 +331,15 @@ most the one new edge of the walk. Since `(cons h p).toSubgraph` is by definitio
 `G.subgraphOfAdj h ⊔ p.toSubgraph`, each step is a simple inequality in the lattice
 `G.Subgraph` (`sup_le_sup_left` or `le_sup_of_le_right`).
 -/
-lemma Walk.exists_isPath_or_odd_isCycle_toSubgraph_le {a b : V} (p : G.Walk a b) :
-    (∃ q : G.Walk a b, q.IsPath ∧ (Even q.length ↔ Even p.length) ∧
+lemma Walk.exists_isPath_or_odd_isCycle_toSubgraph_le {x y : V} (p : G.Walk x y) :
+    (∃ q : G.Walk x y, q.IsPath ∧ (Even q.length ↔ Even p.length) ∧
         q.toSubgraph ≤ p.toSubgraph) ∨
       ∃ (v : V) (c : G.Walk v v), c.IsCycle ∧ Odd c.length ∧
         c.toSubgraph ≤ p.toSubgraph := by
   classical
   induction p with
   | nil => exact .inl ⟨nil, .nil, Iff.rfl, le_rfl⟩
-  | @cons a _ _ h p ih =>
+  | @cons a d b h p ih =>
     rcases ih with ⟨q, hq, hpar, hle⟩ | ⟨v, c, hc, hodd, hle⟩
     · by_cases ha : a ∈ q.support
       · have hlen := length_append _ _ ▸ congrArg length (q.take_spec ha)
@@ -370,11 +370,11 @@ theorem Walk.exists_odd_isCycle_toSubgraph_le {u : V} (w : G.Walk u u)
   | nil => simp at hw
   | cons h p =>
     rcases p.exists_isPath_or_odd_isCycle_toSubgraph_le with
-      ⟨q, hq, hpar, hle⟩ | ⟨v, c, hc, hodd, hle⟩
+      ⟨q, hq, hpar, hle⟩ | ⟨x, c, hc, hodd, hle⟩
     · have hqe : Even q.length := by grind [length_cons]
       exact ⟨_, cons h q, (cons_isCycle_iff_length_ne_one _ h).mpr ⟨hq, by grind⟩,
         by grind [length_cons], sup_le_sup_left hle _⟩
-    · exact ⟨v, c, hc, hodd, le_sup_of_le_right hle⟩
+    · exact ⟨x, c, hc, hodd, le_sup_of_le_right hle⟩
 
 /-!
 5. Show that a trail that is a subgraph of a walk is no longer than the walk. Hint:

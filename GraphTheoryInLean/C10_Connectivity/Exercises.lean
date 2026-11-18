@@ -35,12 +35,12 @@ def botComponentEquiv' : (⊥ : SimpleGraph V).ConnectedComponent ≃ V :=
 
 /-!
 4. Prove the universal property of the disjoint union: a family of homomorphisms
-`G i →g H` into a common graph `H` gives a homomorphism `Σg G →g H`. Hint: adjacent
+`F i →g H` into a common graph `H` gives a homomorphism `Σg F →g H`. Hint: adjacent
 vertices of the disjoint union have the same index.
 -/
-def Hom.sigmaElim' {ι : Type*} {V : ι → Type*} {W : Type*}
-    (G : (i : ι) → SimpleGraph (V i))
-    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : Σg G →g H :=
+def Hom.sigmaElim' {ι : Type*} {U : ι → Type*} {W : Type*}
+    (F : (i : ι) → SimpleGraph (U i))
+    {H : SimpleGraph W} (f : (i : ι) → F i →g H) : Σg F →g H :=
   sorry
 
 /-!
@@ -396,18 +396,18 @@ def botComponentEquiv : (⊥ : SimpleGraph V).ConnectedComponent ≃ V where
 
 /-!
 4. Prove the universal property of the disjoint union: a family of homomorphisms
-`G i →g H` into a common graph `H` gives a homomorphism `Σg G →g H`. Hint: adjacent
+`F i →g H` into a common graph `H` gives a homomorphism `Σg F →g H`. Hint: adjacent
 vertices of the disjoint union have the same index.
 
-An edge `⟨i, u⟩ — ⟨i, v⟩` of the disjoint union is an edge of `G i`, which `f i`
+An edge `⟨i, u⟩ — ⟨i, v⟩` of the disjoint union is an edge of `F i`, which `f i`
 preserves.
 -/
 /-- The universal property of the disjoint union: a family of homomorphisms
-`G i →g H` into a common graph combines into a single homomorphism `Σg G →g H` out of
+`F i →g H` into a common graph combines into a single homomorphism `Σg F →g H` out of
 the disjoint union. -/
-def Hom.sigmaElim {ι : Type*} {V : ι → Type*} {W : Type*}
-    (G : (i : ι) → SimpleGraph (V i))
-    {H : SimpleGraph W} (f : (i : ι) → G i →g H) : Σg G →g H where
+def Hom.sigmaElim {ι : Type*} {U : ι → Type*} {W : Type*}
+    (F : (i : ι) → SimpleGraph (U i))
+    {H : SimpleGraph W} (f : (i : ι) → F i →g H) : Σg F →g H where
   toFun p := f p.1 p.2
   map_rel' := by
     rintro ⟨i, u⟩ ⟨j, v⟩ ⟨rfl, hadj⟩
@@ -497,8 +497,8 @@ lemma IsTree.degree_le_card_leaves [Fintype V] [G.LocallyFinite] (h : G.IsTree)
       2 ≤ G.degree u + if G.degree u = 1 then 1 else 0 := by
     intro u hu
     have : Nontrivial V := ⟨u, v, ne_of_mem_erase hu⟩
-    have := h.connected.preconnected.degree_pos_of_nontrivial u
-    split_ifs <;> grind
+    have hpos := h.connected.preconnected.degree_pos_of_nontrivial u
+    split_ifs with hdeg <;> grind
   have hsum := sum_le_sum hge
   rw [sum_const, card_erase_of_mem (mem_univ v), card_univ, smul_eq_mul] at hsum
   -- split off `v` from the full sum, which is `2 * #edges + #leaves`
@@ -812,8 +812,8 @@ hence block-equivalence, is just equality.
 lemma IsAcyclic.toSubgraph_blockMk (hG : G.IsAcyclic) {u v : V} (h : G.Adj u v) :
     h.block.toSubgraph = G.subgraphOfAdj h := by
   -- block-equivalent potential edges of a forest are equal
-  have key {f g : Sym2 V} (h : G.BlockEquivalent f g) : f = g := by
-    induction h with
+  have key {f g : Sym2 V} (hfg : G.BlockEquivalent f g) : f = g := by
+    induction hfg with
     | rel x y hxy => exact hxy.resolve_right fun ⟨_, c, hc, _⟩ => hG c hc
     | refl x => rfl
     | symm x y _ ih => exact ih.symm

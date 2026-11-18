@@ -374,12 +374,12 @@ theorem IsRegularOfDegree.colorable_lineGraph [G.LocallyFinite] {k : ℕ}
     -- what is left is `k`-regular
     have hG' : G'.IsRegularOfDegree k := fun v => by
       obtain ⟨w, hw, hw'⟩ := Subgraph.isPerfectMatching_iff.1 hM v
-      have : G'.neighborSet v = G.neighborSet v \ {w} := by
+      have hnbr : G'.neighborSet v = G.neighborSet v \ {w} := by
         ext x
         have hMx : M.Adj v x ↔ x = w := ⟨hw' x, fun h => h ▸ hw⟩
         simp only [G', mem_neighborSet, sdiff_adj, Subgraph.spanningCoe_adj,
           Set.mem_sdiff, Set.mem_singleton_iff, hMx]
-      rw [← ncard_neighborSet, this,
+      rw [← ncard_neighborSet, hnbr,
         Set.ncard_sdiff_singleton_of_mem ((G.mem_neighborSet v w).2 hw.adj_sub),
         ncard_neighborSet, hG v, Nat.add_sub_cancel]
     obtain ⟨C⟩ := ih (hb.mono_left hle) hG'

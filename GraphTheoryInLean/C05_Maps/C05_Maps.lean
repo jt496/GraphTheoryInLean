@@ -811,7 +811,7 @@ def cycleGraph.rotate {n : ℕ} (d : Fin n) : C[n] ≃g C[n] where
   right_inv x := by cases n <;> grind
   map_rel_iff' := by
     match n with
-    | 0 | 1 | n + 2 => simp [cycleGraph_adj]
+    | 0 | 1 | m + 2 => simp [cycleGraph_adj]
 
 /-!
 The cycle `C[n]` is vertex-transitive for all `n`. The rotation sending
@@ -1050,7 +1050,7 @@ lemma degree_tensorProd {V W : Type*} {x : V × W} {G : SimpleGraph V}
     (G ⊗g H).degree x = G.degree x.fst * H.degree x.snd := by
   simp_rw [← card_neighborFinset_eq_degree, ← Finset.card_product]
   congr
-  ext ⟨x, y⟩
+  ext ⟨a, b⟩
   simp
 
 /-!
@@ -1397,8 +1397,8 @@ lemma top_three_or_claw_isContained_of_isContained_lineGraph {V : Type*}
   · -- Otherwise the three meeting points `x, y, z` are distinct: a triangle.
     have hf1 : (f 1 : Sym2 V) = s(x, y) := (Sym2.mem_and_mem_iff hxy).1 ⟨hx1, hy1⟩
     obtain ⟨hzx, hzy⟩ : z ≠ x ∧ z ≠ y := by grind [Sym2.mem_and_mem_iff]
-    have : f 0 = s(x, z) := (Sym2.mem_and_mem_iff hzx.symm).1 ⟨hx0, hz0⟩
-    have : f 2 = s(y, z) := (Sym2.mem_and_mem_iff hzy.symm).1 ⟨hy2, hz2⟩
+    have hf0 : f 0 = s(x, z) := (Sym2.mem_and_mem_iff hzx.symm).1 ⟨hx0, hz0⟩
+    have hf2 : f 2 = s(y, z) := (Sym2.mem_and_mem_iff hzy.symm).1 ⟨hy2, hz2⟩
     obtain ⟨axy, axz, ayz⟩ : G.Adj x y ∧ G.Adj x z ∧ G.Adj y z := by
       grind [mem_edgeSet]
     exact Or.inl <| top_three_isContained axy axz ayz

@@ -472,7 +472,7 @@ lemma isHamiltonian_hypercube {n : ℕ} (h1 : n ≠ 1) : Q[n].IsHamiltonian :=
   | 1 => (h1 rfl).elim
   -- the Gray code walk is a Hamiltonian path whose endpoints differ only in the last
   -- coordinate, so they are adjacent and the path closes up into a Hamiltonian cycle
-  | n + 2 => (hypercube.isHamiltonian_grayPath _).isHamiltonian_of_adj (by simp)
+  | m + 2 => (hypercube.isHamiltonian_grayPath _).isHamiltonian_of_adj (by simp)
       (by simp [Nat.pow_succ])
 
 /-!
@@ -716,8 +716,8 @@ lemma Walk.IsMaximumPath.isHamiltonian_of_isCycle [DecidableEq V] {u v : V}
   -- The support of `c` (as a `Set V`) does not contain `w`
   have hw' : w ∉ {x | x ∈ c.support} := fun hwc => hw ((hsupp w).mp hwc)
   -- A boundary edge leaves `c`; break the cycle there and prepend it.
-  obtain ⟨q⟩ := hreach w
-  obtain ⟨x, hxc, z, hzc, hxz⟩ := q.exists_cross_adj c.start_mem_support hw'
+  obtain ⟨r⟩ := hreach w
+  obtain ⟨x, hxc, z, hzc, hxz⟩ := r.exists_cross_adj c.start_mem_support hw'
   obtain ⟨z', q, hqpath, hqlen, hqsupp⟩ := hc.exists_isPath_spanning hxc
   have hznotin : z ∉ q.support := fun hzq => hzc ((hqsupp z).mp hzq)
   have hlong : (q.cons hxz.symm).IsPath :=

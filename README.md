@@ -1,6 +1,6 @@
 # Graph Theory in Lean
 
-*First edition · Release v4.36.0-rc2 · November 2026*
+*First edition · Release v4.36.0 · November 2026*
 
 The Lean sources of *Graph Theory in Lean*: one directory per chapter under
 `GraphTheoryInLean/`, each holding the chapter (`CNN_Name.lean`) and, for most chapters, its

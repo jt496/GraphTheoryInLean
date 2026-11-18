@@ -357,13 +357,10 @@ extends the path `f` ending at `u`.
 lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
     (v : ℕ) : ∃ f : ℕ → ℕ, f (G.greedy v) = v ∧
       ∀ i < G.greedy v, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1)) := by
-  suffices ∀ k v, G.greedy v = k → ∃ f : ℕ → ℕ, f k = v ∧
-      ∀ i < k, f i < f (i + 1) ∧ G.Adj (f i) (f (i + 1)) from this _ v rfl
-  intro k
-  induction k with
-  | zero => exact fun v _ => ⟨fun _ => v, rfl, by simp⟩
+  generalize hv : G.greedy v = k
+  induction k generalizing v with
+  | zero => exact ⟨fun _ => v, rfl, by simp⟩
   | succ k ih =>
-    intro v hv
     -- an earlier neighbour `u` of `v` has colour `k`, so a path ends at `u`
     have hk : k < G.greedy v := by grind
     obtain ⟨u, hu, hgu⟩ := G.exists_greedy_eq_of_lt_greedy hk
@@ -371,9 +368,9 @@ lemma exists_increasing_path_greedy (G : SimpleGraph ℕ) [DecidableRel G.Adj]
     obtain ⟨f, hfk, hf⟩ := ih u hgu
     -- and we extend it by `v`
     refine ⟨Function.update f (k + 1) v, by simp, fun i hi => ?_⟩
-    rcases Nat.lt_succ_iff_lt_or_eq.mp hi with hi | rfl
+    rcases Nat.lt_succ_iff_lt_or_eq.mp hi with hlt | rfl
     · simpa [Function.update_of_ne (show i ≠ k + 1 by grind),
-        Function.update_of_ne (show i + 1 ≠ k + 1 by grind)] using hf i hi
+        Function.update_of_ne (show i + 1 ≠ k + 1 by grind)] using hf i hlt
     · simpa [Function.update_of_ne (show i ≠ i + 1 by grind), hfk] using
         ⟨hu.1, hu.2.symm⟩
 

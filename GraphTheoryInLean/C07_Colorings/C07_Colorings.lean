@@ -239,8 +239,8 @@ theorem Colorable.natCard_le_mul_indepNum {k : ℕ} (h : G.Colorable k) :
     Nat.card V ≤ k * ⍺ G := by
   classical
   cases finite_or_infinite V with
-  | inr => simp -- `Nat.card V` is the junk value `0`
-  | inl =>
+  | inr hinf => simp -- `Nat.card V` is the junk value `0`
+  | inl hfin =>
   have := Fintype.ofFinite V
   obtain ⟨C⟩ := h
   calc Nat.card V = ∑ i, #{v | C v = i} := by
@@ -271,8 +271,8 @@ from `ℕ` to `ℕ∞`.
 -/
 theorem natCard_le_chromaticNumber_mul_indepNum : Nat.card V ≤ χ G * ⍺ G := by
   cases finite_or_infinite V with
-  | inr => simp -- `Nat.card V` is the junk value `0`
-  | inl =>
+  | inr hinf => simp -- `Nat.card V` is the junk value `0`
+  | inl hfin =>
   lift χ G to ℕ using G.chromaticNumber_ne_top_of_finite with k hk
   exact_mod_cast (chromaticNumber_le_iff_colorable.mp hk.ge).natCard_le_mul_indepNum
 
@@ -444,7 +444,7 @@ lemma colorable_blowUpGraph_iff {n : ℕ} {ι : Type*} {W : ι → Type*}
     (G : SimpleGraph ι) (f : ∀ i, W i) :
     (G.blowUpGraph W).Colorable n ↔ G.Colorable n :=
   ⟨fun h => h.of_hom (Embedding.blowUp G W f).toHom,
-   fun h => h.of_hom ⟨Sigma.fst, fun h => by simpa using h⟩⟩
+   fun h => h.of_hom ⟨Sigma.fst, fun hab => by simpa using hab⟩⟩
 
 /-!
 For example, Mathlib's complete multipartite graph `completeMultipartiteGraph W`,

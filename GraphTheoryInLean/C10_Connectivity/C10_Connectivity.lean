@@ -127,9 +127,9 @@ theorem connected_mycielskian_iff : mμ(G).Connected ↔ ∀ v, ¬G.IsIsolated v
   · refine (connected_iff_exists_forall_reachable _).2 ⟨none, fun z => ?_⟩
     rcases z with (_ | ⟨v | v⟩)
     · rfl
-    · obtain ⟨u, h⟩ := h v
+    · obtain ⟨u, hu⟩ := h v
       exact (by simp : mμ(G).Adj _ _).reachable.trans
-            (by simpa using h.symm : mμ(G).Adj uʳ _).reachable
+            (by simpa using hu.symm : mμ(G).Adj uʳ _).reachable
     · exact (by simp : mμ(G).Adj _ _).reachable
 
 /-!
@@ -487,8 +487,8 @@ lemma isAcyclic_pathNat : pathNat.IsAcyclic := by
   simp only [List.mem_toFinset] at hm hmax
   -- its cycle neighbours are adjacent to `m` and at most `m`, so equal `m - 1`
   have hsub : c.toSubgraph.neighborSet m ⊆ {m - 1} := fun w hw => by
-    have := c.toSubgraph.adj_sub hw
-    have := hmax w (c.mem_support_of_adj_toSubgraph hw.symm)
+    have hadj := c.toSubgraph.adj_sub hw
+    have hle := hmax w (c.mem_support_of_adj_toSubgraph hw.symm)
     grind
   -- but `m` has two neighbours on the cycle
   have := Set.ncard_le_ncard hsub
@@ -1246,10 +1246,10 @@ lemma _root_.Finset.exists_cover_avoiding [DecidableEq V] (u v : V)
   have hpick : ∀ e ∈ s.erase s(u, v), ∃ x ∈ e, x ≠ u ∧ x ≠ v := by
     intro e he
     obtain ⟨hne, hes⟩ := Finset.mem_erase.mp he
-    have := hs e hes
+    have hnd := hs e hes
     induction e using Sym2.ind with
     | h a b =>
-      simp only [Sym2.mk_isDiag_iff] at this
+      simp only [Sym2.mk_isDiag_iff] at hnd
       by_cases a = u <;> by_cases a = v <;>
         grind [Sym2.mem_mk_left, Sym2.mem_mk_right]
   -- Plain `choose` would give `g : (e : Sym2 V) → e ∈ s.erase s(u, v) → V`, whose
@@ -1293,13 +1293,13 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ∞} (hG : G.IsVertexConnected
     | top =>
       exact isEdgeConnected_top_iff_forall_nat.mpr fun n => h n (hG.anti le_top)
     | coe k => exact h k hG
-  intro k hG u v s hs
-  -- `s₀`: the finset of edges of `G` that lie in `s`, so `#s₀ < k`
+  intro n hn u v s hs
+  -- `s₀`: the finset of edges of `G` that lie in `s`, so `#s₀ < n`
   have hsfin : s.Finite :=
-    Set.encard_lt_top_iff.mp (hs.trans (ENat.natCast_lt_top k))
+    Set.encard_lt_top_iff.mp (hs.trans (ENat.natCast_lt_top n))
   set s₀ := hsfin.toFinset.filter (· ∈ G.edgeSet)
   have hmem {e : Sym2 V} : e ∈ s₀ ↔ e ∈ s ∧ e ∈ G.edgeSet := by simp [s₀]
-  have hs₀ : #s₀ < k := by
+  have hs₀ : #s₀ < n := by
     rw [hsfin.encard_eq_coe_toFinset_card] at hs
     exact (Finset.card_filter_le _ _).trans_lt (by exact_mod_cast hs)
   obtain ⟨t, htcard, htu, htv, ht⟩ := s₀.exists_cover_avoiding u v
@@ -1315,20 +1315,20 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ∞} (hG : G.IsVertexConnected
     · obtain ⟨x, hx, hxt⟩ := ht e (hmem.mpr ⟨hes, heG⟩) he
       exact ⟨x, hx, hA hxt⟩
   by_cases huv : s(u, v) ∈ s₀
-  · -- the edge `u — v` is deleted, so `#t ≤ k - 2`
+  · -- the edge `u — v` is deleted, so `#t ≤ n - 2`
     -- we need to find another vertex `w` outside `t ∪ {u, v}`
     have hne : u ≠ v := (G.mem_edgeSet.mp (hmem.mp huv).2).ne
-    have htk : #t + 2 ≤ k := by grind
+    have htk : #t + 2 ≤ n := by grind
     have hins (a : V) : #(insert a t) ≤ #t + 1 := Finset.card_insert_le _ _
-    obtain ⟨w, hw⟩ := hG.exists_notMem (insert u (insert v t))
+    obtain ⟨w, hw⟩ := hn.exists_notMem (insert u (insert v t))
       (Nat.cast_le.mpr (by grind))
     simp only [Finset.mem_insert, not_or] at hw
     obtain ⟨hwu, hwv, hwt⟩ := hw
     -- we can walk from `u` to `w` avoiding `t ∪ {v}`
-    obtain ⟨p₁, hp₁⟩ := hG.exists_walk (insert v t)
+    obtain ⟨p₁, hp₁⟩ := hn.exists_walk (insert v t)
       (Nat.cast_lt.mpr (by grind)) u w (by grind) (by grind)
     -- we can walk from `w` to `v` avoiding `t ∪ {u}`
-    obtain ⟨p₂, hp₂⟩ := hG.exists_walk (insert u t)
+    obtain ⟨p₂, hp₂⟩ := hn.exists_walk (insert u t)
       (Nat.cast_lt.mpr (by grind)) w v (by grind) (by grind)
     exact (p₁.reachable_deleteEdges_of_avoids (hcover _ (Finset.subset_insert _ _)
         fun _ => .inr (Finset.mem_insert_self _ _)) hp₁).trans
@@ -1336,7 +1336,7 @@ theorem IsVertexConnected.isEdgeConnected {k : ℕ∞} (hG : G.IsVertexConnected
         fun _ => .inl (Finset.mem_insert_self _ _)) hp₂)
   · -- otherwise `t` meets every edge of `s₀`
     have := Finset.card_erase_le (s := s₀) (a := s(u, v))
-    obtain ⟨p, hp⟩ := hG.exists_walk t (Nat.cast_lt.mpr (by grind)) u v htu htv
+    obtain ⟨p, hp⟩ := hn.exists_walk t (Nat.cast_lt.mpr (by grind)) u v htu htv
     exact p.reachable_deleteEdges_of_avoids (hcover t subset_rfl (absurd · huv)) hp
 
 /-!
@@ -1735,7 +1735,7 @@ private lemma exists_adj_sdiff_of_connected [DecidableEq V] {W S : Finset V}
   obtain ⟨p, hp⟩ :=
     ((Subgraph.connected_iff_forall_exists_walk_subgraph _).mp hconn).2
       (mem_coe.mpr (hSW hv)) (mem_coe.mpr (mem_sdiff.mp hr).1)
-  have hp := p.toSubgraph_le_induce_top_iff.mp hp
+  replace hp := p.toSubgraph_le_induce_top_iff.mp hp
   obtain ⟨d, hd, hd1, hd2⟩ := p.exists_boundary_dart ↑S (mem_coe.mpr hv) (by grind)
   exact ⟨d.toProd.2, mem_sdiff.mpr
     ⟨hp _ (p.dart_snd_mem_support_of_mem_darts hd), by grind⟩, d.toProd.1,
@@ -2345,7 +2345,7 @@ def BlockEquivalent (G : SimpleGraph V) : Sym2 V → Sym2 V → Prop :=
 `BlockEquivalent` is an equivalence relation (by construction).
 -/
 lemma blockEquivalent_equivalence : Equivalence G.BlockEquivalent :=
-  Relation.EqvGen.is_equivalence _
+  Relation.EqvGen.equivalence _
 
 lemma BlockEquivalent.refl (e : Sym2 V) : G.BlockEquivalent e e :=
   G.blockEquivalent_equivalence.refl e

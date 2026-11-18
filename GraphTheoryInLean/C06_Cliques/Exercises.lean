@@ -588,8 +588,8 @@ lemma cliqueNum_add_indepNum_le [Finite V] : ω G + ⍺ G ≤ Nat.card V + 1 := 
   have hst : #(s ∩ t) ≤ 1 :=
     hs.isClique.card_inter_le_one_of_isIndepSet ht.isIndepSet
   -- inclusion-exclusion, and `s ∪ t` has at most `Nat.card V` elements
-  have := Finset.card_union_add_card_inter s t
-  have := (s ∪ t).card_le_univ
+  have hunion := Finset.card_union_add_card_inter s t
+  have hle := (s ∪ t).card_le_univ
   rw [← hs.card_eq, ← ht.card_eq, Nat.card_eq_fintype_card]
   grind
 

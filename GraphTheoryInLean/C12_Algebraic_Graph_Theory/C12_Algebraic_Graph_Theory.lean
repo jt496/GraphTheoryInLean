@@ -78,7 +78,7 @@ of groups, and `→*` (`MonoidHom`) for a homomorphism.
 /-- Transport of the automorphism group of a graph along an isomorphism
 `e : G ≃g H`, by conjugation: `f ↦ e ∘ f ∘ e.symm`. -/
 @[simps!]
-def Iso.autCongr {V W : Type*} {G : SimpleGraph V} {H : SimpleGraph W} (e : G ≃g H) :
+def Iso.autCongr {W : Type*} {H : SimpleGraph W} (e : G ≃g H) :
     (G ≃g G) ≃* (H ≃g H) :=
   { RelIso.relIsoCongr e e with
     map_mul' f g := by ext v; simp [RelIso.relIsoCongr_apply] }
@@ -123,7 +123,7 @@ lemma aut_pathNat_apply (e : pathNat ≃g pathNat) (k : ℕ) : e k = k := by
     grind [aut_pathNat_apply_zero]
   | more k ih₀ ih₁ =>
     have h : pathNat.Adj (e (k + 1)) (e (k + 2)) := e.map_adj_iff.2 (by simp)
-    have hne : e (k + 2) ≠ e k := fun h => by simpa using e.injective h
+    have hne : e (k + 2) ≠ e k := fun heq => by simpa using e.injective heq
     grind
 
 /-!
@@ -171,7 +171,7 @@ def cycleGraph.reflect {n : ℕ} : C[n] ≃g C[n] where
   map_rel_iff' := by
     match n with
     | 0 | 1 => simp
-    | n + 2 =>
+    | m + 2 =>
       intro a b
       grind [cycleGraph_adj, Equiv.coe_fn_mk]
 
@@ -1309,8 +1309,8 @@ cube. -/
 def hypercubeHamming.translateHom (n : ℕ) :
     Multiplicative (Fin n → Bool) →* (hypercubeHamming n ≃g hypercubeHamming n) where
   toFun t := hypercubeHamming.translate t.toAdd
-  map_one' := by ext x; simp
-  map_mul' t s := by ext x; simp [add_assoc]
+  map_one' := by ext x i; simp
+  map_mul' t s := by ext x i; simp [add_assoc]
 
 /-- Coordinate permutations as a monoid homomorphism into the automorphism group of
 the Hamming cube. -/
@@ -1318,8 +1318,8 @@ the Hamming cube. -/
 def hypercubeHamming.permuteHom (n : ℕ) :
     Equiv.Perm (Fin n) →* (hypercubeHamming n ≃g hypercubeHamming n) where
   toFun := hypercubeHamming.permute
-  map_one' := by ext x; rfl
-  map_mul' σ ρ := by ext x; rfl
+  map_one' := by ext x i; rfl
+  map_mul' σ ρ := by ext x i; rfl
 
 /-!
 These two homomorphisms are compatible with the action `hyperoctahedralAction`:
@@ -1538,7 +1538,7 @@ pass between the two kinds of copy.
 -/
 section copies
 open Subgraph Finset
-variable {V W : Type*} {G : SimpleGraph V}
+variable {W : Type*}
 
 #check Copy.toSubgraph     -- (f : Copy A B) : B.Subgraph
 #check Copy.isoToSubgraph  -- (f : Copy A B) : A ≃g f.toSubgraph.coe
@@ -1553,7 +1553,7 @@ Mathlib's `copyCount` counts the unlabelled copies of `H` in `G` as the subgraph
 `A →g B`, while `B.labelledCopyCount A` and `B.copyCount A` are invariants of the
 host graph `B`, which comes first.)
 -/
-#source copyCount         -- #{G' : G.Subgraph | Nonempty (H ≃g G'.coe)}
+#source copyCount         -- Fintype.card (H.UnlabeledCopy G)
 #source labelledCopyCount -- Fintype.card (Copy H G)
 
 /-!
@@ -1595,6 +1595,7 @@ lemma Iso.copyCount_eq {V' W' : Type*} [Fintype W] [Fintype W'] {A : SimpleGraph
     (eB : B ≃g B') : B.copyCount A = B'.copyCount A' := by
   classical
   unfold copyCount
+  rw [Fintype.card_subtype, Fintype.card_subtype]
   refine Finset.card_nbij' (Subgraph.map eB.toHom) (Subgraph.map eB.symm.toHom)
     (fun C hC => ?_) (fun C hC => ?_) (fun C _ => ?_) (fun C _ => ?_)
   · obtain ⟨f⟩ := (Finset.mem_filter.1 hC).2
@@ -1815,7 +1816,7 @@ theorem labelledCopyCount_eq_copyCount_mul_labelledCopyCount [Fintype V] [Fintyp
     B.labelledCopyCount A = B.copyCount A * A.labelledCopyCount A := by
   classical
   rw [labelledCopyCount, Fintype.card_congr (A.copyEquivSubgraphIsoProdCopy B),
-    Fintype.card_prod, copyCount, Fintype.card_subtype]
+    Fintype.card_prod, copyCount]
   rfl
 
 /-!

@@ -575,7 +575,7 @@ lemma cycleGraph_four_free_iff_common_neighbor_unique :
       f.toHom.map_adj ha
     have heq := h (f 0) (f 2) (f 1) (f 3) (hadj (by decide))
       (hadj (by decide)) (hadj (by decide)) (hadj (by decide))
-      (fun h => absurd (f.injective h) (by decide))
+      (fun h02 => absurd (f.injective h02) (by decide))
     exact absurd (f.injective heq) (by decide)
 
 /-!
@@ -1119,10 +1119,10 @@ lemma edist_eq_add_two_of_adj {r u w x : V} {i : ℕ} (hu : G.edist r u = i + 1)
   -- if `x` were at distance at most `i + 1` from `r`, then shortest paths from `r`
   -- to `x` and to `w`, together with `x — u — w`, would give a cycle of length at
   -- most `2 * i + 3`, which is less than the girth
-  have hcyc (hx : G.edist r x ≤ i + 1) : G.egirth ≤ G.edist r x + i + 2 := by
+  have hcyc (hx' : G.edist r x ≤ i + 1) : G.egirth ≤ G.edist r x + i + 2 := by
     have hw_le : G.edist r w ≤ G.edist r u := by simp [hu, hw]
     rw [← hw]
-    exact egirth_le_edist_add_edist_add_two hxw hux.symm hwu (hu ▸ hx) hw_le
+    exact egirth_le_edist_add_edist_add_two hxw hux.symm hwu (hu ▸ hx') hw_le
   -- the distance from `r` to `x` is finite, so we can work in `ℕ`
   lift G.edist r x to ℕ using ne_top_of_le_ne_top (by simp) hx with m
   norm_cast at hx hcyc ⊢
@@ -1134,11 +1134,11 @@ lemma eq_of_adj_of_adj_of_lt_egirth {r u v x : V} {j : ℕ} (hu : G.edist r u = 
     (hv : G.edist r v = j) (hx : G.edist r x = j + 1) (hux : G.Adj u x)
     (hvx : G.Adj v x) (hg : 2 * j + 2 < G.egirth) : u = v := by
   by_contra hne
-  have := egirth_le_edist_add_edist_add_two hne hux hvx (by rw [hu, hx]; simp)
+  have hle := egirth_le_edist_add_edist_add_two hne hux hvx (by rw [hu, hx]; simp)
     (by rw [hv, hx]; simp)
-  rw [hu, hv] at this
-  have := hg.trans_le this
-  norm_cast at this
+  rw [hu, hv] at hle
+  have hlt := hg.trans_le hle
+  norm_cast at hlt
   grind
 
 /-!
@@ -1338,7 +1338,7 @@ theorem cage_bound_even (G : SimpleGraph V) [G.LocallyFinite]
   · rw [ENat.card_eq_coe_natCard, Nat.cast_le]
     have := Fintype.ofFinite V
     obtain ⟨r⟩ := ‹Nonempty V›
-    obtain ⟨s, hrs⟩ := (G.degree_pos_iff_exists_adj r).mp (by have := h_deg r; grind)
+    obtain ⟨s, hrs⟩ := (G.degree_pos_iff_exists_adj r).mp (by grind [h_deg r] )
     let A : ℕ → Finset V := fun i => G.layer r i ∩ G.layer s (i + 1)
     let B : ℕ → Finset V := fun i => G.layer s i ∩ G.layer r (i + 1)
     have hdisj : ∀ i j (v : V), v ∈ A i ∪ B i → v ∈ A j ∪ B j → i = j := by
@@ -1355,7 +1355,7 @@ theorem cage_bound_even (G : SimpleGraph V) [G.LocallyFinite]
     calc 2 * ∑ i ∈ range k, d ^ i = ∑ i ∈ range k, (d ^ i + d ^ i) := by
           rw [sum_add_distrib, two_mul]
       _ ≤ ∑ i ∈ range k, (#(A i) + #(B i)) := by
-          gcongr with i hi <;> have := mem_range.mp hi
+          gcongr with i hi <;> have hik := mem_range.mp hi
           · exact pow_le_card_inter_layer h_deg hrs
               (h_girth.trans_lt' (by norm_cast; grind))
           · exact pow_le_card_inter_layer h_deg hrs.symm

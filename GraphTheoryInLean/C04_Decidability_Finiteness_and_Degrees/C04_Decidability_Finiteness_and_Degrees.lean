@@ -1051,7 +1051,7 @@ rest.
 instance (n : ℕ) : Fintype (pathNat.neighborSet n) :=
   match n with
   | 0 =>  Fintype.ofFinset {1} (by intro; simp [Eq.comm])
-  | n + 1 =>  Fintype.ofFinset {n, n + 2} (by intro; simp [Eq.comm, Or.comm])
+  | m + 1 =>  Fintype.ofFinset {m, m + 2} (by intro; simp [Eq.comm, Or.comm])
 
 /-!
 We will explore finite neighbourhoods in more detail in

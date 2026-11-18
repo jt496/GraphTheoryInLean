@@ -1385,7 +1385,7 @@ example (s t : Finset V) [DecidableEq V] (C : G.ColoringOn γ (↑s ∪ ↑t)) :
     G.ColoringOn γ ↑(s ∪ t) := C
 
 example (s t : Finset V) [DecidableEq V] (C : G.ColoringOn γ (↑s ∪ ↑t)) :
-    G.ColoringOn γ ↑(s ∪ t) := C.copy (by simp)
+    G.ColoringOn γ ↑(s ∪ t) := C.copy (Finset.coe_union s t).symm
 
 /-!
 For this reason we will need to use `ColoringOn.copy` frequently in proofs.
@@ -1412,7 +1412,7 @@ def ColoringOn.toColoring (C : G.ColoringOn γ Set.univ) : G.Coloring γ :=
 /-- A colouring gives rise to a partial colouring on any set. -/
 @[simps]
 def Coloring.toColoringOn (C : G.Coloring γ) (s : Set V) : G.ColoringOn γ s :=
-    ⟨C, fun h ↦ C.valid (by simpa using h.2.2)⟩
+    ⟨C, fun h ↦ C.valid h.2.2⟩
 
 /-!
 A graph is `n`-colourable if and only if `G.ColorableOn n Set.univ`.
