@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "postCreateCommand": "echo 'Fetching Mathlib and building the chapters…' && lake exe cache get && lake build && echo 'Done: open a chapter from the Explorer.'",
+  "onCreateCommand": "elan toolchain install \"$(cat lean-toolchain)\" && mkdir -p .vscode && cp .devcontainer/tasks.json .vscode/",
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb"
@@ -12,7 +12,10 @@
     "vscode": {
       "extensions": [
         "leanprover.lean4"
-      ]
+      ],
+      "settings": {
+        "task.allowAutomaticTasks": "on"
+      }
     }
   }
 }
