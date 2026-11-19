@@ -51,8 +51,9 @@ account):
 
 <https://codespaces.new/jt496/GraphTheoryInLean?quickstart=1>
 
-The first start takes a few minutes, while Mathlib is downloaded and the chapters are
-built.
+When the codespace first opens it downloads Mathlib and builds the chapters, which
+takes a few minutes; wait for this to finish before opening a chapter (the
+repository's `README.md` says what to do if it fails).
 
 # How to Read This Guide
 

@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "onCreateCommand": "echo 'Fetching Mathlib and building the chapters…' && lake exe cache get && lake build",
+  "postCreateCommand": "echo 'Fetching Mathlib and building the chapters…' && lake exe cache get && lake build && echo 'Done: open a chapter from the Explorer.'",
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb"
@@ -12,11 +12,6 @@
     "vscode": {
       "extensions": [
         "leanprover.lean4"
-      ]
-    },
-    "codespaces": {
-      "openFiles": [
-        "GraphTheoryInLean/C01_Introduction/C01_Introduction.lean"
       ]
     }
   }
