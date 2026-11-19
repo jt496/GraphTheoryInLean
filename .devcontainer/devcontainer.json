@@ -3,7 +3,8 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "onCreateCommand": "elan toolchain install \"$(cat lean-toolchain)\" && mkdir -p .vscode && cp .devcontainer/tasks.json .vscode/",
+  "onCreateCommand": "elan toolchain install \"$(cat lean-toolchain)\"",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb"
@@ -12,10 +13,7 @@
     "vscode": {
       "extensions": [
         "leanprover.lean4"
-      ],
-      "settings": {
-        "task.allowAutomaticTasks": "on"
-      }
+      ]
     }
   }
 }

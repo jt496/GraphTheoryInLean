@@ -51,9 +51,10 @@ account):
 
 <https://codespaces.new/jt496/GraphTheoryInLean?quickstart=1>
 
-When the codespace first opens, a terminal downloads Mathlib and builds the chapters,
-which takes ten to fifteen minutes; wait for it to print "Done" before opening a
-chapter (the repository's `README.md` says what to do if it fails).
+The codespace then downloads Mathlib and builds the chapters, which takes ten to
+fifteen minutes the first time. To follow its progress, run
+`bash .devcontainer/setup.sh` in a terminal (Terminal > New Terminal), and wait for
+it to print "Done" before opening a chapter.
 
 # How to Read This Guide
 
