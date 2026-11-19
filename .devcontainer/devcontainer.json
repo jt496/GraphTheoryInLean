@@ -1,0 +1,23 @@
+{
+  "name": "Graph Theory in Lean",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "onCreateCommand": "echo 'Fetching Mathlib and building the chapters…' && lake exe cache get && lake build",
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "leanprover.lean4"
+      ]
+    },
+    "codespaces": {
+      "openFiles": [
+        "GraphTheoryInLean/C01_Introduction/C01_Introduction.lean"
+      ]
+    }
+  }
+}

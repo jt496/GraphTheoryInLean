@@ -66,7 +66,11 @@ tokens of core Lean syntax (binders, parentheses, `→`), separators and delimit
 nothing (see `notationTokens`), as in the code of the guide. A notation used before
 its declaration does not parse, so gets nothing either. A span that is just a token
 of a notation, such as `→g`, shows the docstring of the notation too (see
-`notationTokenKind?`).
+`notationTokenKind?`). A guide can opt in, with `"span_keyword_hovers": true` in
+its `guide.json`, to hovers on the words of the syntax too, as in code: in a span
+`induction s using h generalizing x`, the words `induction`, `using` and
+`generalizing` show the docstring of the `induction` tactic, and in `fun x ↦ f x`
+the word `fun` shows that of `fun`.
 
 Some core syntax has no docstring, such as the term `nofun`. The module gives it one
 (see `syntaxDocStrings`), which then shows wherever its docstring would: in code and
@@ -447,6 +451,18 @@ def readJsonCached? (path : FilePath) : IO (Option Json) := do
     return some j
   | .error _ => return none
 
+/-- Whether the `guide.json` of the guide that the file `file` belongs to (the
+nearest one at or above its directory) sets the Boolean `key` to `true`, for the
+opt-in behaviour of a guide: `false` if there is no such file or key. -/
+def guideFlag (file : FilePath) (key : String) : IO Bool := do
+  let file ← try IO.FS.realPath file catch _ => pure file
+  let some dir ← (match file.parent with
+      | some d => guideDir? d
+      | none => pure none)
+    | return false
+  let some cfg ← readJsonCached? (dir / "guide.json") | return false
+  return (cfg.getObjValAs? Bool key).toOption.getD false
+
 /-- What hovering over the cross-reference `key:tag` into another guide shows (the
 heading's title and number there, and a link to it), from the index that the build
 keeps in `.lake/stil-remotes/key.json` of the guide in `dir`; or, as an error, why
@@ -768,8 +784,14 @@ docstring. `s` is parsed in the current scope, without elaboration, so that its
 variables need not exist: as a tactic (so that the brackets of `simp [h]` belong to
 `simp`), else as a term, else as `(s)` (for a span `x : T`). Words (`fun`),
 separators, delimiters and tokens whose syntax has no docstring are left out, and so
-is all of `s` if it does not parse. The guide's `{smart}` role uses this too. -/
-def notationTokens (env : Environment) (s : String) :
+is all of `s` if it does not parse. The guide's `{smart}` role uses this too.
+
+With `keywords` (the opt-in `span_keyword_hovers` of `guide.json`, see `guideFlag`),
+the words of the syntax are kept too, with the docstring of the syntax node around
+them, as the guide's highlighter gives them in code, even in tactic syntax: so in
+`induction s using h generalizing x`, the words `induction`, `using` and
+`generalizing` all show the docstring of the `induction` tactic. -/
+def notationTokens (env : Environment) (s : String) (keywords := false) :
     IO (Array (Nat × String × SyntaxNodeKind × String)) := do
   let parse (cat : Name) (input : String) :=
     (Parser.runParserCategory env cat input).toOption
@@ -779,7 +801,10 @@ def notationTokens (env : Environment) (s : String) :
   let mut out := #[]
   for (pos, tok, kind) in tokensWithKind stx do
     if pos < shift || pos ≥ s.utf8ByteSize + shift then continue
-    if isKeywordWord tok || isDelimiter tok || !notationKind kind then continue
+    if isDelimiter tok then continue
+    if isKeywordWord tok then
+      unless keywords do continue
+    else if !notationKind kind then continue
     let some doc ← findDocString? env kind | continue
     out := out.push (pos - shift, tok, kind, doc)
   return out
@@ -1128,6 +1153,8 @@ def docHoverLinter : Linter where
       return
     let tactics ← tacticWords
     let env ← getEnv
+    -- Whether the words of a code span's syntax get hovers (see `notationTokens`).
+    let keywords ← guideFlag (← getFileName) "span_keyword_hovers"
     -- The headings of the guide, read only for a comment with a cross-reference.
     let index? ← if docs.any fun doc => !(refs (commentBody doc).getAtomVal).isEmpty
       then currentHeadingIndex? else pure none
@@ -1186,7 +1213,7 @@ def docHoverLinter : Linter where
             pushKeywordInfo
               (Syntax.atom (.synthetic b e (canonical := true)) code) kind
             continue
-          let notationToks ← notationTokens env code
+          let notationToks ← notationTokens env code keywords
           for (off, tok, kind, _) in notationToks do
             let b : String.Pos.Raw := ⟨start.byteIdx + spanOff + off⟩
             let e : String.Pos.Raw := ⟨b.byteIdx + tok.utf8ByteSize⟩
