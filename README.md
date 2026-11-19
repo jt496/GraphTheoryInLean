@@ -24,16 +24,19 @@ in GitHub Codespaces (you need a GitHub account):
 <https://codespaces.new/jt496/GraphTheoryInLean?quickstart=1>
 
 This runs VS Code and Lean in your browser. When the codespace first opens, it
-downloads Mathlib and builds the chapters, which takes a few minutes; wait for
-this to finish before opening a chapter. If it fails, open a terminal
-(Terminal > New Terminal) and run
+downloads Mathlib and builds the chapters, which takes ten to fifteen minutes;
+wait for this to finish before opening a chapter. To follow its progress, choose
+Codespaces: View Creation Log from the Command Palette (Ctrl+Shift+P, or
+Cmd+Shift+P on a Mac): it ends with "Done: open a chapter from the Explorer."
+If it fails, open a terminal (Terminal > New Terminal) and run
 
     lake exe cache get && lake build
 
 After that, the same link offers to resume the codespace you already have.
 Codespaces usage counts against your monthly GitHub allowance, so stop the
 codespace when you have finished (by default it stops by itself after 30 idle
-minutes).
+minutes). A stopped codespace still takes up storage (about 20 GB), so delete it
+at <https://github.com/codespaces> once you no longer need it.
 
 ## Chapters
 

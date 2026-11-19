@@ -324,7 +324,7 @@ The *adjacency matrix* `G.adjMatrix R` of `G` over a type `R` with a zero and a 
 (`[Zero R], [One R]`) has `(i, j)` entry `1` if `i` and `j` are adjacent in `G` and
 `0` otherwise. (Informally we will denote it by `A`.)
 
-[Figure: A graph `G` and its adjacency matrix `G.adjMatrix`](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-adjmatrix)
+[Figure: A graph and its adjacency matrix](https://jt496.github.io/GraphTheoryInLean/Algebraic-Graph-Theory/#figure-adjmatrix)
 
 Mathlib writes a matrix row by row with the `!![⋯]` notation, separating the entries
 of a row by commas and the rows by semicolons.
