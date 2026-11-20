@@ -11,10 +11,10 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
-weak.linter.style.longLine.maxLineLength = 85
 weak.linter.style.missingEnd = false
 weak.linter.style.header = false
 maxSynthPendingDepth = 3
+weak.linter.style.longLine = false
 
 # Pinned to the Mathlib commit the guide was built against.
 [[require]]
