@@ -45,17 +45,6 @@ differences that we encounter in Lean, compared to informal definitions and proo
 If you haven't done so already please [install Lean](https://lean-lang.org/install/)
 and clone a copy of the repository <https://github.com/jt496/GraphTheoryInLean>.
 
-Alternatively, you can work with the guide's Lean files in your web browser, with
-nothing to install, by opening the repository in GitHub Codespaces (you need a GitHub
-account):
-
-<https://codespaces.new/jt496/GraphTheoryInLean?quickstart=1>
-
-The codespace then downloads Mathlib and builds the chapters, which takes ten to
-fifteen minutes the first time. To follow its progress, run
-`bash .devcontainer/setup.sh` in a terminal (Terminal > New Terminal), and wait for
-it to print "Done" before opening a chapter.
-
 # How to Read This Guide
 
 If you are reading the `.lean` files directly in VS Code or similar then see the

@@ -16,30 +16,6 @@ The HTML is in `docs/`, served by GitHub Pages.
 
 `lakefile.toml` pins the Mathlib commit the guide was written against.
 
-## Running in the browser
-
-To use the guide's Lean files without installing anything, open this repository
-in GitHub Codespaces (you need a GitHub account):
-
-<https://codespaces.new/jt496/GraphTheoryInLean?quickstart=1>
-
-This runs VS Code and Lean in your browser. The codespace then sets itself up,
-downloading Mathlib and building the chapters, which takes ten to fifteen minutes
-the first time. To follow its progress, open a terminal (Terminal > New Terminal)
-and run
-
-    bash .devcontainer/setup.sh
-
-and wait for it to print "Done: open a chapter from the Explorer." before opening
-a chapter. The same command starts the setup again if it has failed, and only
-prints "Done" once it has succeeded.
-
-Later, the same link offers to resume the codespace you already have.
-Codespaces usage counts against your monthly GitHub allowance, so stop the
-codespace when you have finished (by default it stops by itself after 30 idle
-minutes). A stopped codespace still takes up storage (about 20 GB), so delete it
-at <https://github.com/codespaces> once you no longer need it.
-
 ## Chapters
 
 1. [Introduction](https://jt496.github.io/GraphTheoryInLean/Introduction/)

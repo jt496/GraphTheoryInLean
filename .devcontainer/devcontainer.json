@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile"
   },
   "onCreateCommand": "elan toolchain install \"$(cat lean-toolchain)\"",
-  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/setup.sh",
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb"
